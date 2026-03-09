@@ -11,3 +11,7 @@ NUL
 
 # Local MCP config
 .mcp.json
+
+# Python cache files
+__pycache__/
+*.pyc

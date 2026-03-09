@@ -143,6 +143,8 @@ function matchesBuildH2hTimeSummary(array $allMatches, array $targetMatch): arra
         'over_05' => 0,
         'over_15' => 0,
         'over_25' => 0,
+        'btts' => 0,
+        'no_btts' => 0,
         'w1' => 0,
         'x' => 0,
         'w2' => 0,
@@ -196,6 +198,11 @@ function matchesBuildH2hTimeSummary(array $allMatches, array $targetMatch): arra
         }
         if ($totalGoals > 2) {
             $summary['over_25']++;
+        }
+        if ($ftHome > 0 && $ftAway > 0) {
+            $summary['btts']++;
+        } else {
+            $summary['no_btts']++;
         }
     }
 
@@ -496,7 +503,7 @@ $monthKeys = array_keys($datesByMonth);
                 <h1 class="text-2xl md:text-3xl font-black tracking-tight">
                     Semua <span class="text-amber-300">Pertandingan</span>
                 </h1>
-                <p class="text-slate-300 text-sm md:text-base">Monitoring data比赛 real-time dari database.</p>
+                <p class="text-slate-300 text-sm md:text-base">Monitoring data pertandingan real-time dari database.</p>
             </div>
             <div class="flex flex-wrap items-center gap-3">
                 <div class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/15 border border-emerald-400/30">
@@ -863,7 +870,7 @@ $monthKeys = array_keys($datesByMonth);
             <!-- Desktop Table View -->
             <div class="hidden md:block bg-white rounded-2xl shadow-md border-0 overflow-hidden">
                 <div class="overflow-x-auto">
-                <table class="w-full border-collapse min-w-[960px]">
+                <table class="w-full border-collapse min-w-[860px]">
                     <thead>
                         <tr class="bg-slate-900 text-white">
                             <th class="px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider">
@@ -898,21 +905,6 @@ $monthKeys = array_keys($datesByMonth);
                             </th>
                             <th class="px-6 py-4 text-center text-[11px] font-bold uppercase tracking-wider">Skor</th>
                             <th class="px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider">H2H Summary</th>
-                            <th class="px-6 py-4 text-right text-[11px] font-bold uppercase tracking-wider">
-                                <a href="<?php echo htmlspecialchars(matchesBuildQuery(['sort' => 'league', 'order' => ($sort == 'league' && $order == 'asc') ? 'desc' : 'asc', 'p' => '1'])); ?>"
-                                    class="flex items-center justify-end gap-1 hover:text-amber-300 transition-colors">
-                                    Liga
-                                    <?php if ($sort == 'league'): ?>
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <?php if ($order == 'asc'): ?>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-                                            <?php else: ?>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                            <?php endif; ?>
-                                        </svg>
-                                    <?php endif; ?>
-                                </a>
-                            </th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -935,19 +927,27 @@ $monthKeys = array_keys($datesByMonth);
                                     </div>
                                 </td>
                                 <td class="px-6 py-5">
-                                    <div class="flex items-center justify-center gap-4">
-                                        <div class="flex-1 text-right">
-                                            <h3 class="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition-colors line-clamp-1">
-                                                <?php echo htmlspecialchars($match['home_team']); ?>
-                                            </h3>
+                                    <div class="space-y-3">
+                                        <div class="flex items-center justify-center gap-4">
+                                            <div class="flex-1 text-right">
+                                                <h3 class="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition-colors line-clamp-1">
+                                                    <?php echo htmlspecialchars($match['home_team']); ?>
+                                                </h3>
+                                            </div>
+                                            <div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center shrink-0">
+                                                <span class="text-[10px] font-black text-white">VS</span>
+                                            </div>
+                                            <div class="flex-1 text-left">
+                                                <h3 class="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition-colors line-clamp-1">
+                                                    <?php echo htmlspecialchars($match['away_team']); ?>
+                                                </h3>
+                                            </div>
                                         </div>
-                                        <div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center shrink-0">
-                                            <span class="text-[10px] font-black text-white">VS</span>
-                                        </div>
-                                        <div class="flex-1 text-left">
-                                            <h3 class="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition-colors line-clamp-1">
-                                                <?php echo htmlspecialchars($match['away_team']); ?>
-                                            </h3>
+                                        <div class="flex justify-center">
+                                            <span class="inline-block text-[10px] font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 uppercase tracking-wide truncate max-w-[280px]"
+                                                  title="<?php echo htmlspecialchars($match['league']); ?>">
+                                                <?php echo htmlspecialchars($match['league']); ?>
+                                            </span>
                                         </div>
                                     </div>
                                 </td>
@@ -1009,13 +1009,17 @@ $monthKeys = array_keys($datesByMonth);
                                                 <p class="mt-1 text-sm font-black text-violet-800"><?php echo (int)$h2hTimeSummary['over_25']; ?></p>
                                             </div>
                                         </div>
+                                        <div class="grid grid-cols-2 gap-2 text-center">
+                                            <div class="rounded-xl border border-teal-200 bg-teal-50 px-2 py-2">
+                                                <p class="text-[10px] font-bold uppercase tracking-wide text-teal-700">BTTS</p>
+                                                <p class="mt-1 text-sm font-black text-teal-800"><?php echo (int)$h2hTimeSummary['btts']; ?></p>
+                                            </div>
+                                            <div class="rounded-xl border border-orange-200 bg-orange-50 px-2 py-2">
+                                                <p class="text-[10px] font-bold uppercase tracking-wide text-orange-700">No BTTS</p>
+                                                <p class="mt-1 text-sm font-black text-orange-800"><?php echo (int)$h2hTimeSummary['no_btts']; ?></p>
+                                            </div>
+                                        </div>
                                     </div>
-                                </td>
-                                <td class="px-6 py-5 text-right">
-                                    <span class="inline-block text-[10px] font-bold <?php echo $hasFt ? 'text-emerald-600 bg-emerald-50' : 'text-amber-600 bg-amber-50'; ?> px-3 py-1.5 rounded-lg border <?php echo $hasFt ? 'border-emerald-200' : 'border-amber-200'; ?> uppercase tracking-wide truncate max-w-[150px]" 
-                                          title="<?php echo htmlspecialchars($match['league']); ?>">
-                                        <?php echo htmlspecialchars($match['league']); ?>
-                                    </span>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -1115,6 +1119,16 @@ $monthKeys = array_keys($datesByMonth);
                                 <div class="rounded-lg bg-violet-50 px-2 py-2">
                                     <p class="text-[10px] font-bold text-violet-700">O2.5</p>
                                     <p class="mt-1 text-sm font-black text-violet-800"><?php echo (int)$h2hTimeSummary['over_25']; ?></p>
+                                </div>
+                            </div>
+                            <div class="mt-2 grid grid-cols-2 gap-2 text-center">
+                                <div class="rounded-lg bg-teal-50 px-2 py-2">
+                                    <p class="text-[10px] font-bold text-teal-700">BTTS</p>
+                                    <p class="mt-1 text-sm font-black text-teal-800"><?php echo (int)$h2hTimeSummary['btts']; ?></p>
+                                </div>
+                                <div class="rounded-lg bg-orange-50 px-2 py-2">
+                                    <p class="text-[10px] font-bold text-orange-700">No BTTS</p>
+                                    <p class="mt-1 text-sm font-black text-orange-800"><?php echo (int)$h2hTimeSummary['no_btts']; ?></p>
                                 </div>
                             </div>
                         </div>

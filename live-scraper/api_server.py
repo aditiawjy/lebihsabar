@@ -19,64 +19,78 @@ notifier = TelegramNotifier()
 # Store last matches
 last_matches = []
 
-@app.route('/api/live-data', methods=['POST'])
+
+@app.route("/api/live-data", methods=["POST"])
 def receive_live_data():
     """Terima data dari Chrome Extension"""
     try:
         data = request.get_json() or {}
-        matches = data.get('matches', [])
-        
+        matches = data.get("matches", [])
+
         # Simpan data
         global last_matches
         last_matches = matches
-        
+
         # Kirim notifikasi untuk match baru atau update
         for match in matches:
-            # Kirim update biasa
-            notifier.send_match_update(match)
-            
-            # Cek dan kirim alert khusus untuk 0-0 di babak pertama
-            notifier.check_and_alert_first_half_zero_zero(match)
-        
-        return jsonify({
-            'success': True,
-            'message': f'Received {len(matches)} matches',
-            'timestamp': datetime.now().isoformat()
-        })
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+            is_second_half_zero_zero = notifier.should_send_second_half_zero_zero_alert(
+                match
+            )
 
-@app.route('/api/live-data', methods=['GET'])
+            if is_second_half_zero_zero:
+                notifier.check_and_alert_second_half_zero_zero(match)
+                continue
+
+            notifier.send_match_update(match)
+
+        return jsonify(
+            {
+                "success": True,
+                "message": f"Received {len(matches)} matches",
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/live-data", methods=["GET"])
 def get_live_data():
     """Ambil data match terakhir"""
-    return jsonify({
-        'matches': last_matches,
-        'count': len(last_matches),
-        'timestamp': datetime.now().isoformat()
-    })
+    return jsonify(
+        {
+            "matches": last_matches,
+            "count": len(last_matches),
+            "timestamp": datetime.now().isoformat(),
+        }
+    )
 
-@app.route('/api/test-telegram', methods=['POST'])
+
+@app.route("/api/test-telegram", methods=["POST"])
 def test_telegram():
     """Test kirim pesan ke Telegram"""
     success = notifier.send_test_message()
-    return jsonify({
-        'success': success,
-        'message': 'Test message sent' if success else 'Failed to send'
-    })
+    return jsonify(
+        {
+            "success": success,
+            "message": "Test message sent" if success else "Failed to send",
+        }
+    )
 
-@app.route('/api/status', methods=['GET'])
+
+@app.route("/api/status", methods=["GET"])
 def get_status():
     """Cek status server"""
-    return jsonify({
-        'status': 'online',
-        'timestamp': datetime.now().isoformat(),
-        'matches_count': len(last_matches)
-    })
+    return jsonify(
+        {
+            "status": "online",
+            "timestamp": datetime.now().isoformat(),
+            "matches_count": len(last_matches),
+        }
+    )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     print("=" * 60)
     print("Live Scraper API Server")
     print("=" * 60)
@@ -87,9 +101,9 @@ if __name__ == '__main__':
     print("  GET  /api/status        - Cek status")
     print("\nServer running on http://127.0.0.1:5000")
     print("=" * 60)
-    
+
     # Test Telegram saat startup
     print("\nTesting Telegram...")
     notifier.send_test_message()
-    
-    app.run(host='127.0.0.1', port=5000, debug=False)
+
+    app.run(host="127.0.0.1", port=5000, debug=False)

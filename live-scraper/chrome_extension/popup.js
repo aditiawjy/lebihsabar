@@ -128,13 +128,18 @@ async function extractData() {
             target: { tabId: currentTab.id },
             func: () => {
                 const matches = [];
-                const matchGroups = document.querySelectorAll('.match-group');
+                const groupedMatches = [];
+                const leagueHeaders = document.querySelectorAll('.league-header');
                 
-                matchGroups.forEach(group => {
-                    const table = group.closest('.odds-table-card');
-                    const leagueHeader = table?.querySelector('.league-header__name');
-                    const league = leagueHeader?.innerText?.trim() || '';
-                    
+                leagueHeaders.forEach(header => {
+                    const league = header.querySelector('.league-header__name')?.innerText?.trim() || '';
+                    const group = header.nextElementSibling;
+
+                    if (!group || !group.classList.contains('match-group')) {
+                        return;
+                    }
+
+                    const leagueMatches = [];
                     const matchElements = group.querySelectorAll('.match');
                     const briefElements = group.querySelectorAll('.match-brief');
                     
@@ -157,7 +162,7 @@ async function extractData() {
                         if (hasPenaltyTeam) {
                             return;
                         }
-                         
+
                         const timeEl = matchEl.querySelector('.match-time-live');
                         if (timeEl) match.status = timeEl.innerText.trim();
                         
@@ -213,12 +218,21 @@ async function extractData() {
                         if (match.homeTeam && match.awayTeam) {
                             match.score = `${match.homeScore || '0'} - ${match.awayScore || '0'}`;
                             matches.push(match);
+                            leagueMatches.push(match);
                         }
                     });
+
+                    if (leagueMatches.length > 0) {
+                        groupedMatches.push({
+                            league: league || 'Unknown League',
+                            matches: leagueMatches
+                        });
+                    }
                 });
                 
                 return {
                     matches,
+                    groupedMatches,
                     count: matches.length,
                     time: new Date().toLocaleTimeString()
                 };
@@ -229,7 +243,7 @@ async function extractData() {
         
         if (results?.[0]?.result) {
             const data = results[0].result;
-            renderTable(data.matches);
+            renderTable(data.groupedMatches || data.matches);
             document.getElementById('matchCount').textContent = `${data.count} matches`;
             document.getElementById('lastUpdate').textContent = `Last update: ${data.time}`;
             clearError();
@@ -265,61 +279,87 @@ async function extractData() {
 function renderTable(matches) {
     if (!isExtensionContextValid()) return;
     
-    const tbody = document.getElementById('matchesTable');
+    const container = document.getElementById('matchesTable');
     
     if (!matches?.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;">No matches found</td></tr>';
+        container.innerHTML = '<div style="text-align:center;padding:40px;background:white;">No matches found</div>';
         return;
     }
+
+    const normalizedGroups = Array.isArray(matches) && matches[0]?.matches
+        ? matches
+        : [{
+            league: 'Unknown League',
+            matches
+        }];
     
-    tbody.innerHTML = matches.map(m => {
-        const timeClass = m.status?.includes('H.Time') ? 'time-ht' : 'time-live';
-        
-        let oddsHtml = '-';
-        if (m.odds?.length) {
-            oddsHtml = m.odds.slice(0, 3).map(betTypeStr => {
-                const parts = betTypeStr.split(': ');
-                if (parts.length >= 2) {
-                    const betType = parts[0];
-                    const options = parts.slice(1).join(': ');
-                    const is1X2Type = betType.includes('1X2');
-                    
-                    const formattedOptions = options.split(' | ').map(opt => {
-                        if (opt === '[LOCKED]') {
-                            return '<span style="color:#999;font-style:italic;">🔒 LOCKED</span>';
-                        }
-                        const optParts = opt.split(':');
-                        if (optParts.length === 2) {
-                            const goal = optParts[0];
-                            const oddsVal = optParts[1].trim();
-                            
-                            if (is1X2Type) {
-                                const isMinus = oddsVal.startsWith('-');
-                                const oddClass = isMinus ? 'odds-minus' : 'odds-normal';
-                                return `<span class="${oddClass}">${goal}: ${oddsVal}</span>`;
-                            } else {
+    container.innerHTML = normalizedGroups.map(({ league, matches: leagueMatches }) => {
+        const rowsHtml = leagueMatches.map(m => {
+            const timeClass = m.status?.includes('H.Time') ? 'time-ht' : 'time-live';
+
+            let oddsHtml = '-';
+            if (m.odds?.length) {
+                oddsHtml = m.odds.slice(0, 3).map(betTypeStr => {
+                    const parts = betTypeStr.split(': ');
+                    if (parts.length >= 2) {
+                        const betType = parts[0];
+                        const options = parts.slice(1).join(': ');
+                        const is1X2Type = betType.includes('1X2');
+
+                        const formattedOptions = options.split(' | ').map(opt => {
+                            if (opt === '[LOCKED]') {
+                                return '<span style="color:#999;font-style:italic;">🔒 LOCKED</span>';
+                            }
+                            const optParts = opt.split(':');
+                            if (optParts.length === 2) {
+                                const goal = optParts[0];
+                                const oddsVal = optParts[1].trim();
+
+                                if (is1X2Type) {
+                                    const isMinus = oddsVal.startsWith('-');
+                                    const oddClass = isMinus ? 'odds-minus' : 'odds-normal';
+                                    return `<span class="${oddClass}">${goal}: ${oddsVal}</span>`;
+                                }
+
                                 const oddsNum = parseFloat(oddsVal);
                                 const oddClass = oddsNum < 2.0 ? 'odds-favorite' : 'odds-normal';
                                 return `<span class="${oddClass}">${goal} @ ${oddsVal}</span>`;
                             }
-                        }
-                        return opt;
-                    }).join(' | ');
-                    
-                    return `<div style="margin-bottom:3px;"><strong style="font-size:9px;color:#666;">${betType}:</strong> ${formattedOptions}</div>`;
-                }
-                return `<span class="odds-normal">${betTypeStr}</span>`;
-            }).join('');
-        }
-        
-        return `<tr>
-            <td style="font-size:10px;color:#666;">${m.league || '-'}</td>
-            <td class="team-name">${m.homeTeam || '-'}</td>
-            <td class="team-name">${m.awayTeam || '-'}</td>
-            <td><span class="${timeClass}">${m.status || '-'}</span></td>
-            <td class="score">${m.score || '-'}</td>
-            <td class="odds-text">${oddsHtml}</td>
-        </tr>`;
+                            return opt;
+                        }).join(' | ');
+
+                        return `<div style="margin-bottom:3px;"><strong style="font-size:9px;color:#666;">${betType}:</strong> ${formattedOptions}</div>`;
+                    }
+                    return `<span class="odds-normal">${betTypeStr}</span>`;
+                }).join('');
+            }
+
+            return `<tr>
+                <td class="team-name">${m.homeTeam || '-'}</td>
+                <td class="team-name">${m.awayTeam || '-'}</td>
+                <td><span class="${timeClass}">${m.status || '-'}</span></td>
+                <td class="score">${m.score || '-'}</td>
+                <td class="odds-text">${oddsHtml}</td>
+            </tr>`;
+        }).join('');
+
+        return `<div class="league-group">
+            <div class="league-title">${league}</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 18%;">Home</th>
+                        <th style="width: 18%;">Away</th>
+                        <th style="width: 10%;">Time</th>
+                        <th style="width: 10%;">Score</th>
+                        <th style="width: 44%;">Odd</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+            </table>
+        </div>`;
     }).join('');
 }
 

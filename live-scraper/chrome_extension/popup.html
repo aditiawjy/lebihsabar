@@ -106,6 +106,23 @@
             padding: 40px;
             color: #007bff;
         }
+        .league-group {
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        .league-title {
+            background: #eef4ff;
+            color: #174ea6;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 8px 10px;
+            border-bottom: 1px solid #d6e4ff;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
     </style>
 </head>
 <body>
@@ -132,21 +149,9 @@
     <div id="errorBox"></div>
     
     <div style="max-height: 400px; overflow-y: auto;">
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 20%;">League</th>
-                    <th style="width: 16%;">Home Team</th>
-                    <th style="width: 16%;">Away Team</th>
-                    <th style="width: 10%;">Time</th>
-                    <th style="width: 8%;">Score</th>
-                    <th style="width: 30%;">Odds</th>
-                </tr>
-            </thead>
-            <tbody id="matchesTable">
-                <tr><td colspan="6" style="text-align:center;padding:40px;">Click "Refresh Data" to load matches</td></tr>
-            </tbody>
-        </table>
+        <div id="matchesTable">
+            <div style="text-align:center;padding:40px;background:white;">Click "Refresh Data" to load matches</div>
+        </div>
     </div>
     
     <script src="popup.js"></script>

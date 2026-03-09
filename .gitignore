@@ -15,3 +15,6 @@ NUL
 # Python cache files
 __pycache__/
 *.pyc
+
+# Local git worktrees
+.worktrees/

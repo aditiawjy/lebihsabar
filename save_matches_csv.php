@@ -5,9 +5,10 @@ error_reporting(E_ALL);
 ob_start();
 header('Content-Type: application/json');
 
-$CSV_FILE = __DIR__ . '/matches.csv';
+$CSV_FILE = getenv('MATCHES_CSV_FILE') ?: (__DIR__ . '/matches.csv');
 $MAX_MATCHES_PER_REQUEST = (int)(getenv('MAX_MATCHES_PER_REQUEST') ?: 5000);
 $MAX_CSV_BACKUPS = (int)(getenv('MAX_CSV_BACKUPS') ?: 20);
+$CSV_HEADER = ['id', 'match_time', 'home_team', 'away_team', 'league', 'fh_home', 'fh_away', 'ft_home', 'ft_away', 'created_at', 'updated_at'];
 
 function normalize_csv_value($value) {
     $text = trim((string)$value);
@@ -45,11 +46,14 @@ function build_duplicate_key($matchTime, $home, $away, $league) {
 }
 
 function read_existing_rows($csvFile) {
+    global $CSV_HEADER;
+
     $existingRows = [];
+    $rows = [];
     $maxId = 0;
 
     if (!file_exists($csvFile)) {
-        return [$existingRows, $maxId];
+        return [$existingRows, $rows, $maxId, $CSV_HEADER];
     }
 
     $fh = fopen($csvFile, 'r');
@@ -57,7 +61,11 @@ function read_existing_rows($csvFile) {
         throw new Exception('Tidak bisa membaca matches.csv');
     }
 
-    fgetcsv($fh);
+    $header = fgetcsv($fh);
+    if (!is_array($header) || count($header) === 0) {
+        $header = $CSV_HEADER;
+    }
+
     while (($row = fgetcsv($fh)) !== false) {
         if (count($row) < 9) {
             continue;
@@ -73,11 +81,29 @@ function read_existing_rows($csvFile) {
             $maxId = $id;
         }
 
-        $existingRows[build_duplicate_key($matchTime, $home, $away, $league)] = true;
+        $normalizedRow = array_pad($row, count($header), '');
+        $rowIndex = count($rows);
+        $rows[] = $normalizedRow;
+        $existingRows[build_duplicate_key($matchTime, $home, $away, $league)] = $rowIndex;
     }
     fclose($fh);
 
-    return [$existingRows, $maxId];
+    return [$existingRows, $rows, $maxId, $header];
+}
+
+function score_value_changed($oldValue, $newValue) {
+    $old = trim((string)$oldValue);
+    $new = trim((string)$newValue);
+
+    if ($old === '' && $new === '') {
+        return false;
+    }
+
+    if ($old === '' || $new === '') {
+        return true;
+    }
+
+    return (int)$old !== (int)$new;
 }
 
 function create_csv_backup($csvFile, $maxBackups) {
@@ -137,10 +163,10 @@ try {
         throw new Exception('Jumlah matches melebihi batas per request: ' . $MAX_MATCHES_PER_REQUEST);
     }
 
-    [$existingRows, $maxId] = read_existing_rows($CSV_FILE);
+    [$existingRows, $rows, $maxId, $header] = read_existing_rows($CSV_FILE);
 
     $fileExists = file_exists($CSV_FILE);
-    $fh = fopen($CSV_FILE, $fileExists ? 'a+' : 'w+');
+    $fh = fopen($CSV_FILE, $fileExists ? 'c+' : 'w+');
     if (!$fh) {
         throw new Exception('Tidak bisa membuka file matches.csv');
     }
@@ -152,11 +178,8 @@ try {
 
     $backupPath = create_csv_backup($CSV_FILE, $MAX_CSV_BACKUPS);
 
-    if (!$fileExists || filesize($CSV_FILE) === 0) {
-        fputcsv($fh, ['id', 'match_time', 'home_team', 'away_team', 'league', 'fh_home', 'fh_away', 'ft_home', 'ft_away', 'created_at', 'updated_at']);
-    }
-
     $inserted = 0;
+    $updated = 0;
     $skippedDuplicate = 0;
     $skippedInvalid = 0;
     $invalidRows = [];
@@ -177,18 +200,37 @@ try {
         }
 
         $key = build_duplicate_key($matchTime, $home, $away, $league);
-        if (isset($existingRows[$key])) {
-            $skippedDuplicate++;
-            continue;
-        }
-
-        $maxId++;
         $fhHome = parse_score_or_empty($match['fh_home'] ?? '');
         $fhAway = parse_score_or_empty($match['fh_away'] ?? '');
         $ftHome = parse_score_or_empty($match['ft_home'] ?? '');
         $ftAway = parse_score_or_empty($match['ft_away'] ?? '');
 
-        fputcsv($fh, [
+        if (isset($existingRows[$key])) {
+            $rowIndex = $existingRows[$key];
+            $existingRow = $rows[$rowIndex];
+
+            $hasChanges = score_value_changed($existingRow[5] ?? '', $fhHome)
+                || score_value_changed($existingRow[6] ?? '', $fhAway)
+                || score_value_changed($existingRow[7] ?? '', $ftHome)
+                || score_value_changed($existingRow[8] ?? '', $ftAway);
+
+            if ($hasChanges) {
+                $rows[$rowIndex][4] = $league;
+                $rows[$rowIndex][5] = $fhHome;
+                $rows[$rowIndex][6] = $fhAway;
+                $rows[$rowIndex][7] = $ftHome;
+                $rows[$rowIndex][8] = $ftAway;
+                $rows[$rowIndex][10] = $now;
+                $updated++;
+            } else {
+                $skippedDuplicate++;
+            }
+
+            continue;
+        }
+
+        $maxId++;
+        $rows[] = [
             $maxId,
             $matchTime,
             $home,
@@ -200,22 +242,31 @@ try {
             $ftAway,
             $now,
             $now
-        ]);
+        ];
 
-        $existingRows[$key] = true;
+        $existingRows[$key] = count($rows) - 1;
         $inserted++;
+    }
+
+    ftruncate($fh, 0);
+    rewind($fh);
+
+    fputcsv($fh, $header ?: $CSV_HEADER);
+    foreach ($rows as $row) {
+        fputcsv($fh, array_pad($row, count($header ?: $CSV_HEADER), ''));
     }
 
     fflush($fh);
     flock($fh, LOCK_UN);
     fclose($fh);
 
-    $message = "BERHASIL: inserted=$inserted, duplicate=$skippedDuplicate, invalid=$skippedInvalid";
+    $message = "BERHASIL: inserted=$inserted, updated=$updated, duplicate=$skippedDuplicate, invalid=$skippedInvalid";
 
     ob_clean();
     echo json_encode([
         'success' => true,
         'inserted' => $inserted,
+        'updated' => $updated,
         'skipped_duplicate' => $skippedDuplicate,
         'skipped_invalid' => $skippedInvalid,
         'backup_file' => $backupPath,

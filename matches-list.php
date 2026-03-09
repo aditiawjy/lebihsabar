@@ -209,6 +209,73 @@ function matchesBuildH2hTimeSummary(array $allMatches, array $targetMatch): arra
     return $summary;
 }
 
+function matchesBuildH2hDayTimeOverSummary(array $allMatches, array $targetMatch): array {
+    $homeTeam = trim((string)($targetMatch['home_team'] ?? ''));
+    $awayTeam = trim((string)($targetMatch['away_team'] ?? ''));
+    $matchDatetime = (string)($targetMatch['match_time'] ?? '');
+    $kickoffTime = strlen($matchDatetime) >= 16 ? substr($matchDatetime, 11, 5) : '';
+    $matchDayOfWeek = '';
+
+    try {
+        $targetDate = new DateTime($matchDatetime);
+        $matchDayOfWeek = $targetDate->format('N');
+    } catch (\Exception $e) {
+        $matchDayOfWeek = '';
+    }
+
+    $summary = [
+        'total_meetings' => 0,
+        'finished_meetings' => 0,
+        'over_05' => 0,
+        'over_15' => 0,
+        'over_25' => 0,
+    ];
+
+    if ($homeTeam === '' || $awayTeam === '' || $kickoffTime === '' || $matchDayOfWeek === '') {
+        return $summary;
+    }
+
+    foreach ($allMatches as $match) {
+        $candidateHome = trim((string)($match['home_team'] ?? ''));
+        $candidateAway = trim((string)($match['away_team'] ?? ''));
+        $candidateDatetime = (string)($match['match_time'] ?? '');
+        $candidateTime = strlen($candidateDatetime) >= 16 ? substr($candidateDatetime, 11, 5) : '';
+
+        try {
+            $candidateDate = new DateTime($candidateDatetime);
+            $candidateDayOfWeek = $candidateDate->format('N');
+        } catch (\Exception $e) {
+            $candidateDayOfWeek = '';
+        }
+
+        $sameOrder = strcasecmp($candidateHome, $homeTeam) === 0 && strcasecmp($candidateAway, $awayTeam) === 0;
+        $reverseOrder = strcasecmp($candidateHome, $awayTeam) === 0 && strcasecmp($candidateAway, $homeTeam) === 0;
+        if ((!$sameOrder && !$reverseOrder) || $candidateTime !== $kickoffTime || $candidateDayOfWeek !== $matchDayOfWeek) {
+            continue;
+        }
+
+        if (($match['ft_home'] ?? null) === null || ($match['ft_away'] ?? null) === null) {
+            continue;
+        }
+
+        $summary['total_meetings']++;
+        $summary['finished_meetings']++;
+        $totalGoals = (int)$match['ft_home'] + (int)$match['ft_away'];
+        if ($totalGoals > 0) {
+            $summary['over_05']++;
+        }
+        if ($totalGoals > 1) {
+            $summary['over_15']++;
+        }
+        if ($totalGoals > 2) {
+            $summary['over_25']++;
+        }
+    }
+
+    return $summary;
+}
+
+
 $csvPath = __DIR__ . '/matches.csv';
 $allMatches = [];
 
@@ -912,6 +979,7 @@ $monthKeys = array_keys($datesByMonth);
                             try { $date = new DateTime($match['match_time']); } catch (\Exception $e) { $date = null; }
                             $hasFt = ($match['ft_home'] ?? '') !== '' && ($match['ft_away'] ?? '') !== '';
                             $h2hTimeSummary = matchesBuildH2hTimeSummary($allMatches, $match);
+                            $h2hDayTimeOverSummary = matchesBuildH2hDayTimeOverSummary($allMatches, $match);
                         ?>
                             <tr class="hover:bg-blue-50/50 transition-all duration-200 group">
                                 <td class="px-6 py-5 whitespace-nowrap">
@@ -1009,6 +1077,24 @@ $monthKeys = array_keys($datesByMonth);
                                                 <p class="mt-1 text-sm font-black text-violet-800"><?php echo (int)$h2hTimeSummary['over_25']; ?></p>
                                             </div>
                                         </div>
+                                        <div class="grid grid-cols-4 gap-2 text-center">
+                                            <div class="rounded-xl border border-slate-200 bg-slate-50 px-2 py-2">
+                                                <p class="text-[10px] font-bold uppercase tracking-wide text-slate-700">Total H+J</p>
+                                                <p class="mt-1 text-sm font-black text-slate-800"><?php echo (int)$h2hDayTimeOverSummary['total_meetings']; ?></p>
+                                            </div>
+                                            <div class="rounded-xl border border-sky-200 bg-sky-50 px-2 py-2">
+                                                <p class="text-[10px] font-bold uppercase tracking-wide text-sky-700">O0.5 H+J</p>
+                                                <p class="mt-1 text-sm font-black text-sky-800"><?php echo (int)$h2hDayTimeOverSummary['over_05']; ?></p>
+                                            </div>
+                                            <div class="rounded-xl border border-indigo-200 bg-indigo-50 px-2 py-2">
+                                                <p class="text-[10px] font-bold uppercase tracking-wide text-indigo-700">O1.5 H+J</p>
+                                                <p class="mt-1 text-sm font-black text-indigo-800"><?php echo (int)$h2hDayTimeOverSummary['over_15']; ?></p>
+                                            </div>
+                                            <div class="rounded-xl border border-violet-200 bg-violet-50 px-2 py-2">
+                                                <p class="text-[10px] font-bold uppercase tracking-wide text-violet-700">O2.5 H+J</p>
+                                                <p class="mt-1 text-sm font-black text-violet-800"><?php echo (int)$h2hDayTimeOverSummary['over_25']; ?></p>
+                                            </div>
+                                        </div>
                                         <div class="grid grid-cols-2 gap-2 text-center">
                                             <div class="rounded-xl border border-teal-200 bg-teal-50 px-2 py-2">
                                                 <p class="text-[10px] font-bold uppercase tracking-wide text-teal-700">BTTS</p>
@@ -1034,6 +1120,7 @@ $monthKeys = array_keys($datesByMonth);
                     try { $date = new DateTime($match['match_time']); } catch (\Exception $e) { $date = null; }
                     $hasFt = ($match['ft_home'] ?? '') !== '' && ($match['ft_away'] ?? '') !== '';
                     $h2hTimeSummary = matchesBuildH2hTimeSummary($allMatches, $match);
+                    $h2hDayTimeOverSummary = matchesBuildH2hDayTimeOverSummary($allMatches, $match);
                 ?>
                     <div class="bg-white rounded-2xl p-4 border-0 shadow-md relative overflow-hidden">
                         <?php if ($hasFt): ?>
@@ -1119,6 +1206,24 @@ $monthKeys = array_keys($datesByMonth);
                                 <div class="rounded-lg bg-violet-50 px-2 py-2">
                                     <p class="text-[10px] font-bold text-violet-700">O2.5</p>
                                     <p class="mt-1 text-sm font-black text-violet-800"><?php echo (int)$h2hTimeSummary['over_25']; ?></p>
+                                </div>
+                            </div>
+                            <div class="mt-2 grid grid-cols-2 gap-2 text-center">
+                                <div class="rounded-lg bg-white px-2 py-2">
+                                    <p class="text-[10px] font-bold text-slate-700">Total H+J</p>
+                                    <p class="mt-1 text-sm font-black text-slate-800"><?php echo (int)$h2hDayTimeOverSummary['total_meetings']; ?></p>
+                            </div>
+                                <div class="rounded-lg bg-sky-50 px-2 py-2">
+                                    <p class="text-[10px] font-bold text-sky-700">O0.5 H+J</p>
+                                    <p class="mt-1 text-sm font-black text-sky-800"><?php echo (int)$h2hDayTimeOverSummary['over_05']; ?></p>
+                                </div>
+                                <div class="rounded-lg bg-indigo-50 px-2 py-2">
+                                    <p class="text-[10px] font-bold text-indigo-700">O1.5 H+J</p>
+                                    <p class="mt-1 text-sm font-black text-indigo-800"><?php echo (int)$h2hDayTimeOverSummary['over_15']; ?></p>
+                                </div>
+                                <div class="rounded-lg bg-violet-50 px-2 py-2">
+                                    <p class="text-[10px] font-bold text-violet-700">O2.5 H+J</p>
+                                    <p class="mt-1 text-sm font-black text-violet-800"><?php echo (int)$h2hDayTimeOverSummary['over_25']; ?></p>
                                 </div>
                             </div>
                             <div class="mt-2 grid grid-cols-2 gap-2 text-center">

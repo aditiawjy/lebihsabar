@@ -5,11 +5,26 @@
   "description": "Scraper for g943gp.bpvmr7u6.com",
   "permissions": [
     "activeTab",
+    "alarms",
     "scripting",
-    "storage"
+    "storage",
+    "tabs"
   ],
   "host_permissions": [
     "https://g943gp.bpvmr7u6.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://g943gp.bpvmr7u6.com/*"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
   ],
   "action": {
     "default_popup": "popup.html",

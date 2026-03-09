@@ -133,6 +133,7 @@
     
     <div class="controls">
         <button id="refreshBtn" class="btn-primary">Refresh Data</button>
+        <button id="startLiveBtn" class="btn-success">Start Live</button>
         <button id="stopLiveBtn" class="btn-danger" disabled>Stop Live</button>
         <button id="sendBtn" class="btn-secondary">Send to Server</button>
         <span id="liveStatus" class="live-indicator live-off">AUTO LIVE: OFF</span>
@@ -145,12 +146,17 @@
         <span id="lastRetry">Last retry: 0</span>
         <span id="serverStatus">Server: -</span>
     </div>
+    <div class="status-bar" style="margin-top:-8px;font-size:11px;flex-wrap:wrap;gap:8px;">
+        <span id="lastCycle">Cycle: -</span>
+        <span id="lastRefresh">Refresh: -</span>
+        <span id="lastExtractStatus">Extract: -</span>
+    </div>
     
     <div id="errorBox"></div>
     
     <div style="max-height: 400px; overflow-y: auto;">
         <div id="matchesTable">
-            <div style="text-align:center;padding:40px;background:white;">Click "Refresh Data" to load matches</div>
+            <div style="text-align:center;padding:40px;background:white;">Click "Refresh Data" or "Start Live" to load matches</div>
         </div>
     </div>
     

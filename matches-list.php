@@ -944,7 +944,7 @@ $monthKeys = array_keys($datesByMonth);
                                             </div>
                                         </div>
                                         <div class="flex justify-center">
-                                            <span class="inline-block text-[10px] font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 uppercase tracking-wide truncate max-w-[280px]"
+                                            <span class="inline-block text-[9px] font-semibold text-slate-500 bg-slate-100/80 px-2.5 py-1 rounded-md border border-slate-200 uppercase tracking-[0.12em] truncate max-w-[260px]"
                                                   title="<?php echo htmlspecialchars($match['league']); ?>">
                                                 <?php echo htmlspecialchars($match['league']); ?>
                                             </span>
@@ -1157,7 +1157,7 @@ $monthKeys = array_keys($datesByMonth);
                 Halaman <span class="text-slate-900"><?php echo $p; ?></span> dari <span class="text-slate-900"><?php echo $totalPages; ?></span>
             </div>
             <div class="flex items-center gap-2">
-                <label class="text-slate-400">Show:</label>
+                <label class="text-slate-400">Tampil:</label>
                 <select onchange="window.location.href=this.value" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium text-slate-700 cursor-pointer hover:bg-slate-100 transition-colors">
                     <?php 
                     foreach ($perPageOptions as $option):

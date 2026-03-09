@@ -8,3 +8,6 @@ NUL
 
 # IDE files
 .claude/settings.local.json
+
+# Local MCP config
+.mcp.json

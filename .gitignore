@@ -1,0 +1,10 @@
+# Debug files
+sabar_debug.log
+*.log
+
+# Windows system files
+nul
+NUL
+
+# IDE files
+.claude/settings.local.json

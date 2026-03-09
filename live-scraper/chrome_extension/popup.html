@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 900px;
+            padding: 15px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+        }
+        h3 {
+            margin: 0 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #007bff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .status-bar {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .live-indicator {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .live-on { background: #d4edda; color: #155724; }
+        .live-off { background: #f8d7da; color: #721c24; }
+        table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+        th {
+            background: #007bff;
+            color: white;
+            padding: 10px 8px;
+            text-align: left;
+        }
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .team-name { 
+            font-weight: 500; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+        }
+        .score { font-weight: bold; color: #dc3545; font-size: 13px; }
+        .time-live { 
+            background: #d4edda; 
+            color: #155724; 
+            padding: 2px 8px; 
+            border-radius: 12px;
+            font-size: 10px;
+        }
+        .time-ht { 
+            background: #fff3cd; 
+            color: #856404; 
+            padding: 2px 8px; 
+            border-radius: 12px;
+            font-size: 10px;
+        }
+        .odds-text { font-size: 10px; line-height: 1.4; }
+        .odds-normal { color: #212529; }
+        .odds-favorite { color: #007bff; font-weight: 500; }
+        .odds-minus { color: #dc3545; font-weight: 600; }
+        .error-box {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h3>
+        BPVM Live Scraper
+        <span id="matchCount" style="font-size: 14px; background: #007bff; color: white; padding: 4px 12px; border-radius: 12px;">0 matches</span>
+    </h3>
+    
+    <div class="controls">
+        <button id="refreshBtn" class="btn-primary">Refresh Data</button>
+        <button id="stopLiveBtn" class="btn-danger" disabled>Stop Live</button>
+        <button id="sendBtn" class="btn-secondary">Send to Server</button>
+        <span id="liveStatus" class="live-indicator live-off">AUTO LIVE: OFF</span>
+    </div>
+    
+    <div class="status-bar">
+        <span id="pageStatus">Checking page...</span>
+        <span id="lastUpdate">Last update: -</span>
+        <span id="lastSent">Last sent: -</span>
+        <span id="lastRetry">Last retry: 0</span>
+        <span id="serverStatus">Server: -</span>
+    </div>
+    
+    <div id="errorBox"></div>
+    
+    <div style="max-height: 400px; overflow-y: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 20%;">League</th>
+                    <th style="width: 16%;">Home Team</th>
+                    <th style="width: 16%;">Away Team</th>
+                    <th style="width: 10%;">Time</th>
+                    <th style="width: 8%;">Score</th>
+                    <th style="width: 30%;">Odds</th>
+                </tr>
+            </thead>
+            <tbody id="matchesTable">
+                <tr><td colspan="6" style="text-align:center;padding:40px;">Click "Refresh Data" to load matches</td></tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

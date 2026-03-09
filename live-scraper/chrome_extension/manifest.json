@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "BPVM Scraper",
+  "version": "1.0",
+  "description": "Scraper for g943gp.bpvmr7u6.com",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://g943gp.bpvmr7u6.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "BPVM Scraper"
+  }
+}

@@ -5,6 +5,7 @@ Telegram Notifier untuk Live Scraper
 
 import requests
 import json
+import re
 from datetime import datetime
 from telegram_config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, ALERT_SETTINGS
 
@@ -63,10 +64,19 @@ class TelegramNotifier:
         return self.send_message(message)
 
     def should_send_second_half_zero_zero_alert(self, match_data):
-        """Cek apakah match tepat di 2H 2' dan masih 0-0"""
+        """Cek apakah match sudah lewat 2H 2' dan masih 0-0"""
         status = match_data.get("status", "").strip()
         score = match_data.get("score", "0-0").strip()
-        return status == "2H 2'" and score in {"0-0", "0 - 0"}
+
+        if score not in {"0-0", "0 - 0"}:
+            return False
+
+        second_half_match = re.fullmatch(r"2H\s+(\d+)'", status)
+        if not second_half_match:
+            return False
+
+        minute = int(second_half_match.group(1))
+        return minute >= 2
 
     def send_test_message(self):
         """Kirim pesan test"""
@@ -80,7 +90,7 @@ class TelegramNotifier:
         return self.send_message(test_message)
 
     def check_and_alert_second_half_zero_zero(self, match_data):
-        """Cek dan kirim alert jika tepat 2H 2' dan skor masih 0-0"""
+        """Cek dan kirim alert jika sudah lewat 2H 2' dan skor masih 0-0"""
         if not self.should_send_second_half_zero_zero_alert(match_data):
             return False
 

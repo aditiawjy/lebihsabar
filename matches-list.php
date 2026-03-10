@@ -140,6 +140,9 @@ function matchesBuildH2hTimeSummary(array $allMatches, array $targetMatch): arra
         'total_meetings' => 0,
         'finished_meetings' => 0,
         'under_05' => 0,
+        'under_25' => 0,
+        'fhg_over_05' => 0,
+        'shg_over_05' => 0,
         'over_05' => 0,
         'over_15' => 0,
         'over_25' => 0,
@@ -175,7 +178,11 @@ function matchesBuildH2hTimeSummary(array $allMatches, array $targetMatch): arra
         $summary['finished_meetings']++;
         $ftHome = (int)$match['ft_home'];
         $ftAway = (int)$match['ft_away'];
+        $fhHome = (int)($match['fh_home'] ?? 0);
+        $fhAway = (int)($match['fh_away'] ?? 0);
         $totalGoals = $ftHome + $ftAway;
+        $firstHalfGoals = $fhHome + $fhAway;
+        $secondHalfGoals = max(0, ($ftHome - $fhHome) + ($ftAway - $fhAway));
 
         $team1Goals = strcasecmp($candidateHome, $homeTeam) === 0 ? $ftHome : $ftAway;
         $team2Goals = strcasecmp($candidateAway, $awayTeam) === 0 ? $ftAway : $ftHome;
@@ -189,6 +196,15 @@ function matchesBuildH2hTimeSummary(array $allMatches, array $targetMatch): arra
 
         if ($totalGoals === 0) {
             $summary['under_05']++;
+        }
+        if ($totalGoals < 3) {
+            $summary['under_25']++;
+        }
+        if ($firstHalfGoals > 0) {
+            $summary['fhg_over_05']++;
+        }
+        if ($secondHalfGoals > 0) {
+            $summary['shg_over_05']++;
         }
         if ($totalGoals > 0) {
             $summary['over_05']++;
@@ -226,6 +242,7 @@ function matchesBuildH2hDayTimeOverSummary(array $allMatches, array $targetMatch
     $summary = [
         'total_meetings' => 0,
         'finished_meetings' => 0,
+        'under_25' => 0,
         'over_05' => 0,
         'over_15' => 0,
         'over_25' => 0,
@@ -261,6 +278,9 @@ function matchesBuildH2hDayTimeOverSummary(array $allMatches, array $targetMatch
         $summary['total_meetings']++;
         $summary['finished_meetings']++;
         $totalGoals = (int)$match['ft_home'] + (int)$match['ft_away'];
+        if ($totalGoals < 3) {
+            $summary['under_25']++;
+        }
         if ($totalGoals > 0) {
             $summary['over_05']++;
         }
@@ -1064,6 +1084,10 @@ $monthKeys = array_keys($datesByMonth);
                                             </div>
                                         </div>
                                         <div class="grid grid-cols-3 gap-2 text-center">
+                                            <div class="rounded-xl border border-rose-200 bg-rose-50 px-2 py-2">
+                                                <p class="text-[10px] font-bold uppercase tracking-wide text-rose-700">U2.5</p>
+                                                <p class="mt-1 text-sm font-black text-rose-800"><?php echo (int)$h2hTimeSummary['under_25']; ?></p>
+                                            </div>
                                             <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-2 py-2">
                                                 <p class="text-[10px] font-bold uppercase tracking-wide text-emerald-700">O0.5</p>
                                                 <p class="mt-1 text-sm font-black text-emerald-800"><?php echo (int)$h2hTimeSummary['over_05']; ?></p>
@@ -1072,15 +1096,25 @@ $monthKeys = array_keys($datesByMonth);
                                                 <p class="text-[10px] font-bold uppercase tracking-wide text-blue-700">O1.5</p>
                                                 <p class="mt-1 text-sm font-black text-blue-800"><?php echo (int)$h2hTimeSummary['over_15']; ?></p>
                                             </div>
-                                            <div class="rounded-xl border border-violet-200 bg-violet-50 px-2 py-2">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-violet-700">O2.5</p>
-                                                <p class="mt-1 text-sm font-black text-violet-800"><?php echo (int)$h2hTimeSummary['over_25']; ?></p>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2 text-center">
+                                            <div class="rounded-xl border border-fuchsia-200 bg-fuchsia-50 px-2 py-2">
+                                                <p class="text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">FHG O0.5</p>
+                                                <p class="mt-1 text-sm font-black text-fuchsia-800"><?php echo (int)$h2hTimeSummary['fhg_over_05']; ?></p>
+                                            </div>
+                                            <div class="rounded-xl border border-pink-200 bg-pink-50 px-2 py-2">
+                                                <p class="text-[10px] font-bold uppercase tracking-wide text-pink-700">SHG O0.5</p>
+                                                <p class="mt-1 text-sm font-black text-pink-800"><?php echo (int)$h2hTimeSummary['shg_over_05']; ?></p>
                                             </div>
                                         </div>
                                         <div class="grid grid-cols-4 gap-2 text-center">
                                             <div class="rounded-xl border border-slate-200 bg-slate-50 px-2 py-2">
                                                 <p class="text-[10px] font-bold uppercase tracking-wide text-slate-700">Total H+J</p>
                                                 <p class="mt-1 text-sm font-black text-slate-800"><?php echo (int)$h2hDayTimeOverSummary['total_meetings']; ?></p>
+                                            </div>
+                                            <div class="rounded-xl border border-rose-200 bg-rose-50 px-2 py-2">
+                                                <p class="text-[10px] font-bold uppercase tracking-wide text-rose-700">U2.5 H+J</p>
+                                                <p class="mt-1 text-sm font-black text-rose-800"><?php echo (int)$h2hDayTimeOverSummary['under_25']; ?></p>
                                             </div>
                                             <div class="rounded-xl border border-sky-200 bg-sky-50 px-2 py-2">
                                                 <p class="text-[10px] font-bold uppercase tracking-wide text-sky-700">O0.5 H+J</p>
@@ -1089,10 +1123,6 @@ $monthKeys = array_keys($datesByMonth);
                                             <div class="rounded-xl border border-indigo-200 bg-indigo-50 px-2 py-2">
                                                 <p class="text-[10px] font-bold uppercase tracking-wide text-indigo-700">O1.5 H+J</p>
                                                 <p class="mt-1 text-sm font-black text-indigo-800"><?php echo (int)$h2hDayTimeOverSummary['over_15']; ?></p>
-                                            </div>
-                                            <div class="rounded-xl border border-violet-200 bg-violet-50 px-2 py-2">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-violet-700">O2.5 H+J</p>
-                                                <p class="mt-1 text-sm font-black text-violet-800"><?php echo (int)$h2hDayTimeOverSummary['over_25']; ?></p>
                                             </div>
                                         </div>
                                         <div class="grid grid-cols-2 gap-2 text-center">
@@ -1195,6 +1225,10 @@ $monthKeys = array_keys($datesByMonth);
                                 </div>
                             </div>
                             <div class="mt-3 grid grid-cols-3 gap-2 text-center">
+                                <div class="rounded-lg bg-rose-50 px-2 py-2">
+                                    <p class="text-[10px] font-bold text-rose-700">U2.5</p>
+                                    <p class="mt-1 text-sm font-black text-rose-800"><?php echo (int)$h2hTimeSummary['under_25']; ?></p>
+                                </div>
                                 <div class="rounded-lg bg-emerald-50 px-2 py-2">
                                     <p class="text-[10px] font-bold text-emerald-700">O0.5</p>
                                     <p class="mt-1 text-sm font-black text-emerald-800"><?php echo (int)$h2hTimeSummary['over_05']; ?></p>
@@ -1203,16 +1237,26 @@ $monthKeys = array_keys($datesByMonth);
                                     <p class="text-[10px] font-bold text-blue-700">O1.5</p>
                                     <p class="mt-1 text-sm font-black text-blue-800"><?php echo (int)$h2hTimeSummary['over_15']; ?></p>
                                 </div>
-                                <div class="rounded-lg bg-violet-50 px-2 py-2">
-                                    <p class="text-[10px] font-bold text-violet-700">O2.5</p>
-                                    <p class="mt-1 text-sm font-black text-violet-800"><?php echo (int)$h2hTimeSummary['over_25']; ?></p>
-                                </div>
                             </div>
                             <div class="mt-2 grid grid-cols-2 gap-2 text-center">
+                                <div class="rounded-lg bg-fuchsia-50 px-2 py-2">
+                                    <p class="text-[10px] font-bold text-fuchsia-700">FHG O0.5</p>
+                                    <p class="mt-1 text-sm font-black text-fuchsia-800"><?php echo (int)$h2hTimeSummary['fhg_over_05']; ?></p>
+                                </div>
+                                <div class="rounded-lg bg-pink-50 px-2 py-2">
+                                    <p class="text-[10px] font-bold text-pink-700">SHG O0.5</p>
+                                    <p class="mt-1 text-sm font-black text-pink-800"><?php echo (int)$h2hTimeSummary['shg_over_05']; ?></p>
+                                </div>
+                            </div>
+                            <div class="mt-2 grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
                                 <div class="rounded-lg bg-white px-2 py-2">
                                     <p class="text-[10px] font-bold text-slate-700">Total H+J</p>
                                     <p class="mt-1 text-sm font-black text-slate-800"><?php echo (int)$h2hDayTimeOverSummary['total_meetings']; ?></p>
-                            </div>
+                                </div>
+                                <div class="rounded-lg bg-rose-50 px-2 py-2">
+                                    <p class="text-[10px] font-bold text-rose-700">U2.5 H+J</p>
+                                    <p class="mt-1 text-sm font-black text-rose-800"><?php echo (int)$h2hDayTimeOverSummary['under_25']; ?></p>
+                                </div>
                                 <div class="rounded-lg bg-sky-50 px-2 py-2">
                                     <p class="text-[10px] font-bold text-sky-700">O0.5 H+J</p>
                                     <p class="mt-1 text-sm font-black text-sky-800"><?php echo (int)$h2hDayTimeOverSummary['over_05']; ?></p>
@@ -1220,10 +1264,6 @@ $monthKeys = array_keys($datesByMonth);
                                 <div class="rounded-lg bg-indigo-50 px-2 py-2">
                                     <p class="text-[10px] font-bold text-indigo-700">O1.5 H+J</p>
                                     <p class="mt-1 text-sm font-black text-indigo-800"><?php echo (int)$h2hDayTimeOverSummary['over_15']; ?></p>
-                                </div>
-                                <div class="rounded-lg bg-violet-50 px-2 py-2">
-                                    <p class="text-[10px] font-bold text-violet-700">O2.5 H+J</p>
-                                    <p class="mt-1 text-sm font-black text-violet-800"><?php echo (int)$h2hDayTimeOverSummary['over_25']; ?></p>
                                 </div>
                             </div>
                             <div class="mt-2 grid grid-cols-2 gap-2 text-center">

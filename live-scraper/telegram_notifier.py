@@ -17,6 +17,19 @@ class TelegramNotifier:
         self.base_url = f"https://api.telegram.org/bot{self.bot_token}"
         self.sent_alerts = set()
 
+    def get_match_name(self, match_data):
+        """Ambil nama match yang stabil untuk display dan dedup."""
+        teams = (match_data.get("teams") or "").strip()
+        if teams:
+            return teams
+
+        home_team = (match_data.get("homeTeam") or "").strip()
+        away_team = (match_data.get("awayTeam") or "").strip()
+        if home_team and away_team:
+            return f"{home_team} vs {away_team}"
+
+        return "Unknown"
+
     def send_message(self, message, retries=3):
         """Kirim pesan ke Telegram dengan retry"""
         url = f"{self.base_url}/sendMessage"
@@ -47,9 +60,10 @@ class TelegramNotifier:
             return False
 
         current_time = datetime.now().strftime("%H:%M:%S")
+        match_name = self.get_match_name(match_data)
 
         message = f"📊 <b>LIVE MATCH UPDATE</b>\n\n"
-        message += f"⚽ <b>{match_data.get('teams', 'Unknown')}</b>\n"
+        message += f"⚽ <b>{match_name}</b>\n"
         message += f"📊 Score: <b>{match_data.get('score', '0-0')}</b>\n"
         message += f"🏆 League: {match_data.get('league', 'N/A')}\n"
         message += f"⏰ Status: {match_data.get('status', 'Live')}\n"
@@ -95,7 +109,8 @@ class TelegramNotifier:
             return False
 
         status = match_data.get("status", "").strip()
-        match_id = f"{match_data.get('teams', 'Unknown')}_secondhalf_2h2_0-0"
+        match_name = self.get_match_name(match_data)
+        match_id = f"{match_name}_secondhalf_2h2_0-0"
 
         if match_id in self.sent_alerts:
             return False
@@ -103,7 +118,7 @@ class TelegramNotifier:
         current_time = datetime.now().strftime("%H:%M:%S")
 
         message = f"⚠️ <b>SECOND HALF 0-0 ALERT!</b> ⚠️\n\n"
-        message += f"⚽ <b>{match_data.get('teams', 'Unknown Teams')}</b>\n"
+        message += f"⚽ <b>{match_name}</b>\n"
         message += f"📊 Score: <b>0-0</b>\n"
         message += f"🏆 League: {match_data.get('league', 'Unknown League')}\n"
         message += f"⏰ Status: {status}\n"
@@ -121,9 +136,7 @@ class TelegramNotifier:
         success = self.send_message(message)
         if success:
             self.sent_alerts.add(match_id)
-            print(
-                f"[ALERT] Second half 0-0 alert sent for: {match_data.get('teams', 'Unknown')}"
-            )
+            print(f"[ALERT] Second half 0-0 alert sent for: {match_name}")
         return success
 
 

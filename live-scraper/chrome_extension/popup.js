@@ -147,7 +147,7 @@ function applyPopupState(state) {
     document.getElementById('lastUpdate').textContent = `Last update: ${liveStatus.lastUpdate || data.time || '-'}`;
     document.getElementById('lastSent').textContent = `Last sent: ${liveStatus.lastSent || '-'}`;
     document.getElementById('lastRetry').textContent = `Last retry: ${liveStatus.lastRetry || '0'}`;
-    document.getElementById('serverStatus').textContent = liveStatus.serverStatus || 'Server: -';
+    document.getElementById('serverStatus').textContent = liveStatus.serverStatus || 'Telegram: -';
     document.getElementById('pageStatus').textContent = liveStatus.pageStatus || 'Checking page...';
     document.getElementById('lastCycle').textContent = `Cycle: ${liveStatus.lastCycle || '-'}`;
     document.getElementById('lastRefresh').textContent = `Refresh: ${liveStatus.lastRefresh || '-'}`;

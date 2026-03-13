@@ -1,4 +1,6 @@
-const SERVER_URL = 'http://127.0.0.1:5000';
+const TELEGRAM_BOT_TOKEN = '8498249768:AAHuJNth3fhRlR4CBSfvb6eYOFnTzRVR0YA';
+const TELEGRAM_CHAT_ID = '6801623296';
+const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 const LIVE_INTERVAL_MS = 5000;
 const REFRESH_SETTLE_MS = 1500;
 const AUTO_SEND_RETRY_COUNT = 2;
@@ -6,10 +8,12 @@ const AUTO_SEND_RETRY_DELAY_MS = 1200;
 const TARGET_HOST = 'g943gp.bpvmr7u6.com';
 const LIVE_ALARM_NAME = 'bpvm-live-cycle';
 
+
 let isLiveRunning = false;
 let isLiveCycleRunning = false;
 let currentTabId = null;
 let lastAutoSentSignature = null;
+let sentAlertKeys = new Set();
 
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -25,6 +29,53 @@ function createDataSignature(data) {
         matches: data.matches
     });
 }
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+function getMatchTeams(match) {
+    return match?.teams || `${match?.homeTeam || 'Unknown'} vs ${match?.awayTeam || 'Unknown'}`;
+}
+
+function isSecondHalfOneZeroZero(match) {
+    const status = String(match?.status || '').trim();
+    const score = String(match?.score || '').trim();
+    return /^2H\s+1'$/.test(status) && ['0-0', '0 - 0'].includes(score);
+}
+
+function createAlertKey(match) {
+    return JSON.stringify({
+        league: match?.league || 'N/A',
+        teams: getMatchTeams(match)
+    });
+}
+
+function formatMatchMessage(match) {
+    const odds = Array.isArray(match?.odds) ? match.odds.slice(0, 3) : [];
+    const lines = [
+        '⚠️ <b>2H 1\' 0-0 ALERT</b>',
+        '',
+        `⚽ <b>${escapeHtml(getMatchTeams(match))}</b>`,
+        `📊 Score: <b>${escapeHtml(match?.score || '0-0')}</b>`,
+        `🏆 League: ${escapeHtml(match?.league || 'N/A')}`,
+        `⏰ Status: ${escapeHtml(match?.status || 'Live')}`,
+        `📅 Time: ${new Date().toLocaleTimeString()}`,
+        '',
+        '🔥 <i>Masuk 2H 1\' dan skor masih 0-0.</i>'
+    ];
+
+    if (odds.length) {
+        lines.push('', '📈 <b>Odds:</b>');
+        odds.forEach((odd) => lines.push(`• ${escapeHtml(odd)}`));
+    }
+
+    return lines.join('\n');
+}
+
 
 function isTargetUrl(url) {
     return typeof url === 'string' && url.includes(TARGET_HOST);
@@ -92,7 +143,7 @@ async function setStatus(patch = {}) {
         lastUpdate: '-',
         lastSent: '-',
         lastRetry: '0',
-        serverStatus: 'Server: -',
+        serverStatus: 'Telegram: -',
         pageStatus: 'Checking page...',
         lastCycle: '-',
         lastRefresh: '-',
@@ -163,30 +214,62 @@ async function extractDataFromTab(tabId) {
 
 async function sendToServer(data, isAutoSend = false) {
     try {
-        const res = await fetch(`${SERVER_URL}/api/live-data`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-
-        if (res.ok) {
-            const sentAt = new Date().toLocaleTimeString();
+        const matches = Array.isArray(data?.matches) ? data.matches : [];
+        if (!matches.length) {
             await setStatus({
-                serverStatus: isAutoSend ? 'Server: Auto-sent ✓' : 'Server: Connected ✓',
-                lastSent: sentAt,
-                lastRetry: isAutoSend ? undefined : 'manual',
+                serverStatus: 'Telegram: No data',
+                error: 'No match data to send.'
+            });
+            return false;
+        }
+
+        const alertMatches = matches.filter((match) => isSecondHalfOneZeroZero(match) && !sentAlertKeys.has(createAlertKey(match)));
+        if (!alertMatches.length) {
+            await setStatus({
+                serverStatus: 'Telegram: No 2H 1\' 0-0 alert',
                 error: ''
             });
-            return true;
+            return false;
         }
+
+        let sentCount = 0;
+        for (const match of alertMatches) {
+            const res = await fetch(TELEGRAM_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_CHAT_ID,
+                    text: formatMatchMessage(match),
+                    parse_mode: 'HTML'
+                })
+            });
+
+            if (!res.ok) {
+                throw new Error(`Telegram API error ${res.status}`);
+            }
+
+            sentAlertKeys.add(createAlertKey(match));
+            sentCount += 1;
+        }
+
+        const sentAt = new Date().toLocaleTimeString();
+        await setStatus({
+            serverStatus: isAutoSend ? `Telegram: Auto-sent ${sentCount} alert ✓` : `Telegram: Sent ${sentCount} alert ✓`,
+            lastSent: sentAt,
+            lastRetry: isAutoSend ? undefined : 'manual',
+            error: ''
+        });
+        return true;
     } catch (error) {
         await setStatus({
-            serverStatus: isAutoSend ? 'Server: Auto-send failed ✗' : 'Server: Failed ✗'
+            serverStatus: isAutoSend ? 'Telegram: Auto-send failed ✗' : 'Telegram: Failed ✗',
+            error: error.message || 'Telegram send failed'
         });
     }
 
     return false;
 }
+
 
 async function sendToServerWithRetry(data) {
     let attempt = 0;
@@ -201,16 +284,16 @@ async function sendToServerWithRetry(data) {
 
         attempt += 1;
         if (attempt <= AUTO_SEND_RETRY_COUNT) {
-            await setStatus({
-                serverStatus: `Server: Retry ${attempt}/${AUTO_SEND_RETRY_COUNT}`,
-                lastRetry: String(attempt)
-            });
+                await setStatus({
+                    serverStatus: `Telegram: Retry ${attempt}/${AUTO_SEND_RETRY_COUNT}`,
+                    lastRetry: String(attempt)
+                });
             await delay(AUTO_SEND_RETRY_DELAY_MS);
         }
     }
 
     await setStatus({
-        serverStatus: 'Server: Auto-send failed after retry ✗',
+        serverStatus: 'Telegram: Auto-send failed after retry ✗',
         lastRetry: String(AUTO_SEND_RETRY_COUNT)
     });
     return false;
@@ -381,7 +464,7 @@ chrome.runtime.onInstalled.addListener(() => {
             lastUpdate: '-',
             lastSent: '-',
             lastRetry: '0',
-            serverStatus: 'Server: -',
+            serverStatus: 'Telegram: -',
             pageStatus: 'Checking page...',
             lastCycle: '-',
             lastRefresh: '-',

@@ -143,7 +143,7 @@ $timeFrom   = csvNormalizeTime($_GET['time_from'] ?? '00:00', '00:00');
 $timeTo     = csvNormalizeTime($_GET['time_to']   ?? '23:59', '23:59');
 $lgFilter   = trim($_GET['league'] ?? '');
 $searchTerm = trim($_GET['search'] ?? '');
-$sortCol    = $_GET['sort']  ?? 'under_count';
+$sortCol    = $_GET['sort']  ?? 'hits_ratio';
 $sortOrder  = $_GET['order'] ?? 'desc';
 $pg         = max(1, (int)($_GET['pg'] ?? 1));
 $perPageOpt = [25, 50, 100, 200];
@@ -151,8 +151,8 @@ $perPageRaw = (int)($_GET['per_page'] ?? 50);
 $perPage    = in_array($perPageRaw, $perPageOpt) ? $perPageRaw : 50;
 $showOnlyMax = isset($_GET['show_max']) && $_GET['show_max'] === '1';
 
-if (!in_array($sortCol, ['team', 'under_count', 'max_count', 'max_date'], true)) {
-    $sortCol = 'under_count';
+if (!in_array($sortCol, ['team', 'under_count', 'max_count', 'max_date', 'hits_ratio'], true)) {
+    $sortCol = 'hits_ratio';
 }
 if (!in_array($sortOrder, ['asc', 'desc'], true)) {
     $sortOrder = 'desc';
@@ -285,6 +285,7 @@ foreach ($inRange as $key => $club) {
         'period_max_count' => $periodMaxCnt,
         'period_max_date' => $periodMaxDate,
         'max_count'   => $maxCnt,
+        'hits_ratio'  => $maxCnt > 0 ? round(($periodCnt / $maxCnt) * 100, 1) : null,
         'max_date'    => $maxDate,
         'is_max'      => $isMax,
         'last_home'   => $lastHome[$key] ?? [],
@@ -314,6 +315,7 @@ usort($rows, function($a, $b) use ($sortCol, $sortOrder) {
     $cmp = match($sortCol) {
         'team'      => strcmp($a['team'], $b['team']),
         'max_count' => $a['max_count'] <=> $b['max_count'],
+        'hits_ratio' => ($a['hits_ratio'] ?? -1) <=> ($b['hits_ratio'] ?? -1),
         'max_date'  => strcmp($a['max_date'], $b['max_date']),
         default     => $a['under_count'] <=> $b['under_count'],
     };
@@ -373,6 +375,29 @@ function csvMatchCell(array $matches, string $mkt): string {
         $parts[] = "<span class=\"text-xs {$cls}\" title=\"{$date}\">{$score}</span>";
     }
     return implode('<br>', $parts);
+}
+function csvFormatRatio(?float $ratio): string {
+    if ($ratio === null) {
+        return '-';
+    }
+
+    return rtrim(rtrim(number_format($ratio, 1, '.', ''), '0'), '.') . '%';
+}
+function csvRatioBadgeClass(?float $ratio): string {
+    if ($ratio === null) {
+        return 'bg-slate-100 text-slate-500';
+    }
+    if ($ratio >= 100) {
+        return 'bg-emerald-100 text-emerald-700';
+    }
+    if ($ratio >= 75) {
+        return 'bg-blue-100 text-blue-700';
+    }
+    if ($ratio >= 50) {
+        return 'bg-amber-100 text-amber-700';
+    }
+
+    return 'bg-rose-100 text-rose-700';
 }
 
 $mktLabel = $marketOptions[$mktParam]['label'];
@@ -592,16 +617,17 @@ $mktClass = $marketOptions[$mktParam]['class'];
         <div class="overflow-x-auto">
         <table class="min-w-full text-xs">
             <thead class="bg-rose-50 text-rose-900 sticky top-0 z-10">
-                <tr>
-                    <th class="px-4 py-3 text-left font-bold">#</th>
-                    <th class="px-4 py-3 text-left font-bold">Market</th>
-                    <th class="px-4 py-3 text-left font-bold">Club</th>
-                    <th class="px-4 py-3 text-center font-bold">Period Max</th>
-                    <th class="px-4 py-3 text-center font-bold">All-Time Max</th>
-                    <th class="px-4 py-3 text-center font-bold">Tgl Max</th>
-                    <th class="px-4 py-3 text-center font-bold">Next Match</th>
-                </tr>
-            </thead>
+                        <tr>
+                            <th class="px-4 py-3 text-left font-bold">#</th>
+                            <th class="px-4 py-3 text-left font-bold">Market</th>
+                            <th class="px-4 py-3 text-left font-bold">Club</th>
+                            <th class="px-4 py-3 text-center font-bold">Period Max</th>
+                            <th class="px-4 py-3 text-center font-bold">All-Time Max</th>
+                            <th class="px-4 py-3 text-center font-bold">Hits / Max %</th>
+                            <th class="px-4 py-3 text-center font-bold">Tgl Max</th>
+                            <th class="px-4 py-3 text-center font-bold">Next Match</th>
+                        </tr>
+                    </thead>
             <tbody class="divide-y divide-slate-100">
             <?php foreach ($recordBreakers as $i => $r): ?>
                 <tr class="hover:bg-rose-50/30 transition-all">
@@ -611,10 +637,20 @@ $mktClass = $marketOptions[$mktParam]['class'];
                         <div class="font-bold text-slate-900"><?= htmlspecialchars($r['team']) ?></div>
                         <div class="text-[10px] text-slate-500"><?= htmlspecialchars($r['league']) ?></div>
                     </td>
-                    <td class="px-4 py-3 text-center"><span class="px-3 py-1 rounded-full bg-rose-100 text-rose-700 font-black text-sm"><?= $r['period_max_count'] ?></span></td>
-                    <td class="px-4 py-3 text-center"><span class="px-3 py-1 rounded-full bg-violet-100 text-violet-700 font-black text-sm"><?= $r['max_count'] ?></span></td>
-                    <td class="px-4 py-3 text-center text-slate-600 font-medium"><?= htmlspecialchars(date('d-m-y', strtotime($r['max_date']))) ?></td>
-                    <td class="px-4 py-3 text-center text-slate-600">
+                        <td class="px-4 py-3 text-center"><span class="px-3 py-1 rounded-full bg-rose-100 text-rose-700 font-black text-sm"><?= $r['period_max_count'] ?></span></td>
+                        <td class="px-4 py-3 text-center"><span class="px-3 py-1 rounded-full bg-violet-100 text-violet-700 font-black text-sm"><?= $r['max_count'] ?></span></td>
+                        <td class="px-4 py-3 text-center text-xs">
+                            <?php
+                            $recordRatio = $r['max_count'] > 0
+                                ? round(($r['period_max_count'] / $r['max_count']) * 100, 1)
+                                : null;
+                            ?>
+                            <span class="px-3 py-1.5 rounded-full text-xs font-black <?= csvRatioBadgeClass($recordRatio) ?>">
+                                <?= htmlspecialchars(csvFormatRatio($recordRatio)) ?>
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-center text-slate-600 font-medium"><?= htmlspecialchars(date('d-m-y', strtotime($r['max_date']))) ?></td>
+                        <td class="px-4 py-3 text-center text-slate-600">
                         <?php if ($r['next_match']): ?>
                             <div class="font-bold text-slate-800"><?= htmlspecialchars($r['next_match']['vs']) ?></div>
                             <div class="text-[10px] text-slate-500"><?= htmlspecialchars($r['next_match']['date'].' '.$r['next_match']['time']) ?></div>
@@ -668,6 +704,9 @@ $mktClass = $marketOptions[$mktParam]['class'];
                         <a href="<?= htmlspecialchars(csvSortUrl('max_count', $sortCol, $sortOrder)) ?>" class="flex items-center justify-center gap-1 hover:text-amber-600 font-bold">Max <?= $sortCol==='max_count' ? ($sortOrder==='asc'?'▲':'▼') : '' ?></a>
                     </th>
                     <th class="px-4 py-3 text-center">
+                        <a href="<?= htmlspecialchars(csvSortUrl('hits_ratio', $sortCol, $sortOrder)) ?>" class="flex items-center justify-center gap-1 hover:text-amber-600 font-bold">Hits / Max % <?= $sortCol==='hits_ratio' ? ($sortOrder==='asc'?'▲':'▼') : '' ?></a>
+                    </th>
+                    <th class="px-4 py-3 text-center">
                         <a href="<?= htmlspecialchars(csvSortUrl('max_date', $sortCol, $sortOrder)) ?>" class="flex items-center justify-center gap-1 hover:text-amber-600 font-bold">Tgl Max <?= $sortCol==='max_date' ? ($sortOrder==='asc'?'▲':'▼') : '' ?></a>
                     </th>
                     <th class="px-4 py-3 text-center font-bold">Next Match</th>
@@ -694,6 +733,12 @@ $mktClass = $marketOptions[$mktParam]['class'];
                     </td>
                     <td class="px-4 py-3 text-center">
                         <span class="px-3 py-1.5 rounded-full text-xs font-black bg-violet-100 text-violet-700"><?= $r['max_count'] ?: '-' ?></span>
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <span
+                            class="px-3 py-1.5 rounded-full text-xs font-black <?= csvRatioBadgeClass($r['hits_ratio']) ?>"
+                            title="<?= (int)$r['under_count'] ?>/<?= (int)$r['max_count'] ?> (<?= htmlspecialchars(csvFormatRatio($r['hits_ratio'])) ?>)"
+                        ><?= htmlspecialchars(csvFormatRatio($r['hits_ratio'])) ?></span>
                     </td>
                     <td class="px-4 py-3 text-center text-slate-600 font-medium"><?= $r['max_date'] ? htmlspecialchars(date('d-m-y', strtotime($r['max_date']))) : '-' ?></td>
                     <td class="px-4 py-3 text-center text-slate-600">

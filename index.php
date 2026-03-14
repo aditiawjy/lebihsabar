@@ -44,13 +44,14 @@ $navLinkIdleClass = 'text-slate-400 hover:bg-slate-800 hover:text-white';
 $navIconBaseClass = 'w-5 h-5 mr-3';
 $navIconActiveClass = 'text-white';
 $navIconIdleClass = 'text-slate-500 group-hover:text-blue-400';
+
 ?>
 <!DOCTYPE html>
 <html lang="id" class="no-js">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sabaraja - Management Pertandingan</title>
+    <title><?php echo htmlspecialchars('Sabaraja - ' . $pages[$page]['title'], ENT_QUOTES, 'UTF-8'); ?></title>
     <script>
         document.documentElement.classList.remove('no-js');
     </script>
@@ -250,84 +251,77 @@ document.addEventListener('DOMContentLoaded', function () {
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     const hamburgerIcon = document.getElementById('hamburgerIcon');
     const closeIcon = document.getElementById('closeIcon');
-
-    if (!mobileMenuBtn || !sidebar || !sidebarOverlay || !hamburgerIcon || !closeIcon) {
-        return;
-    }
-
     const desktopBreakpoint = 1024;
 
-    function setMenuState(isOpen) {
-        if (isOpen) {
-            sidebarOverlay.classList.remove('hidden');
-            // Small delay to allow display:block to apply before opacity transition
-            setTimeout(() => sidebarOverlay.classList.remove('opacity-0'), 10);
-        } else {
-            sidebarOverlay.classList.add('opacity-0');
-            setTimeout(() => sidebarOverlay.classList.add('hidden'), 300);
-        }
-        
-        sidebar.classList.toggle('-translate-x-full', !isOpen);
-        hamburgerIcon.classList.toggle('hidden', isOpen);
-        closeIcon.classList.toggle('hidden', !isOpen);
-        mobileMenuBtn.classList.toggle('bg-red-600', isOpen);
-        mobileMenuBtn.classList.toggle('bg-slate-900', !isOpen);
-        mobileMenuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-        document.body.style.overflow = isOpen ? 'hidden' : '';
-    }
+    if (mobileMenuBtn && sidebar && sidebarOverlay && hamburgerIcon && closeIcon) {
+        function setMenuState(isOpen) {
+            if (isOpen) {
+                sidebarOverlay.classList.remove('hidden');
+                setTimeout(() => sidebarOverlay.classList.remove('opacity-0'), 10);
+            } else {
+                sidebarOverlay.classList.add('opacity-0');
+                setTimeout(() => sidebarOverlay.classList.add('hidden'), 300);
+            }
 
-    function closeSidebar() {
-        setMenuState(false);
-    }
-
-    function handleResize() {
-        if (window.innerWidth >= desktopBreakpoint) {
-            sidebar.classList.remove('-translate-x-full');
-            sidebarOverlay.classList.add('hidden');
-            hamburgerIcon.classList.remove('hidden');
-            closeIcon.classList.add('hidden');
-            mobileMenuBtn.classList.remove('bg-red-600');
-            mobileMenuBtn.classList.add('bg-slate-900');
-            mobileMenuBtn.setAttribute('aria-expanded', 'false');
-            document.body.style.overflow = '';
-            return;
+            sidebar.classList.toggle('-translate-x-full', !isOpen);
+            hamburgerIcon.classList.toggle('hidden', isOpen);
+            closeIcon.classList.toggle('hidden', !isOpen);
+            mobileMenuBtn.classList.toggle('bg-red-600', isOpen);
+            mobileMenuBtn.classList.toggle('bg-slate-900', !isOpen);
+            mobileMenuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            document.body.style.overflow = isOpen ? 'hidden' : '';
         }
 
-        closeSidebar();
-    }
+        function closeSidebar() {
+            setMenuState(false);
+        }
 
-    mobileMenuBtn.addEventListener('click', function () {
-        const isOpen = sidebar.classList.contains('-translate-x-full');
-        setMenuState(isOpen);
-    });
+        function handleResize() {
+            if (window.innerWidth >= desktopBreakpoint) {
+                sidebar.classList.remove('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+                hamburgerIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+                mobileMenuBtn.classList.remove('bg-red-600');
+                mobileMenuBtn.classList.add('bg-slate-900');
+                mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+                return;
+            }
 
-    sidebarOverlay.addEventListener('click', closeSidebar);
-
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape' && window.innerWidth < desktopBreakpoint) {
             closeSidebar();
         }
-    });
 
-    const sidebarLinks = sidebar.querySelectorAll('a');
-    sidebarLinks.forEach(function (link) {
-        link.addEventListener('click', function () {
-            if (window.innerWidth < desktopBreakpoint) {
+        mobileMenuBtn.addEventListener('click', function () {
+            const isOpen = sidebar.classList.contains('-translate-x-full');
+            setMenuState(isOpen);
+        });
+
+        sidebarOverlay.addEventListener('click', closeSidebar);
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && window.innerWidth < desktopBreakpoint) {
                 closeSidebar();
             }
         });
-    });
 
-    window.addEventListener('resize', handleResize);
-    handleResize();
+        const sidebarLinks = sidebar.querySelectorAll('a');
+        sidebarLinks.forEach(function (link) {
+            link.addEventListener('click', function () {
+                if (window.innerWidth < desktopBreakpoint) {
+                    closeSidebar();
+                }
+            });
+        });
 
-    // Page loading indicator for navigation
+        window.addEventListener('resize', handleResize);
+        handleResize();
+    }
+
     const pageLoader = document.getElementById('pageLoader');
     const navLinks = document.querySelectorAll('nav a[href^="index.php?page="]');
-    
     navLinks.forEach(function(link) {
         link.addEventListener('click', function(e) {
-            // Only show loader if it's a different page
             const currentPage = new URLSearchParams(window.location.search).get('page') || 'parser';
             const targetPage = new URLSearchParams(this.href.split('?')[1]).get('page');
             
@@ -337,7 +331,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Hide loader when page is fully loaded
     window.addEventListener('load', function() {
         if (pageLoader) {
             pageLoader.classList.add('hidden');

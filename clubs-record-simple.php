@@ -40,27 +40,6 @@ function csvTimeInRange(string $time, string $from, string $to): bool {
     return $time >= $from || $time <= $to;
 }
 
-function csvPushRecent(array &$bucket, string $key, array $match): void {
-    if (!isset($bucket[$key])) {
-        $bucket[$key] = [];
-    }
-
-    $matchTs = $match['date'] . $match['time'];
-    $insertAt = count($bucket[$key]);
-    foreach ($bucket[$key] as $idx => $existing) {
-        $existingTs = $existing['date'] . $existing['time'];
-        if ($matchTs > $existingTs) {
-            $insertAt = $idx;
-            break;
-        }
-    }
-
-    array_splice($bucket[$key], $insertAt, 0, [$match]);
-    if (count($bucket[$key]) > 5) {
-        array_pop($bucket[$key]);
-    }
-}
-
 function csvBumpDailyMax(array &$dailyCounts, array &$maxByKey, string $key, string $date): void {
     $dailyCounts[$key][$date] = ($dailyCounts[$key][$date] ?? 0) + 1;
     $newCount = $dailyCounts[$key][$date];
@@ -169,8 +148,6 @@ if ($dateFrom > $dateTo) [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
 // -- CSV scan #2: build stats without loading full file in memory -------------
 $allTimeDailyMkt = [];  // key => [date => count]
 $allTimeMaxByKey = []; // key => ['count' => int, 'date' => string]
-$lastHome        = [];  // key => latest 5 matches (desc)
-$lastAway        = [];
 $nextMatch       = [];  // key => match
 $inRange = [];  // key => ['team','league','under_count']
 $inRangeDailyMkt = []; // key => [date => count]
@@ -191,8 +168,6 @@ csvReadMatches($csvPath, function(array $m) use (
     $timeTo,
     &$allTimeDailyMkt,
     &$allTimeMaxByKey,
-    &$lastHome,
-    &$lastAway,
     &$nextMatch,
     &$inRange,
     &$inRangeDailyMkt,
@@ -228,10 +203,8 @@ csvReadMatches($csvPath, function(array $m) use (
             csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $aKey, $m['date']);
         }
 
-        csvPushRecent($lastHome, $hKey, $m);
-        csvPushRecent($lastAway, $aKey, $m);
-
         if (
+            $isMarketHit &&
             $m['date'] >= $dateFrom &&
             $m['date'] <= $dateTo &&
             csvTimeInRange($m['time'], $timeFrom, $timeTo)
@@ -240,10 +213,8 @@ csvReadMatches($csvPath, function(array $m) use (
                 if (!isset($inRange[$key])) {
                     $inRange[$key] = ['team' => $team, 'league' => $m['league'], 'under_count' => 0];
                 }
-                if ($isMarketHit) {
-                    $inRange[$key]['under_count']++;
-                    csvBumpDailyMax($inRangeDailyMkt, $periodMaxByKey, $key, $m['date']);
-                }
+                $inRange[$key]['under_count']++;
+                csvBumpDailyMax($inRangeDailyMkt, $periodMaxByKey, $key, $m['date']);
             }
         }
         return;
@@ -269,6 +240,7 @@ sort($leagueList);
 
 // -- Build final rows -----------------------------------------------------------
 $rows = [];
+$recordBreakers = [];
 foreach ($inRange as $key => $club) {
     $maxCnt = $allTimeMaxByKey[$key]['count'] ?? 0;
     $maxDate = $allTimeMaxByKey[$key]['date'] ?? '';
@@ -276,6 +248,10 @@ foreach ($inRange as $key => $club) {
     $periodMaxDate = $periodMaxByKey[$key]['date'] ?? '';
 
     $periodCnt = $club['under_count'];
+    if ($periodCnt <= 0) {
+        continue;
+    }
+
     $isMax = $maxCnt > 0 && $periodMaxCnt >= $maxCnt;
 
     $rows[] = [
@@ -288,10 +264,23 @@ foreach ($inRange as $key => $club) {
         'hits_ratio'  => $maxCnt > 0 ? round(($periodCnt / $maxCnt) * 100, 1) : null,
         'max_date'    => $maxDate,
         'is_max'      => $isMax,
-        'last_home'   => $lastHome[$key] ?? [],
-        'last_away'   => $lastAway[$key] ?? [],
         'next_match'  => $nextMatch[$key] ?? null,
     ];
+
+    if ($isMax && $maxCnt > 0) {
+        $recordBreakers[] = [
+            'team' => $club['team'],
+            'league' => $club['league'],
+            'under_count' => $periodCnt,
+            'period_max_count' => $periodMaxCnt,
+            'period_max_date' => $periodMaxDate,
+            'max_count' => $maxCnt,
+            'hits_ratio' => $maxCnt > 0 ? round(($periodCnt / $maxCnt) * 100, 1) : null,
+            'max_date' => $maxDate,
+            'is_max' => $isMax,
+            'next_match' => $nextMatch[$key] ?? null,
+        ];
+    }
 }
 
 if ($searchTerm) {
@@ -300,10 +289,11 @@ if ($searchTerm) {
         mb_strpos(mb_strtolower($r['team'], 'UTF-8'), $searchLower) !== false ||
         mb_strpos(mb_strtolower($r['league'], 'UTF-8'), $searchLower) !== false
     ));
+    $recordBreakers = array_values(array_filter($recordBreakers, fn($r) => 
+        mb_strpos(mb_strtolower($r['team'], 'UTF-8'), $searchLower) !== false ||
+        mb_strpos(mb_strtolower($r['league'], 'UTF-8'), $searchLower) !== false
+    ));
 }
-
-// Record Breakers = teams where max harian pada periode filter = all-time max
-$recordBreakers = array_values(array_filter($rows, fn($r) => $r['is_max'] && $r['max_count'] > 0));
 
 // Filter: only max if requested
 if ($showOnlyMax) {
@@ -359,22 +349,6 @@ function csvUrl(array $extra = []): string {
 function csvSortUrl(string $col, string $cur, string $curOrder): string {
     $o = ($cur === $col && $curOrder === 'desc') ? 'asc' : 'desc';
     return csvUrl(['sort' => $col, 'order' => $o, 'pg' => 1]);
-}
-function csvMatchCell(array $matches, string $mkt): string {
-    if (!$matches) return '<span class="text-slate-300 text-xs">-</span>';
-    $parts = [];
-    foreach ($matches as $m) {
-        $hit  = csvHasFT($m) && csvCheckMarket($m, $mkt);
-        $ftH  = csvHasFT($m) ? $m['ft_home'] : '?';
-        $ftA  = csvHasFT($m) ? $m['ft_away'] : '?';
-        $fhH  = $m['fh_home'] !== '' ? $m['fh_home'] : '?';
-        $fhA  = $m['fh_away'] !== '' ? $m['fh_away'] : '?';
-        $score = htmlspecialchars("({$fhH}-{$fhA}) {$ftH}-{$ftA}");
-        $date  = htmlspecialchars(substr($m['date'], 5));
-        $cls   = $hit ? 'text-emerald-700 font-bold' : 'text-slate-500';
-        $parts[] = "<span class=\"text-xs {$cls}\" title=\"{$date}\">{$score}</span>";
-    }
-    return implode('<br>', $parts);
 }
 function csvFormatRatio(?float $ratio): string {
     if ($ratio === null) {

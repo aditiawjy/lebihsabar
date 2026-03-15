@@ -19,30 +19,6 @@
         </div>
     </div>
 
-    <!-- Daily Health Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4" id="dailyHealthCards">
-        <div class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm">
-            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Hari Ini</p>
-            <p id="metricTotalToday" class="mt-2 text-2xl font-black text-slate-900">0</p>
-        </div>
-        <div class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm">
-            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">League Aktif</p>
-            <p id="metricLeagueActive" class="mt-2 text-2xl font-black text-slate-900">0</p>
-        </div>
-        <div class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm">
-            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Pending Score</p>
-            <p id="metricPendingScore" class="mt-2 text-2xl font-black text-amber-600">0</p>
-        </div>
-        <div class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm">
-            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Data Invalid</p>
-            <p id="metricInvalidData" class="mt-2 text-2xl font-black text-rose-600">0</p>
-        </div>
-        <div class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm">
-            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Duplicate</p>
-            <p id="metricDuplicate" class="mt-2 text-2xl font-black text-amber-600">0</p>
-        </div>
-    </div>
-    
     <!-- Main Input Card -->
     <div class="bg-white rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-200 p-6 md:p-8 transition-all hover:shadow-xl hover:shadow-slate-200/60 relative overflow-hidden group">
         <!-- Decoration -->

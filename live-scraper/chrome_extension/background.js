@@ -7,13 +7,24 @@ const AUTO_SEND_RETRY_COUNT = 2;
 const AUTO_SEND_RETRY_DELAY_MS = 1200;
 const TARGET_HOST = 'g943gp.bpvmr7u6.com';
 const LIVE_ALARM_NAME = 'bpvm-live-cycle';
+const TARGET_ODD_MARKET = 'o/u';
+const TARGET_ODD_SELECTION = 'o0.75';
+const COMPARISON_ODD_SELECTIONS = ['o1.0', 'o1.25'];
+const TARGET_ODD_MIN = 1.8;
+const ODD_HISTORY_LIMIT = 40;
+const ODD_SPIKE_DELTA = 0.10;
+const ODD_SPIKE_WINDOW_MS = 30000;
+const ODD_BREAKOUT_HOLD_MS = 20000;
 
 
 let isLiveRunning = false;
 let isLiveCycleRunning = false;
 let currentTabId = null;
 let lastAutoSentSignature = null;
-let sentAlertKeys = new Set();
+let notifiedMatchKeys = new Set();
+let wasAboveThresholdByMatchKey = new Map();
+let oddHistoryByMatchKey = new Map();
+let oddInsightByMatchKey = new Map();
 
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -41,31 +52,272 @@ function getMatchTeams(match) {
     return match?.teams || `${match?.homeTeam || 'Unknown'} vs ${match?.awayTeam || 'Unknown'}`;
 }
 
-function isSecondHalfOneZeroZero(match) {
-    const status = String(match?.status || '').trim();
-    const score = String(match?.score || '').trim();
-    return /^2H\s+1'$/.test(status) && ['0-0', '0 - 0'].includes(score);
-}
-
-function createAlertKey(match) {
+function createMatchKey(match) {
     return JSON.stringify({
         league: match?.league || 'N/A',
         teams: getMatchTeams(match)
     });
 }
 
-function formatMatchMessage(match) {
+function isSecondHalfStatus(match) {
+    const status = String(match?.status || '').trim();
+    return /^2H\s+\d+'$/i.test(status);
+}
+
+function normalizeMarketValue(value) {
+    return String(value || '')
+        .toLowerCase()
+        .replace(/\s+/g, '');
+}
+
+function getOverOddsBySelection(match, selections = [TARGET_ODD_SELECTION]) {
+    const odds = Array.isArray(match?.odds) ? match.odds : [];
+    const wantedSelections = new Set(selections.map((selection) => normalizeMarketValue(selection)));
+    const foundSelections = {};
+
+    for (const marketLine of odds) {
+        const parts = String(marketLine || '').split(': ');
+        if (parts.length < 2) {
+            continue;
+        }
+
+        const marketName = parts[0].trim();
+        if (!normalizeMarketValue(marketName).includes(TARGET_ODD_MARKET)) {
+            continue;
+        }
+
+        const optionsText = parts.slice(1).join(': ');
+        const options = optionsText.split(' | ');
+        for (const option of options) {
+            if (option === '[LOCKED]') {
+                continue;
+            }
+
+            const separatorIndex = option.indexOf(':');
+            if (separatorIndex === -1) {
+                continue;
+            }
+
+            const label = option.slice(0, separatorIndex).trim();
+            const normalizedLabel = normalizeMarketValue(label);
+            const oddText = option.slice(separatorIndex + 1).trim();
+            const oddValue = parseFloat(oddText);
+            if (!wantedSelections.has(normalizedLabel) || !Number.isFinite(oddValue)) {
+                continue;
+            }
+
+            foundSelections[normalizedLabel] = {
+                marketName,
+                label,
+                oddValue
+            };
+
+            if (Object.keys(foundSelections).length === wantedSelections.size) {
+                return foundSelections;
+            }
+        }
+    }
+
+    return foundSelections;
+}
+
+function getTargetOverOdd(match) {
+    const oddsMap = getOverOddsBySelection(match, [TARGET_ODD_SELECTION]);
+    return oddsMap[TARGET_ODD_SELECTION] || null;
+}
+
+function getQualifiedOddsAlert(match) {
+    if (!isSecondHalfStatus(match)) {
+        return null;
+    }
+
+    const targetOdd = getTargetOverOdd(match);
+    if (!targetOdd || !(targetOdd.oddValue > TARGET_ODD_MIN)) {
+        return null;
+    }
+
+    return targetOdd;
+}
+
+function pruneMatchAlertState(matches) {
+    const activeMatchKeys = new Set(matches.map((match) => createMatchKey(match)));
+
+    notifiedMatchKeys = new Set(
+        Array.from(notifiedMatchKeys).filter((matchKey) => activeMatchKeys.has(matchKey))
+    );
+
+    wasAboveThresholdByMatchKey = new Map(
+        Array.from(wasAboveThresholdByMatchKey.entries()).filter(([matchKey]) => activeMatchKeys.has(matchKey))
+    );
+
+    oddHistoryByMatchKey = new Map(
+        Array.from(oddHistoryByMatchKey.entries()).filter(([matchKey]) => activeMatchKeys.has(matchKey))
+    );
+
+    oddInsightByMatchKey = new Map(
+        Array.from(oddInsightByMatchKey.entries()).filter(([matchKey]) => activeMatchKeys.has(matchKey))
+    );
+}
+
+function getRecentHistoryPoint(history, timeWindowMs) {
+    if (!Array.isArray(history) || history.length === 0) {
+        return null;
+    }
+
+    const latest = history[history.length - 1];
+    for (let index = history.length - 1; index >= 0; index -= 1) {
+        const point = history[index];
+        if ((latest.timestamp - point.timestamp) >= timeWindowMs) {
+            return point;
+        }
+    }
+
+    return history[0] || null;
+}
+
+function computeAboveThresholdDurationMs(history) {
+    if (!Array.isArray(history) || history.length === 0) {
+        return 0;
+    }
+
+    const latest = history[history.length - 1];
+    if (!(latest.oddValue > TARGET_ODD_MIN)) {
+        return 0;
+    }
+
+    let startTimestamp = latest.timestamp;
+    for (let index = history.length - 2; index >= 0; index -= 1) {
+        const point = history[index];
+        if (!(point.oddValue > TARGET_ODD_MIN)) {
+            break;
+        }
+        startTimestamp = point.timestamp;
+    }
+
+    return latest.timestamp - startTimestamp;
+}
+
+function countThresholdCrosses(history) {
+    if (!Array.isArray(history) || history.length <= 1) {
+        return 0;
+    }
+
+    let crosses = 0;
+    for (let index = 1; index < history.length; index += 1) {
+        const prevAbove = history[index - 1].oddValue > TARGET_ODD_MIN;
+        const currAbove = history[index].oddValue > TARGET_ODD_MIN;
+        if (prevAbove !== currAbove) {
+            crosses += 1;
+        }
+    }
+
+    return crosses;
+}
+
+function createOddInsight(match, history, targetOdd) {
+    const latest = history[history.length - 1] || null;
+    const previous = history.length > 1 ? history[history.length - 2] : null;
+    const windowPoint = getRecentHistoryPoint(history, ODD_SPIKE_WINDOW_MS);
+    const deltaFromPrevious = latest && previous ? latest.oddValue - previous.oddValue : 0;
+    const deltaFromWindow = latest && windowPoint ? latest.oddValue - windowPoint.oddValue : 0;
+    const aboveThresholdDurationMs = computeAboveThresholdDurationMs(history);
+    const thresholdCrosses = countThresholdCrosses(history);
+    const maxOdd = history.reduce((maxValue, point) => Math.max(maxValue, point.oddValue), latest ? latest.oddValue : 0);
+    const crossedUp = latest && previous ? previous.oddValue <= TARGET_ODD_MIN && latest.oddValue > TARGET_ODD_MIN : false;
+    const crossedDown = latest && previous ? previous.oddValue > TARGET_ODD_MIN && latest.oddValue <= TARGET_ODD_MIN : false;
+
+    let pattern = 'Tracking';
+    let severity = 'neutral';
+
+    if (crossedDown && maxOdd > TARGET_ODD_MIN) {
+        pattern = 'Fake Breakout';
+        severity = 'danger';
+    } else if (latest && latest.oddValue > TARGET_ODD_MIN && aboveThresholdDurationMs >= ODD_BREAKOUT_HOLD_MS) {
+        pattern = 'Breakout';
+        severity = 'danger';
+    } else if (Math.abs(deltaFromWindow) >= ODD_SPIKE_DELTA) {
+        pattern = deltaFromWindow > 0 ? 'Spike Up' : 'Spike Down';
+        severity = deltaFromWindow > 0 ? 'warning' : 'neutral';
+    } else if (crossedUp) {
+        pattern = 'Cross > 1.80';
+        severity = 'warning';
+    } else if (thresholdCrosses >= 3) {
+        pattern = 'Volatile';
+        severity = 'warning';
+    }
+
+    const comparisonOdds = getOverOddsBySelection(match, COMPARISON_ODD_SELECTIONS);
+
+    return {
+        matchKey: createMatchKey(match),
+        marketName: targetOdd.marketName,
+        label: targetOdd.label,
+        currentOdd: latest ? latest.oddValue : null,
+        previousOdd: previous ? previous.oddValue : null,
+        deltaFromPrevious,
+        deltaFromWindow,
+        aboveThresholdDurationMs,
+        thresholdCrosses,
+        maxOdd,
+        pattern,
+        severity,
+        status: String(match?.status || '').trim(),
+        score: String(match?.score || '').trim(),
+        updatedAt: latest ? latest.timestamp : Date.now(),
+        isSecondHalf: isSecondHalfStatus(match),
+        isAboveThreshold: latest ? latest.oddValue > TARGET_ODD_MIN : false,
+        comparisonOdds: Object.fromEntries(Object.entries(comparisonOdds).map(([key, value]) => [key, {
+            label: value.label,
+            oddValue: value.oddValue
+        }]))
+    };
+}
+
+async function updateOddTracking(matches) {
+    const timestamp = Date.now();
+
+    for (const match of matches) {
+        const matchKey = createMatchKey(match);
+        const targetOdd = getTargetOverOdd(match);
+
+        if (!isSecondHalfStatus(match) || !targetOdd) {
+            oddInsightByMatchKey.delete(matchKey);
+            continue;
+        }
+
+        const history = oddHistoryByMatchKey.get(matchKey) || [];
+        const lastPoint = history[history.length - 1] || null;
+        if (!lastPoint || lastPoint.oddValue !== targetOdd.oddValue || lastPoint.status !== String(match?.status || '').trim() || lastPoint.score !== String(match?.score || '').trim()) {
+            history.push({
+                timestamp,
+                oddValue: targetOdd.oddValue,
+                status: String(match?.status || '').trim(),
+                score: String(match?.score || '').trim()
+            });
+        }
+
+        oddHistoryByMatchKey.set(matchKey, history.slice(-ODD_HISTORY_LIMIT));
+        oddInsightByMatchKey.set(matchKey, createOddInsight(match, oddHistoryByMatchKey.get(matchKey), targetOdd));
+    }
+
+    await chrome.storage.local.set({
+        liveOddInsights: Object.fromEntries(Array.from(oddInsightByMatchKey.entries()))
+    });
+}
+
+function formatMatchMessage(match, targetOdd) {
     const odds = Array.isArray(match?.odds) ? match.odds.slice(0, 3) : [];
     const lines = [
-        '⚠️ <b>2H 1\' 0-0 ALERT</b>',
+        '🚨 <b>LIVE O/U ALERT</b>',
         '',
         `⚽ <b>${escapeHtml(getMatchTeams(match))}</b>`,
         `📊 Score: <b>${escapeHtml(match?.score || '0-0')}</b>`,
         `🏆 League: ${escapeHtml(match?.league || 'N/A')}`,
         `⏰ Status: ${escapeHtml(match?.status || 'Live')}`,
+        `🎯 Market: <b>${escapeHtml(targetOdd?.marketName || 'O/U')}: ${escapeHtml(targetOdd?.label || 'o 0.75')} @ ${escapeHtml((targetOdd?.oddValue || 0).toFixed(2))}</b>`,
         `📅 Time: ${new Date().toLocaleTimeString()}`,
         '',
-        '🔥 <i>Masuk 2H 1\' dan skor masih 0-0.</i>'
+        `🔥 <i>Alert dikirim saat market ${escapeHtml(targetOdd?.label || 'o 0.75')} sudah di atas ${TARGET_ODD_MIN.toFixed(2)}.</i>`
     ];
 
     if (odds.length) {
@@ -223,23 +475,43 @@ async function sendToServer(data, isAutoSend = false) {
             return false;
         }
 
-        const alertMatches = matches.filter((match) => isSecondHalfOneZeroZero(match) && !sentAlertKeys.has(createAlertKey(match)));
+        pruneMatchAlertState(matches);
+
+        const evaluatedMatches = matches
+            .map((match) => ({
+                match,
+                matchKey: createMatchKey(match),
+                targetOdd: getQualifiedOddsAlert(match)
+            }));
+
+        const alertMatches = evaluatedMatches.filter(({ matchKey, targetOdd }) => {
+            if (!targetOdd || notifiedMatchKeys.has(matchKey)) {
+                return false;
+            }
+
+            return wasAboveThresholdByMatchKey.get(matchKey) !== true;
+        });
+
         if (!alertMatches.length) {
+            evaluatedMatches.forEach(({ matchKey, targetOdd }) => {
+                wasAboveThresholdByMatchKey.set(matchKey, Boolean(targetOdd));
+            });
+
             await setStatus({
-                serverStatus: 'Telegram: No 2H 1\' 0-0 alert',
+                serverStatus: 'Telegram: No O/U 0.75 > 1.80 alert',
                 error: ''
             });
             return false;
         }
 
         let sentCount = 0;
-        for (const match of alertMatches) {
+        for (const { match, matchKey, targetOdd } of alertMatches) {
             const res = await fetch(TELEGRAM_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     chat_id: TELEGRAM_CHAT_ID,
-                    text: formatMatchMessage(match),
+                    text: formatMatchMessage(match, targetOdd),
                     parse_mode: 'HTML'
                 })
             });
@@ -248,9 +520,16 @@ async function sendToServer(data, isAutoSend = false) {
                 throw new Error(`Telegram API error ${res.status}`);
             }
 
-            sentAlertKeys.add(createAlertKey(match));
+            notifiedMatchKeys.add(matchKey);
+            wasAboveThresholdByMatchKey.set(matchKey, true);
             sentCount += 1;
         }
+
+        evaluatedMatches.forEach(({ matchKey, targetOdd }) => {
+            if (!notifiedMatchKeys.has(matchKey)) {
+                wasAboveThresholdByMatchKey.set(matchKey, Boolean(targetOdd));
+            }
+        });
 
         const sentAt = new Date().toLocaleTimeString();
         await setStatus({
@@ -301,6 +580,7 @@ async function sendToServerWithRetry(data) {
 
 async function handleFreshData(data) {
     await setSavedMatchData(data);
+    await updateOddTracking(Array.isArray(data?.matches) ? data.matches : []);
     await setStatus({
         pageStatus: '✓ Target page detected',
         lastUpdate: data.time,
@@ -434,6 +714,7 @@ async function getPopupState() {
         'lastGroupedMatches',
         'lastCount',
         'lastUpdate',
+        'liveOddInsights',
         'liveStatus',
         'liveRuntimeState'
     ]);
@@ -445,6 +726,7 @@ async function getPopupState() {
             groupedMatches: data.lastGroupedMatches || [],
             count: data.lastCount || 0,
             time: data.lastUpdate || '-',
+            oddInsights: data.liveOddInsights || {},
             liveStatus: data.liveStatus || null,
             runtimeState: data.liveRuntimeState || {
                 isLiveRunning: false,
@@ -456,6 +738,7 @@ async function getPopupState() {
 
 chrome.runtime.onInstalled.addListener(() => {
     chrome.storage.local.set({
+        liveOddInsights: {},
         liveRuntimeState: {
             isLiveRunning: false,
             currentTabId: null

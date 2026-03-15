@@ -56,10 +56,26 @@ function o15SignalExpectedTotal(array $match, array $leagueStats, array $homeSta
     ];
 }
 
-function o15SignalProbabilityFromScore(float $score): float
+function o15SignalProbabilityFromScore(float $score, int $targetGoals): float
 {
     $score = max(0.0, $score);
-    $probability = 1 - exp(-$score) * (1 + $score);
+
+    if ($targetGoals <= 1) {
+        $probability = 1 - exp(-$score);
+
+        return max(0.0, min(1.0, $probability));
+    }
+
+    $poissonCdf = 0.0;
+    $factorial = 1.0;
+    for ($goals = 0; $goals < $targetGoals; $goals++) {
+        if ($goals > 1) {
+            $factorial *= $goals;
+        }
+        $poissonCdf += exp(-$score) * pow($score, $goals) / $factorial;
+    }
+
+    $probability = 1 - $poissonCdf;
 
     return max(0.0, min(1.0, $probability));
 }
@@ -81,7 +97,7 @@ function o15SignalHistoryAverage(array $values, float $fallback): float
     return array_sum($values) / count($values);
 }
 
-function o15SignalUnder15Rate(array $values): float
+function o15SignalBelowTargetRate(array $values, int $targetGoals): float
 {
     if ($values === []) {
         return 0.0;
@@ -89,7 +105,7 @@ function o15SignalUnder15Rate(array $values): float
 
     $underCount = 0;
     foreach ($values as $value) {
-        if ((int) $value < 2) {
+        if ((int) $value < $targetGoals) {
             $underCount++;
         }
     }
@@ -113,6 +129,23 @@ function o15SignalStdDev(array $values): float
     return sqrt($sumSquares / $count);
 }
 
+function o15SignalLowGoalRate(array $values, int $targetGoals): float
+{
+    if ($values === []) {
+        return 0.0;
+    }
+
+    $lowGoalCap = max(0, $targetGoals - 1);
+    $lowCount = 0;
+    foreach ($values as $value) {
+        if ((int) $value <= $lowGoalCap) {
+            $lowCount++;
+        }
+    }
+
+    return $lowCount / count($values);
+}
+
 function o15SignalAdjustedMetrics(
     array $match,
     array $baseMetrics,
@@ -120,6 +153,9 @@ function o15SignalAdjustedMetrics(
     array $recentAwayTotals,
     array $recentPairTotals,
     array $recentTeamTotals,
+    array $recentHomeFirstHalfTotals,
+    array $recentAwayFirstHalfTotals,
+    int $targetGoals,
     ?float $prevSlotAvg
 ): array {
     $league = $match['league'] ?? '';
@@ -131,6 +167,8 @@ function o15SignalAdjustedMetrics(
     $awayHistory = array_slice($recentAwayTotals[$league][$away] ?? [], -5);
     $awayHistoryLong = array_slice($recentAwayTotals[$league][$away] ?? [], -10);
     $pairHistory = array_slice($recentPairTotals[$league][$pairKey] ?? [], -5);
+    $homeFirstHalfHistory = array_slice($recentHomeFirstHalfTotals[$league][$home] ?? [], -5);
+    $awayFirstHalfHistory = array_slice($recentAwayFirstHalfTotals[$league][$away] ?? [], -5);
 
     $homeRecentAvg = o15SignalHistoryAverage($homeHistory, (float) $baseMetrics['home_avg']);
     $awayRecentAvg = o15SignalHistoryAverage($awayHistory, (float) $baseMetrics['away_avg']);
@@ -139,8 +177,22 @@ function o15SignalAdjustedMetrics(
 
     $recentAnchor = (0.45 * $homeRecentAvg) + (0.35 * $awayRecentAvg) + (0.20 * $pairRecentAvg);
     $recentGapPenalty = max(0.0, (float) $baseMetrics['score'] - $recentAnchor) * 0.35;
-    $underPenalty = (0.30 * o15SignalUnder15Rate($awayHistory)) + (0.15 * o15SignalUnder15Rate($pairHistory));
+    $underPenalty = (0.15 * o15SignalBelowTargetRate($homeHistory, $targetGoals))
+        + (0.30 * o15SignalBelowTargetRate($awayHistory, $targetGoals))
+        + (0.15 * o15SignalBelowTargetRate($pairHistory, $targetGoals));
     $volatilityPenalty = (0.10 * o15SignalStdDev($awayHistoryLong)) + (0.08 * o15SignalStdDev($pairHistory));
+    $exactLowPenalty = (0.12 * o15SignalLowGoalRate($homeHistory, $targetGoals))
+        + (0.18 * o15SignalLowGoalRate($awayHistory, $targetGoals))
+        + (0.12 * o15SignalLowGoalRate($pairHistory, $targetGoals));
+    $firstHalfPenalty = (0.10 * o15SignalBelowTargetRate($homeFirstHalfHistory, $targetGoals))
+        + (0.14 * o15SignalBelowTargetRate($awayFirstHalfHistory, $targetGoals));
+
+    if (!(($baseMetrics['use_exact_low_penalty'] ?? false))) {
+        $exactLowPenalty = 0.0;
+    }
+    if (!(($baseMetrics['use_first_half_penalty'] ?? false))) {
+        $firstHalfPenalty = 0.0;
+    }
 
     $prevPenalty = 0.0;
     $homeTeamHistory = $recentTeamTotals[$league][$home] ?? [];
@@ -164,17 +216,19 @@ function o15SignalAdjustedMetrics(
         }
     }
 
-    $rngPenalty = $recentGapPenalty + $underPenalty + $volatilityPenalty + $prevPenalty;
+    $rngPenalty = $recentGapPenalty + $underPenalty + $volatilityPenalty + $exactLowPenalty + $firstHalfPenalty + $prevPenalty;
     $adjustedScore = max(0.0, (float) $baseMetrics['score'] - $rngPenalty);
 
     return [
         'score' => $adjustedScore,
-        'probability' => o15SignalProbabilityFromScore($adjustedScore),
+        'probability' => o15SignalProbabilityFromScore($adjustedScore, $targetGoals),
         'rng_penalty' => $rngPenalty,
         'recent_anchor' => $recentAnchor,
         'recent_gap_penalty' => $recentGapPenalty,
         'under_penalty' => $underPenalty,
         'volatility_penalty' => $volatilityPenalty,
+        'exact_low_penalty' => $exactLowPenalty,
+        'first_half_penalty' => $firstHalfPenalty,
         'previous_penalty' => $prevPenalty,
     ];
 }
@@ -199,6 +253,8 @@ function o15SignalBuildUrl(array $extra = []): string
         'threshold' => $_GET['threshold'] ?? '',
         'team_floor' => $_GET['team_floor'] ?? '',
         'min_history' => $_GET['min_history'] ?? '',
+        'market' => $_GET['market'] ?? 'o15',
+        'mode' => $_GET['mode'] ?? 'sharp',
         'show_all' => $_GET['show_all'] ?? '',
     ];
 
@@ -222,7 +278,83 @@ $leagueFilter = trim((string) ($_GET['league'] ?? ''));
 $threshold = (float) ($_GET['threshold'] ?? '2.40');
 $teamFloor = (float) ($_GET['team_floor'] ?? '2.70');
 $minHistory = (int) ($_GET['min_history'] ?? 300);
+$marketKey = $_GET['market'] ?? 'o15';
+$signalMode = $_GET['mode'] ?? 'sharp';
 $showAll = ($_GET['show_all'] ?? '0') === '1';
+
+$marketConfigs = [
+    'o05' => [
+        'label' => 'Over 0.5',
+        'targetGoals' => 1,
+        'pageLabel' => 'O0.5',
+        'strongOffset' => 0.15,
+        'strongMin' => 2.35,
+        'defaultThreshold' => 1.75,
+        'defaultTeamFloor' => 1.55,
+        'modes' => [
+            'balanced' => [
+                'label' => 'Balanced',
+                'threshold' => max($threshold, 1.75),
+                'teamFloor' => max($teamFloor, 1.55),
+                'awayUnderCap' => 0.35,
+                'pairUnderCap' => 0.35,
+                'useExactLowPenalty' => true,
+                'useFirstHalfPenalty' => false,
+            ],
+            'sharp' => [
+                'label' => 'Sharp',
+                'threshold' => max($threshold, 1.95),
+                'teamFloor' => max($teamFloor, 1.70),
+                'awayUnderCap' => 0.25,
+                'pairUnderCap' => 0.25,
+                'useExactLowPenalty' => true,
+                'useFirstHalfPenalty' => true,
+            ],
+        ],
+    ],
+    'o15' => [
+        'label' => 'Over 1.5',
+        'targetGoals' => 2,
+        'pageLabel' => 'O1.5',
+        'strongOffset' => 0.20,
+        'strongMin' => 2.65,
+        'defaultThreshold' => 2.40,
+        'defaultTeamFloor' => 2.70,
+        'modes' => [
+            'balanced' => [
+                'label' => 'Balanced',
+                'threshold' => max($threshold, 2.40),
+                'teamFloor' => max($teamFloor, 2.70),
+                'awayUnderCap' => 0.80,
+                'pairUnderCap' => 0.80,
+                'useExactLowPenalty' => true,
+                'useFirstHalfPenalty' => false,
+            ],
+            'sharp' => [
+                'label' => 'Sharp',
+                'threshold' => max($threshold, 2.45),
+                'teamFloor' => max($teamFloor, 2.75),
+                'awayUnderCap' => 0.80,
+                'pairUnderCap' => 0.80,
+                'useExactLowPenalty' => true,
+                'useFirstHalfPenalty' => true,
+            ],
+        ],
+    ],
+];
+
+if (!isset($marketConfigs[$marketKey])) {
+    $marketKey = 'o15';
+}
+
+$marketConfig = $marketConfigs[$marketKey];
+
+if (!isset($marketConfig['modes'][$signalMode])) {
+    $signalMode = 'sharp';
+}
+
+$activeMode = $marketConfig['modes'][$signalMode];
+$targetGoals = (int) $marketConfig['targetGoals'];
 
 if (strtotime($dateFrom) === false) {
     $dateFrom = $today;
@@ -233,11 +365,11 @@ if (strtotime($dateTo) === false) {
 if ($dateFrom > $dateTo) {
     [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
 }
-if ($threshold < 1.50 || $threshold > 4.50) {
-    $threshold = 2.40;
+if ($threshold < 0.50 || $threshold > 4.50) {
+    $threshold = (float) $marketConfig['defaultThreshold'];
 }
 if ($teamFloor < 0.00 || $teamFloor > 4.50) {
-    $teamFloor = 2.70;
+    $teamFloor = (float) $marketConfig['defaultTeamFloor'];
 }
 if ($minHistory < 50) {
     $minHistory = 50;
@@ -284,6 +416,8 @@ $recentHomeTotals = [];
 $recentAwayTotals = [];
 $recentPairTotals = [];
 $recentTeamTotals = [];
+$recentHomeFirstHalfTotals = [];
+$recentAwayFirstHalfTotals = [];
 $lastSlotAvgByLeague = [];
 $globalFinishedCount = 0;
 $globalFinishedGoals = 0.0;
@@ -318,6 +452,8 @@ foreach ($groupedMatches as $matchTime => $groupMatches) {
         }
 
         $metrics = o15SignalExpectedTotal($match, $leagueStats, $homeStats, $awayStats, $globalAvg);
+        $metrics['use_exact_low_penalty'] = $activeMode['useExactLowPenalty'];
+        $metrics['use_first_half_penalty'] = $activeMode['useFirstHalfPenalty'];
         $adjustedMetrics = o15SignalAdjustedMetrics(
             $match,
             $metrics,
@@ -325,14 +461,24 @@ foreach ($groupedMatches as $matchTime => $groupMatches) {
             $recentAwayTotals,
             $recentPairTotals,
             $recentTeamTotals,
+            $recentHomeFirstHalfTotals,
+            $recentAwayFirstHalfTotals,
+            $targetGoals,
             $slotAverages[$match['league'] ?? ''] ?? null
         );
         $matchDate = substr((string) $matchTime, 0, 10);
         $teamBalance = min($metrics['home_avg'], $metrics['away_avg']);
-        $isSignal = $adjustedMetrics['score'] >= $threshold && $teamBalance >= $teamFloor;
+        $awayUnderRate = o15SignalBelowTargetRate(array_slice($recentAwayTotals[$match['league'] ?? ''][$match['away_team'] ?? ''] ?? [], -5), $targetGoals);
+        $pairUnderRate = o15SignalBelowTargetRate(array_slice($recentPairTotals[$match['league'] ?? ''][o15SignalPairKey($match['home_team'] ?? '', $match['away_team'] ?? '')] ?? [], -5), $targetGoals);
+        $signalThreshold = $activeMode['threshold'];
+        $signalTeamFloor = $activeMode['teamFloor'];
+        $isSignal = $adjustedMetrics['score'] >= $signalThreshold
+            && $teamBalance >= $signalTeamFloor
+            && $awayUnderRate <= $activeMode['awayUnderCap']
+            && $pairUnderRate <= $activeMode['pairUnderCap'];
 
         if (o15SignalHasFinished($match)) {
-            $outcome = o15SignalTotalGoals($match) >= 2 ? 1 : 0;
+            $outcome = o15SignalTotalGoals($match) >= $targetGoals ? 1 : 0;
             $validation['predictions']++;
             $validation['hits'] += $outcome;
             $validation['brier_sum'] += ($adjustedMetrics['probability'] - $outcome) * ($adjustedMetrics['probability'] - $outcome);
@@ -371,7 +517,7 @@ foreach ($groupedMatches as $matchTime => $groupMatches) {
             'league_sample' => $metrics['league_sample'],
             'home_sample' => $metrics['home_sample'],
             'away_sample' => $metrics['away_sample'],
-            'grade' => $isSignal && $adjustedMetrics['score'] >= max(2.60, $threshold + 0.20) ? 'Strong' : ($isSignal ? 'Valid' : 'Watchlist'),
+            'grade' => $isSignal && $adjustedMetrics['score'] >= max((float) $marketConfig['strongMin'], $signalThreshold + (float) $marketConfig['strongOffset']) ? 'Strong' : ($isSignal ? 'Valid' : 'Watchlist'),
         ];
     }
 
@@ -407,6 +553,13 @@ foreach ($groupedMatches as $matchTime => $groupMatches) {
         $recentTeamTotals[$league][$home][] = $totalGoals;
         $recentTeamTotals[$league][$away][] = $totalGoals;
         $recentPairTotals[$league][o15SignalPairKey($home, $away)][] = $totalGoals;
+        $firstHalfGoals = ($match['fh_home'] ?? null) !== null && ($match['fh_away'] ?? null) !== null
+            ? (int) $match['fh_home'] + (int) $match['fh_away']
+            : null;
+        if ($firstHalfGoals !== null) {
+            $recentHomeFirstHalfTotals[$league][$home][] = $firstHalfGoals;
+            $recentAwayFirstHalfTotals[$league][$away][] = $firstHalfGoals;
+        }
         $slotTotalsByLeague[$league][] = $totalGoals;
         $globalFinishedCount++;
         $globalFinishedGoals += $totalGoals;
@@ -425,7 +578,11 @@ usort($signalRows, static function (array $a, array $b): int {
     return $a['score'] < $b['score'] ? 1 : -1;
 });
 
-$strongSignals = count(array_filter($signalRows, static fn(array $row): bool => $row['score'] >= max(2.60, $threshold + 0.20)));
+$strongSignals = count(array_filter($signalRows, function (array $row) use ($activeMode, $marketConfig): bool {
+    return $row['score'] >= max((float) $marketConfig['strongMin'], $activeMode['threshold'] + (float) $marketConfig['strongOffset']);
+}));
+
+$strongCutoff = max((float) $marketConfig['strongMin'], $activeMode['threshold'] + (float) $marketConfig['strongOffset']);
 $signalWinrate = $validation['signal_predictions'] > 0
     ? ($validation['signal_hits'] / $validation['signal_predictions'])
     : 0.0;
@@ -448,14 +605,17 @@ $brierScore = $validation['predictions'] > 0
         <div class="pointer-events-none absolute -bottom-20 -right-16 h-56 w-56 rounded-full bg-emerald-400/20 blur-3xl"></div>
         <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div class="space-y-1">
-                <p class="text-[11px] uppercase tracking-[0.2em] text-emerald-300 font-bold">Model Over 1.5</p>
-                <h1 class="text-2xl md:text-3xl font-black tracking-tight">Signal Generator <span class="text-emerald-300">O1.5</span></h1>
+                <p class="text-[11px] uppercase tracking-[0.2em] text-emerald-300 font-bold">Model <?= htmlspecialchars($marketConfig['label']) ?></p>
+                <h1 class="text-2xl md:text-3xl font-black tracking-tight">Signal Generator <span class="text-emerald-300"><?= htmlspecialchars($marketConfig['pageLabel']) ?></span></h1>
                 <p class="text-slate-300 text-sm md:text-base">Signal live sekarang pakai adjusted score: base model diturunkan oleh recent form, RNG penalty, dan previous-slot context.</p>
             </div>
             <div class="rounded-xl bg-white/10 border border-white/10 px-4 py-3 text-sm text-slate-200">
-                <div>Adjusted threshold: <span class="font-black text-white"><?= htmlspecialchars(o15SignalFormatDec($threshold)) ?></span></div>
-                <div>Team floor: <span class="font-black text-white"><?= htmlspecialchars(o15SignalFormatDec($teamFloor)) ?></span></div>
+                <div>Market: <span class="font-black text-white"><?= htmlspecialchars($marketConfig['label']) ?></span></div>
+                <div>Mode: <span class="font-black text-white"><?= htmlspecialchars($activeMode['label']) ?></span></div>
+                <div>Adjusted threshold: <span class="font-black text-white"><?= htmlspecialchars(o15SignalFormatDec($activeMode['threshold'])) ?></span></div>
+                <div>Team floor: <span class="font-black text-white"><?= htmlspecialchars(o15SignalFormatDec($activeMode['teamFloor'])) ?></span></div>
                 <div>Warmup histori: <span class="font-black text-white"><?= number_format($minHistory) ?></span> match selesai</div>
+                <div>Away/Pair under cap: <span class="font-black text-white"><?= htmlspecialchars(o15SignalFormatPct($activeMode['awayUnderCap'])) ?> / <?= htmlspecialchars(o15SignalFormatPct($activeMode['pairUnderCap'])) ?></span></div>
             </div>
         </div>
     </div>
@@ -471,7 +631,7 @@ $brierScore = $validation['predictions'] > 0
             <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-slate-900 via-emerald-500 to-sky-400"></div>
             <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Strong Signal</p>
             <p class="mt-2 text-2xl font-black text-emerald-600"><?= number_format($strongSignals) ?></p>
-            <p class="mt-1 text-xs text-slate-500">Adjusted score >= <?= htmlspecialchars(o15SignalFormatDec(max(2.60, $threshold + 0.20))) ?>.</p>
+            <p class="mt-1 text-xs text-slate-500">Adjusted score >= <?= htmlspecialchars(o15SignalFormatDec($strongCutoff)) ?>.</p>
         </div>
             <div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-4 shadow-lg shadow-slate-900/5">
             <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-slate-900 via-emerald-500 to-sky-400"></div>
@@ -490,7 +650,7 @@ $brierScore = $validation['predictions'] > 0
     <form method="GET" class="rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-5 shadow-lg shadow-slate-900/5 transition-all md:p-6">
         <input type="hidden" name="page" value="o15-signals">
 
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
+        <div class="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-9 gap-3">
             <div class="flex flex-col gap-1">
                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Dari Tanggal</label>
                 <input type="date" name="date_from" value="<?= htmlspecialchars($dateFrom) ?>" class="h-[46px] rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-medium transition duration-200 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/10">
@@ -509,8 +669,24 @@ $brierScore = $validation['predictions'] > 0
                 </select>
             </div>
             <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Market</label>
+                <select name="market" class="h-[46px] rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-medium transition duration-200 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/10">
+                    <?php foreach ($marketConfigs as $marketOptionKey => $marketOption): ?>
+                        <option value="<?= htmlspecialchars($marketOptionKey) ?>" <?= $marketKey === $marketOptionKey ? 'selected' : '' ?>><?= htmlspecialchars($marketOption['label']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Mode</label>
+                <select name="mode" class="h-[46px] rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-medium transition duration-200 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/10">
+                    <?php foreach ($marketConfig['modes'] as $modeKey => $modeConfig): ?>
+                        <option value="<?= htmlspecialchars($modeKey) ?>" <?= $signalMode === $modeKey ? 'selected' : '' ?>><?= htmlspecialchars($modeConfig['label']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="flex flex-col gap-1">
                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Threshold</label>
-                <input type="number" step="0.01" min="1.50" max="4.50" name="threshold" value="<?= htmlspecialchars(o15SignalFormatDec($threshold)) ?>" class="h-[46px] rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-medium transition duration-200 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/10">
+                <input type="number" step="0.01" min="0.50" max="4.50" name="threshold" value="<?= htmlspecialchars(o15SignalFormatDec($threshold)) ?>" class="h-[46px] rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-medium transition duration-200 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/10">
             </div>
             <div class="flex flex-col gap-1">
                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Team Floor</label>
@@ -530,7 +706,7 @@ $brierScore = $validation['predictions'] > 0
                 <input type="checkbox" name="show_all" value="1" <?= $showAll ? 'checked' : '' ?> class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
                 Tampilkan semua upcoming match
             </label>
-            <a href="<?= htmlspecialchars(o15SignalBuildUrl(['date_from' => $today, 'date_to' => $today, 'league' => '', 'threshold' => '2.40', 'team_floor' => '2.70', 'min_history' => 300, 'show_all' => ''])) ?>" class="text-xs font-bold text-slate-500 hover:text-slate-800">Reset ke setting default</a>
+            <a href="<?= htmlspecialchars(o15SignalBuildUrl(['date_from' => $today, 'date_to' => $today, 'league' => '', 'threshold' => (string) $marketConfig['defaultThreshold'], 'team_floor' => (string) $marketConfig['defaultTeamFloor'], 'min_history' => 300, 'market' => $marketKey, 'mode' => 'sharp', 'show_all' => ''])) ?>" class="text-xs font-bold text-slate-500 hover:text-slate-800">Reset ke setting default</a>
         </div>
     </form>
 
@@ -559,14 +735,20 @@ recent_anchor = 0.45 * home_last5_avg
               + 0.20 * h2h_last5_avg
 
 rng_penalty = recent_gap_penalty
-            + under_penalty
+            + under_penalty(home+away+pair)
             + volatility_penalty
+            + exact_low_goal_penalty
+            + first_half_conservative_penalty
             + previous_match_penalty
 
 adjusted_score = base_score_o15 - rng_penalty
 
-signal = adjusted_score >= <?= htmlspecialchars(o15SignalFormatDec($threshold)) ?>
-       && team_floor >= <?= htmlspecialchars(o15SignalFormatDec($teamFloor)) ?></pre>
+signal = adjusted_score >= <?= htmlspecialchars(o15SignalFormatDec($activeMode['threshold'])) ?>
+       && team_floor >= <?= htmlspecialchars(o15SignalFormatDec($activeMode['teamFloor'])) ?>
+       && away_below_target_rate <= <?= htmlspecialchars(o15SignalFormatPct($activeMode['awayUnderCap'])) ?>
+       && pair_below_target_rate <= <?= htmlspecialchars(o15SignalFormatPct($activeMode['pairUnderCap'])) ?>
+
+market <?= htmlspecialchars($marketConfig['label']) ?> probability = <?= $targetGoals === 1 ? '1 - exp(-adjusted_score)' : '1 - exp(-adjusted_score) * (1 + adjusted_score)' ?></pre>
             </div>
         </div>
 
@@ -577,7 +759,7 @@ signal = adjusted_score >= <?= htmlspecialchars(o15SignalFormatDec($threshold)) 
             </div>
             <div class="grid grid-cols-2 gap-3 text-sm">
                 <div class="rounded-xl border border-slate-200 bg-white/80 p-3 shadow-sm shadow-slate-900/5">
-                    <div class="text-[11px] uppercase tracking-wider font-bold text-slate-400">League O1.5</div>
+                    <div class="text-[11px] uppercase tracking-wider font-bold text-slate-400">League <?= htmlspecialchars($marketConfig['pageLabel']) ?></div>
                     <div class="mt-2 text-xl font-black text-slate-900"><?= htmlspecialchars(o15SignalFormatPct($baseWinrate)) ?></div>
                 </div>
                 <div class="rounded-xl border border-slate-200 bg-white/80 p-3 shadow-sm shadow-slate-900/5">
@@ -599,7 +781,7 @@ signal = adjusted_score >= <?= htmlspecialchars(o15SignalFormatDec($threshold)) 
     <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-slate-900/5">
         <div class="px-5 py-4 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3">
             <div>
-                <div class="text-sm font-bold uppercase tracking-wide">Daftar Signal Over 1.5</div>
+                <div class="text-sm font-bold uppercase tracking-wide">Daftar Signal <?= htmlspecialchars($marketConfig['label']) ?></div>
                 <div class="text-xs text-slate-300">Diurutkan dari adjusted score tertinggi, sambil tetap menampilkan base score dan RNG penalty.</div>
             </div>
             <div class="text-xs text-slate-300">

@@ -18,3 +18,6 @@ __pycache__/
 
 # Local git worktrees
 .worktrees/
+
+# Local CSV backup snapshots
+csv_backups/

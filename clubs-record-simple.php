@@ -87,9 +87,13 @@ function csvReadMatches(string $csvPath, callable $onMatch): void {
     fclose($fh);
 }
 
-$mktParam = $_GET['under'] ?? '0.5';
+$mktParam = $_GET['under'] ?? '2.5';
 if (!array_key_exists($mktParam, $marketOptions)) {
-    $mktParam = '0.5';
+    $mktParam = '2.5';
+}
+
+if (!array_key_exists('under', $_GET)) {
+    $mktParam = '2.5';
 }
 
 // -- Hidden leagues config -----------------------------------------------------
@@ -113,6 +117,8 @@ $dateFromRaw = $_GET['date_from'] ?? '';
 $dateToRaw = $_GET['date_to'] ?? '';
 $dateFromValid = $dateFromRaw !== '' && strtotime($dateFromRaw) !== false;
 $dateToValid = $dateToRaw !== '' && strtotime($dateToRaw) !== false;
+$hasDateFromInput = array_key_exists('date_from', $_GET) && trim((string)$_GET['date_from']) !== '';
+$hasDateToInput = array_key_exists('date_to', $_GET) && trim((string)$_GET['date_to']) !== '';
 
 // -- Filters -------------------------------------------------------------------
 $today      = date('Y-m-d');
@@ -121,7 +127,7 @@ $dateTo     = $dateToValid ? $dateToRaw : $_csvDefaultDate;
 $timeFrom   = csvNormalizeTime($_GET['time_from'] ?? '00:00', '00:00');
 $timeTo     = csvNormalizeTime($_GET['time_to']   ?? '23:59', '23:59');
 $lgFilter   = trim($_GET['league'] ?? '');
-$searchTerm = trim($_GET['search'] ?? '');
+$searchTerm = array_key_exists('search', $_GET) ? trim((string)$_GET['search']) : '';
 $sortCol    = $_GET['sort']  ?? 'hits_ratio';
 $sortOrder  = $_GET['order'] ?? 'desc';
 $pg         = max(1, (int)($_GET['pg'] ?? 1));
@@ -156,11 +162,13 @@ $leagueSet       = [];
 $csvMinDate      = null;
 $csvMaxDate      = null;
 $csvDatesWithData = [];
+$useDateFilter = $hasDateFromInput && $hasDateToInput && $dateFromValid && $dateToValid;
 
 csvReadMatches($csvPath, function(array $m) use (
     $lgFilter,
     $today,
     $mktParam,
+    $useDateFilter,
     $hiddenLeagues,
     $dateFrom,
     $dateTo,
@@ -205,17 +213,20 @@ csvReadMatches($csvPath, function(array $m) use (
 
         if (
             $isMarketHit &&
-            $m['date'] >= $dateFrom &&
-            $m['date'] <= $dateTo &&
-            csvTimeInRange($m['time'], $timeFrom, $timeTo)
+            (!$useDateFilter ||
+            (
+                $m['date'] >= $dateFrom &&
+                $m['date'] <= $dateTo &&
+                csvTimeInRange($m['time'], $timeFrom, $timeTo)
+            ))
         ) {
             foreach ([$hKey => $m['home'], $aKey => $m['away']] as $key => $team) {
                 if (!isset($inRange[$key])) {
                     $inRange[$key] = ['team' => $team, 'league' => $m['league'], 'under_count' => 0];
                 }
                 $inRange[$key]['under_count']++;
-                csvBumpDailyMax($inRangeDailyMkt, $periodMaxByKey, $key, $m['date']);
-            }
+            csvBumpDailyMax($inRangeDailyMkt, $periodMaxByKey, $key, $m['date']);
+        }
         }
         return;
     }
@@ -435,7 +446,7 @@ $mktClass = $marketOptions[$mktParam]['class'];
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
-                <input type="text" name="search" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" placeholder="Cari club..." 
+                <input type="text" name="search" value="<?= htmlspecialchars($searchTerm) ?>" placeholder="Cari club..."
                     class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all">
             </div>
             <div class="flex gap-1">

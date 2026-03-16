@@ -49,6 +49,7 @@ function toFiniteNumber(value, fallback = DEFAULT_CUSTOM_WATCH_THRESHOLD) {
 function normalizeText(value) {
     return String(value || '')
         .toLowerCase()
+        .replace(/\([^)]*\)/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
 }

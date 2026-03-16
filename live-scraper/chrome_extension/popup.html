@@ -237,6 +237,64 @@
             font-weight: 700;
             color: #174ea6;
         }
+
+        .custom-watch {
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            padding: 10px 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .custom-watch__title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #174ea6;
+            margin-bottom: 8px;
+        }
+
+        .custom-watch__row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .custom-watch input {
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 6px 8px;
+            font-size: 12px;
+        }
+
+        .custom-watch__chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .team-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #eef4ff;
+            font-size: 11px;
+            color: #174ea6;
+            border: 1px solid #d6e4ff;
+        }
+
+        .team-chip button {
+            background: transparent;
+            color: #174ea6;
+            border: none;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -258,6 +316,21 @@
         </div>
     </div>
     
+    <div class="custom-watch">
+        <div class="custom-watch__title">Team target (mode ALL): notifikasi team ini gunakan rule odd custom</div>
+        <div class="custom-watch__row">
+            <input id="teamInput" type="text" placeholder="Masukkan nama team" />
+            <button id="addTeamBtn" class="btn-primary">Add team</button>
+            <label for="customMarketInput" style="font-size:11px;color:#495057;">Market:</label>
+            <input id="customMarketInput" type="text" placeholder="0.5" style="width:64px;" />
+            <label for="customOddInput" style="font-size:11px;color:#495057;">Odd threshold:</label>
+            <input id="customOddInput" type="number" min="1" step="0.01" style="width:90px;" />
+            <button id="saveWatchBtn" class="btn-success">Save custom rule</button>
+        </div>
+        <div id="teamChips" class="custom-watch__chips"></div>
+        <div id="customWatchInfo" style="font-size:11px;color:#6c757d;margin-top:6px;"></div>
+    </div>
+
     <div class="status-bar">
         <span id="pageStatus">Checking page...</span>
         <span id="lastUpdate">Last update: -</span>

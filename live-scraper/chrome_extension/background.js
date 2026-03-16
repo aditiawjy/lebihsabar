@@ -11,10 +11,17 @@ const TARGET_ODD_MARKET = 'o/u';
 const TARGET_ODD_SELECTION = 'o0.75';
 const COMPARISON_ODD_SELECTIONS = ['o1.0', 'o1.25'];
 const TARGET_ODD_MIN = 1.8;
+const DEFAULT_CUSTOM_WATCH_MARKET = TARGET_ODD_SELECTION;
 const ODD_HISTORY_LIMIT = 40;
 const ODD_SPIKE_DELTA = 0.10;
 const ODD_SPIKE_WINDOW_MS = 30000;
 const ODD_BREAKOUT_HOLD_MS = 20000;
+const CUSTOM_WATCH_CONFIG_KEY = 'bpvmCustomWatchConfig';
+const DEFAULT_CUSTOM_WATCH_CONFIG = {
+    teamList: [],
+    customOddThreshold: TARGET_ODD_MIN,
+    customOddSelection: DEFAULT_CUSTOM_WATCH_MARKET
+};
 
 
 let isLiveRunning = false;
@@ -62,6 +69,108 @@ function createMatchKey(match) {
 function isSecondHalfStatus(match) {
     const status = String(match?.status || '').trim();
     return /^2H\s+\d+'$/i.test(status);
+}
+
+function normalizeTeamName(value) {
+    return String(value || '')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function toThresholdNumber(value, fallback = TARGET_ODD_MIN) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function normalizeWatchMarketSelection(value, fallback = DEFAULT_CUSTOM_WATCH_MARKET) {
+    const rawValue = String(value || '').trim().toLowerCase().replace(/\s+/g, '');
+    if (!rawValue) {
+        return fallback;
+    }
+
+    const normalized = rawValue.startsWith('o') ? rawValue : `o${rawValue}`;
+    const valuePart = normalized.slice(1);
+    const numeric = Number(valuePart.replace(',', '.'));
+    if (!Number.isFinite(numeric) || numeric <= 0) {
+        return fallback;
+    }
+
+    return `o${Number(numeric).toString()}`;
+}
+
+function formatWatchMarketForDisplay(value) {
+    const normalizedSelection = normalizeWatchMarketSelection(value, TARGET_ODD_SELECTION);
+    return `O/U ${normalizedSelection.replace(/^o/, '')}`;
+}
+
+function getDefaultCustomWatchConfig() {
+    return {
+        teamList: [],
+        customOddThreshold: DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold,
+        customOddSelection: DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection
+    };
+}
+
+async function getCustomWatchConfig() {
+    const data = await chrome.storage.local.get([CUSTOM_WATCH_CONFIG_KEY]);
+    const stored = data?.[CUSTOM_WATCH_CONFIG_KEY] || {};
+
+    return {
+        ...getDefaultCustomWatchConfig(),
+        ...stored,
+        teamList: Array.isArray(stored.teamList)
+            ? stored.teamList
+                .map((team) => normalizeTeamName(team))
+                .filter(Boolean)
+            : [],
+        customOddThreshold: toThresholdNumber(stored.customOddThreshold, DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold),
+        customOddSelection: normalizeWatchMarketSelection(stored.customOddSelection, DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection)
+    };
+}
+
+function isCustomWatchTeam(match, customTeamList = []) {
+    if (!Array.isArray(customTeamList) || !customTeamList.length) {
+        return false;
+    }
+
+    const teams = [
+        match?.homeTeam,
+        match?.awayTeam
+    ].map(normalizeTeamName).filter(Boolean);
+
+    return customTeamList.some((watchTeam) => teams.some((team) => team.includes(watchTeam) || watchTeam.includes(team)));
+}
+
+function getMatchWatchContext(match, customConfig = {}) {
+    const normalizedTeams = Array.isArray(customConfig.teamList) ? customConfig.teamList : [];
+    const isWatched = isCustomWatchTeam(match, normalizedTeams);
+    const baseThreshold = toThresholdNumber(customConfig.customOddThreshold, DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold);
+    const baseSelection = normalizeWatchMarketSelection(customConfig.customOddSelection, DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection);
+    const appliedThreshold = isWatched ? baseThreshold : TARGET_ODD_MIN;
+    const appliedSelection = isWatched ? baseSelection : TARGET_ODD_SELECTION;
+
+    return {
+        isWatched,
+        appliedThreshold,
+        appliedSelection
+    };
+}
+
+async function setCustomWatchConfig(payload = {}) {
+    const normalized = {
+        teamList: Array.isArray(payload.teamList)
+            ? payload.teamList
+                .map((team) => normalizeTeamName(team))
+                .filter(Boolean)
+                .filter((team, index, list) => list.indexOf(team) === index)
+            : [],
+        customOddThreshold: toThresholdNumber(payload.customOddThreshold, DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold),
+        customOddSelection: normalizeWatchMarketSelection(payload.customOddSelection, DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection)
+    };
+
+    await chrome.storage.local.set({ [CUSTOM_WATCH_CONFIG_KEY]: normalized });
+    return normalized;
 }
 
 function normalizeMarketValue(value) {
@@ -121,18 +230,22 @@ function getOverOddsBySelection(match, selections = [TARGET_ODD_SELECTION]) {
     return foundSelections;
 }
 
-function getTargetOverOdd(match) {
-    const oddsMap = getOverOddsBySelection(match, [TARGET_ODD_SELECTION]);
-    return oddsMap[TARGET_ODD_SELECTION] || null;
+function getTargetOverOdd(match, marketSelection = TARGET_ODD_SELECTION) {
+    const oddsMap = getOverOddsBySelection(match, [marketSelection]);
+    const normalizedSelection = normalizeMarketValue(marketSelection);
+    return oddsMap[normalizedSelection] || null;
 }
 
-function getQualifiedOddsAlert(match) {
+function getQualifiedOddsAlert(match, marketSelection = TARGET_ODD_SELECTION, threshold = TARGET_ODD_MIN) {
     if (!isSecondHalfStatus(match)) {
         return null;
     }
 
-    const targetOdd = getTargetOverOdd(match);
-    if (!targetOdd || !(targetOdd.oddValue > TARGET_ODD_MIN)) {
+    const normalizedSelection = normalizeWatchMarketSelection(marketSelection, TARGET_ODD_SELECTION);
+    const targetOdd = getTargetOverOdd(match, normalizedSelection);
+    const numericThreshold = toThresholdNumber(threshold, TARGET_ODD_MIN);
+
+    if (!targetOdd || !(targetOdd.oddValue > numericThreshold)) {
         return null;
     }
 
@@ -142,21 +255,66 @@ function getQualifiedOddsAlert(match) {
 function pruneMatchAlertState(matches) {
     const activeMatchKeys = new Set(matches.map((match) => createMatchKey(match)));
 
-    notifiedMatchKeys = new Set(
-        Array.from(notifiedMatchKeys).filter((matchKey) => activeMatchKeys.has(matchKey))
-    );
+    const isStateMatchForActiveMatch = (stateKey) => activeMatchKeys.has(splitStateKey(stateKey).matchKey);
+
+    const notifiedMatchKeysNormalized = Array.from(notifiedMatchKeys)
+        .filter((stateKey) => isStateMatchForActiveMatch(stateKey));
+    const oddHistoryKeysNormalized = Array.from(oddHistoryByMatchKey.keys())
+        .filter((matchKey) => activeMatchKeys.has(matchKey));
+    const oddInsightKeysNormalized = Array.from(oddInsightByMatchKey.keys())
+        .filter((matchKey) => activeMatchKeys.has(matchKey));
+
+    notifiedMatchKeys = new Set(notifiedMatchKeysNormalized);
 
     wasAboveThresholdByMatchKey = new Map(
-        Array.from(wasAboveThresholdByMatchKey.entries()).filter(([matchKey]) => activeMatchKeys.has(matchKey))
+        Array.from(wasAboveThresholdByMatchKey.entries())
+            .filter(([stateKey]) => isStateMatchForActiveMatch(stateKey))
     );
 
     oddHistoryByMatchKey = new Map(
-        Array.from(oddHistoryByMatchKey.entries()).filter(([matchKey]) => activeMatchKeys.has(matchKey))
+        Array.from(oddHistoryByMatchKey.entries())
+            .filter(([matchKey]) => oddHistoryKeysNormalized.includes(matchKey))
     );
 
     oddInsightByMatchKey = new Map(
-        Array.from(oddInsightByMatchKey.entries()).filter(([matchKey]) => activeMatchKeys.has(matchKey))
+        Array.from(oddInsightByMatchKey.entries())
+            .filter(([matchKey]) => oddInsightKeysNormalized.includes(matchKey))
     );
+}
+
+function splitStateKey(stateKey) {
+    const keyText = String(stateKey || '');
+    const delimiter = '::';
+    const lastIndex = keyText.lastIndexOf(delimiter);
+    if (lastIndex === -1) {
+        return {
+            matchKey: keyText,
+            threshold: TARGET_ODD_MIN,
+            selection: TARGET_ODD_SELECTION
+        };
+    }
+
+    const prevIndex = keyText.lastIndexOf(delimiter, lastIndex - 1);
+
+    if (prevIndex === -1) {
+        return {
+            matchKey: keyText.slice(0, lastIndex),
+            threshold: Number(keyText.slice(lastIndex + delimiter.length)) || TARGET_ODD_MIN,
+            selection: TARGET_ODD_SELECTION
+        };
+    }
+
+    return {
+        matchKey: keyText.slice(0, prevIndex),
+        threshold: Number(keyText.slice(prevIndex + delimiter.length, lastIndex)) || TARGET_ODD_MIN,
+        selection: String(keyText.slice(lastIndex + delimiter.length)) || TARGET_ODD_SELECTION
+    };
+}
+
+function getThresholdStateKey(matchKey, threshold, marketSelection = TARGET_ODD_SELECTION) {
+    const normalizedThreshold = toThresholdNumber(threshold, TARGET_ODD_MIN).toFixed(2);
+    const normalizedSelection = normalizeWatchMarketSelection(marketSelection, TARGET_ODD_SELECTION);
+    return `${matchKey}::${normalizedThreshold}::${normalizedSelection}`;
 }
 
 function getRecentHistoryPoint(history, timeWindowMs) {
@@ -175,20 +333,20 @@ function getRecentHistoryPoint(history, timeWindowMs) {
     return history[0] || null;
 }
 
-function computeAboveThresholdDurationMs(history) {
+function computeAboveThresholdDurationMs(history, threshold = TARGET_ODD_MIN) {
     if (!Array.isArray(history) || history.length === 0) {
         return 0;
     }
 
     const latest = history[history.length - 1];
-    if (!(latest.oddValue > TARGET_ODD_MIN)) {
+    if (!(latest.oddValue > threshold)) {
         return 0;
     }
 
     let startTimestamp = latest.timestamp;
     for (let index = history.length - 2; index >= 0; index -= 1) {
         const point = history[index];
-        if (!(point.oddValue > TARGET_ODD_MIN)) {
+        if (!(point.oddValue > threshold)) {
             break;
         }
         startTimestamp = point.timestamp;
@@ -197,15 +355,15 @@ function computeAboveThresholdDurationMs(history) {
     return latest.timestamp - startTimestamp;
 }
 
-function countThresholdCrosses(history) {
+function countThresholdCrosses(history, threshold = TARGET_ODD_MIN) {
     if (!Array.isArray(history) || history.length <= 1) {
         return 0;
     }
 
     let crosses = 0;
     for (let index = 1; index < history.length; index += 1) {
-        const prevAbove = history[index - 1].oddValue > TARGET_ODD_MIN;
-        const currAbove = history[index].oddValue > TARGET_ODD_MIN;
+        const prevAbove = history[index - 1].oddValue > threshold;
+        const currAbove = history[index].oddValue > threshold;
         if (prevAbove !== currAbove) {
             crosses += 1;
         }
@@ -214,32 +372,35 @@ function countThresholdCrosses(history) {
     return crosses;
 }
 
-function createOddInsight(match, history, targetOdd) {
+function createOddInsight(match, history, targetOdd, watchContext = {}) {
     const latest = history[history.length - 1] || null;
     const previous = history.length > 1 ? history[history.length - 2] : null;
     const windowPoint = getRecentHistoryPoint(history, ODD_SPIKE_WINDOW_MS);
+    const threshold = toThresholdNumber(watchContext.appliedThreshold, TARGET_ODD_MIN);
+    const selection = normalizeWatchMarketSelection(watchContext.appliedSelection, TARGET_ODD_SELECTION);
     const deltaFromPrevious = latest && previous ? latest.oddValue - previous.oddValue : 0;
     const deltaFromWindow = latest && windowPoint ? latest.oddValue - windowPoint.oddValue : 0;
-    const aboveThresholdDurationMs = computeAboveThresholdDurationMs(history);
-    const thresholdCrosses = countThresholdCrosses(history);
+    const aboveThresholdDurationMs = computeAboveThresholdDurationMs(history, threshold);
+    const thresholdCrosses = countThresholdCrosses(history, threshold);
     const maxOdd = history.reduce((maxValue, point) => Math.max(maxValue, point.oddValue), latest ? latest.oddValue : 0);
-    const crossedUp = latest && previous ? previous.oddValue <= TARGET_ODD_MIN && latest.oddValue > TARGET_ODD_MIN : false;
-    const crossedDown = latest && previous ? previous.oddValue > TARGET_ODD_MIN && latest.oddValue <= TARGET_ODD_MIN : false;
+    const crossedUp = latest && previous ? previous.oddValue <= threshold && latest.oddValue > threshold : false;
+    const crossedDown = latest && previous ? previous.oddValue > threshold && latest.oddValue <= threshold : false;
 
     let pattern = 'Tracking';
     let severity = 'neutral';
+    const thresholdText = threshold.toFixed(2);
 
-    if (crossedDown && maxOdd > TARGET_ODD_MIN) {
+    if (crossedDown && maxOdd > threshold) {
         pattern = 'Fake Breakout';
         severity = 'danger';
-    } else if (latest && latest.oddValue > TARGET_ODD_MIN && aboveThresholdDurationMs >= ODD_BREAKOUT_HOLD_MS) {
+    } else if (latest && latest.oddValue > threshold && aboveThresholdDurationMs >= ODD_BREAKOUT_HOLD_MS) {
         pattern = 'Breakout';
         severity = 'danger';
     } else if (Math.abs(deltaFromWindow) >= ODD_SPIKE_DELTA) {
         pattern = deltaFromWindow > 0 ? 'Spike Up' : 'Spike Down';
         severity = deltaFromWindow > 0 ? 'warning' : 'neutral';
     } else if (crossedUp) {
-        pattern = 'Cross > 1.80';
+        pattern = `Cross > ${thresholdText}`;
         severity = 'warning';
     } else if (thresholdCrosses >= 3) {
         pattern = 'Volatile';
@@ -250,6 +411,9 @@ function createOddInsight(match, history, targetOdd) {
 
     return {
         matchKey: createMatchKey(match),
+        marketSelection: selection,
+        threshold,
+        marketDisplay: formatWatchMarketForDisplay(selection),
         marketName: targetOdd.marketName,
         label: targetOdd.label,
         currentOdd: latest ? latest.oddValue : null,
@@ -265,7 +429,7 @@ function createOddInsight(match, history, targetOdd) {
         score: String(match?.score || '').trim(),
         updatedAt: latest ? latest.timestamp : Date.now(),
         isSecondHalf: isSecondHalfStatus(match),
-        isAboveThreshold: latest ? latest.oddValue > TARGET_ODD_MIN : false,
+        isAboveThreshold: latest ? latest.oddValue > threshold : false,
         comparisonOdds: Object.fromEntries(Object.entries(comparisonOdds).map(([key, value]) => [key, {
             label: value.label,
             oddValue: value.oddValue
@@ -275,10 +439,12 @@ function createOddInsight(match, history, targetOdd) {
 
 async function updateOddTracking(matches) {
     const timestamp = Date.now();
+    const watchConfig = await getCustomWatchConfig();
 
     for (const match of matches) {
         const matchKey = createMatchKey(match);
-        const targetOdd = getTargetOverOdd(match);
+        const watchContext = getMatchWatchContext(match, watchConfig);
+        const targetOdd = getTargetOverOdd(match, watchContext.appliedSelection);
 
         if (!isSecondHalfStatus(match) || !targetOdd) {
             oddInsightByMatchKey.delete(matchKey);
@@ -297,7 +463,7 @@ async function updateOddTracking(matches) {
         }
 
         oddHistoryByMatchKey.set(matchKey, history.slice(-ODD_HISTORY_LIMIT));
-        oddInsightByMatchKey.set(matchKey, createOddInsight(match, oddHistoryByMatchKey.get(matchKey), targetOdd));
+        oddInsightByMatchKey.set(matchKey, createOddInsight(match, oddHistoryByMatchKey.get(matchKey), targetOdd, watchContext));
     }
 
     await chrome.storage.local.set({
@@ -305,7 +471,11 @@ async function updateOddTracking(matches) {
     });
 }
 
-function formatMatchMessage(match, targetOdd) {
+function formatMatchMessage(match, targetOdd, watchContext = null) {
+    const isWatchedTeam = Boolean(watchContext?.isWatched);
+    const appliedThreshold = toThresholdNumber(watchContext?.appliedThreshold, TARGET_ODD_MIN);
+    const appliedSelection = watchContext?.appliedSelection || TARGET_ODD_SELECTION;
+    const normalizedSelection = normalizeWatchMarketSelection(appliedSelection, TARGET_ODD_SELECTION);
     const odds = Array.isArray(match?.odds) ? match.odds.slice(0, 3) : [];
     const lines = [
         '🚨 <b>LIVE O/U ALERT</b>',
@@ -314,10 +484,12 @@ function formatMatchMessage(match, targetOdd) {
         `📊 Score: <b>${escapeHtml(match?.score || '0-0')}</b>`,
         `🏆 League: ${escapeHtml(match?.league || 'N/A')}`,
         `⏰ Status: ${escapeHtml(match?.status || 'Live')}`,
-        `🎯 Market: <b>${escapeHtml(targetOdd?.marketName || 'O/U')}: ${escapeHtml(targetOdd?.label || 'o 0.75')} @ ${escapeHtml((targetOdd?.oddValue || 0).toFixed(2))}</b>`,
+        `🎯 Market: <b>${escapeHtml(targetOdd?.marketName || 'O/U')}: ${escapeHtml(targetOdd?.label || normalizedSelection)} @ ${escapeHtml((targetOdd?.oddValue || 0).toFixed(2))}</b>`,
+        `👀 Watch team: ${isWatchedTeam ? 'Ya' : 'Tidak'}`,
+        `📐 Rule: >${appliedThreshold.toFixed(2)}`,
         `📅 Time: ${new Date().toLocaleTimeString()}`,
         '',
-        `🔥 <i>Alert dikirim saat market ${escapeHtml(targetOdd?.label || 'o 0.75')} sudah di atas ${TARGET_ODD_MIN.toFixed(2)}.</i>`
+        `🔥 <i>Alert dikirim saat market ${escapeHtml(targetOdd?.label || normalizedSelection)} sudah di atas ${appliedThreshold.toFixed(2)}.</i>`
     ];
 
     if (odds.length) {
@@ -475,43 +647,63 @@ async function sendToServer(data, isAutoSend = false) {
             return false;
         }
 
+        const watchConfig = await getCustomWatchConfig();
         pruneMatchAlertState(matches);
 
         const evaluatedMatches = matches
-            .map((match) => ({
-                match,
-                matchKey: createMatchKey(match),
-                targetOdd: getQualifiedOddsAlert(match)
-            }));
+            .map((match) => {
+                const matchKey = createMatchKey(match);
+                const watchContext = getMatchWatchContext(match, watchConfig);
+                const threshold = watchContext.appliedThreshold;
+                const marketSelection = watchContext.appliedSelection;
 
-        const alertMatches = evaluatedMatches.filter(({ matchKey, targetOdd }) => {
-            if (!targetOdd || notifiedMatchKeys.has(matchKey)) {
+                return {
+                    match,
+                    matchKey,
+                    stateKey: getThresholdStateKey(matchKey, threshold, marketSelection),
+                    targetOdd: getQualifiedOddsAlert(match, marketSelection, threshold),
+                    watchContext
+                };
+            });
+
+        const alertMatches = evaluatedMatches.filter(({ stateKey, targetOdd }) => {
+            if (!targetOdd || notifiedMatchKeys.has(stateKey)) {
                 return false;
             }
 
-            return wasAboveThresholdByMatchKey.get(matchKey) !== true;
+            return wasAboveThresholdByMatchKey.get(stateKey) !== true;
         });
 
         if (!alertMatches.length) {
-            evaluatedMatches.forEach(({ matchKey, targetOdd }) => {
-                wasAboveThresholdByMatchKey.set(matchKey, Boolean(targetOdd));
+            evaluatedMatches.forEach(({ stateKey, targetOdd }) => {
+                wasAboveThresholdByMatchKey.set(stateKey, Boolean(targetOdd));
             });
 
+            const defaultThresholdText = TARGET_ODD_MIN.toFixed(2);
+            const defaultSelectionText = formatWatchMarketForDisplay(TARGET_ODD_SELECTION);
+            const watchTeamsCount = Array.isArray(watchConfig.teamList) ? watchConfig.teamList.length : 0;
+            const hasWatchTeams = watchTeamsCount > 0;
+            const customThresholdText = toThresholdNumber(watchConfig.customOddThreshold, TARGET_ODD_MIN).toFixed(2);
+            const customSelectionText = formatWatchMarketForDisplay(watchConfig.customOddSelection);
+            const statusText = hasWatchTeams
+                ? `Telegram: No alert on ${defaultSelectionText} > ${defaultThresholdText} (team watch uses ${customSelectionText} > ${customThresholdText})`
+                : `Telegram: No alert on ${defaultSelectionText} > ${defaultThresholdText}`;
+
             await setStatus({
-                serverStatus: 'Telegram: No O/U 0.75 > 1.80 alert',
+                serverStatus: statusText,
                 error: ''
             });
             return false;
         }
 
         let sentCount = 0;
-        for (const { match, matchKey, targetOdd } of alertMatches) {
+        for (const { match, stateKey, targetOdd, watchContext } of alertMatches) {
             const res = await fetch(TELEGRAM_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     chat_id: TELEGRAM_CHAT_ID,
-                    text: formatMatchMessage(match, targetOdd),
+                    text: formatMatchMessage(match, targetOdd, watchContext),
                     parse_mode: 'HTML'
                 })
             });
@@ -520,14 +712,14 @@ async function sendToServer(data, isAutoSend = false) {
                 throw new Error(`Telegram API error ${res.status}`);
             }
 
-            notifiedMatchKeys.add(matchKey);
-            wasAboveThresholdByMatchKey.set(matchKey, true);
+            notifiedMatchKeys.add(stateKey);
+            wasAboveThresholdByMatchKey.set(stateKey, true);
             sentCount += 1;
         }
 
-        evaluatedMatches.forEach(({ matchKey, targetOdd }) => {
-            if (!notifiedMatchKeys.has(matchKey)) {
-                wasAboveThresholdByMatchKey.set(matchKey, Boolean(targetOdd));
+        evaluatedMatches.forEach(({ stateKey, targetOdd }) => {
+            if (!notifiedMatchKeys.has(stateKey)) {
+                wasAboveThresholdByMatchKey.set(stateKey, Boolean(targetOdd));
             }
         });
 
@@ -716,7 +908,8 @@ async function getPopupState() {
         'lastUpdate',
         'liveOddInsights',
         'liveStatus',
-        'liveRuntimeState'
+        'liveRuntimeState',
+        CUSTOM_WATCH_CONFIG_KEY
     ]);
 
     return {
@@ -728,6 +921,7 @@ async function getPopupState() {
             time: data.lastUpdate || '-',
             oddInsights: data.liveOddInsights || {},
             liveStatus: data.liveStatus || null,
+            customWatchConfig: data[CUSTOM_WATCH_CONFIG_KEY] || getDefaultCustomWatchConfig(),
             runtimeState: data.liveRuntimeState || {
                 isLiveRunning: false,
                 currentTabId: null
@@ -743,6 +937,7 @@ chrome.runtime.onInstalled.addListener(() => {
             isLiveRunning: false,
             currentTabId: null
         },
+        [CUSTOM_WATCH_CONFIG_KEY]: getDefaultCustomWatchConfig(),
         liveStatus: {
             lastUpdate: '-',
             lastSent: '-',
@@ -809,8 +1004,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             case 'sendStoredData':
                 sendResponse(await sendStoredDataToServer());
                 break;
-            case 'getPopupState':
+    case 'getPopupState':
                 sendResponse(await getPopupState());
+                break;
+            case 'getCustomWatchConfig':
+                sendResponse(await getCustomWatchConfig());
+                break;
+            case 'setCustomWatchConfig':
+                sendResponse(await setCustomWatchConfig(message.payload || {}));
                 break;
             default:
                 sendResponse({ ok: false, error: 'Unknown action' });

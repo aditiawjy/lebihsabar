@@ -1,5 +1,17 @@
 let currentTab = null;
 let currentViewFilter = 'all';
+const DEFAULT_CUSTOM_WATCH_THRESHOLD = 1.8;
+const DEFAULT_CUSTOM_WATCH_MARKET = '0.75';
+let customWatchConfig = {
+    teamList: [],
+    customOddThreshold: DEFAULT_CUSTOM_WATCH_THRESHOLD,
+    customOddSelection: `o${DEFAULT_CUSTOM_WATCH_MARKET}`
+};
+
+const WATCH_CONFIG_ACTIONS = {
+    get: 'getCustomWatchConfig',
+    set: 'setCustomWatchConfig'
+};
 
 function isExtensionContextValid() {
     try {
@@ -18,6 +30,39 @@ async function refreshCurrentTab() {
 
 async function requestBackground(action) {
     return chrome.runtime.sendMessage({ action });
+}
+
+async function requestBackgroundWithPayload(action, payload = {}) {
+    return chrome.runtime.sendMessage({ action, payload });
+}
+
+function toFiniteNumber(value, fallback = DEFAULT_CUSTOM_WATCH_THRESHOLD) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function normalizeText(value) {
+    return String(value || '')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function isTeamMatchInWatch(match, watchConfig) {
+    const teams = [
+        match?.homeTeam,
+        match?.awayTeam
+    ].map(normalizeText);
+
+    return (watchConfig?.teamList || []).some((watchTeam) => {
+        return teams.some((teamName) => teamName.includes(watchTeam) || watchTeam.includes(teamName));
+    });
+}
+
+function getMatchWatchContextInPopup(match) {
+    return {
+        isWatchedTeam: isTeamMatchInWatch(match, customWatchConfig)
+    };
 }
 
 function createMatchKey(match) {
@@ -76,6 +121,11 @@ function getPatternBadgeClass(insight) {
 }
 
 function getPatternIcon(insight) {
+    if ((insight?.pattern || '').startsWith('Cross >')) {
+        const match = /Cross\s*>\s*([0-9]+(?:[.,][0-9]+)?)/.exec(String(insight.pattern));
+        return match?.[1] ? String(match[1]).replace(',', '.') : DEFAULT_CUSTOM_WATCH_THRESHOLD.toFixed(2);
+    }
+
     switch (insight?.pattern) {
         case 'Breakout':
             return '!!';
@@ -85,13 +135,17 @@ function getPatternIcon(insight) {
             return 'UP';
         case 'Spike Down':
             return 'DN';
-        case 'Cross > 1.80':
-            return '1.8';
         case 'Volatile':
             return '~~';
         default:
             return '--';
     }
+}
+
+function getWatchRuleText(insight = {}) {
+    const market = insight?.marketDisplay || `O/U ${DEFAULT_CUSTOM_WATCH_MARKET}`;
+    const threshold = Number.isFinite(insight?.threshold) ? insight.threshold : DEFAULT_CUSTOM_WATCH_THRESHOLD;
+    return `${market} > ${threshold.toFixed(2)}`;
 }
 
 function rankInsight(insight) {
@@ -176,9 +230,10 @@ function renderOddInsights(oddInsights = {}) {
             <div class="insight-card__meta">
                 <span>${insight.status || '-'}</span>
                 <span>Score ${insight.score || '-'}</span>
-                <span class="insight-card__odd">O0.75 ${formatOdd(insight.currentOdd)} (${formatDelta(insight.deltaFromPrevious)})</span>
+                <span class="insight-card__odd">${getWatchRuleText(insight)}</span>
+                <span class="insight-card__odd">Odd ${formatOdd(insight.currentOdd)} (${formatDelta(insight.deltaFromPrevious)})</span>
                 <span>Compare ${formatComparisonOdds(insight.comparisonOdds)}</span>
-                <span>Above 1.80 ${formatDuration(insight.aboveThresholdDurationMs)}</span>
+                <span>Above threshold ${formatDuration(insight.aboveThresholdDurationMs)}</span>
                 <span>Max ${formatOdd(insight.maxOdd)}</span>
             </div>
         </div>
@@ -238,6 +293,10 @@ function renderTable(matches, oddInsights = {}) {
         const rowsHtml = leagueMatches.map((m) => {
             const timeClass = m.status?.includes('H.Time') ? 'time-ht' : 'time-live';
             const insight = oddInsights[createMatchKey(m)] || null;
+            const watchContext = getMatchWatchContextInPopup(m);
+            const watchBadge = watchContext.isWatchedTeam
+                ? ' <span style="background:#fff3cd;color:#856404;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;">WATCH TEAM</span>'
+                : '';
 
             let oddsHtml = '-';
             if (m.odds?.length) {
@@ -281,11 +340,11 @@ function renderTable(matches, oddInsights = {}) {
 
             return `<tr>
                 <td class="team-name">${m.homeTeam || '-'}</td>
-                <td class="team-name">${m.awayTeam || '-'}</td>
+                <td class="team-name">${m.awayTeam || '-'}${watchBadge}</td>
                 <td><span class="${timeClass}">${m.status || '-'}</span></td>
                 <td class="score">${m.score || '-'}</td>
                 <td class="odds-focus">${insight ? `${formatOdd(insight.currentOdd)} <span class="delta-text">(${formatDelta(insight.deltaFromPrevious)})</span><div class="pattern-meta">${formatComparisonOdds(insight.comparisonOdds)}</div>` : '-'}</td>
-                <td>${insight ? `<span class="${getPatternBadgeClass(insight)}"><span class="pattern-icon">${getPatternIcon(insight)}</span>${insight.pattern}</span><div class="pattern-meta">Above 1.80: ${formatDuration(insight.aboveThresholdDurationMs)}</div>` : '<span class="pattern-badge pattern-muted"><span class="pattern-icon">--</span>No 2H data</span>'}</td>
+                <td>${insight ? `<span class="${getPatternBadgeClass(insight)}"><span class="pattern-icon">${getPatternIcon(insight)}</span>${insight.pattern}</span><div class="pattern-meta">${getWatchRuleText(insight)} • Above ${formatDuration(insight.aboveThresholdDurationMs)}</div>` : '<span class="pattern-badge pattern-muted"><span class="pattern-icon">--</span>No 2H data</span>'}</td>
                 <td class="odds-text">${oddsHtml}</td>
             </tr>`;
         }).join('');
@@ -299,7 +358,7 @@ function renderTable(matches, oddInsights = {}) {
                         <th style="width: 18%;">Away</th>
                         <th style="width: 10%;">Time</th>
                         <th style="width: 10%;">Score</th>
-                        <th style="width: 12%;">O0.75</th>
+                        <th style="width: 12%;">Watch O</th>
                         <th style="width: 16%;">Pattern</th>
                         <th style="width: 34%;">Odd</th>
                     </tr>
@@ -375,6 +434,63 @@ function applyPopupState(state) {
     updateLiveUI(Boolean(runtimeState.isLiveRunning));
 }
 
+function renderTeamWatchPanel() {
+    const chips = document.getElementById('teamChips');
+    const info = document.getElementById('customWatchInfo');
+    const thresholdInput = document.getElementById('customOddInput');
+
+    thresholdInput.value = customWatchConfig.customOddThreshold;
+    chips.innerHTML = (customWatchConfig.teamList || []).map((team) => `
+        <span class="team-chip">
+            ${team}
+            <button type="button" data-team="${team}" title="Hapus">x</button>
+        </span>
+    `).join('');
+
+    const customMarket = String(customWatchConfig.customOddSelection || DEFAULT_CUSTOM_WATCH_MARKET).replace(/^o/, '');
+    const customThreshold = Number(customWatchConfig.customOddThreshold || DEFAULT_CUSTOM_WATCH_THRESHOLD);
+    info.textContent = `Mode: all mode, teams: ${(customWatchConfig.teamList || []).length} (rule: O/U ${customMarket} > ${Number.isFinite(customThreshold) ? customThreshold.toFixed(2) : DEFAULT_CUSTOM_WATCH_THRESHOLD})`;
+
+    Array.from(chips.querySelectorAll('button[data-team]')).forEach((button) => {
+        button.addEventListener('click', async () => {
+            const teamValue = button.dataset.team;
+            const nextList = (customWatchConfig.teamList || []).filter((item) => item !== teamValue);
+            customWatchConfig.teamList = nextList;
+            await requestBackgroundWithPayload(WATCH_CONFIG_ACTIONS.set, customWatchConfig);
+            await syncPopupState();
+            await loadCustomWatchConfig();
+        });
+    });
+}
+
+async function loadCustomWatchConfig() {
+    const response = await requestBackgroundWithPayload(WATCH_CONFIG_ACTIONS.get);
+    if (!response || response.ok === false) {
+        return;
+    }
+
+    const teams = Array.isArray(response.teamList) ? response.teamList : [];
+    customWatchConfig = {
+        teamList: teams,
+        customOddThreshold: toFiniteNumber(response.customOddThreshold, DEFAULT_CUSTOM_WATCH_THRESHOLD),
+        customOddSelection: response.customOddSelection || `o${DEFAULT_CUSTOM_WATCH_MARKET}`
+    };
+
+    const marketInput = document.getElementById('customMarketInput');
+    if (marketInput) {
+        marketInput.value = customWatchConfig.customOddSelection.replace(/^o/, '');
+    }
+
+    const thresholdInput = document.getElementById('customOddInput');
+    if (thresholdInput) {
+        thresholdInput.value = Number.isFinite(customWatchConfig.customOddThreshold)
+            ? Number(customWatchConfig.customOddThreshold).toFixed(2)
+            : DEFAULT_CUSTOM_WATCH_THRESHOLD;
+    }
+
+    renderTeamWatchPanel();
+}
+
 async function syncPopupState() {
     if (!isExtensionContextValid()) {
         return;
@@ -425,6 +541,54 @@ async function startLive() {
     await syncPopupState();
 }
 
+async function addTeam() {
+    const teamInput = document.getElementById('teamInput');
+    const raw = String(teamInput?.value || '');
+    const teamName = raw.trim();
+    if (!teamName) {
+        return;
+    }
+
+    const teamValue = teamName.toLowerCase().replace(/\s+/g, ' ').trim();
+    if (!teamValue) {
+        return;
+    }
+
+    const normalizedExisting = (customWatchConfig.teamList || []).map((team) => team.toLowerCase());
+    if (!normalizedExisting.includes(teamValue)) {
+        customWatchConfig.teamList = [...normalizedExisting, teamValue];
+        await requestBackgroundWithPayload(WATCH_CONFIG_ACTIONS.set, customWatchConfig);
+        await syncPopupState();
+    }
+
+    teamInput.value = '';
+    await loadCustomWatchConfig();
+}
+
+async function saveCustomThreshold() {
+    const oddInput = document.getElementById('customOddInput');
+    const nextThreshold = toFiniteNumber(oddInput?.value, customWatchConfig.customOddThreshold);
+    const marketInput = document.getElementById('customMarketInput');
+    const rawMarket = String(marketInput?.value || '').trim();
+    const marketValue = rawMarket.replace(/\s+/g, '').toLowerCase();
+
+    if (rawMarket && !/^o?\d+(?:[.,]\d+)?$/.test(marketValue)) {
+        showError('Market should be a positive number like 0.5, 0.75, 1.0');
+        return;
+    }
+
+    const normalizedMarket = marketValue
+        ? (marketValue.startsWith('o') ? marketValue : `o${marketValue}`)
+        : `o${DEFAULT_CUSTOM_WATCH_MARKET}`;
+
+    customWatchConfig.customOddThreshold = nextThreshold;
+    customWatchConfig.customOddSelection = normalizedMarket;
+    clearError();
+    await requestBackgroundWithPayload(WATCH_CONFIG_ACTIONS.set, customWatchConfig);
+    await syncPopupState();
+    await loadCustomWatchConfig();
+}
+
 async function stopLive() {
     await requestBackground('stopLive');
     await syncPopupState();
@@ -451,6 +615,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('stopLiveBtn').addEventListener('click', stopLive);
         document.getElementById('sendBtn').addEventListener('click', sendToServer);
         document.getElementById('startLiveBtn').addEventListener('click', startLive);
+        document.getElementById('addTeamBtn').addEventListener('click', addTeam);
+        document.getElementById('saveWatchBtn').addEventListener('click', saveCustomThreshold);
+        document.getElementById('teamInput')?.addEventListener('keydown', async (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                await addTeam();
+            }
+        });
+        document.getElementById('customOddInput')?.addEventListener('keydown', async (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                await saveCustomThreshold();
+            }
+        });
+        document.getElementById('customMarketInput')?.addEventListener('keydown', async (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                await saveCustomThreshold();
+            }
+        });
         document.getElementById('viewAllBtn').addEventListener('click', async () => {
             currentViewFilter = 'all';
             await syncPopupState();
@@ -463,6 +647,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentViewFilter = 'odd';
             await syncPopupState();
         });
+
+        await loadCustomWatchConfig();
     } catch (error) {
         showError(error.message || 'Popup init failed');
     }

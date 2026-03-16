@@ -1,9 +1,14 @@
 let currentTab = null;
 let currentViewFilter = 'all';
+let popupDataCache = {
+    groupedMatches: null,
+    oddInsights: null,
+    count: null
+};
 const DEFAULT_CUSTOM_WATCH_THRESHOLD = 1.8;
 const DEFAULT_CUSTOM_WATCH_MARKET = '0.75';
 let customWatchConfig = {
-    teamList: [],
+    teamRules: [],
     customOddThreshold: DEFAULT_CUSTOM_WATCH_THRESHOLD,
     customOddSelection: `o${DEFAULT_CUSTOM_WATCH_MARKET}`
 };
@@ -48,20 +53,76 @@ function normalizeText(value) {
         .trim();
 }
 
-function isTeamMatchInWatch(match, watchConfig) {
+function escapeHtml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function getTeamRuleInputs() {
+    const marketInput = document.getElementById('customMarketInput');
+    const oddInput = document.getElementById('customOddInput');
+
+    const rawMarket = String(marketInput?.value || '').trim();
+    const marketValue = rawMarket.replace(/\s+/g, '').toLowerCase();
+
+    if (rawMarket && !/^o?\d+(?:[.,]\d+)?$/.test(marketValue)) {
+        showError('Market should be a positive number like 0.5, 0.75, 1.0');
+        return null;
+    }
+
+    const normalizedMarket = marketValue
+        ? (marketValue.startsWith('o') ? marketValue : `o${marketValue}`)
+        : `o${DEFAULT_CUSTOM_WATCH_MARKET}`;
+
+    const nextThreshold = toFiniteNumber(oddInput?.value, customWatchConfig.customOddThreshold);
+
+    return {
+        customOddSelection: normalizedMarket,
+        customOddThreshold: nextThreshold
+    };
+}
+
+function getMatchWatchRuleInPopup(match) {
     const teams = [
         match?.homeTeam,
         match?.awayTeam
     ].map(normalizeText);
 
-    return (watchConfig?.teamList || []).some((watchTeam) => {
-        return teams.some((teamName) => teamName.includes(watchTeam) || watchTeam.includes(teamName));
-    });
+    const rules = Array.isArray(customWatchConfig.teamRules) ? customWatchConfig.teamRules : [];
+    for (const rule of rules) {
+        const watchTeam = normalizeText(rule?.team);
+        if (!watchTeam) {
+            continue;
+        }
+
+        const matched = teams.some((teamName) => teamName.includes(watchTeam) || watchTeam.includes(teamName));
+        if (matched) {
+            return {
+                team: watchTeam,
+                customOddThreshold: Number.isFinite(rule?.customOddThreshold)
+                    ? rule.customOddThreshold
+                    : customWatchConfig.customOddThreshold,
+                customOddSelection: rule?.customOddSelection || customWatchConfig.customOddSelection
+            };
+        }
+    }
+
+    return null;
 }
 
 function getMatchWatchContextInPopup(match) {
+    const rule = getMatchWatchRuleInPopup(match);
+
     return {
-        isWatchedTeam: isTeamMatchInWatch(match, customWatchConfig)
+        isWatchedTeam: Boolean(rule),
+        appliedBy: rule?.team || null,
+        appliedThreshold: Number.isFinite(rule?.customOddThreshold)
+            ? rule.customOddThreshold
+            : customWatchConfig.customOddThreshold,
+        appliedSelection: rule?.customOddSelection || customWatchConfig.customOddSelection
     };
 }
 
@@ -400,15 +461,40 @@ function applyPopupState(state) {
     const liveStatus = data.liveStatus || {};
     const groupedMatches = data.groupedMatches?.length ? data.groupedMatches : data.matches;
     const oddInsights = data.oddInsights || {};
+    const hasMatchData = Array.isArray(groupedMatches) && groupedMatches.length > 0;
+    const hasOddData = oddInsights && Object.keys(oddInsights).length > 0;
 
-    updateViewToggleButtons();
-    renderOddInsights(oddInsights);
-
-    if (groupedMatches?.length) {
-        renderTable(groupedMatches, oddInsights);
+    if (hasMatchData) {
+        popupDataCache.groupedMatches = groupedMatches;
     }
 
-    document.getElementById('matchCount').textContent = `${data.count || 0} matches`;
+    if (hasOddData) {
+        popupDataCache.oddInsights = oddInsights;
+    }
+
+    const matchesToRender = hasMatchData
+        ? groupedMatches
+        : (popupDataCache.groupedMatches || []);
+    const insightsToRender = hasOddData
+        ? oddInsights
+        : (popupDataCache.oddInsights || {});
+    const countFromState = Number.isFinite(data.count) ? data.count : 0;
+    if (hasMatchData) {
+        popupDataCache.count = countFromState;
+    }
+
+    const matchCountToShow = hasMatchData
+        ? countFromState
+        : (popupDataCache.count !== null ? popupDataCache.count : countFromState);
+
+    updateViewToggleButtons();
+    renderOddInsights(insightsToRender);
+
+    if (matchesToRender?.length) {
+        renderTable(matchesToRender, insightsToRender);
+    }
+
+    document.getElementById('matchCount').textContent = `${matchCountToShow} matches`;
     document.getElementById('lastUpdate').textContent = `Last update: ${liveStatus.lastUpdate || data.time || '-'}`;
     document.getElementById('lastSent').textContent = `Last sent: ${liveStatus.lastSent || '-'}`;
     document.getElementById('lastRetry').textContent = `Last retry: ${liveStatus.lastRetry || '0'}`;
@@ -440,22 +526,72 @@ function renderTeamWatchPanel() {
     const thresholdInput = document.getElementById('customOddInput');
 
     thresholdInput.value = customWatchConfig.customOddThreshold;
-    chips.innerHTML = (customWatchConfig.teamList || []).map((team) => `
-        <span class="team-chip">
-            ${team}
-            <button type="button" data-team="${team}" title="Hapus">x</button>
-        </span>
-    `).join('');
+    const teamRules = Array.isArray(customWatchConfig.teamRules) ? customWatchConfig.teamRules : [];
+
+    chips.innerHTML = teamRules
+        .map((watchRule) => {
+            const team = normalizeText(watchRule?.team || '');
+            if (!team) {
+                return '';
+            }
+
+            const selection = String(watchRule?.customOddSelection || customWatchConfig.customOddSelection || DEFAULT_CUSTOM_WATCH_MARKET);
+            const threshold = Number.isFinite(watchRule?.customOddThreshold)
+                ? Number(watchRule.customOddThreshold)
+                : customWatchConfig.customOddThreshold;
+            const displaySelection = `O/U ${selection.replace(/^o/, '')}`;
+
+            return `
+                <span class="team-chip" data-rule-team="${escapeHtml(team)}" title="Edit rule">
+                    <span class="team-chip__text">${escapeHtml(team)} (${escapeHtml(displaySelection)} > ${threshold.toFixed(2)})</span>
+                    <button type="button" data-remove-team="${escapeHtml(team)}" title="Hapus">x</button>
+                </span>
+            `;
+        })
+        .join('');
 
     const customMarket = String(customWatchConfig.customOddSelection || DEFAULT_CUSTOM_WATCH_MARKET).replace(/^o/, '');
     const customThreshold = Number(customWatchConfig.customOddThreshold || DEFAULT_CUSTOM_WATCH_THRESHOLD);
-    info.textContent = `Mode: all mode, teams: ${(customWatchConfig.teamList || []).length} (rule: O/U ${customMarket} > ${Number.isFinite(customThreshold) ? customThreshold.toFixed(2) : DEFAULT_CUSTOM_WATCH_THRESHOLD})`;
+    const hasRules = teamRules.length > 0;
+    info.textContent = hasRules
+        ? `Mode: all mode, custom rules: ${teamRules.length} teams (${`O/U ${customMarket} > ${Number.isFinite(customThreshold) ? customThreshold.toFixed(2) : DEFAULT_CUSTOM_WATCH_THRESHOLD}`} as default fallback)`
+        : 'Mode: all mode, belum ada custom team';
 
-    Array.from(chips.querySelectorAll('button[data-team]')).forEach((button) => {
+    Array.from(chips.querySelectorAll('span[data-rule-team]')).forEach((chip) => {
+        chip.addEventListener('click', (event) => {
+            if (event.target?.dataset?.removeTeam) {
+                return;
+            }
+
+            const teamName = chip.dataset.ruleTeam;
+            const matched = teamRules.find((rule) => normalizeText(rule.team) === teamName);
+            if (!matched) {
+                return;
+            }
+
+            const teamInput = document.getElementById('teamInput');
+            const marketInput = document.getElementById('customMarketInput');
+            const thresholdInput = document.getElementById('customOddInput');
+
+            if (teamInput) {
+                teamInput.value = matched.team;
+            }
+            if (marketInput) {
+                marketInput.value = String(matched.customOddSelection || customWatchConfig.customOddSelection || DEFAULT_CUSTOM_WATCH_MARKET).replace(/^o/, '');
+            }
+            if (thresholdInput) {
+                thresholdInput.value = Number.isFinite(matched.customOddThreshold)
+                    ? Number(matched.customOddThreshold).toFixed(2)
+                    : Number(customWatchConfig.customOddThreshold).toFixed(2);
+            }
+        });
+    });
+
+    Array.from(chips.querySelectorAll('button[data-remove-team]')).forEach((button) => {
         button.addEventListener('click', async () => {
-            const teamValue = button.dataset.team;
-            const nextList = (customWatchConfig.teamList || []).filter((item) => item !== teamValue);
-            customWatchConfig.teamList = nextList;
+            const teamValue = button.dataset.removeTeam;
+            const nextRules = (customWatchConfig.teamRules || []).filter((item) => normalizeText(item?.team) !== teamValue);
+            customWatchConfig.teamRules = nextRules;
             await requestBackgroundWithPayload(WATCH_CONFIG_ACTIONS.set, customWatchConfig);
             await syncPopupState();
             await loadCustomWatchConfig();
@@ -469,9 +605,9 @@ async function loadCustomWatchConfig() {
         return;
     }
 
-    const teams = Array.isArray(response.teamList) ? response.teamList : [];
+    const teamRules = Array.isArray(response.teamRules) ? response.teamRules : [];
     customWatchConfig = {
-        teamList: teams,
+        teamRules,
         customOddThreshold: toFiniteNumber(response.customOddThreshold, DEFAULT_CUSTOM_WATCH_THRESHOLD),
         customOddSelection: response.customOddSelection || `o${DEFAULT_CUSTOM_WATCH_MARKET}`
     };
@@ -545,7 +681,9 @@ async function addTeam() {
     const teamInput = document.getElementById('teamInput');
     const raw = String(teamInput?.value || '');
     const teamName = raw.trim();
+    clearError();
     if (!teamName) {
+        showError('Nama team harus diisi.');
         return;
     }
 
@@ -554,35 +692,43 @@ async function addTeam() {
         return;
     }
 
-    const normalizedExisting = (customWatchConfig.teamList || []).map((team) => team.toLowerCase());
-    if (!normalizedExisting.includes(teamValue)) {
-        customWatchConfig.teamList = [...normalizedExisting, teamValue];
-        await requestBackgroundWithPayload(WATCH_CONFIG_ACTIONS.set, customWatchConfig);
-        await syncPopupState();
+    const ruleInput = getTeamRuleInputs();
+    if (!ruleInput) {
+        return;
     }
 
+    const normalizedRules = Array.isArray(customWatchConfig.teamRules) ? customWatchConfig.teamRules : [];
+    const nextRules = normalizedRules.filter((rule) => normalizeText(rule?.team) !== teamValue);
+    nextRules.push({
+        team: teamValue,
+        customOddThreshold: ruleInput.customOddThreshold,
+        customOddSelection: ruleInput.customOddSelection
+    });
+
+    customWatchConfig.teamRules = nextRules;
+    await requestBackgroundWithPayload(WATCH_CONFIG_ACTIONS.set, customWatchConfig);
+    await syncPopupState();
+
     teamInput.value = '';
+    const marketInput = document.getElementById('customMarketInput');
+    const oddInput = document.getElementById('customOddInput');
+    if (marketInput) {
+        marketInput.value = '';
+    }
+    if (oddInput) {
+        oddInput.value = '';
+    }
     await loadCustomWatchConfig();
 }
 
 async function saveCustomThreshold() {
-    const oddInput = document.getElementById('customOddInput');
-    const nextThreshold = toFiniteNumber(oddInput?.value, customWatchConfig.customOddThreshold);
-    const marketInput = document.getElementById('customMarketInput');
-    const rawMarket = String(marketInput?.value || '').trim();
-    const marketValue = rawMarket.replace(/\s+/g, '').toLowerCase();
-
-    if (rawMarket && !/^o?\d+(?:[.,]\d+)?$/.test(marketValue)) {
-        showError('Market should be a positive number like 0.5, 0.75, 1.0');
+    const ruleInput = getTeamRuleInputs();
+    if (!ruleInput) {
         return;
     }
 
-    const normalizedMarket = marketValue
-        ? (marketValue.startsWith('o') ? marketValue : `o${marketValue}`)
-        : `o${DEFAULT_CUSTOM_WATCH_MARKET}`;
-
-    customWatchConfig.customOddThreshold = nextThreshold;
-    customWatchConfig.customOddSelection = normalizedMarket;
+    customWatchConfig.customOddThreshold = ruleInput.customOddThreshold;
+    customWatchConfig.customOddSelection = ruleInput.customOddSelection;
     clearError();
     await requestBackgroundWithPayload(WATCH_CONFIG_ACTIONS.set, customWatchConfig);
     await syncPopupState();

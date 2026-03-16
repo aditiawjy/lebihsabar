@@ -18,7 +18,7 @@ const ODD_SPIKE_WINDOW_MS = 30000;
 const ODD_BREAKOUT_HOLD_MS = 20000;
 const CUSTOM_WATCH_CONFIG_KEY = 'bpvmCustomWatchConfig';
 const DEFAULT_CUSTOM_WATCH_CONFIG = {
-    teamList: [],
+    teamRules: [],
     customOddThreshold: TARGET_ODD_MIN,
     customOddSelection: DEFAULT_CUSTOM_WATCH_MARKET
 };
@@ -106,31 +106,82 @@ function formatWatchMarketForDisplay(value) {
 
 function getDefaultCustomWatchConfig() {
     return {
-        teamList: [],
+        teamRules: [],
         customOddThreshold: DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold,
         customOddSelection: DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection
     };
+}
+
+function normalizeWatchTeamRule(rule = {}, fallback = {}) {
+    const fallbackThreshold = toThresholdNumber(fallback.customOddThreshold, DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold);
+    const fallbackSelection = normalizeWatchMarketSelection(fallback.customOddSelection, DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection);
+
+    const normalizedTeam = normalizeTeamName(rule.team || rule.teamName || rule.name || rule.team_name);
+    if (!normalizedTeam) {
+        return null;
+    }
+
+    return {
+        team: normalizedTeam,
+        customOddThreshold: toThresholdNumber(rule.customOddThreshold ?? rule.threshold, fallbackThreshold),
+        customOddSelection: normalizeWatchMarketSelection(rule.customOddSelection ?? rule.market ?? rule.selection, fallbackSelection)
+    };
+}
+
+function normalizeWatchTeamRules(rawRules = [], fallback = {}) {
+    if (!Array.isArray(rawRules) || !rawRules.length) {
+        return [];
+    }
+
+    const seen = new Set();
+    const nextRules = [];
+
+    rawRules.forEach((rule) => {
+        const normalizedRule = normalizeWatchTeamRule(rule, fallback);
+        if (!normalizedRule || seen.has(normalizedRule.team)) {
+            return;
+        }
+
+        seen.add(normalizedRule.team);
+        nextRules.push(normalizedRule);
+    });
+
+    return nextRules;
 }
 
 async function getCustomWatchConfig() {
     const data = await chrome.storage.local.get([CUSTOM_WATCH_CONFIG_KEY]);
     const stored = data?.[CUSTOM_WATCH_CONFIG_KEY] || {};
 
+    const fallbackThreshold = toThresholdNumber(stored.customOddThreshold, DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold);
+    const fallbackSelection = normalizeWatchMarketSelection(stored.customOddSelection, DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection);
+    const legacyTeamList = Array.isArray(stored.teamList)
+        ? stored.teamList
+            .map((team) => normalizeTeamName(team))
+            .filter(Boolean)
+        : [];
+    const normalizedLegacyRules = legacyTeamList.map((team) => ({
+        team,
+        customOddThreshold: fallbackThreshold,
+        customOddSelection: fallbackSelection
+    }));
+
+    const normalizedRules = normalizeWatchTeamRules(stored.teamRules, {
+        customOddThreshold: fallbackThreshold,
+        customOddSelection: fallbackSelection
+    });
+
     return {
         ...getDefaultCustomWatchConfig(),
         ...stored,
-        teamList: Array.isArray(stored.teamList)
-            ? stored.teamList
-                .map((team) => normalizeTeamName(team))
-                .filter(Boolean)
-            : [],
-        customOddThreshold: toThresholdNumber(stored.customOddThreshold, DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold),
-        customOddSelection: normalizeWatchMarketSelection(stored.customOddSelection, DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection)
+        teamRules: normalizedRules.length ? normalizedRules : normalizedLegacyRules,
+        customOddThreshold: fallbackThreshold,
+        customOddSelection: fallbackSelection
     };
 }
 
-function isCustomWatchTeam(match, customTeamList = []) {
-    if (!Array.isArray(customTeamList) || !customTeamList.length) {
+function getWatchRuleByMatch(match, customTeamRules = []) {
+    if (!Array.isArray(customTeamRules) || !customTeamRules.length) {
         return false;
     }
 
@@ -139,32 +190,74 @@ function isCustomWatchTeam(match, customTeamList = []) {
         match?.awayTeam
     ].map(normalizeTeamName).filter(Boolean);
 
-    return customTeamList.some((watchTeam) => teams.some((team) => team.includes(watchTeam) || watchTeam.includes(team)));
+    for (const rule of customTeamRules) {
+        const teamName = normalizeTeamName(rule?.team);
+        if (!teamName) {
+            continue;
+        }
+
+        const matched = teams.some((team) => team.includes(teamName) || teamName.includes(team));
+        if (matched) {
+            return {
+                team: teamName,
+                customOddThreshold: toThresholdNumber(rule.customOddThreshold, DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold),
+                customOddSelection: normalizeWatchMarketSelection(rule.customOddSelection, DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection)
+            };
+        }
+    }
+
+    return null;
+}
+
+function isCustomWatchTeam(match, customTeamList = []) {
+    return Boolean(getWatchRuleByMatch(match, customTeamList));
 }
 
 function getMatchWatchContext(match, customConfig = {}) {
-    const normalizedTeams = Array.isArray(customConfig.teamList) ? customConfig.teamList : [];
-    const isWatched = isCustomWatchTeam(match, normalizedTeams);
+    const normalizedTeamRules = Array.isArray(customConfig.teamRules) ? customConfig.teamRules : [];
+    const matchTeamRule = getWatchRuleByMatch(match, normalizedTeamRules);
+
+    const isWatched = Boolean(matchTeamRule);
     const baseThreshold = toThresholdNumber(customConfig.customOddThreshold, DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold);
     const baseSelection = normalizeWatchMarketSelection(customConfig.customOddSelection, DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection);
-    const appliedThreshold = isWatched ? baseThreshold : TARGET_ODD_MIN;
-    const appliedSelection = isWatched ? baseSelection : TARGET_ODD_SELECTION;
+    const appliedThreshold = isWatched
+        ? toThresholdNumber(matchTeamRule.customOddThreshold, baseThreshold)
+        : TARGET_ODD_MIN;
+    const appliedSelection = isWatched
+        ? normalizeWatchMarketSelection(matchTeamRule.customOddSelection, baseSelection)
+        : TARGET_ODD_SELECTION;
 
     return {
         isWatched,
+        watchTeamRule: matchTeamRule,
         appliedThreshold,
-        appliedSelection
+        appliedSelection,
+        appliedBy: isWatched ? matchTeamRule?.team : null
     };
 }
 
 async function setCustomWatchConfig(payload = {}) {
+    const fallbackThreshold = toThresholdNumber(payload.customOddThreshold, DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold);
+    const fallbackSelection = normalizeWatchMarketSelection(payload.customOddSelection, DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection);
+    const legacyTeamList = Array.isArray(payload.teamList)
+        ? payload.teamList
+            .map((team) => normalizeTeamName(team))
+            .filter(Boolean)
+        : [];
+
+    const normalizedRulesFromPayload = normalizeWatchTeamRules(payload.teamRules, {
+        customOddThreshold: fallbackThreshold,
+        customOddSelection: fallbackSelection
+    });
+
+    const fallbackRules = legacyTeamList.map((team) => ({
+        team,
+        customOddThreshold: fallbackThreshold,
+        customOddSelection: fallbackSelection
+    }));
+
     const normalized = {
-        teamList: Array.isArray(payload.teamList)
-            ? payload.teamList
-                .map((team) => normalizeTeamName(team))
-                .filter(Boolean)
-                .filter((team, index, list) => list.indexOf(team) === index)
-            : [],
+        teamRules: normalizedRulesFromPayload.length ? normalizedRulesFromPayload : fallbackRules,
         customOddThreshold: toThresholdNumber(payload.customOddThreshold, DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold),
         customOddSelection: normalizeWatchMarketSelection(payload.customOddSelection, DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection)
     };
@@ -681,12 +774,12 @@ async function sendToServer(data, isAutoSend = false) {
 
             const defaultThresholdText = TARGET_ODD_MIN.toFixed(2);
             const defaultSelectionText = formatWatchMarketForDisplay(TARGET_ODD_SELECTION);
-            const watchTeamsCount = Array.isArray(watchConfig.teamList) ? watchConfig.teamList.length : 0;
+            const watchTeamsCount = Array.isArray(watchConfig.teamRules) ? watchConfig.teamRules.length : 0;
             const hasWatchTeams = watchTeamsCount > 0;
             const customThresholdText = toThresholdNumber(watchConfig.customOddThreshold, TARGET_ODD_MIN).toFixed(2);
             const customSelectionText = formatWatchMarketForDisplay(watchConfig.customOddSelection);
             const statusText = hasWatchTeams
-                ? `Telegram: No alert on ${defaultSelectionText} > ${defaultThresholdText} (team watch uses ${customSelectionText} > ${customThresholdText})`
+                ? `Telegram: No alert on ${defaultSelectionText} > ${defaultThresholdText} (team watch uses per-team rules; fallback ${customSelectionText} > ${customThresholdText})`
                 : `Telegram: No alert on ${defaultSelectionText} > ${defaultThresholdText}`;
 
             await setStatus({

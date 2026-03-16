@@ -1,4 +1,8 @@
 function extractLiveData() {
+    function parseLocaleFloat(value) {
+        return parseFloat(String(value || '').replace(',', '.'));
+    }
+
     const matches = [];
     const groupedMatches = [];
     const leagueHeaders = document.querySelectorAll('.league-header');
@@ -75,7 +79,7 @@ function extractLiveData() {
                         if (is1X2) {
                             betOptions.push(`${goal}:${oddsValue}`);
                         } else {
-                            const numericOdds = parseFloat(oddsValue);
+                            const numericOdds = parseLocaleFloat(oddsValue);
                             let decimalOdds;
 
                             if (isMinus || oddsValue.startsWith('-')) {

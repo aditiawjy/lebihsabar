@@ -74,6 +74,7 @@ function isSecondHalfStatus(match) {
 function normalizeTeamName(value) {
     return String(value || '')
         .toLowerCase()
+        .replace(/\([^)]*\)/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
 }
@@ -84,14 +85,18 @@ function toThresholdNumber(value, fallback = TARGET_ODD_MIN) {
 }
 
 function normalizeWatchMarketSelection(value, fallback = DEFAULT_CUSTOM_WATCH_MARKET) {
-    const rawValue = String(value || '').trim().toLowerCase().replace(/\s+/g, '');
+    const rawValue = String(value || '').trim().replace(',', '.').toLowerCase().replace(/\s+/g, '');
     if (!rawValue) {
         return fallback;
     }
 
     const normalized = rawValue.startsWith('o') ? rawValue : `o${rawValue}`;
-    const valuePart = normalized.slice(1);
-    const numeric = Number(valuePart.replace(',', '.'));
+    const match = normalized.match(/\d+(?:\.\d+)?/);
+    if (!match) {
+        return fallback;
+    }
+
+    const numeric = Number(match[0]);
     if (!Number.isFinite(numeric) || numeric <= 0) {
         return fallback;
     }
@@ -272,6 +277,51 @@ function normalizeMarketValue(value) {
         .replace(/\s+/g, '');
 }
 
+function parseLocaleFloat(value) {
+    return parseFloat(String(value || '').replace(',', '.'));
+}
+
+function parseSelectionValue(value) {
+    const normalized = String(value || '').replace(/,/g, '.').toLowerCase().trim();
+    const match = normalized.match(/\d+(?:\.\d+)?/);
+    if (!match) {
+        return null;
+    }
+
+    const numeric = Number(match[0]);
+    return Number.isFinite(numeric) ? numeric : null;
+}
+
+function isSelectionMatch(label, marketName, wantedSelection) {
+    const normalizedLabel = normalizeMarketValue(label);
+    const normalizedWanted = normalizeMarketValue(wantedSelection);
+
+    if (!normalizedWanted) {
+        return false;
+    }
+
+    if (
+        normalizedLabel === normalizedWanted
+        || normalizedLabel.includes(normalizedWanted)
+        || normalizedWanted.includes(normalizedLabel)
+    ) {
+        return true;
+    }
+
+    const wantedValue = parseSelectionValue(normalizedWanted);
+    if (wantedValue === null) {
+        return false;
+    }
+
+    const labelValue = parseSelectionValue(normalizedLabel);
+    if (labelValue !== null && labelValue === wantedValue) {
+        return true;
+    }
+
+    const marketValue = parseSelectionValue(marketName);
+    return marketValue !== null && marketValue === wantedValue;
+}
+
 function getOverOddsBySelection(match, selections = [TARGET_ODD_SELECTION]) {
     const odds = Array.isArray(match?.odds) ? match.odds : [];
     const wantedSelections = new Set(selections.map((selection) => normalizeMarketValue(selection)));
@@ -301,14 +351,18 @@ function getOverOddsBySelection(match, selections = [TARGET_ODD_SELECTION]) {
             }
 
             const label = option.slice(0, separatorIndex).trim();
-            const normalizedLabel = normalizeMarketValue(label);
             const oddText = option.slice(separatorIndex + 1).trim();
-            const oddValue = parseFloat(oddText);
-            if (!wantedSelections.has(normalizedLabel) || !Number.isFinite(oddValue)) {
+            const oddValue = parseLocaleFloat(oddText);
+            if (!Number.isFinite(oddValue)) {
                 continue;
             }
 
-            foundSelections[normalizedLabel] = {
+            const matchedSelection = Array.from(wantedSelections).find((wantedSelection) => isSelectionMatch(label, marketName, wantedSelection));
+            if (!matchedSelection) {
+                continue;
+            }
+
+            foundSelections[matchedSelection] = {
                 marketName,
                 label,
                 oddValue

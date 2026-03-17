@@ -87,13 +87,13 @@ function csvReadMatches(string $csvPath, callable $onMatch): void {
     fclose($fh);
 }
 
-$mktParam = $_GET['under'] ?? '2.5';
+$mktParam = $_GET['under'] ?? '0.5';
 if (!array_key_exists($mktParam, $marketOptions)) {
-    $mktParam = '2.5';
+    $mktParam = '0.5';
 }
 
 if (!array_key_exists('under', $_GET)) {
-    $mktParam = '2.5';
+    $mktParam = '0.5';
 }
 
 // -- Hidden leagues config -----------------------------------------------------
@@ -162,7 +162,7 @@ $leagueSet       = [];
 $csvMinDate      = null;
 $csvMaxDate      = null;
 $csvDatesWithData = [];
-$useDateFilter = $hasDateFromInput && $hasDateToInput && $dateFromValid && $dateToValid;
+$useDateFilter = true;
 
 csvReadMatches($csvPath, function(array $m) use (
     $lgFilter,

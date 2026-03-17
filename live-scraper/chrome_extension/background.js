@@ -8,6 +8,7 @@ const AUTO_SEND_RETRY_DELAY_MS = 1200;
 const TARGET_HOST = 'g943gp.bpvmr7u6.com';
 const LIVE_ALARM_NAME = 'bpvm-live-cycle';
 const TARGET_ODD_MARKET = 'o/u';
+const TARGET_FT_ODD_MARKET = 'ft.o/u';
 const TARGET_ODD_SELECTION = 'o0.75';
 const COMPARISON_ODD_SELECTIONS = ['o1.0', 'o1.25'];
 const TARGET_ODD_MIN = 1.8;
@@ -322,7 +323,7 @@ function isSelectionMatch(label, marketName, wantedSelection) {
     return marketValue !== null && marketValue === wantedValue;
 }
 
-function getOverOddsBySelection(match, selections = [TARGET_ODD_SELECTION]) {
+function getOverOddsBySelection(match, selections = [TARGET_ODD_SELECTION], marketFilter = TARGET_ODD_MARKET) {
     const odds = Array.isArray(match?.odds) ? match.odds : [];
     const wantedSelections = new Set(selections.map((selection) => normalizeMarketValue(selection)));
     const foundSelections = {};
@@ -334,7 +335,7 @@ function getOverOddsBySelection(match, selections = [TARGET_ODD_SELECTION]) {
         }
 
         const marketName = parts[0].trim();
-        if (!normalizeMarketValue(marketName).includes(TARGET_ODD_MARKET)) {
+        if (!normalizeMarketValue(marketName).includes(marketFilter)) {
             continue;
         }
 
@@ -377,22 +378,23 @@ function getOverOddsBySelection(match, selections = [TARGET_ODD_SELECTION]) {
     return foundSelections;
 }
 
-function getTargetOverOdd(match, marketSelection = TARGET_ODD_SELECTION) {
-    const oddsMap = getOverOddsBySelection(match, [marketSelection]);
+function getTargetOverOdd(match, marketSelection = TARGET_ODD_SELECTION, marketFilter = TARGET_ODD_MARKET) {
+    const oddsMap = getOverOddsBySelection(match, [marketSelection], marketFilter);
     const normalizedSelection = normalizeMarketValue(marketSelection);
     return oddsMap[normalizedSelection] || null;
 }
 
-function getQualifiedOddsAlert(match, marketSelection = TARGET_ODD_SELECTION, threshold = TARGET_ODD_MIN) {
-    if (!isSecondHalfStatus(match)) {
+function getQualifiedOddsAlert(match, marketSelection = TARGET_ODD_SELECTION, threshold = TARGET_ODD_MIN, isWatched = false) {
+    if (!isWatched && !isSecondHalfStatus(match)) {
         return null;
     }
 
     const normalizedSelection = normalizeWatchMarketSelection(marketSelection, TARGET_ODD_SELECTION);
-    const targetOdd = getTargetOverOdd(match, normalizedSelection);
+    const marketFilter = isWatched ? TARGET_FT_ODD_MARKET : TARGET_ODD_MARKET;
+    const targetOdd = getTargetOverOdd(match, normalizedSelection, marketFilter);
     const numericThreshold = toThresholdNumber(threshold, TARGET_ODD_MIN);
 
-    if (!targetOdd || !(targetOdd.oddValue > numericThreshold)) {
+    if (!targetOdd || !(targetOdd.oddValue >= numericThreshold)) {
         return null;
     }
 
@@ -591,7 +593,8 @@ async function updateOddTracking(matches) {
     for (const match of matches) {
         const matchKey = createMatchKey(match);
         const watchContext = getMatchWatchContext(match, watchConfig);
-        const targetOdd = getTargetOverOdd(match, watchContext.appliedSelection);
+        const marketFilter = watchContext.isWatched ? TARGET_FT_ODD_MARKET : TARGET_ODD_MARKET;
+        const targetOdd = getTargetOverOdd(match, watchContext.appliedSelection, marketFilter);
 
         if (!isSecondHalfStatus(match) || !targetOdd) {
             oddInsightByMatchKey.delete(matchKey);
@@ -808,7 +811,7 @@ async function sendToServer(data, isAutoSend = false) {
                     match,
                     matchKey,
                     stateKey: getThresholdStateKey(matchKey, threshold, marketSelection),
-                    targetOdd: getQualifiedOddsAlert(match, marketSelection, threshold),
+                    targetOdd: getQualifiedOddsAlert(match, marketSelection, threshold, watchContext.isWatched),
                     watchContext
                 };
             });

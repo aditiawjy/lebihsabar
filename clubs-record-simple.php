@@ -3,12 +3,14 @@ date_default_timezone_set('Asia/Jakarta');
 
 // -- Market options ------------------------------------------------------------
 $marketOptions = [
-    '0.5'     => ['label' => 'Under 0.5',     'short' => 'U0.5',  'class' => 'bg-blue-500 text-white'],
-    '1.5'     => ['label' => 'Under 1.5',     'short' => 'U1.5',  'class' => 'bg-sky-500 text-white'],
-    '2.5'     => ['label' => 'Under 2.5',     'short' => 'U2.5',  'class' => 'bg-cyan-500 text-white'],
-    'fhg0.5'  => ['label' => 'FHG Under 0.5', 'short' => 'FHG',   'class' => 'bg-violet-500 text-white'],
-    'shg0.5'  => ['label' => 'SHG Under 0.5', 'short' => 'SHG',   'class' => 'bg-fuchsia-500 text-white'],
-    'draw_ft' => ['label' => 'Draw FT',        'short' => 'DRAW',  'class' => 'bg-indigo-500 text-white'],
+    '0.5'       => ['label' => 'Under 0.5',       'short' => 'U0.5',  'class' => 'bg-blue-500 text-white'],
+    '1.5'       => ['label' => 'Under 1.5',       'short' => 'U1.5',  'class' => 'bg-sky-500 text-white'],
+    '2.5'       => ['label' => 'Under 2.5',       'short' => 'U2.5',  'class' => 'bg-cyan-500 text-white'],
+    'fhg0.5'    => ['label' => 'FHG Under 0.5',   'short' => 'FHG',   'class' => 'bg-violet-500 text-white'],
+    'shg0.5'    => ['label' => 'SHG Under 0.5',   'short' => 'SHG',   'class' => 'bg-fuchsia-500 text-white'],
+    'draw_ft'   => ['label' => 'Draw FT',          'short' => 'DRAW',  'class' => 'bg-indigo-500 text-white'],
+    'home_wtn'  => ['label' => 'Home Win to Nil',  'short' => 'HWTN',  'class' => 'bg-orange-500 text-white'],
+    'away_wtn'  => ['label' => 'Away Win to Nil',  'short' => 'AWTN',  'class' => 'bg-teal-500 text-white'],
 ];
 
 function csvCheckMarket(array $m, string $mkt): bool {
@@ -20,8 +22,10 @@ function csvCheckMarket(array $m, string $mkt): bool {
         '2.5'     => ($ftH + $ftA) < 3,
         'fhg0.5'  => ($fhH + $fhA) < 1,
         'shg0.5'  => (($ftH - $fhH) + ($ftA - $fhA)) < 1,
-        'draw_ft' => $ftH === $ftA,
-        default   => false,
+        'draw_ft'  => $ftH === $ftA,
+        'home_wtn' => $ftH > $ftA && $ftA === 0,
+        'away_wtn' => $ftA > $ftH && $ftH === 0,
+        default    => false,
     };
 }
 function csvHasFT(array $m): bool {
@@ -305,6 +309,9 @@ if ($searchTerm) {
         mb_strpos(mb_strtolower($r['league'], 'UTF-8'), $searchLower) !== false
     ));
 }
+
+// Filter: only clubs with upcoming next match and hits/max >= 50%
+$rows = array_values(array_filter($rows, fn($r) => $r['next_match'] !== null && ($r['hits_ratio'] ?? 0) >= 50));
 
 // Filter: only max if requested
 if ($showOnlyMax) {
@@ -637,8 +644,8 @@ $mktClass = $marketOptions[$mktParam]['class'];
                         <td class="px-4 py-3 text-center text-slate-600 font-medium"><?= htmlspecialchars(date('d-m-y', strtotime($r['max_date']))) ?></td>
                         <td class="px-4 py-3 text-center text-slate-600">
                         <?php if ($r['next_match']): ?>
-                            <div class="font-bold text-slate-800"><?= htmlspecialchars($r['next_match']['vs']) ?></div>
-                            <div class="text-[10px] text-slate-500"><?= htmlspecialchars($r['next_match']['date'].' '.$r['next_match']['time']) ?></div>
+                            <div class="font-bold text-slate-800 text-xs max-w-[120px] truncate mx-auto" title="<?= htmlspecialchars($r['next_match']['vs']) ?>"><?= htmlspecialchars($r['next_match']['vs']) ?></div>
+                            <div class="text-[10px] text-slate-500"><?= htmlspecialchars(date('d/m', strtotime($r['next_match']['date'])).' '.$r['next_match']['time']) ?></div>
                         <?php else: ?>-<?php endif; ?>
                     </td>
                 </tr>
@@ -728,8 +735,8 @@ $mktClass = $marketOptions[$mktParam]['class'];
                     <td class="px-4 py-3 text-center text-slate-600 font-medium"><?= $r['max_date'] ? htmlspecialchars(date('d-m-y', strtotime($r['max_date']))) : '-' ?></td>
                     <td class="px-4 py-3 text-center text-slate-600">
                         <?php if ($r['next_match']): ?>
-                            <div class="font-bold text-slate-800 text-xs"><?= htmlspecialchars($r['next_match']['vs']) ?></div>
-                            <div class="text-[10px] text-slate-500"><?= htmlspecialchars($r['next_match']['date'].' '.$r['next_match']['time']) ?></div>
+                            <div class="font-bold text-slate-800 text-xs max-w-[120px] truncate mx-auto" title="<?= htmlspecialchars($r['next_match']['vs']) ?>"><?= htmlspecialchars($r['next_match']['vs']) ?></div>
+                            <div class="text-[10px] text-slate-500"><?= htmlspecialchars(date('d/m', strtotime($r['next_match']['date'])).' '.$r['next_match']['time']) ?></div>
                         <?php else: ?>-<?php endif; ?>
                     </td>
                 </tr>

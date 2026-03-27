@@ -261,6 +261,7 @@ foreach ($inRange as $key => $club) {
     $maxDate = $allTimeMaxByKey[$key]['date'] ?? '';
     $periodMaxCnt = $periodMaxByKey[$key]['count'] ?? 0;
     $periodMaxDate = $periodMaxByKey[$key]['date'] ?? '';
+    $allTimeTotal = array_sum($allTimeDailyMkt[$key] ?? []);
 
     $periodCnt = $club['under_count'];
     if ($periodCnt <= 0) {
@@ -276,6 +277,7 @@ foreach ($inRange as $key => $club) {
         'period_max_count' => $periodMaxCnt,
         'period_max_date' => $periodMaxDate,
         'max_count'   => $maxCnt,
+        'all_time_total' => $allTimeTotal,
         'hits_ratio'  => $maxCnt > 0 ? round(($periodCnt / $maxCnt) * 100, 1) : null,
         'max_date'    => $maxDate,
         'is_max'      => $isMax,
@@ -290,6 +292,7 @@ foreach ($inRange as $key => $club) {
             'period_max_count' => $periodMaxCnt,
             'period_max_date' => $periodMaxDate,
             'max_count' => $maxCnt,
+            'all_time_total' => $allTimeTotal,
             'hits_ratio' => $maxCnt > 0 ? round(($periodCnt / $maxCnt) * 100, 1) : null,
             'max_date' => $maxDate,
             'is_max' => $isMax,
@@ -310,8 +313,8 @@ if ($searchTerm) {
     ));
 }
 
-// Filter: only clubs with upcoming next match and hits/max >= 50%
-$rows = array_values(array_filter($rows, fn($r) => $r['next_match'] !== null && ($r['hits_ratio'] ?? 0) >= 50));
+// Filter: only hits/max >= 60%
+$rows = array_values(array_filter($rows, fn($r) => ($r['hits_ratio'] ?? 0) >= 60));
 
 // Filter: only max if requested
 if ($showOnlyMax) {
@@ -632,13 +635,8 @@ $mktClass = $marketOptions[$mktParam]['class'];
                         <td class="px-4 py-3 text-center"><span class="px-3 py-1 rounded-full bg-rose-100 text-rose-700 font-black text-sm"><?= $r['period_max_count'] ?></span></td>
                         <td class="px-4 py-3 text-center"><span class="px-3 py-1 rounded-full bg-violet-100 text-violet-700 font-black text-sm"><?= $r['max_count'] ?></span></td>
                         <td class="px-4 py-3 text-center text-xs">
-                            <?php
-                            $recordRatio = $r['max_count'] > 0
-                                ? round(($r['period_max_count'] / $r['max_count']) * 100, 1)
-                                : null;
-                            ?>
-                            <span class="px-3 py-1.5 rounded-full text-xs font-black <?= csvRatioBadgeClass($recordRatio) ?>">
-                                <?= htmlspecialchars(csvFormatRatio($recordRatio)) ?>
+                            <span class="px-3 py-1.5 rounded-full text-xs font-black <?= csvRatioBadgeClass($r['hits_ratio']) ?>">
+                                <?= htmlspecialchars(csvFormatRatio($r['hits_ratio'])) ?>
                             </span>
                         </td>
                         <td class="px-4 py-3 text-center text-slate-600 font-medium"><?= htmlspecialchars(date('d-m-y', strtotime($r['max_date']))) ?></td>

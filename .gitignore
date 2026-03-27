@@ -21,3 +21,15 @@ __pycache__/
 
 # Local CSV backup snapshots
 csv_backups/
+
+# OMC / Claude tools
+.omc/
+AGENTS.md
+
+# Node / Playwright testing
+node_modules/
+package-lock.json
+package.json
+playwright.config.js
+test-results/
+tests/

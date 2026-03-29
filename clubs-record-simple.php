@@ -9,8 +9,10 @@ $marketOptions = [
     'fhg0.5'    => ['label' => 'FHG Under 0.5',   'short' => 'FHG',   'class' => 'bg-violet-500 text-white'],
     'shg0.5'    => ['label' => 'SHG Under 0.5',   'short' => 'SHG',   'class' => 'bg-fuchsia-500 text-white'],
     'draw_ft'   => ['label' => 'Draw FT',          'short' => 'DRAW',  'class' => 'bg-indigo-500 text-white'],
-    'home_wtn'  => ['label' => 'Home Win to Nil',  'short' => 'HWTN',  'class' => 'bg-orange-500 text-white'],
-    'away_wtn'  => ['label' => 'Away Win to Nil',  'short' => 'AWTN',  'class' => 'bg-teal-500 text-white'],
+    'home_wtn'  => ['label' => 'Home Win to Nil',   'short' => 'HWTN',  'class' => 'bg-orange-500 text-white'],
+    'away_wtn'  => ['label' => 'Away Win to Nil',   'short' => 'AWTN',  'class' => 'bg-teal-500 text-white'],
+    '!home_wtn' => ['label' => '!Home Win to Nil',  'short' => '!HWTN', 'class' => 'bg-orange-800 text-white'],
+    '!away_wtn' => ['label' => '!Away Win to Nil',  'short' => '!AWTN', 'class' => 'bg-teal-800 text-white'],
 ];
 
 function csvCheckMarket(array $m, string $mkt): bool {
@@ -23,8 +25,10 @@ function csvCheckMarket(array $m, string $mkt): bool {
         'fhg0.5'  => ($fhH + $fhA) < 1,
         'shg0.5'  => (($ftH - $fhH) + ($ftA - $fhA)) < 1,
         'draw_ft'  => $ftH === $ftA,
-        'home_wtn' => $ftH > $ftA && $ftA === 0,
-        'away_wtn' => $ftA > $ftH && $ftH === 0,
+        'home_wtn'  => $ftH > $ftA && $ftA === 0,
+        'away_wtn'  => $ftA > $ftH && $ftH === 0,
+        '!home_wtn' => !($ftH > $ftA && $ftA === 0),
+        '!away_wtn' => !($ftA > $ftH && $ftH === 0),
         default    => false,
     };
 }

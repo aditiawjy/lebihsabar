@@ -163,6 +163,7 @@ if ($dateFrom > $dateTo) [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
 $allTimeDailyMkt = [];  // key => [date => count]
 $allTimeMaxByKey = []; // key => ['count' => int, 'date' => string]
 $nextMatch       = [];  // key => match
+$lastMatch       = [];  // key => last completed match with score
 $inRange = [];  // key => ['team','league','under_count']
 $inRangeDailyMkt = []; // key => [date => count]
 $periodMaxByKey = [];  // key => ['count' => int, 'date' => string]
@@ -185,6 +186,7 @@ csvReadMatches($csvPath, function(array $m) use (
     &$allTimeDailyMkt,
     &$allTimeMaxByKey,
     &$nextMatch,
+    &$lastMatch,
     &$inRange,
     &$inRangeDailyMkt,
     &$periodMaxByKey,
@@ -213,6 +215,15 @@ csvReadMatches($csvPath, function(array $m) use (
         if ($csvMinDate === null || $m['date'] < $csvMinDate) $csvMinDate = $m['date'];
         if ($csvMaxDate === null || $m['date'] > $csvMaxDate) $csvMaxDate = $m['date'];
         $csvDatesWithData[$m['date']] = true;
+
+        $matchInfo = ['vs_home' => $m['home'], 'vs_away' => $m['away'], 'date' => $m['date'], 'ft_home' => $m['ft_home'], 'ft_away' => $m['ft_away']];
+        if (!isset($lastMatch[$hKey]) || $m['date'] > $lastMatch[$hKey]['date']) {
+            $lastMatch[$hKey] = $matchInfo;
+        }
+        if (!isset($lastMatch[$aKey]) || $m['date'] > $lastMatch[$aKey]['date']) {
+            $lastMatch[$aKey] = $matchInfo;
+        }
+
         $isMarketHit = csvCheckMarket($m, $mktParam);
         if ($isMarketHit && csvTimeInRange($m['time'], $timeFrom, $timeTo)) {
             csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $hKey, $m['date']);
@@ -286,6 +297,7 @@ foreach ($inRange as $key => $club) {
         'max_date'    => $maxDate,
         'is_max'      => $isMax,
         'next_match'  => $nextMatch[$key] ?? null,
+        'last_match'  => $lastMatch[$key] ?? null,
     ];
 
     if ($isMax && $maxCnt > 0) {
@@ -301,6 +313,7 @@ foreach ($inRange as $key => $club) {
             'max_date' => $maxDate,
             'is_max' => $isMax,
             'next_match' => $nextMatch[$key] ?? null,
+            'last_match' => $lastMatch[$key] ?? null,
         ];
     }
 }
@@ -624,6 +637,7 @@ $mktClass = $marketOptions[$mktParam]['class'];
                             <th class="px-4 py-3 text-center font-bold">All-Time Max</th>
                             <th class="px-4 py-3 text-center font-bold">Hits / Max %</th>
                             <th class="px-4 py-3 text-center font-bold">Tgl Max</th>
+                            <th class="px-4 py-3 text-center font-bold">Last Match</th>
                             <th class="px-4 py-3 text-center font-bold">Next Match</th>
                         </tr>
                     </thead>
@@ -644,6 +658,12 @@ $mktClass = $marketOptions[$mktParam]['class'];
                             </span>
                         </td>
                         <td class="px-4 py-3 text-center text-slate-600 font-medium"><?= htmlspecialchars(date('d-m-y', strtotime($r['max_date']))) ?></td>
+                        <td class="px-4 py-3 text-center text-slate-600">
+                        <?php if ($r['last_match'] ?? null): ?>
+                            <div class="text-[10px] font-bold text-slate-700"><?= htmlspecialchars($r['last_match']['vs_home']).' '.$r['last_match']['ft_home'].'-'.$r['last_match']['ft_away'].' '.htmlspecialchars($r['last_match']['vs_away']) ?></div>
+                            <div class="text-[10px] text-slate-400"><?= htmlspecialchars(date('d/m/y', strtotime($r['last_match']['date']))) ?></div>
+                        <?php else: ?>-<?php endif; ?>
+                    </td>
                         <td class="px-4 py-3 text-center text-slate-600">
                         <?php if ($r['next_match']): ?>
                             <div class="font-bold text-slate-800 text-xs max-w-[120px] truncate mx-auto" title="<?= htmlspecialchars($r['next_match']['vs']) ?>"><?= htmlspecialchars($r['next_match']['vs']) ?></div>
@@ -703,12 +723,13 @@ $mktClass = $marketOptions[$mktParam]['class'];
                     <th class="px-4 py-3 text-center">
                         <a href="<?= htmlspecialchars(csvSortUrl('max_date', $sortCol, $sortOrder)) ?>" class="flex items-center justify-center gap-1 hover:text-amber-600 font-bold">Tgl Max <?= $sortCol==='max_date' ? ($sortOrder==='asc'?'▲':'▼') : '' ?></a>
                     </th>
+                    <th class="px-4 py-3 text-center font-bold">Last Match</th>
                     <th class="px-4 py-3 text-center font-bold">Next Match</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
             <?php if (!$pageRows): ?>
-                <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400 font-medium">
+                <tr><td colspan="8" class="px-4 py-12 text-center text-slate-400 font-medium">
                     <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                     </div>
@@ -735,6 +756,12 @@ $mktClass = $marketOptions[$mktParam]['class'];
                         ><?= htmlspecialchars(csvFormatRatio($r['hits_ratio'])) ?></span>
                     </td>
                     <td class="px-4 py-3 text-center text-slate-600 font-medium"><?= $r['max_date'] ? htmlspecialchars(date('d-m-y', strtotime($r['max_date']))) : '-' ?></td>
+                    <td class="px-4 py-3 text-center text-slate-600">
+                        <?php if ($r['last_match'] ?? null): ?>
+                            <div class="text-[10px] font-bold text-slate-700"><?= htmlspecialchars($r['last_match']['vs_home']).' '.$r['last_match']['ft_home'].'-'.$r['last_match']['ft_away'].' '.htmlspecialchars($r['last_match']['vs_away']) ?></div>
+                            <div class="text-[10px] text-slate-400"><?= htmlspecialchars(date('d/m/y', strtotime($r['last_match']['date']))) ?></div>
+                        <?php else: ?>-<?php endif; ?>
+                    </td>
                     <td class="px-4 py-3 text-center text-slate-600">
                         <?php if ($r['next_match']): ?>
                             <div class="font-bold text-slate-800 text-xs max-w-[120px] truncate mx-auto" title="<?= htmlspecialchars($r['next_match']['vs']) ?>"><?= htmlspecialchars($r['next_match']['vs']) ?></div>

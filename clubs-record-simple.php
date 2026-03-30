@@ -214,7 +214,7 @@ csvReadMatches($csvPath, function(array $m) use (
         if ($csvMaxDate === null || $m['date'] > $csvMaxDate) $csvMaxDate = $m['date'];
         $csvDatesWithData[$m['date']] = true;
         $isMarketHit = csvCheckMarket($m, $mktParam);
-        if ($isMarketHit) {
+        if ($isMarketHit && csvTimeInRange($m['time'], $timeFrom, $timeTo)) {
             csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $hKey, $m['date']);
             csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $aKey, $m['date']);
         }

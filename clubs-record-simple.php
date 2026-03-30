@@ -216,7 +216,7 @@ csvReadMatches($csvPath, function(array $m) use (
         if ($csvMaxDate === null || $m['date'] > $csvMaxDate) $csvMaxDate = $m['date'];
         $csvDatesWithData[$m['date']] = true;
 
-        $matchInfo = ['vs_home' => $m['home'], 'vs_away' => $m['away'], 'date' => $m['date'], 'ft_home' => $m['ft_home'], 'ft_away' => $m['ft_away']];
+        $matchInfo = ['vs_home' => $m['home'], 'vs_away' => $m['away'], 'date' => $m['date'], 'ft_home' => $m['ft_home'], 'ft_away' => $m['ft_away'], 'fh_home' => $m['fh_home'], 'fh_away' => $m['fh_away']];
         if (!isset($lastMatch[$hKey]) || $m['date'] > $lastMatch[$hKey]['date']) {
             $lastMatch[$hKey] = $matchInfo;
         }
@@ -661,6 +661,7 @@ $mktClass = $marketOptions[$mktParam]['class'];
                         <td class="px-4 py-3 text-center text-slate-600">
                         <?php if ($r['last_match'] ?? null): ?>
                             <div class="text-[10px] font-bold text-slate-700"><?= htmlspecialchars($r['last_match']['vs_home']).' '.$r['last_match']['ft_home'].'-'.$r['last_match']['ft_away'].' '.htmlspecialchars($r['last_match']['vs_away']) ?></div>
+                            <div class="text-[10px] text-slate-500">(HT <?= $r['last_match']['fh_home'].'-'.$r['last_match']['fh_away'] ?>)</div>
                             <div class="text-[10px] text-slate-400"><?= htmlspecialchars(date('d/m/y', strtotime($r['last_match']['date']))) ?></div>
                         <?php else: ?>-<?php endif; ?>
                     </td>
@@ -759,6 +760,7 @@ $mktClass = $marketOptions[$mktParam]['class'];
                     <td class="px-4 py-3 text-center text-slate-600">
                         <?php if ($r['last_match'] ?? null): ?>
                             <div class="text-[10px] font-bold text-slate-700"><?= htmlspecialchars($r['last_match']['vs_home']).' '.$r['last_match']['ft_home'].'-'.$r['last_match']['ft_away'].' '.htmlspecialchars($r['last_match']['vs_away']) ?></div>
+                            <div class="text-[10px] text-slate-500">(HT <?= $r['last_match']['fh_home'].'-'.$r['last_match']['fh_away'] ?>)</div>
                             <div class="text-[10px] text-slate-400"><?= htmlspecialchars(date('d/m/y', strtotime($r['last_match']['date']))) ?></div>
                         <?php else: ?>-<?php endif; ?>
                     </td>

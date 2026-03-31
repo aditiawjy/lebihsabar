@@ -27,8 +27,8 @@ function csvCheckMarket(array $m, string $mkt): bool {
         'draw_ft'  => $ftH === $ftA,
         'home_wtn'  => $ftH > $ftA && $ftA === 0,
         'away_wtn'  => $ftA > $ftH && $ftH === 0,
-        '!home_wtn' => !($ftH > $ftA && $ftA === 0),
-        '!away_wtn' => !($ftA > $ftH && $ftH === 0),
+        '!home_wtn' => $ftH > $ftA && $ftA > 0,
+        '!away_wtn' => $ftA > $ftH && $ftH > 0,
         default    => false,
     };
 }
@@ -225,6 +225,7 @@ csvReadMatches($csvPath, function(array $m) use (
         }
 
         $isMarketHit = csvCheckMarket($m, $mktParam);
+
         if ($isMarketHit && csvTimeInRange($m['time'], $timeFrom, $timeTo)) {
             csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $hKey, $m['date']);
             csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $aKey, $m['date']);
@@ -244,8 +245,8 @@ csvReadMatches($csvPath, function(array $m) use (
                     $inRange[$key] = ['team' => $team, 'league' => $m['league'], 'under_count' => 0];
                 }
                 $inRange[$key]['under_count']++;
-            csvBumpDailyMax($inRangeDailyMkt, $periodMaxByKey, $key, $m['date']);
-        }
+                csvBumpDailyMax($inRangeDailyMkt, $periodMaxByKey, $key, $m['date']);
+            }
         }
         return;
     }
@@ -330,8 +331,12 @@ if ($searchTerm) {
     ));
 }
 
-// Filter: only hits/max >= 60%
-$rows = array_values(array_filter($rows, fn($r) => ($r['hits_ratio'] ?? 0) >= 60));
+// Filter: U0.5 shows all with max >= 1; others require hits/max >= 60%
+if ($mktParam === '0.5') {
+    $rows = array_values(array_filter($rows, fn($r) => ($r['max_count'] ?? 0) >= 1));
+} else {
+    $rows = array_values(array_filter($rows, fn($r) => ($r['hits_ratio'] ?? 0) >= 60));
+}
 
 // Filter: only max if requested
 if ($showOnlyMax) {

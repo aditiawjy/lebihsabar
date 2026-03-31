@@ -216,14 +216,6 @@ csvReadMatches($csvPath, function(array $m) use (
         if ($csvMaxDate === null || $m['date'] > $csvMaxDate) $csvMaxDate = $m['date'];
         $csvDatesWithData[$m['date']] = true;
 
-        $matchInfo = ['vs_home' => $m['home'], 'vs_away' => $m['away'], 'date' => $m['date'], 'ft_home' => $m['ft_home'], 'ft_away' => $m['ft_away'], 'fh_home' => $m['fh_home'], 'fh_away' => $m['fh_away']];
-        if (!isset($lastMatch[$hKey]) || $m['date'] > $lastMatch[$hKey]['date']) {
-            $lastMatch[$hKey] = $matchInfo;
-        }
-        if (!isset($lastMatch[$aKey]) || $m['date'] > $lastMatch[$aKey]['date']) {
-            $lastMatch[$aKey] = $matchInfo;
-        }
-
         $isMarketHit = csvCheckMarket($m, $mktParam);
 
         if ($isMarketHit && csvTimeInRange($m['time'], $timeFrom, $timeTo)) {
@@ -240,12 +232,16 @@ csvReadMatches($csvPath, function(array $m) use (
                 csvTimeInRange($m['time'], $timeFrom, $timeTo)
             ))
         ) {
+            $matchInfo = ['vs_home' => $m['home'], 'vs_away' => $m['away'], 'date' => $m['date'], 'ft_home' => $m['ft_home'], 'ft_away' => $m['ft_away'], 'fh_home' => $m['fh_home'], 'fh_away' => $m['fh_away']];
             foreach ([$hKey => $m['home'], $aKey => $m['away']] as $key => $team) {
                 if (!isset($inRange[$key])) {
                     $inRange[$key] = ['team' => $team, 'league' => $m['league'], 'under_count' => 0];
                 }
                 $inRange[$key]['under_count']++;
                 csvBumpDailyMax($inRangeDailyMkt, $periodMaxByKey, $key, $m['date']);
+                if (!isset($lastMatch[$key]) || $m['date'] > $lastMatch[$key]['date']) {
+                    $lastMatch[$key] = $matchInfo;
+                }
             }
         }
         return;

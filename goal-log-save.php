@@ -25,7 +25,7 @@ if (!isset($payload['goals']) || !is_array($payload['goals']) || !count($payload
 }
 
 $csvFile = __DIR__ . '/goal_log.csv';
-$headers = ['date', 'league', 'home_team', 'away_team', 'goals', 'final_home', 'final_away'];
+$headers = ['datetime', 'league', 'home_team', 'away_team', 'goals', 'final_home', 'final_away'];
 
 // Load existing rows keyed by match (date|home|away)
 $rows = [];
@@ -34,7 +34,8 @@ if (is_file($csvFile) && is_readable($csvFile)) {
     fgetcsv($fh); // skip header
     while (($row = fgetcsv($fh)) !== false) {
         if (count($row) < 7) continue;
-        $key = $row[0] . '|' . $row[2] . '|' . $row[3];
+        $parsedDate = date('Y-m-d', strtotime($row[0]));
+        $key = $parsedDate . '|' . $row[2] . '|' . $row[3];
         $rows[$key] = [
             'date'       => $row[0],
             'league'     => $row[1],
@@ -50,7 +51,9 @@ if (is_file($csvFile) && is_readable($csvFile)) {
 
 // Merge incoming goal events into rows
 foreach ($payload['goals'] as $goal) {
-    $date     = substr($goal['timestamp'] ?? date('c'), 0, 10);
+    $ts       = $goal['timestamp'] ?? date('c');
+    $dateOnly = substr($ts, 0, 10); // for key only
+    $datetime = date('d-m-y H:i', strtotime($ts));
     $homeTeam = trim($goal['home_team'] ?? '');
     $awayTeam = trim($goal['away_team'] ?? '');
     $league   = trim($goal['league']    ?? '');
@@ -61,12 +64,12 @@ foreach ($payload['goals'] as $goal) {
 
     if ($homeTeam === '' || $awayTeam === '') continue;
 
-    $key = $date . '|' . $homeTeam . '|' . $awayTeam;
+    $key = $dateOnly . '|' . $homeTeam . '|' . $awayTeam;
     $goalEntry = $minute . ' (' . $scoreAfter . ')';
 
     if (!isset($rows[$key])) {
         $rows[$key] = [
-            'date'       => $date,
+            'date'       => $datetime,
             'league'     => $league,
             'home_team'  => $homeTeam,
             'away_team'  => $awayTeam,

@@ -33,9 +33,71 @@ let notifiedMatchKeys = new Set();
 let wasAboveThresholdByMatchKey = new Map();
 let oddHistoryByMatchKey = new Map();
 let oddInsightByMatchKey = new Map();
+let lastScoreByMatchKey = new Map(); // key => "homeScore-awayScore"
 
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function trackGoalEvents(matches) {
+    if (!Array.isArray(matches) || !matches.length) return;
+
+    const newGoals = [];
+    const now = new Date();
+    const timestamp = now.toISOString();
+    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    for (const match of matches) {
+        const key = createMatchKey(match);
+        const homeScore = String(match?.homeScore ?? '0').trim();
+        const awayScore = String(match?.awayScore ?? '0').trim();
+        const scoreStr = `${homeScore}-${awayScore}`;
+        const minute = String(match?.status || '').trim();
+
+        const prev = lastScoreByMatchKey.get(key);
+
+        if (prev === undefined) {
+            // first time seeing this match, just record
+            lastScoreByMatchKey.set(key, scoreStr);
+            continue;
+        }
+
+        if (prev !== scoreStr) {
+            // score changed = goal event
+            newGoals.push({
+                timestamp,
+                time: timeStr,
+                league: match?.league || '',
+                home_team: match?.homeTeam || '',
+                away_team: match?.awayTeam || '',
+                minute,
+                score_before: prev,
+                score_after: scoreStr,
+                home_score: homeScore,
+                away_score: awayScore,
+            });
+            lastScoreByMatchKey.set(key, scoreStr);
+        }
+    }
+
+    if (!newGoals.length) return;
+
+    // append to chrome.storage goalLog
+    const stored = await chrome.storage.local.get(['goalLog']);
+    const existing = Array.isArray(stored.goalLog) ? stored.goalLog : [];
+    const updated = [...existing, ...newGoals].slice(-500); // keep last 500 events
+    await chrome.storage.local.set({ goalLog: updated });
+
+    // send to PHP server
+    try {
+        await fetch('http://localhost/lebihsabar/goal-log-save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ goals: newGoals })
+        });
+    } catch (_) {
+        // server might be offline, ignore
+    }
 }
 
 function createDataSignature(data) {
@@ -922,6 +984,7 @@ async function sendToServerWithRetry(data) {
 
 async function handleFreshData(data) {
     await setSavedMatchData(data);
+    await trackGoalEvents(Array.isArray(data?.matches) ? data.matches : []);
     await updateOddTracking(Array.isArray(data?.matches) ? data.matches : []);
     await setStatus({
         pageStatus: '✓ Target page detected',

@@ -35,6 +35,8 @@ let oddHistoryByMatchKey = new Map();
 let oddInsightByMatchKey = new Map();
 let lastScoreByMatchKey = new Map(); // key => "homeScore-awayScore"
 let registeredMatchKeys = new Set(); // keys already registered in CSV
+let shScoreByMatchKey = new Map();   // key => score when 2H started "h-a"
+let shNotifiedLeagues = new Set();   // league keys already notified for SHG alert
 
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -42,6 +44,96 @@ function delay(ms) {
 
 function isKickoffMinute(status) {
     return /^1H\s+[01]'$/i.test(String(status || '').trim());
+}
+
+function isSecondHalfStart(status) {
+    return /^2H\s+[01]'$/i.test(String(status || '').trim());
+}
+
+function getShMinute(status) {
+    const m = String(status || '').match(/^2H\s+(\d+)'/i);
+    return m ? parseInt(m[1], 10) : -1;
+}
+
+async function sendTelegramText(text) {
+    try {
+        await fetch(TELEGRAM_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text, parse_mode: 'HTML' })
+        });
+    } catch (_) {}
+}
+
+async function trackShgAlert(matches) {
+    if (!Array.isArray(matches) || !matches.length) return;
+
+    // Step 1: record score when 2H starts, reset SH tracking for matches back to 1H
+    for (const match of matches) {
+        const key = createMatchKey(match);
+        const homeScore = String(match?.homeScore ?? '0').trim();
+        const awayScore = String(match?.awayScore ?? '0').trim();
+        const scoreStr = `${homeScore}-${awayScore}`;
+        const status = String(match?.status || '').trim();
+
+        if (isSecondHalfStart(status) && !shScoreByMatchKey.has(key)) {
+            shScoreByMatchKey.set(key, scoreStr);
+        }
+
+        // Reset if match back to 1H (new match)
+        if (isKickoffMinute(status)) {
+            shScoreByMatchKey.delete(key);
+            // also clear league notification so new match cycle can notify again
+        }
+    }
+
+    // Step 2: group active 2H matches by league, check SHG condition
+    // match is "no SHG" if shScore === current score
+    const leagueMatches = {}; // league => [{match, shMin, noShg}]
+
+    for (const match of matches) {
+        const key = createMatchKey(match);
+        const status = String(match?.status || '').trim();
+        const shMin = getShMinute(status);
+        if (shMin < 0) continue; // not in 2H
+
+        const homeScore = String(match?.homeScore ?? '0').trim();
+        const awayScore = String(match?.awayScore ?? '0').trim();
+        const scoreStr = `${homeScore}-${awayScore}`;
+        const shStartScore = shScoreByMatchKey.get(key);
+        const noShg = shStartScore !== undefined && shStartScore === scoreStr;
+
+        const league = match?.league || 'Unknown';
+        if (!leagueMatches[league]) leagueMatches[league] = [];
+        leagueMatches[league].push({ match, shMin, noShg, scoreStr });
+    }
+
+    // Step 3: per league — if any match >= 2H 7' with no SHG, notify all no-SHG matches
+    for (const [league, items] of Object.entries(leagueMatches)) {
+        const hasTrigger = items.some(i => i.noShg && i.shMin >= 7);
+        if (!hasTrigger) continue;
+
+        const noShgMatches = items.filter(i => i.noShg);
+        if (!noShgMatches.length) continue;
+
+        // Build a league+match signature to avoid duplicate notif
+        const sig = league + '|' + noShgMatches.map(i => createMatchKey(i.match) + i.shMin).join(',');
+        if (shNotifiedLeagues.has(sig)) continue;
+        shNotifiedLeagues.add(sig);
+
+        const lines = noShgMatches.map(i => {
+            const m = i.match;
+            return `⚽ <b>${escapeHtml(m?.homeTeam || '?')} vs ${escapeHtml(m?.awayTeam || '?')}</b>\n` +
+                   `   Menit: ${escapeHtml(String(m?.status || ''))} | Skor: ${i.scoreStr}`;
+        });
+
+        const msg =
+            `🔔 <b>SHG Alert — ${escapeHtml(league)}</b>\n` +
+            `Belum ada gol babak 2:\n\n` +
+            lines.join('\n\n');
+
+        await sendTelegramText(msg);
+    }
 }
 
 async function trackGoalEvents(matches) {
@@ -1011,6 +1103,7 @@ async function sendToServerWithRetry(data) {
 async function handleFreshData(data) {
     await setSavedMatchData(data);
     await trackGoalEvents(Array.isArray(data?.matches) ? data.matches : []);
+    await trackShgAlert(Array.isArray(data?.matches) ? data.matches : []);
     await updateOddTracking(Array.isArray(data?.matches) ? data.matches : []);
     await setStatus({
         pageStatus: '✓ Target page detected',

@@ -43,8 +43,10 @@ function h2hKey(string $a, string $b): string {
 
 $csvPath    = __DIR__ . '/matches.csv';
 $today      = date('Y-m-d');
-$lgFilter   = trim($_GET['league'] ?? '');
-$searchTerm = trim($_GET['search'] ?? '');
+$lgFilter    = trim($_GET['league'] ?? '');
+$searchTerm  = trim($_GET['search'] ?? '');
+$filterHome  = trim($_GET['home'] ?? '');
+$filterAway  = trim($_GET['away'] ?? '');
 $minMatches = max(1, (int)($_GET['min'] ?? 3));
 $sortCol    = $_GET['sort'] ?? 'pct';
 $sortOrder  = $_GET['order'] ?? 'desc';
@@ -146,6 +148,20 @@ if ($searchTerm !== '') {
         mb_strpos(mb_strtolower($r['league'], 'UTF-8'), $sl) !== false
     ));
 }
+if ($filterHome !== '') {
+    $hl = mb_strtolower($filterHome, 'UTF-8');
+    $rows = array_values(array_filter($rows, fn($r) =>
+        mb_strpos(mb_strtolower($r['home'], 'UTF-8'), $hl) !== false ||
+        mb_strpos(mb_strtolower($r['away'], 'UTF-8'), $hl) !== false
+    ));
+}
+if ($filterAway !== '') {
+    $al = mb_strtolower($filterAway, 'UTF-8');
+    $rows = array_values(array_filter($rows, fn($r) =>
+        mb_strpos(mb_strtolower($r['home'], 'UTF-8'), $al) !== false ||
+        mb_strpos(mb_strtolower($r['away'], 'UTF-8'), $al) !== false
+    ));
+}
 
 // Sort
 usort($rows, function($a, $b) use ($sortCol, $sortOrder) {
@@ -170,6 +186,8 @@ function h2hUrl(array $override = []): string {
         'page'   => 'h2h-over05',
         'league' => $_GET['league'] ?? '',
         'search' => $_GET['search'] ?? '',
+        'home'   => $_GET['home'] ?? '',
+        'away'   => $_GET['away'] ?? '',
         'min'    => $_GET['min'] ?? '3',
         'sort'   => $_GET['sort'] ?? 'pct',
         'order'  => $_GET['order'] ?? 'desc',
@@ -212,13 +230,27 @@ function h2hPctClass(float $pct): string {
             <input type="hidden" name="page" value="h2h-over05">
 
             <div class="flex flex-col gap-1">
-                <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Cari Tim</label>
-                <input type="text" name="search" value="<?= htmlspecialchars($searchTerm) ?>"
-                    placeholder="Nama tim / liga..."
-                    list="team-suggestions"
+                <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Home</label>
+                <input type="text" name="home" value="<?= htmlspecialchars($filterHome) ?>"
+                    placeholder="Tim home..."
+                    list="team-list-home"
                     autocomplete="off"
-                    class="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all w-48">
-                <datalist id="team-suggestions">
+                    class="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all w-44">
+                <datalist id="team-list-home">
+                    <?php foreach ($teamList as $t): ?>
+                        <option value="<?= htmlspecialchars($t) ?>">
+                    <?php endforeach; ?>
+                </datalist>
+            </div>
+
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Away</label>
+                <input type="text" name="away" value="<?= htmlspecialchars($filterAway) ?>"
+                    placeholder="Tim away..."
+                    list="team-list-away"
+                    autocomplete="off"
+                    class="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all w-44">
+                <datalist id="team-list-away">
                     <?php foreach ($teamList as $t): ?>
                         <option value="<?= htmlspecialchars($t) ?>">
                     <?php endforeach; ?>
@@ -244,7 +276,7 @@ function h2hPctClass(float $pct): string {
             <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all shadow-sm">
                 Filter
             </button>
-            <a href="<?= htmlspecialchars(h2hUrl(['search'=>'','league'=>'','pg'=>'1'])) ?>"
+            <a href="<?= htmlspecialchars(h2hUrl(['search'=>'','home'=>'','away'=>'','league'=>'','pg'=>'1'])) ?>"
                class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-all">
                 Reset
             </a>

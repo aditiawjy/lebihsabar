@@ -18,9 +18,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $body    = file_get_contents('php://input');
 $payload = json_decode($body, true);
 
-if (!isset($payload['goals']) || !is_array($payload['goals']) || !count($payload['goals'])) {
+$hasGoals   = !empty($payload['goals'])   && is_array($payload['goals']);
+$hasMatches = !empty($payload['matches']) && is_array($payload['matches']);
+
+if (!$hasGoals && !$hasMatches) {
     http_response_code(400);
-    echo json_encode(['ok' => false, 'error' => 'No goals provided']);
+    echo json_encode(['ok' => false, 'error' => 'No data provided']);
     exit;
 }
 
@@ -59,8 +62,35 @@ if (is_file($csvFile) && is_readable($csvFile)) {
     fclose($fh);
 }
 
+// Register new matches (no goal yet, just kicked off)
+if ($hasMatches) {
+    foreach ($payload['matches'] as $m) {
+        $ts = $m['timestamp'] ?? date('c');
+        $dt = new DateTime($ts);
+        $dateOnly = $dt->format('Y-m-d');
+        $hourOnly = $dt->format('H');
+        $datetime = $dt->format('d/m/Y H:i');
+        $homeTeam = trim($m['home_team'] ?? '');
+        $awayTeam = trim($m['away_team'] ?? '');
+        $league   = trim($m['league']   ?? '');
+        if ($homeTeam === '' || $awayTeam === '') continue;
+        $key = $dateOnly . '|' . $hourOnly . '|' . $homeTeam . '|' . $awayTeam;
+        if (!isset($rows[$key])) {
+            $rows[$key] = [
+                'datetime'   => $datetime,
+                'league'     => $league,
+                'home_team'  => $homeTeam,
+                'away_team'  => $awayTeam,
+                'goals'      => '',
+                'final_home' => '',
+                'final_away' => '',
+            ];
+        }
+    }
+}
+
 // Merge incoming goal events into rows
-foreach ($payload['goals'] as $goal) {
+foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
     $ts = $goal['timestamp'] ?? date('c');
     $dt = new DateTime($ts);
 
@@ -117,4 +147,4 @@ foreach ($rows as $row) {
 }
 fclose($fh);
 
-echo json_encode(['ok' => true, 'saved' => count($payload['goals'])]);
+echo json_encode(['ok' => true, 'goals' => count($payload['goals'] ?? []), 'matches' => count($payload['matches'] ?? [])]);

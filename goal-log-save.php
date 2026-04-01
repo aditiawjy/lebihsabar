@@ -27,23 +27,31 @@ if (!isset($payload['goals']) || !is_array($payload['goals']) || !count($payload
 $csvFile = __DIR__ . '/goal_log.csv';
 $headers = ['datetime', 'league', 'home_team', 'away_team', 'goals', 'final_home', 'final_away'];
 
-// Load existing rows keyed by match (date|hour|home|away)
+// Parse datetime stored as "d/m/Y H:i" → Y-m-d and H for key
+function parseCsvDatetime(string $val): array {
+    $dt = DateTime::createFromFormat('d/m/Y H:i', $val);
+    if (!$dt) $dt = new DateTime($val); // fallback
+    return [
+        'date' => $dt->format('Y-m-d'),
+        'hour' => $dt->format('H'),
+    ];
+}
+
+// Load existing rows keyed by (Y-m-d|H|home_team|away_team)
 $rows = [];
 if (is_file($csvFile) && is_readable($csvFile)) {
     $fh = fopen($csvFile, 'r');
     fgetcsv($fh); // skip header
     while (($row = fgetcsv($fh)) !== false) {
         if (count($row) < 7) continue;
-        $t = strtotime($row[0]);
-        $parsedDate = date('Y-m-d', $t);
-        $parsedHour = date('H', $t);
-        $key = $parsedDate . '|' . $parsedHour . '|' . $row[2] . '|' . $row[3];
+        $parsed = parseCsvDatetime($row[0]);
+        $key = $parsed['date'] . '|' . $parsed['hour'] . '|' . $row[2] . '|' . $row[3];
         $rows[$key] = [
-            'date'       => $row[0],
+            'datetime'   => $row[0],
             'league'     => $row[1],
             'home_team'  => $row[2],
             'away_team'  => $row[3],
-            'goals'      => $row[4],  // pipe-separated: "1H 23' (1-0) | 2H 67' (2-0)"
+            'goals'      => $row[4],
             'final_home' => $row[5],
             'final_away' => $row[6],
         ];
@@ -53,27 +61,29 @@ if (is_file($csvFile) && is_readable($csvFile)) {
 
 // Merge incoming goal events into rows
 foreach ($payload['goals'] as $goal) {
-    $ts       = $goal['timestamp'] ?? date('c');
-    $t        = strtotime($ts);
-    $dateOnly = date('Y-m-d', $t);
-    $hourOnly = date('H', $t);
-    $datetime = date('d-m-y H:i', $t);
-    $homeTeam = trim($goal['home_team'] ?? '');
-    $awayTeam = trim($goal['away_team'] ?? '');
-    $league   = trim($goal['league']    ?? '');
-    $minute   = trim($goal['minute']    ?? '');
-    $scoreAfter = trim($goal['score_after'] ?? '');
-    $homeFinal  = trim($goal['home_score']  ?? '');
-    $awayFinal  = trim($goal['away_score']  ?? '');
+    $ts = $goal['timestamp'] ?? date('c');
+    $dt = new DateTime($ts);
+
+    $dateOnly = $dt->format('Y-m-d');
+    $hourOnly = $dt->format('H');
+    $datetime = $dt->format('d/m/Y H:i'); // stored format — parseable by createFromFormat
+
+    $homeTeam   = trim($goal['home_team']    ?? '');
+    $awayTeam   = trim($goal['away_team']    ?? '');
+    $league     = trim($goal['league']       ?? '');
+    $minute     = trim($goal['minute']       ?? '');
+    $scoreAfter = trim($goal['score_after']  ?? '');
+    $homeFinal  = trim($goal['home_score']   ?? '');
+    $awayFinal  = trim($goal['away_score']   ?? '');
 
     if ($homeTeam === '' || $awayTeam === '') continue;
 
-    $key = $dateOnly . '|' . $hourOnly . '|' . $homeTeam . '|' . $awayTeam;
+    $key       = $dateOnly . '|' . $hourOnly . '|' . $homeTeam . '|' . $awayTeam;
     $goalEntry = $minute . ' (' . $scoreAfter . ')';
 
     if (!isset($rows[$key])) {
         $rows[$key] = [
-            'date'       => $datetime,
+            'datetime'   => $datetime,
             'league'     => $league,
             'home_team'  => $homeTeam,
             'away_team'  => $awayTeam,
@@ -82,12 +92,10 @@ foreach ($payload['goals'] as $goal) {
             'final_away' => $awayFinal,
         ];
     } else {
-        // append goal if not already recorded
         $existing = $rows[$key]['goals'];
         if (strpos($existing, $goalEntry) === false) {
             $rows[$key]['goals'] = $existing . ' | ' . $goalEntry;
         }
-        // update final score
         $rows[$key]['final_home'] = $homeFinal;
         $rows[$key]['final_away'] = $awayFinal;
     }
@@ -98,7 +106,7 @@ $fh = fopen($csvFile, 'w');
 fputcsv($fh, $headers);
 foreach ($rows as $row) {
     fputcsv($fh, [
-        $row['date'],
+        $row['datetime'],
         $row['league'],
         $row['home_team'],
         $row['away_team'],

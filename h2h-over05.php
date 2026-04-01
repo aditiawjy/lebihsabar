@@ -41,8 +41,15 @@ function h2hKey(string $a, string $b): string {
     return implode(' vs ', $teams);
 }
 
+$marketOptions = [
+    'over05'  => ['label' => 'Over 0.5',      'short' => 'O0.5',  'class' => 'bg-emerald-500 text-white'],
+    'shg05'   => ['label' => 'SHG Over 0.5',  'short' => 'SHGO',  'class' => 'bg-fuchsia-500 text-white'],
+];
+
 $csvPath    = __DIR__ . '/matches.csv';
 $today      = date('Y-m-d');
+$mktParam   = $_GET['mkt'] ?? 'over05';
+if (!array_key_exists($mktParam, $marketOptions)) $mktParam = 'over05';
 $lgFilter    = trim($_GET['league'] ?? '');
 $searchTerm  = trim($_GET['search'] ?? '');
 $filterHome  = trim($_GET['home'] ?? '');
@@ -63,7 +70,7 @@ $teamSet   = [];
 $nextMatch = []; // h2hKey => next match info
 
 h2hReadMatches($csvPath, function(array $m) use (
-    $lgFilter, $today,
+    $lgFilter, $today, $mktParam,
     &$h2hStats, &$leagueSet, &$teamSet, &$nextMatch
 ): void {
     if ($m['league'] !== '') $leagueSet[$m['league']] = true;
@@ -89,7 +96,12 @@ h2hReadMatches($csvPath, function(array $m) use (
 
     $ftH = (int)$m['ft_home'];
     $ftA = (int)$m['ft_away'];
-    $over05 = ($ftH + $ftA) >= 1;
+    $fhH = (int)$m['fh_home'];
+    $fhA = (int)$m['fh_away'];
+    $isHit = match($mktParam) {
+        'shg05'  => (($ftH - $fhH) + ($ftA - $fhA)) >= 1,
+        default  => ($ftH + $ftA) >= 1,
+    };
 
     if (!isset($h2hStats[$key])) {
         $h2hStats[$key] = [
@@ -105,7 +117,7 @@ h2hReadMatches($csvPath, function(array $m) use (
     }
 
     $h2hStats[$key]['total']++;
-    if ($over05) $h2hStats[$key]['hits']++;
+    if ($isHit) $h2hStats[$key]['hits']++;
 
     if ($m['date'] > $h2hStats[$key]['last_date']) {
         $h2hStats[$key]['last_date']  = $m['date'];
@@ -184,6 +196,7 @@ $pageRows   = array_slice($rows, $offset, $perPage);
 function h2hUrl(array $override = []): string {
     $params = array_merge([
         'page'   => 'h2h-over05',
+        'mkt'    => $_GET['mkt'] ?? 'over05',
         'league' => $_GET['league'] ?? '',
         'search' => $_GET['search'] ?? '',
         'home'   => $_GET['home'] ?? '',
@@ -215,8 +228,8 @@ function h2hPctClass(float $pct): string {
     <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
-                <h2 class="text-xl font-black text-slate-900">H2H Over 0.5</h2>
-                <p class="text-slate-400 text-sm mt-0.5">Persentase pertemuan yang menghasilkan minimal 1 gol</p>
+                <h2 class="text-xl font-black text-slate-900">H2H <?= htmlspecialchars($marketOptions[$mktParam]['label']) ?></h2>
+                <p class="text-slate-400 text-sm mt-0.5">Persentase H2H berdasarkan market yang dipilih</p>
             </div>
             <div class="flex items-center gap-3">
                 <span class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-sm font-bold border border-emerald-100"><?= $totalRows ?> pasangan</span>
@@ -228,6 +241,15 @@ function h2hPctClass(float $pct): string {
     <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
         <form method="GET" action="index.php" class="flex flex-wrap gap-3 items-end">
             <input type="hidden" name="page" value="h2h-over05">
+
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Market</label>
+                <select name="mkt" class="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all">
+                    <?php foreach ($marketOptions as $val => $opt): ?>
+                        <option value="<?= $val ?>" <?= $mktParam === $val ? 'selected' : '' ?>><?= htmlspecialchars($opt['label']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
             <div class="flex flex-col gap-1">
                 <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Home</label>
@@ -297,7 +319,7 @@ function h2hPctClass(float $pct): string {
                             <a href="<?= htmlspecialchars(h2hSortUrl('hits', $sortCol, $sortOrder)) ?>" class="flex items-center justify-center gap-1 hover:text-amber-600 font-bold">Hits <?= $sortCol==='hits' ? ($sortOrder==='asc'?'▲':'▼') : '' ?></a>
                         </th>
                         <th class="px-4 py-3 text-center">
-                            <a href="<?= htmlspecialchars(h2hSortUrl('pct', $sortCol, $sortOrder)) ?>" class="flex items-center justify-center gap-1 hover:text-amber-600 font-bold">O0.5 % <?= $sortCol==='pct' ? ($sortOrder==='asc'?'▲':'▼') : '' ?></a>
+                            <a href="<?= htmlspecialchars(h2hSortUrl('pct', $sortCol, $sortOrder)) ?>" class="flex items-center justify-center gap-1 hover:text-amber-600 font-bold"><?= htmlspecialchars($marketOptions[$mktParam]['short']) ?> % <?= $sortCol==='pct' ? ($sortOrder==='asc'?'▲':'▼') : '' ?></a>
                         </th>
                         <th class="px-4 py-3 text-center">
                             <a href="<?= htmlspecialchars(h2hSortUrl('last_date', $sortCol, $sortOrder)) ?>" class="flex items-center justify-center gap-1 hover:text-amber-600 font-bold">Last Match <?= $sortCol==='last_date' ? ($sortOrder==='asc'?'▲':'▼') : '' ?></a>

@@ -34,18 +34,23 @@ let wasAboveThresholdByMatchKey = new Map();
 let oddHistoryByMatchKey = new Map();
 let oddInsightByMatchKey = new Map();
 let lastScoreByMatchKey = new Map(); // key => "homeScore-awayScore"
+let registeredMatchKeys = new Set(); // keys already registered in CSV
 
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isKickoffMinute(status) {
+    return /^1H\s+[01]'$/i.test(String(status || '').trim());
 }
 
 async function trackGoalEvents(matches) {
     if (!Array.isArray(matches) || !matches.length) return;
 
     const newGoals = [];
+    const newMatches = [];
     const now = new Date();
     const timestamp = now.toISOString();
-    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     for (const match of matches) {
         const key = createMatchKey(match);
@@ -54,19 +59,31 @@ async function trackGoalEvents(matches) {
         const scoreStr = `${homeScore}-${awayScore}`;
         const minute = String(match?.status || '').trim();
 
-        const prev = lastScoreByMatchKey.get(key);
+        // Register new match when status is 1H 0' or 1H 1'
+        if (isKickoffMinute(minute) && !registeredMatchKeys.has(key)) {
+            registeredMatchKeys.add(key);
+            lastScoreByMatchKey.set(key, scoreStr);
+            newMatches.push({
+                timestamp,
+                league: match?.league || '',
+                home_team: match?.homeTeam || '',
+                away_team: match?.awayTeam || '',
+            });
+            continue;
+        }
 
+        // Only track goals for registered matches
+        if (!registeredMatchKeys.has(key)) continue;
+
+        const prev = lastScoreByMatchKey.get(key);
         if (prev === undefined) {
-            // first time seeing this match, just record
             lastScoreByMatchKey.set(key, scoreStr);
             continue;
         }
 
         if (prev !== scoreStr) {
-            // score changed = goal event
             newGoals.push({
                 timestamp,
-                time: timeStr,
                 league: match?.league || '',
                 home_team: match?.homeTeam || '',
                 away_team: match?.awayTeam || '',
@@ -80,24 +97,33 @@ async function trackGoalEvents(matches) {
         }
     }
 
+    // Send new match registrations
+    if (newMatches.length) {
+        try {
+            await fetch('http://localhost/lebihsabar/goal-log-save.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ matches: newMatches })
+            });
+        } catch (_) {}
+    }
+
     if (!newGoals.length) return;
 
     // append to chrome.storage goalLog
     const stored = await chrome.storage.local.get(['goalLog']);
     const existing = Array.isArray(stored.goalLog) ? stored.goalLog : [];
-    const updated = [...existing, ...newGoals].slice(-500); // keep last 500 events
+    const updated = [...existing, ...newGoals].slice(-500);
     await chrome.storage.local.set({ goalLog: updated });
 
-    // send to PHP server
+    // send goals to PHP server
     try {
         await fetch('http://localhost/lebihsabar/goal-log-save.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ goals: newGoals })
         });
-    } catch (_) {
-        // server might be offline, ignore
-    }
+    } catch (_) {}
 }
 
 function createDataSignature(data) {

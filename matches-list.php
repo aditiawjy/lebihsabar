@@ -991,15 +991,12 @@ $monthKeys = array_keys($datesByMonth);
                                 </a>
                             </th>
                             <th class="px-6 py-4 text-center text-[11px] font-bold uppercase tracking-wider">Skor</th>
-                            <th class="px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider">H2H Summary</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         <?php foreach ($pagedMatches as $match):
                             try { $date = new DateTime($match['match_time']); } catch (\Exception $e) { $date = null; }
                             $hasFt = ($match['ft_home'] ?? '') !== '' && ($match['ft_away'] ?? '') !== '';
-                            $h2hTimeSummary = matchesBuildH2hTimeSummary($allMatches, $match);
-                            $h2hDayTimeOverSummary = matchesBuildH2hDayTimeOverSummary($allMatches, $match);
                         ?>
                             <tr class="hover:bg-blue-50/50 transition-all duration-200 group">
                                 <td class="px-6 py-5 whitespace-nowrap">
@@ -1053,90 +1050,6 @@ $monthKeys = array_keys($datesByMonth);
                                         <?php endif; ?>
                                     </div>
                                 </td>
-                                <td class="px-6 py-5 align-top">
-                                    <div class="min-w-[220px] space-y-2">
-                                        <div class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                                            <span class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-slate-700">
-                                                Jam <?php echo htmlspecialchars($h2hTimeSummary['time'] !== '' ? $h2hTimeSummary['time'] : '--:--', ENT_QUOTES, 'UTF-8'); ?>
-                                            </span>
-                                            <span><?php echo (int)$h2hTimeSummary['finished_meetings']; ?>/<?php echo (int)$h2hTimeSummary['total_meetings']; ?> selesai</span>
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-2 text-[11px] font-bold">
-                                            <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700">
-                                                Total: <?php echo (int)$h2hTimeSummary['total_meetings']; ?>
-                                            </div>
-                                            <div class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-rose-700">
-                                                U0.5: <?php echo (int)$h2hTimeSummary['under_05']; ?>
-                                            </div>
-                                        </div>
-                                        <div class="grid grid-cols-3 gap-2 text-center">
-                                            <div class="rounded-xl border border-amber-200 bg-amber-50 px-2 py-2">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-amber-700">W1</p>
-                                                <p class="mt-1 text-sm font-black text-amber-800"><?php echo (int)$h2hTimeSummary['w1']; ?></p>
-                                            </div>
-                                            <div class="rounded-xl border border-slate-200 bg-slate-50 px-2 py-2">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-slate-700">X</p>
-                                                <p class="mt-1 text-sm font-black text-slate-800"><?php echo (int)$h2hTimeSummary['x']; ?></p>
-                                            </div>
-                                            <div class="rounded-xl border border-cyan-200 bg-cyan-50 px-2 py-2">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-cyan-700">W2</p>
-                                                <p class="mt-1 text-sm font-black text-cyan-800"><?php echo (int)$h2hTimeSummary['w2']; ?></p>
-                                            </div>
-                                        </div>
-                                        <div class="grid grid-cols-3 gap-2 text-center">
-                                            <div class="rounded-xl border border-rose-200 bg-rose-50 px-2 py-2">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-rose-700">U2.5</p>
-                                                <p class="mt-1 text-sm font-black text-rose-800"><?php echo (int)$h2hTimeSummary['under_25']; ?></p>
-                                            </div>
-                                            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-2 py-2">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-emerald-700">O0.5</p>
-                                                <p class="mt-1 text-sm font-black text-emerald-800"><?php echo (int)$h2hTimeSummary['over_05']; ?></p>
-                                            </div>
-                                            <div class="rounded-xl border border-blue-200 bg-blue-50 px-2 py-2">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-blue-700">O1.5</p>
-                                                <p class="mt-1 text-sm font-black text-blue-800"><?php echo (int)$h2hTimeSummary['over_15']; ?></p>
-                                            </div>
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-2 text-center">
-                                            <div class="rounded-xl border border-fuchsia-200 bg-fuchsia-50 px-2 py-2">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">FHG O0.5</p>
-                                                <p class="mt-1 text-sm font-black text-fuchsia-800"><?php echo (int)$h2hTimeSummary['fhg_over_05']; ?></p>
-                                            </div>
-                                            <div class="rounded-xl border border-pink-200 bg-pink-50 px-2 py-2">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-pink-700">SHG O0.5</p>
-                                                <p class="mt-1 text-sm font-black text-pink-800"><?php echo (int)$h2hTimeSummary['shg_over_05']; ?></p>
-                                            </div>
-                                        </div>
-                                        <div class="grid grid-cols-4 gap-2 text-center">
-                                            <div class="rounded-xl border border-slate-200 bg-slate-50 px-2 py-2">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-slate-700">Total H+J</p>
-                                                <p class="mt-1 text-sm font-black text-slate-800"><?php echo (int)$h2hDayTimeOverSummary['total_meetings']; ?></p>
-                                            </div>
-                                            <div class="rounded-xl border border-rose-200 bg-rose-50 px-2 py-2">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-rose-700">U2.5 H+J</p>
-                                                <p class="mt-1 text-sm font-black text-rose-800"><?php echo (int)$h2hDayTimeOverSummary['under_25']; ?></p>
-                                            </div>
-                                            <div class="rounded-xl border border-sky-200 bg-sky-50 px-2 py-2">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-sky-700">O0.5 H+J</p>
-                                                <p class="mt-1 text-sm font-black text-sky-800"><?php echo (int)$h2hDayTimeOverSummary['over_05']; ?></p>
-                                            </div>
-                                            <div class="rounded-xl border border-indigo-200 bg-indigo-50 px-2 py-2">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-indigo-700">O1.5 H+J</p>
-                                                <p class="mt-1 text-sm font-black text-indigo-800"><?php echo (int)$h2hDayTimeOverSummary['over_15']; ?></p>
-                                            </div>
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-2 text-center">
-                                            <div class="rounded-xl border border-teal-200 bg-teal-50 px-2 py-2">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-teal-700">BTTS</p>
-                                                <p class="mt-1 text-sm font-black text-teal-800"><?php echo (int)$h2hTimeSummary['btts']; ?></p>
-                                            </div>
-                                            <div class="rounded-xl border border-orange-200 bg-orange-50 px-2 py-2">
-                                                <p class="text-[10px] font-bold uppercase tracking-wide text-orange-700">No BTTS</p>
-                                                <p class="mt-1 text-sm font-black text-orange-800"><?php echo (int)$h2hTimeSummary['no_btts']; ?></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -1149,8 +1062,6 @@ $monthKeys = array_keys($datesByMonth);
                 <?php foreach ($pagedMatches as $match):
                     try { $date = new DateTime($match['match_time']); } catch (\Exception $e) { $date = null; }
                     $hasFt = ($match['ft_home'] ?? '') !== '' && ($match['ft_away'] ?? '') !== '';
-                    $h2hTimeSummary = matchesBuildH2hTimeSummary($allMatches, $match);
-                    $h2hDayTimeOverSummary = matchesBuildH2hDayTimeOverSummary($allMatches, $match);
                 ?>
                     <div class="bg-white rounded-2xl p-4 border-0 shadow-md relative overflow-hidden">
                         <?php if ($hasFt): ?>
@@ -1195,88 +1106,6 @@ $monthKeys = array_keys($datesByMonth);
                             </div>
                         </div>
 
-                        <div class="mt-4 ml-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                            <div class="flex items-center justify-between gap-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                                <span>H2H Jam <?php echo htmlspecialchars($h2hTimeSummary['time'] !== '' ? $h2hTimeSummary['time'] : '--:--', ENT_QUOTES, 'UTF-8'); ?></span>
-                                <span><?php echo (int)$h2hTimeSummary['finished_meetings']; ?>/<?php echo (int)$h2hTimeSummary['total_meetings']; ?> selesai</span>
-                            </div>
-                            <div class="mt-3 grid grid-cols-2 gap-2 text-center">
-                                <div class="rounded-lg bg-white px-2 py-2">
-                                    <p class="text-[10px] font-bold text-slate-600">Total</p>
-                                    <p class="mt-1 text-sm font-black text-slate-800"><?php echo (int)$h2hTimeSummary['total_meetings']; ?></p>
-                                </div>
-                                <div class="rounded-lg bg-rose-50 px-2 py-2">
-                                    <p class="text-[10px] font-bold text-rose-700">U0.5</p>
-                                    <p class="mt-1 text-sm font-black text-rose-800"><?php echo (int)$h2hTimeSummary['under_05']; ?></p>
-                                </div>
-                            </div>
-                            <div class="mt-2 grid grid-cols-3 gap-2 text-center">
-                                <div class="rounded-lg bg-amber-50 px-2 py-2">
-                                    <p class="text-[10px] font-bold text-amber-700">W1</p>
-                                    <p class="mt-1 text-sm font-black text-amber-800"><?php echo (int)$h2hTimeSummary['w1']; ?></p>
-                                </div>
-                                <div class="rounded-lg bg-white px-2 py-2">
-                                    <p class="text-[10px] font-bold text-slate-700">X</p>
-                                    <p class="mt-1 text-sm font-black text-slate-800"><?php echo (int)$h2hTimeSummary['x']; ?></p>
-                                </div>
-                                <div class="rounded-lg bg-cyan-50 px-2 py-2">
-                                    <p class="text-[10px] font-bold text-cyan-700">W2</p>
-                                    <p class="mt-1 text-sm font-black text-cyan-800"><?php echo (int)$h2hTimeSummary['w2']; ?></p>
-                                </div>
-                            </div>
-                            <div class="mt-3 grid grid-cols-3 gap-2 text-center">
-                                <div class="rounded-lg bg-rose-50 px-2 py-2">
-                                    <p class="text-[10px] font-bold text-rose-700">U2.5</p>
-                                    <p class="mt-1 text-sm font-black text-rose-800"><?php echo (int)$h2hTimeSummary['under_25']; ?></p>
-                                </div>
-                                <div class="rounded-lg bg-emerald-50 px-2 py-2">
-                                    <p class="text-[10px] font-bold text-emerald-700">O0.5</p>
-                                    <p class="mt-1 text-sm font-black text-emerald-800"><?php echo (int)$h2hTimeSummary['over_05']; ?></p>
-                                </div>
-                                <div class="rounded-lg bg-blue-50 px-2 py-2">
-                                    <p class="text-[10px] font-bold text-blue-700">O1.5</p>
-                                    <p class="mt-1 text-sm font-black text-blue-800"><?php echo (int)$h2hTimeSummary['over_15']; ?></p>
-                                </div>
-                            </div>
-                            <div class="mt-2 grid grid-cols-2 gap-2 text-center">
-                                <div class="rounded-lg bg-fuchsia-50 px-2 py-2">
-                                    <p class="text-[10px] font-bold text-fuchsia-700">FHG O0.5</p>
-                                    <p class="mt-1 text-sm font-black text-fuchsia-800"><?php echo (int)$h2hTimeSummary['fhg_over_05']; ?></p>
-                                </div>
-                                <div class="rounded-lg bg-pink-50 px-2 py-2">
-                                    <p class="text-[10px] font-bold text-pink-700">SHG O0.5</p>
-                                    <p class="mt-1 text-sm font-black text-pink-800"><?php echo (int)$h2hTimeSummary['shg_over_05']; ?></p>
-                                </div>
-                            </div>
-                            <div class="mt-2 grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
-                                <div class="rounded-lg bg-white px-2 py-2">
-                                    <p class="text-[10px] font-bold text-slate-700">Total H+J</p>
-                                    <p class="mt-1 text-sm font-black text-slate-800"><?php echo (int)$h2hDayTimeOverSummary['total_meetings']; ?></p>
-                                </div>
-                                <div class="rounded-lg bg-rose-50 px-2 py-2">
-                                    <p class="text-[10px] font-bold text-rose-700">U2.5 H+J</p>
-                                    <p class="mt-1 text-sm font-black text-rose-800"><?php echo (int)$h2hDayTimeOverSummary['under_25']; ?></p>
-                                </div>
-                                <div class="rounded-lg bg-sky-50 px-2 py-2">
-                                    <p class="text-[10px] font-bold text-sky-700">O0.5 H+J</p>
-                                    <p class="mt-1 text-sm font-black text-sky-800"><?php echo (int)$h2hDayTimeOverSummary['over_05']; ?></p>
-                                </div>
-                                <div class="rounded-lg bg-indigo-50 px-2 py-2">
-                                    <p class="text-[10px] font-bold text-indigo-700">O1.5 H+J</p>
-                                    <p class="mt-1 text-sm font-black text-indigo-800"><?php echo (int)$h2hDayTimeOverSummary['over_15']; ?></p>
-                                </div>
-                            </div>
-                            <div class="mt-2 grid grid-cols-2 gap-2 text-center">
-                                <div class="rounded-lg bg-teal-50 px-2 py-2">
-                                    <p class="text-[10px] font-bold text-teal-700">BTTS</p>
-                                    <p class="mt-1 text-sm font-black text-teal-800"><?php echo (int)$h2hTimeSummary['btts']; ?></p>
-                                </div>
-                                <div class="rounded-lg bg-orange-50 px-2 py-2">
-                                    <p class="text-[10px] font-bold text-orange-700">No BTTS</p>
-                                    <p class="mt-1 text-sm font-black text-orange-800"><?php echo (int)$h2hTimeSummary['no_btts']; ?></p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 <?php endforeach; ?>
             </div>

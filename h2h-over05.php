@@ -57,13 +57,16 @@ if (!in_array($sortOrder, ['asc', 'desc'], true)) $sortOrder = 'desc';
 // -- Scan CSV ------------------------------------------------------------------
 $h2hStats  = []; // key => ['total'=>int, 'hits'=>int, 'last_date'=>str, 'last_score'=>str, 'league'=>str, 'home'=>str, 'away'=>str]
 $leagueSet = [];
+$teamSet   = [];
 $nextMatch = []; // h2hKey => next match info
 
 h2hReadMatches($csvPath, function(array $m) use (
     $lgFilter, $today,
-    &$h2hStats, &$leagueSet, &$nextMatch
+    &$h2hStats, &$leagueSet, &$teamSet, &$nextMatch
 ): void {
     if ($m['league'] !== '') $leagueSet[$m['league']] = true;
+    $teamSet[$m['home']] = true;
+    $teamSet[$m['away']] = true;
     if ($lgFilter && $m['league'] !== $lgFilter) return;
 
     $key = h2hKey($m['home'], $m['away']);
@@ -112,6 +115,8 @@ h2hReadMatches($csvPath, function(array $m) use (
 
 $leagueList = array_keys($leagueSet);
 sort($leagueList);
+$teamList = array_keys($teamSet);
+sort($teamList);
 
 // -- Build rows ----------------------------------------------------------------
 $rows = [];
@@ -210,7 +215,14 @@ function h2hPctClass(float $pct): string {
                 <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Cari Tim</label>
                 <input type="text" name="search" value="<?= htmlspecialchars($searchTerm) ?>"
                     placeholder="Nama tim / liga..."
+                    list="team-suggestions"
+                    autocomplete="off"
                     class="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all w-48">
+                <datalist id="team-suggestions">
+                    <?php foreach ($teamList as $t): ?>
+                        <option value="<?= htmlspecialchars($t) ?>">
+                    <?php endforeach; ?>
+                </datalist>
             </div>
 
             <div class="flex flex-col gap-1">

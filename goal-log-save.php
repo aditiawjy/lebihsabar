@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$body = file_get_contents('php://input');
+$body    = file_get_contents('php://input');
 $payload = json_decode($body, true);
 
 if (!isset($payload['goals']) || !is_array($payload['goals']) || !count($payload['goals'])) {
@@ -24,39 +24,82 @@ if (!isset($payload['goals']) || !is_array($payload['goals']) || !count($payload
     exit;
 }
 
-$logFile = __DIR__ . '/goal_log.json';
+$csvFile = __DIR__ . '/goal_log.csv';
+$headers = ['date', 'league', 'home_team', 'away_team', 'goals', 'final_home', 'final_away'];
 
-// Load existing
-$existing = [];
-if (is_file($logFile) && is_readable($logFile)) {
-    $raw = file_get_contents($logFile);
-    $decoded = json_decode($raw, true);
-    if (is_array($decoded)) {
-        $existing = $decoded;
+// Load existing rows keyed by match (date|home|away)
+$rows = [];
+if (is_file($csvFile) && is_readable($csvFile)) {
+    $fh = fopen($csvFile, 'r');
+    fgetcsv($fh); // skip header
+    while (($row = fgetcsv($fh)) !== false) {
+        if (count($row) < 7) continue;
+        $key = $row[0] . '|' . $row[2] . '|' . $row[3];
+        $rows[$key] = [
+            'date'       => $row[0],
+            'league'     => $row[1],
+            'home_team'  => $row[2],
+            'away_team'  => $row[3],
+            'goals'      => $row[4],  // pipe-separated: "1H 23' (1-0) | 2H 67' (2-0)"
+            'final_home' => $row[5],
+            'final_away' => $row[6],
+        ];
+    }
+    fclose($fh);
+}
+
+// Merge incoming goal events into rows
+foreach ($payload['goals'] as $goal) {
+    $date     = substr($goal['timestamp'] ?? date('c'), 0, 10);
+    $homeTeam = trim($goal['home_team'] ?? '');
+    $awayTeam = trim($goal['away_team'] ?? '');
+    $league   = trim($goal['league']    ?? '');
+    $minute   = trim($goal['minute']    ?? '');
+    $scoreAfter = trim($goal['score_after'] ?? '');
+    $homeFinal  = trim($goal['home_score']  ?? '');
+    $awayFinal  = trim($goal['away_score']  ?? '');
+
+    if ($homeTeam === '' || $awayTeam === '') continue;
+
+    $key = $date . '|' . $homeTeam . '|' . $awayTeam;
+    $goalEntry = $minute . ' (' . $scoreAfter . ')';
+
+    if (!isset($rows[$key])) {
+        $rows[$key] = [
+            'date'       => $date,
+            'league'     => $league,
+            'home_team'  => $homeTeam,
+            'away_team'  => $awayTeam,
+            'goals'      => $goalEntry,
+            'final_home' => $homeFinal,
+            'final_away' => $awayFinal,
+        ];
+    } else {
+        // append goal if not already recorded
+        $existing = $rows[$key]['goals'];
+        if (strpos($existing, $goalEntry) === false) {
+            $rows[$key]['goals'] = $existing . ' | ' . $goalEntry;
+        }
+        // update final score
+        $rows[$key]['final_home'] = $homeFinal;
+        $rows[$key]['final_away'] = $awayFinal;
     }
 }
 
-// Append new
-foreach ($payload['goals'] as $goal) {
-    $existing[] = [
-        'timestamp'    => $goal['timestamp']   ?? date('c'),
-        'time'         => $goal['time']         ?? '',
-        'league'       => $goal['league']       ?? '',
-        'home_team'    => $goal['home_team']    ?? '',
-        'away_team'    => $goal['away_team']    ?? '',
-        'minute'       => $goal['minute']       ?? '',
-        'score_before' => $goal['score_before'] ?? '',
-        'score_after'  => $goal['score_after']  ?? '',
-        'home_score'   => $goal['home_score']   ?? '',
-        'away_score'   => $goal['away_score']   ?? '',
-    ];
+// Write CSV
+$fh = fopen($csvFile, 'w');
+fputcsv($fh, $headers);
+foreach ($rows as $row) {
+    fputcsv($fh, [
+        $row['date'],
+        $row['league'],
+        $row['home_team'],
+        $row['away_team'],
+        $row['goals'],
+        $row['final_home'],
+        $row['final_away'],
+    ]);
 }
-
-// Keep last 2000 entries
-if (count($existing) > 2000) {
-    $existing = array_slice($existing, -2000);
-}
-
-file_put_contents($logFile, json_encode($existing, JSON_PRETTY_PRINT), LOCK_EX);
+fclose($fh);
 
 echo json_encode(['ok' => true, 'saved' => count($payload['goals'])]);

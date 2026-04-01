@@ -152,6 +152,9 @@ foreach ($h2hStats as $key => $s) {
     ];
 }
 
+// Only show rows with upcoming next match
+$rows = array_values(array_filter($rows, fn($r) => $r['next'] !== null));
+
 // Search
 if ($searchTerm !== '') {
     $sl = mb_strtolower($searchTerm, 'UTF-8');

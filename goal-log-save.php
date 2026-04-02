@@ -170,7 +170,7 @@ if ($hasMilestones) {
         if ($homeTeam === '' || $awayTeam === '') continue;
         if (!in_array($msId, ['1h3', '2h1', '2h7'], true)) continue;
         $key = $dateOnly . '|' . $hourOnly . ':' . $minuteOnly . '|' . $homeTeam . '|' . $awayTeam;
-        if (isset($rows[$key])) {
+        if (isset($rows[$key]) && $rows[$key]['goals'] !== '') {
             $rows[$key][$msId] = '✓';
             // 2H milestones imply 1H 3' was also reached
             if ($msId === '2h1' || $msId === '2h7') $rows[$key]['1h3'] = '✓';

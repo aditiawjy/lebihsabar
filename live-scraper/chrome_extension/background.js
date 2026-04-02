@@ -168,10 +168,18 @@ async function trackGoalEvents(matches) {
         const minute = String(match?.status || '').trim();
 
         // Register new match when status is 1H 0' or 1H 1'
-        if (isKickoffMinute(minute) && !registeredMatchKeys.has(key)) {
+        // Also re-register if score reset to 0-0 (new round of same teams)
+        const isNewRound = isKickoffMinute(minute) && scoreStr === '0-0' &&
+            registeredMatchKeys.has(key) &&
+            (lastScoreByMatchKey.get(key) || '0-0') !== '0-0';
+        if (isKickoffMinute(minute) && (!registeredMatchKeys.has(key) || isNewRound)) {
             registeredMatchKeys.add(key);
             kickoffTimeByMatchKey.set(key, timestamp);
             lastScoreByMatchKey.set(key, scoreStr);
+            // Clear milestones for this key so new round sends them fresh
+            for (const ms of MILESTONES) {
+                sentMilestones.delete(key + '|' + ms.id);
+            }
             newMatches.push({
                 timestamp,
                 league: match?.league || '',
@@ -931,17 +939,38 @@ async function updateLiveState(isRunning, extraState = {}) {
 }
 
 async function restoreRuntimeState() {
-    const data = await chrome.storage.local.get(['liveRuntimeState']);
-    const runtimeState = data.liveRuntimeState || {};
+    const [localData, sessionData] = await Promise.all([
+        chrome.storage.local.get(['liveRuntimeState']),
+        chrome.storage.session.get(['kickoffTimes', 'registeredKeys', 'sentMilestoneKeys'])
+    ]);
+    const runtimeState = localData.liveRuntimeState || {};
 
     isLiveRunning = Boolean(runtimeState.isLiveRunning);
     currentTabId = Number.isInteger(runtimeState.currentTabId) ? runtimeState.currentTabId : null;
+
+    if (sessionData.kickoffTimes) {
+        kickoffTimeByMatchKey = new Map(Object.entries(sessionData.kickoffTimes));
+    }
+    if (Array.isArray(sessionData.registeredKeys)) {
+        registeredMatchKeys = new Set(sessionData.registeredKeys);
+    }
+    if (Array.isArray(sessionData.sentMilestoneKeys)) {
+        sentMilestones = new Set(sessionData.sentMilestoneKeys);
+    }
 
     if (isLiveRunning) {
         await chrome.alarms.create(LIVE_ALARM_NAME, {
             periodInMinutes: 0.1
         });
     }
+}
+
+async function persistMatchState() {
+    await chrome.storage.session.set({
+        kickoffTimes: Object.fromEntries(kickoffTimeByMatchKey),
+        registeredKeys: [...registeredMatchKeys],
+        sentMilestoneKeys: [...sentMilestones],
+    });
 }
 
 async function setStatus(patch = {}) {
@@ -1156,6 +1185,7 @@ async function sendToServerWithRetry(data) {
 async function handleFreshData(data) {
     await setSavedMatchData(data);
     await trackGoalEvents(Array.isArray(data?.matches) ? data.matches : []);
+    await persistMatchState();
     await trackShgAlert(Array.isArray(data?.matches) ? data.matches : []);
     await updateOddTracking(Array.isArray(data?.matches) ? data.matches : []);
     await setStatus({

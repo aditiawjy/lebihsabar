@@ -35,6 +35,7 @@ let oddHistoryByMatchKey = new Map();
 let oddInsightByMatchKey = new Map();
 let lastScoreByMatchKey = new Map(); // key => "homeScore-awayScore"
 let registeredMatchKeys = new Set(); // keys already registered in CSV
+let kickoffTimeByMatchKey = new Map(); // key => ISO timestamp of match kickoff
 let shScoreByMatchKey = new Map();   // key => score when 2H started "h-a"
 let shNotifiedLeagues = new Set();   // league keys already notified for SHG alert
 let sentMilestones = new Set();      // matchKey|milestoneId already sent this session
@@ -96,6 +97,7 @@ async function trackShgAlert(matches) {
         // Reset if match back to 1H (new match)
         if (isKickoffMinute(status)) {
             shScoreByMatchKey.delete(key);
+            kickoffTimeByMatchKey.delete(key);
             for (const ms of MILESTONES) sentMilestones.delete(key + '|' + ms.id);
             // also clear league notification so new match cycle can notify again
         }
@@ -168,6 +170,7 @@ async function trackGoalEvents(matches) {
         // Register new match when status is 1H 0' or 1H 1'
         if (isKickoffMinute(minute) && !registeredMatchKeys.has(key)) {
             registeredMatchKeys.add(key);
+            kickoffTimeByMatchKey.set(key, timestamp);
             lastScoreByMatchKey.set(key, scoreStr);
             newMatches.push({
                 timestamp,
@@ -189,7 +192,7 @@ async function trackGoalEvents(matches) {
 
         if (prev !== scoreStr) {
             newGoals.push({
-                timestamp,
+                timestamp: kickoffTimeByMatchKey.get(key) || timestamp,
                 league: match?.league || '',
                 home_team: match?.homeTeam || '',
                 away_team: match?.awayTeam || '',
@@ -216,7 +219,7 @@ async function trackGoalEvents(matches) {
                 if (!sentMilestones.has(msKey)) {
                     sentMilestones.add(msKey);
                     newMilestones.push({
-                        timestamp,
+                        timestamp: kickoffTimeByMatchKey.get(key) || timestamp,
                         league: match?.league || '',
                         home_team: match?.homeTeam || '',
                         away_team: match?.awayTeam || '',
@@ -750,7 +753,7 @@ function countThresholdCrosses(history, threshold = TARGET_ODD_MIN) {
     return crosses;
 }
 
-function createOddInsight(match, history, targetOdd, watchContext = {}) {
+function createOddInsight(match, history, targetOdd, watchContext = {}, htScore = null) {
     const latest = history[history.length - 1] || null;
     const previous = history.length > 1 ? history[history.length - 2] : null;
     const windowPoint = getRecentHistoryPoint(history, ODD_SPIKE_WINDOW_MS);
@@ -808,6 +811,7 @@ function createOddInsight(match, history, targetOdd, watchContext = {}) {
         updatedAt: latest ? latest.timestamp : Date.now(),
         isSecondHalf: isSecondHalfStatus(match),
         isAboveThreshold: latest ? latest.oddValue > threshold : false,
+        htScore,
         comparisonOdds: Object.fromEntries(Object.entries(comparisonOdds).map(([key, value]) => [key, {
             label: value.label,
             oddValue: value.oddValue
@@ -842,7 +846,7 @@ async function updateOddTracking(matches) {
         }
 
         oddHistoryByMatchKey.set(matchKey, history.slice(-ODD_HISTORY_LIMIT));
-        oddInsightByMatchKey.set(matchKey, createOddInsight(match, oddHistoryByMatchKey.get(matchKey), targetOdd, watchContext));
+        oddInsightByMatchKey.set(matchKey, createOddInsight(match, oddHistoryByMatchKey.get(matchKey), targetOdd, watchContext, shScoreByMatchKey.get(matchKey) || null));
     }
 
     await chrome.storage.local.set({

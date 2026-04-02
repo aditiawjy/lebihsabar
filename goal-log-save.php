@@ -1,13 +1,6 @@
 <?php
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+date_default_timezone_set('Asia/Jakarta');
 header('Content-Type: application/json');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -43,12 +36,13 @@ function parseCsvDatetime(string $val): array {
     $dt = DateTime::createFromFormat('d/m/Y H:i', $val);
     if (!$dt) $dt = new DateTime($val); // fallback
     return [
-        'date' => $dt->format('Y-m-d'),
-        'hour' => $dt->format('H'),
+        'date'   => $dt->format('Y-m-d'),
+        'hour'   => $dt->format('H'),
+        'minute' => $dt->format('i'),
     ];
 }
 
-// Load existing rows keyed by (Y-m-d|H|home_team|away_team)
+// Load existing rows keyed by (Y-m-d|HH:MM|home_team|away_team)
 $rows = [];
 if (is_file($csvFile) && is_readable($csvFile)) {
     $fh = fopen($csvFile, 'r');
@@ -56,7 +50,7 @@ if (is_file($csvFile) && is_readable($csvFile)) {
     while (($row = fgetcsv($fh)) !== false) {
         if (count($row) < 7) continue;
         $parsed = parseCsvDatetime($row[0]);
-        $key = $parsed['date'] . '|' . $parsed['hour'] . '|' . $row[2] . '|' . $row[3];
+        $key = $parsed['date'] . '|' . $parsed['hour'] . ':' . $parsed['minute'] . '|' . $row[2] . '|' . $row[3];
         $rows[$key] = [
             'datetime'   => $row[0],
             'league'     => $row[1],
@@ -77,15 +71,16 @@ if (is_file($csvFile) && is_readable($csvFile)) {
 if ($hasMatches) {
     foreach ($payload['matches'] as $m) {
         $ts = $m['timestamp'] ?? date('c');
-        $dt = new DateTime($ts);
-        $dateOnly = $dt->format('Y-m-d');
-        $hourOnly = $dt->format('H');
-        $datetime = $dt->format('d/m/Y H:i');
+        $dt = (new DateTime($ts))->setTimezone(new DateTimeZone('Asia/Jakarta'));
+        $dateOnly   = $dt->format('Y-m-d');
+        $hourOnly   = $dt->format('H');
+        $minuteOnly = $dt->format('i');
+        $datetime   = $dt->format('d/m/Y H:i');
         $homeTeam = trim($m['home_team'] ?? '');
         $awayTeam = trim($m['away_team'] ?? '');
         $league   = trim($m['league']   ?? '');
         if ($homeTeam === '' || $awayTeam === '') continue;
-        $key = $dateOnly . '|' . $hourOnly . '|' . $homeTeam . '|' . $awayTeam;
+        $key = $dateOnly . '|' . $hourOnly . ':' . $minuteOnly . '|' . $homeTeam . '|' . $awayTeam;
         if (!isset($rows[$key])) {
             $rows[$key] = [
                 'datetime'   => $datetime,
@@ -106,11 +101,12 @@ if ($hasMatches) {
 // Merge incoming goal events into rows
 foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
     $ts = $goal['timestamp'] ?? date('c');
-    $dt = new DateTime($ts);
+    $dt = (new DateTime($ts))->setTimezone(new DateTimeZone('Asia/Jakarta'));
 
-    $dateOnly = $dt->format('Y-m-d');
-    $hourOnly = $dt->format('H');
-    $datetime = $dt->format('d/m/Y H:i'); // stored format — parseable by createFromFormat
+    $dateOnly   = $dt->format('Y-m-d');
+    $hourOnly   = $dt->format('H');
+    $minuteOnly = $dt->format('i');
+    $datetime   = $dt->format('d/m/Y H:i'); // stored format — parseable by createFromFormat
 
     $homeTeam   = trim($goal['home_team']    ?? '');
     $awayTeam   = trim($goal['away_team']    ?? '');
@@ -122,7 +118,7 @@ foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
 
     if ($homeTeam === '' || $awayTeam === '') continue;
 
-    $key       = $dateOnly . '|' . $hourOnly . '|' . $homeTeam . '|' . $awayTeam;
+    $key       = $dateOnly . '|' . $hourOnly . ':' . $minuteOnly . '|' . $homeTeam . '|' . $awayTeam;
     $goalEntry = $minute . ' (' . $scoreAfter . ')';
 
     if (!isset($rows[$key])) {
@@ -159,15 +155,16 @@ foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
 if ($hasMilestones) {
     foreach ($payload['milestones'] as $ms) {
         $ts = $ms['timestamp'] ?? date('c');
-        $dt = new DateTime($ts);
-        $dateOnly  = $dt->format('Y-m-d');
-        $hourOnly  = $dt->format('H');
-        $homeTeam  = trim($ms['home_team'] ?? '');
-        $awayTeam  = trim($ms['away_team'] ?? '');
-        $msId      = trim($ms['milestone'] ?? '');
+        $dt = (new DateTime($ts))->setTimezone(new DateTimeZone('Asia/Jakarta'));
+        $dateOnly   = $dt->format('Y-m-d');
+        $hourOnly   = $dt->format('H');
+        $minuteOnly = $dt->format('i');
+        $homeTeam   = trim($ms['home_team'] ?? '');
+        $awayTeam   = trim($ms['away_team'] ?? '');
+        $msId       = trim($ms['milestone'] ?? '');
         if ($homeTeam === '' || $awayTeam === '') continue;
         if (!in_array($msId, ['1h3', '2h1', '2h7'], true)) continue;
-        $key = $dateOnly . '|' . $hourOnly . '|' . $homeTeam . '|' . $awayTeam;
+        $key = $dateOnly . '|' . $hourOnly . ':' . $minuteOnly . '|' . $homeTeam . '|' . $awayTeam;
         if (isset($rows[$key])) {
             $rows[$key][$msId] = '✓';
             // 2H milestones imply 1H 3' was also reached

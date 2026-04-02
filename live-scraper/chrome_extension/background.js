@@ -257,7 +257,7 @@ async function trackGoalEvents(matches) {
     // Send new match registrations
     if (newMatches.length) {
         try {
-            await fetch('http://localhost/sabaraja/goal-log-save.php', {
+            await fetch('http://localhost/lebihsabar/goal-log-save.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ matches: newMatches })
@@ -268,7 +268,7 @@ async function trackGoalEvents(matches) {
     // Send milestones
     if (newMilestones.length) {
         try {
-            await fetch('http://localhost/sabaraja/goal-log-save.php', {
+            await fetch('http://localhost/lebihsabar/goal-log-save.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ milestones: newMilestones })
@@ -286,7 +286,7 @@ async function trackGoalEvents(matches) {
 
     // send goals to PHP server
     try {
-        await fetch('http://localhost/sabaraja/goal-log-save.php', {
+        await fetch('http://localhost/lebihsabar/goal-log-save.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ goals: newGoals })

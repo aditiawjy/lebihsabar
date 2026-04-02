@@ -1221,10 +1221,9 @@ async function runLiveCycle() {
     try {
         const targetTab = await getTargetTab();
         if (!targetTab?.id || !isTargetUrl(targetTab.url)) {
-            await updateLiveState(false);
             await setStatus({
                 pageStatus: '✗ Not on target page',
-                error: 'Target tab not found. Open the BPVM page to keep auto live running.'
+                error: 'Target tab not found. Will retry next cycle.'
             });
             return;
         }

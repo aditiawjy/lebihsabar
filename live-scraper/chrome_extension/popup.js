@@ -405,6 +405,7 @@ function renderTable(matches, oddInsights = {}) {
                 <td class="team-name">${m.awayTeam || '-'}${watchBadge}</td>
                 <td><span class="${timeClass}">${m.status || '-'}</span></td>
                 <td class="score">${m.score || '-'}</td>
+                <td class="score">${insight?.htScore || '-'}</td>
                 <td class="odds-focus">${insight ? `${formatOdd(insight.currentOdd)} <span class="delta-text">(${formatDelta(insight.deltaFromPrevious)})</span><div class="pattern-meta">${formatComparisonOdds(insight.comparisonOdds)}</div>` : '-'}</td>
                 <td>${insight ? `<span class="${getPatternBadgeClass(insight)}"><span class="pattern-icon">${getPatternIcon(insight)}</span>${insight.pattern}</span><div class="pattern-meta">${getWatchRuleText(insight)} • Above ${formatDuration(insight.aboveThresholdDurationMs)}</div>` : '<span class="pattern-badge pattern-muted"><span class="pattern-icon">--</span>No 2H data</span>'}</td>
                 <td class="odds-text">${oddsHtml}</td>
@@ -416,13 +417,14 @@ function renderTable(matches, oddInsights = {}) {
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 18%;">Home</th>
-                        <th style="width: 18%;">Away</th>
-                        <th style="width: 10%;">Time</th>
-                        <th style="width: 10%;">Score</th>
-                        <th style="width: 12%;">Watch O</th>
-                        <th style="width: 16%;">Pattern</th>
-                        <th style="width: 34%;">Odd</th>
+                        <th style="width: 17%;">Home</th>
+                        <th style="width: 17%;">Away</th>
+                        <th style="width: 9%;">Time</th>
+                        <th style="width: 9%;">Score</th>
+                        <th style="width: 8%;">HT</th>
+                        <th style="width: 11%;">Watch O</th>
+                        <th style="width: 15%;">Pattern</th>
+                        <th style="width: 14%;">Odd</th>
                     </tr>
                 </thead>
                 <tbody>

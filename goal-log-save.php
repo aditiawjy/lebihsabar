@@ -42,6 +42,11 @@ function parseCsvDatetime(string $val): array {
     ];
 }
 
+// Open CSV with exclusive lock to prevent race conditions
+$lockFile = $csvFile . '.lock';
+$lock = fopen($lockFile, 'c');
+flock($lock, LOCK_EX);
+
 // Load existing rows keyed by (Y-m-d|HH:MM|home_team|away_team)
 $rows = [];
 if (is_file($csvFile) && is_readable($csvFile)) {
@@ -192,5 +197,9 @@ foreach ($rows as $row) {
     ]);
 }
 fclose($fh);
+
+// Release lock
+flock($lock, LOCK_UN);
+fclose($lock);
 
 echo json_encode(['ok' => true, 'goals' => count($payload['goals'] ?? []), 'matches' => count($payload['matches'] ?? []), 'milestones' => count($payload['milestones'] ?? [])]);

@@ -37,6 +37,13 @@ let lastScoreByMatchKey = new Map(); // key => "homeScore-awayScore"
 let registeredMatchKeys = new Set(); // keys already registered in CSV
 let shScoreByMatchKey = new Map();   // key => score when 2H started "h-a"
 let shNotifiedLeagues = new Set();   // league keys already notified for SHG alert
+let sentMilestones = new Set();      // matchKey|milestoneId already sent this session
+
+const MILESTONES = [
+    { id: '1h3', half: '1H', minThreshold: 3 },
+    { id: '2h1', half: '2H', minThreshold: 1 },
+    { id: '2h7', half: '2H', minThreshold: 7 },
+];
 
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -44,6 +51,12 @@ function delay(ms) {
 
 function isKickoffMinute(status) {
     return /^1H\s+[01]'$/i.test(String(status || '').trim());
+}
+
+function parseMatchMinute(status) {
+    const m = String(status || '').trim().match(/^(1H|2H)\s+(\d+)'$/i);
+    if (!m) return { half: null, min: -1 };
+    return { half: m[1].toUpperCase(), min: parseInt(m[2], 10) };
 }
 
 function isSecondHalfStart(status) {
@@ -83,6 +96,7 @@ async function trackShgAlert(matches) {
         // Reset if match back to 1H (new match)
         if (isKickoffMinute(status)) {
             shScoreByMatchKey.delete(key);
+            for (const ms of MILESTONES) sentMilestones.delete(key + '|' + ms.id);
             // also clear league notification so new match cycle can notify again
         }
     }
@@ -189,13 +203,48 @@ async function trackGoalEvents(matches) {
         }
     }
 
+    // Track milestones (1H 3', 2H 1', 2H 7') for registered matches
+    const newMilestones = [];
+    for (const match of matches) {
+        const key = createMatchKey(match);
+        if (!registeredMatchKeys.has(key)) continue;
+        const { half, min } = parseMatchMinute(String(match?.status || ''));
+        if (!half) continue;
+        for (const ms of MILESTONES) {
+            if (ms.half === half && min >= ms.minThreshold) {
+                const msKey = key + '|' + ms.id;
+                if (!sentMilestones.has(msKey)) {
+                    sentMilestones.add(msKey);
+                    newMilestones.push({
+                        timestamp,
+                        league: match?.league || '',
+                        home_team: match?.homeTeam || '',
+                        away_team: match?.awayTeam || '',
+                        milestone: ms.id,
+                    });
+                }
+            }
+        }
+    }
+
     // Send new match registrations
     if (newMatches.length) {
         try {
-            await fetch('http://localhost/lebihsabar/goal-log-save.php', {
+            await fetch('http://localhost/sabaraja/goal-log-save.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ matches: newMatches })
+            });
+        } catch (_) {}
+    }
+
+    // Send milestones
+    if (newMilestones.length) {
+        try {
+            await fetch('http://localhost/sabaraja/goal-log-save.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ milestones: newMilestones })
             });
         } catch (_) {}
     }
@@ -210,7 +259,7 @@ async function trackGoalEvents(matches) {
 
     // send goals to PHP server
     try {
-        await fetch('http://localhost/lebihsabar/goal-log-save.php', {
+        await fetch('http://localhost/sabaraja/goal-log-save.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ goals: newGoals })

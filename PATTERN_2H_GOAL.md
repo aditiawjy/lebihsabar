@@ -1,178 +1,180 @@
 # Pattern Prediksi Goal Babak Kedua — SABA Virtual PES/FC24
 
 > Update terus setiap ada data baru dari goal_log.csv
+> Data per 03/04/2026 (~222 match)
 > Format sample: `[tanggal] Match | HT | Kondisi | Hasil`
 
 ---
 
-## TIER 1 — Pasti Ada Goal 2H (Confidence ≥ 95%)
+## TIER 1 — Pasti Ada Goal 2H (Confidence 100%)
 
-### Pattern A: Away Leading HT + Goal Sudah Ada di 2H 1'-2H 5'
-**Logika:** Home harus kejar → menyerang terus. Sudah ada goal = pertandingan aktif → tekanan lanjut sampai akhir.
+### Pattern #1: Gol Pertama 1H di Mnt 8'
+**Logika:** First goal sangat telat di 1H = match baru "hidup", momentum langsung lanjut ke 2H.
 
-**Record: 7/7 = 100%**
+**Record: 8/8 = 100%**
 
-| Sample | HT | 2H Early Goal | Late 2H |
-|---|---|---|---|
-| PSG vs Chelsea | 1-2 | 2H 1', 2H 2' | 2H 7' ✓ |
-| Leicester vs Arsenal | 0-3 | 2H 1' | 2H 7' ✓ |
-| Philippines vs India | 1-2 | 2H 5' | 2H 7' ✓ |
-| Barcelona vs Sociedad | 0-1 | 2H 0', 2H 5' | 2H 7' ✓ |
-| Lille vs Man United | 0-1 | 2H 3' | 2H 6' ✓ |
-| PSG vs Sevilla | 0-1 | 2H 1' | 2H 6' ✓ |
-| Arminia vs Man City | 0-1 | 2H 5' | 2H 6' ✓ |
-
-**Sinyal masuk:** Lihat goal muncul antara 2H 1'-2H 5' saat away leading HT → **beli next goal / over sekarang**
+**Kondisi:** Gol pertama match muncul di menit 8 babak pertama.
+**Sinyal masuk:** Deteksi first goal di 1H mnt 8' → antisipasi pasti ada gol 2H.
 
 ---
 
-### Pattern B: HT 0-0 → Ada Goal 2H
+### Pattern #2: Selisih 2+ & Last Gol 1H Mnt 7'
+**Logika:** Tim tertinggal jauh dan gol terakhir di menit akhir 1H = masih ada semangat kejar, lanjut di 2H.
+
+**Record: 8/8 = 100%**
+
+**Kondisi:** Skor selisih 2+ gol (misal 3-1, 2-0), dan gol terakhir 1H terjadi di mnt 7'.
+**Contoh:** 1H → gol di mnt 2', 5', 7' dengan skor akhir 3-1 → pasti ada 2H gol.
+
+---
+
+### Pattern #3: AH + Gap Balas >= 3 Menit
+**Logika:** Away cetak duluan, Home membalas tapi lambat (3+ menit kemudian) = masih ada tensi, belum tuntas.
+
+**Record: 8/8 = 100%**
+
+**Kondisi:** Away cetak gol duluan, Home balas dengan jeda >= 3 menit. Contoh: Away mnt 2', Home mnt 6' (gap 4 mnt).
+**Sinyal masuk:** Deteksi urutan scorer AH dengan gap lebar → pasti lanjut di 2H.
+
+---
+
+### Pattern #4: 1 Gol Doang di 1H Mnt 8'+
+**Logika:** Match sepi sepanjang 1H, tiba-tiba gol di detik akhir = momentum baru dimulai, lanjut ke 2H.
+
+**Record: 10/10 = 100%**
+
+**Kondisi:** Hanya ada 1 gol sepanjang 1H, dan gol itu terjadi di mnt 8 atau 9.
+**Berlaku untuk:** 16min dan 20min league (15min league jarang sampai mnt 8).
+
+---
+
+### Pattern #5: First Mnt 0-2' + Last Mnt 7' + Selisih <=1
+**Logika:** Gol sangat awal + gol sangat telat + skor masih ketat = match aktif dari awal sampai akhir 1H, belum ada yang menang.
+
+**Record: 6/6 = 100%**
+
+**Kondisi:** Gol pertama di mnt 0-2', ada gol lagi di mnt 7'+, dan skor akhir 1H selisih maksimal 1 gol (seri atau 1-0/0-1).
+**Contoh:** Away gol mnt 1', Home balas mnt 7' → skor 1-1 → pasti ada gol 2H.
+
+---
+
+## TIER 2 — Sangat Mungkin Ada Goal 2H (Confidence 87-98%)
+
+### Pattern #6: 0-0 di 1H
 **Logika:** Tidak ada tim yang unggul → kedua tim menyerang penuh di 2H.
 
-**Record: 7/7 = 100%**
+**Record: 44/45 = 98%** — hanya 2 match FT 0-0 total dari 45 data.
 
-| Sample | HT | 2H Goals |
-|---|---|---|
-| Armenia vs Canada | 0-0 | 2H 3', 2H 3', 2H 6', 2H 8' |
-| Brazil vs Bosnia | 0-0 | 2H 4' |
-| Mexico vs Paraguay | 0-0 | 2H 4', 2H 5' |
-| Liverpool vs Napoli | 0-0 | 2H 4', 2H 5', 2H 5', 2H 6' |
-| Sweden vs Denmark | 0-0 | 2H 6' |
-| Finland vs Ukraine | 0-0 | 2H 4', 2H 4' |
-| Valencia vs Roma | 0-0 | 2H 1' |
-
-**Sinyal masuk:** HT 0-0 → langsung antisipasi 2H goal
+**Sinyal masuk:** HT 0-0 → langsung antisipasi gol di 2H.
 
 ---
 
-### Pattern C: Away Leading HT (tanpa syarat early 2H goal)
-**Logika:** Home tertinggal → pasti menyerang lebih agresif di 2H.
+### Pattern #7: First Mnt 0-2' + Last Mnt 7'+
+**Logika:** Gol pertama sangat awal + gol terakhir sangat telat = match aktif rentang panjang, momentum lanjut ke 2H.
 
-**Record: 8/10 = 80%** (bukan 100%, lihat pengecualian)
+**Record: 17/18 = 94%**
 
-| Sample | HT | 2H Ada Goal? |
-|---|---|---|
-| Lyon vs Monaco | 0-1 | ✓ 2H 6' |
-| FSV Mainz vs Bayern | 0-1 | ✓ 2H 2', 2H 5' |
-| PSG vs Chelsea | 1-2 | ✓ |
-| Lille vs Man United | 0-1 | ✓ |
-| Arminia vs Man City | 0-1 | ✓ |
-| Barcelona vs Sociedad | 0-1 | ✓ |
-| PSG vs Sevilla | 0-1 | ✓ |
-| Leicester vs Arsenal | 0-3 | ✓ |
-| Tottenham vs Chelsea | 0-2 | ✗ (away dominan terlalu besar) |
-| FSV Mainz vs PSG* | 0-0→? | ✗ (match bermasalah) |
-
-**Pengecualian:** Away unggul 2+ gol → home sudah menyerah, tidak ada 2H goal
+**Kondisi:** Gol pertama di mnt 0-2' DAN gol terakhir di mnt 7'+, minimal 2 gol di 1H.
 
 ---
 
-## TIER 2 — Sangat Mungkin Ada Goal 2H (Confidence 70-85%)
+### Pattern #8: Seri + Gap Antar Gol >= 4 Menit
+**Logika:** Skor seri + jarak antar gol lebar = kedua tim bergantian susah payah, masih kompetitif, belum selesai.
 
-### Pattern D: 1H Aktif (3+ Goals) → 2H Selalu Ada Goal
-**Record: 7/7 = 100%** (tapi syarat 1H aktif dulu)
+**Record: 13/14 = 93%**
 
-| Sample | 1H Goals | 2H Ada Goal? |
-|---|---|---|
-| PSG vs Chelsea | 3 | ✓ |
-| Leicester vs Arsenal | 3 | ✓ |
-| Philippines vs India | 3 | ✓ |
-| Iraq vs UAE | 3 | ✓ |
-| Inter vs FC Koln | 3 | ✓ |
-| South Africa vs China | 3 | ✓ |
-| Man United vs Atalanta | 2+1 (ke 3) | ✓ |
+**Kondisi:** Skor seri di akhir 1H (1-1, 2-2, dll) DAN jarak antar gol di 1H minimal 4 menit.
+**Contoh:** Gol di mnt 1' dan 6' (gap 5 mnt), skor 1-1 → 93% ada gol 2H.
 
 ---
 
-### Pattern E: Goal Terakhir 1H di Menit 7'-8' → Ada Late 2H Goal
-**Logika:** Momentum tembak di akhir 1H → berlanjut ke 2H, kedua tim masih "panas"
+### Pattern #9: Seri + Last Gol Mnt 6'
+**Logika:** Gol penyama di mnt 6 = match baru seri di saat-saat akhir, belum ada yang puas.
 
-**Record: 4/5 = 80%**
+**Record: 9/10 = 90%**
 
-| Sample | Last 1H Goal | HT | Late 2H |
-|---|---|---|---|
-| Bahrain vs Indonesia | 1H 8' | 1-0 | 2H 10' ✓ |
-| Portugal vs Senegal | 1H 8' | 1-0 | 2H 7' ✓ |
-| Belgium vs France | 1H 8' | 1-1 | 2H 8' ✓ |
-| Belgium vs USA | 1H 8' | 1-0 | 2H 8' ✓ |
-| Mali vs Qatar | 1H 8' | 2-0 | ✗ (sudah dominan) |
-
-**Pengecualian:** HT sudah 2-0+ → tim unggul santai
+**Kondisi:** Skor seri (1-1, 2-2, dll) dan gol terakhir 1H terjadi di mnt 6.
 
 ---
 
-### Pattern F: HT 1-1 → Ada 2H Goal
-**Record: 6/7 = 86%**
+### Pattern #10: Balas 1x + Last Mnt 6'
+**Logika:** Ada satu aksi balas gol di 1H, dan gol terakhir di mnt 6 = tensi masih tinggi masuk 2H.
 
-| Sample | 2H Ada Goal? |
-|---|---|
-| Everton vs Bielefeld | ✓ |
-| Italy vs Ukraine | ✓ |
-| New Zealand vs China | ✓ |
-| Norway vs Czech Republic | ✓ |
-| Switzerland vs Nigeria | ✓ |
-| South Africa vs China | ✓ |
-| Torino vs Getafe | ✗ |
+**Record: 13/15 = 87%**
+
+**Kondisi:** Ada minimal 1 balas-balasan gol di 1H, dan gol terakhir terjadi di mnt 6.
 
 ---
 
-## TIER 3 — Kapan TIDAK Ada 2H Goal (Waspada)
+## TIER 3 — Kondisi TIDAK Ada 2H Goal (Skip Bet)
 
-### Kondisi Aman-Skip (No Bet):
 | Kondisi | Penjelasan |
 |---|---|
-| HT 1-0, hanya 1 goal, goal di 1H 1'-5' | Tim unggul tipis → bertahan, tidak menyerang |
-| Away unggul 2+ gol saat HT | Home sudah menyerah mental |
-| Tidak ada satupun goal di 1H (HT 0-0) yang tidak aktif menyerang | Perlu konfirmasi 2H aktif dulu |
+| HT 1-0, hanya 1 gol, gol di mnt 1'-5' | Tim unggul tipis → bertahan, tidak menyerang |
+| Away unggul 2+ gol saat HT + tidak aktif di 2H awal | Home sudah menyerah mental |
+| Skor 2-0 atau 3-0 sebelum 2H mnt 7 | 0% late gol dari data |
 
 **Contoh no-goal 2H:**
-- Bayer vs Lille: HT 1-0 (goal 1H 1' saja) → 2H 0-0
-- Man City vs Roma: HT 1-0 (goal 1H 7' saja) → 2H 0-0
-- Bayern vs Leicester: HT 1-0 (goal 1H 3' saja) → 2H 0-0
+- Bayer vs Lille: HT 1-0 (goal 1H mnt 1' saja) → 2H 0-0
+- Man City vs Roma: HT 1-0 (goal 1H mnt 7' saja) → 2H 0-0
+- Bayern vs Leicester: HT 1-0 (goal 1H mnt 3' saja) → 2H 0-0
+
+---
+
+## Catatan Per League
+
+| League | Durasi 2H | Mnt akhir 2H | Last gol paling sering |
+|---|---|---|---|
+| 15 Mins (PES Club) | ~7-8 mnt | 2H 6-7' | 2H 6' (20%) dan 2H 7' (18%) |
+| 16 Mins (FC24) | ~8 mnt | 2H 7-8' | 2H 7' (23%) |
+| 20 Mins (PES Intl) | ~10 mnt | 2H 9-10' | 2H 7' (19%), 2H 9' (15%) |
+
+**Catatan penting:**
+- Pattern #1 (mnt 8') dan #4 (1 gol mnt 8'+): **tidak berlaku untuk 15min league** (mnt 8 hampir tidak pernah ada)
+- Untuk 15min league: window bet sangat sempit jika signal muncul di mnt 7'
 
 ---
 
 ## Kombinasi Signal Terkuat (Stack Pattern)
 
-### 🔥 Signal 3 Layer (masuk langsung):
+### Signal 3 Layer — Masuk Langsung:
 1. Away leading HT **+**
-2. Ada goal di 2H 1'-2H 5' **+**
+2. Ada goal di 2H mnt 1'-5' **+**
 3. Skor masih dalam 1 gol jarak
 
-→ **7/7 = 100% ada goal lagi**
+→ **Confidence sangat tinggi**
 
-### 🔥 Signal 2 Layer:
+### Signal 2 Layer:
 - HT 0-0 + Match sudah aktif (ada goal masuk di awal 2H) → **beli**
-- HT 1-1 + Ada goal di 2H 0'-2H 3' → **beli**
+- HT 1-1 + Ada goal di 2H mnt 0'-3' → **beli**
+
+---
+
+## Summary Akurasi Per Pattern
+
+| # | Pattern | Record | Akurasi |
+|---|---|---|---|
+| 1 | Gol pertama 1H di mnt 8' | 8/8 | **100%** |
+| 2 | Selisih 2+ & last gol 1H mnt 7' | 8/8 | **100%** |
+| 3 | AH + gap balas >= 3 mnt | 8/8 | **100%** |
+| 4 | 1 gol doang di 1H mnt 8'+ | 10/10 | **100%** |
+| 5 | First mnt 0-2' + last mnt 7' + selisih <=1 | 6/6 | **100%** |
+| 6 | 0-0 di 1H | 44/45 | **98%** |
+| 7 | First mnt 0-2' + last mnt 7'+ | 17/18 | **94%** |
+| 8 | Seri + gap antar gol >= 4 mnt | 13/14 | **93%** |
+| 9 | Seri + last gol mnt 6' | 9/10 | **90%** |
+| 10 | Balas 1x + last mnt 6' | 13/15 | **87%** |
 
 ---
 
 ## Template Pencatatan Data Baru
-
-Setiap ada match selesai, catat di sini untuk update record:
 
 ```
 [DD/MM/YYYY] | League | Home vs Away
 HT Score: X-X
 1H Goals: menit1, menit2, ...
 2H Goals: menit1, menit2, ...
-Pattern match: A/B/C/D/E/F / tidak ada
+Pattern match: #1/#2/#3/... / tidak ada
 Prediksi: [ada/tidak ada 2H goal]
 Hasil: ✓ / ✗
 ```
-
----
-
-## Summary Akurasi per Pattern
-
-| Pattern | Kondisi | Record | % |
-|---|---|---|---|
-| A | Away leading HT + goal 2H 1-5 | 7/7 | **100%** |
-| B | HT 0-0 | 7/7 | **100%** |
-| C | Away leading HT (any) | 8/10 | **80%** |
-| D | 1H 3+ goals | 7/7 | **100%** |
-| E | Last 1H goal menit 7-8 + HT ≤1-0 | 4/5 | **80%** |
-| F | HT 1-1 | 6/7 | **86%** |
-
-> Data dari: goal_log.csv per 02/04/2026 (~44 match selesai)
-> Update record setiap minggu dengan data terbaru

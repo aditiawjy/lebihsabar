@@ -40,7 +40,11 @@ let shScoreByMatchKey = new Map();   // key => score when 2H started "h-a"
 let shNotifiedLeagues = new Set();   // league keys already notified for SHG alert
 let sentMilestones = new Set();      // matchKey|milestoneId already sent this session
 let sentLate2HSignals = new Set();   // matchKey already notified for late 2H signal
+let sentDraw1HSignals = new Set();   // matchKey already notified for draw 1H signal
+let sentUnggul1HSignals = new Set(); // matchKey already notified for unggul 1-0 late 1H signal
+let sentEarlyLateSignals = new Set(); // matchKey already notified for early goal late reply signal
 let last1HGoalMinByMatchKey = new Map(); // matchKey => last 1H goal minute
+let first1HGoalMinByMatchKey = new Map(); // matchKey => first 1H goal minute
 let has2HGoalByMatchKey = new Map(); // matchKey => true if any 2H goal seen
 
 const MILESTONES = [
@@ -182,6 +186,10 @@ async function trackGoalEvents(matches) {
             last1HGoalMinByMatchKey.delete(key);
             has2HGoalByMatchKey.delete(key);
             sentLate2HSignals.delete(key);
+            sentDraw1HSignals.delete(key);
+            sentUnggul1HSignals.delete(key);
+            sentEarlyLateSignals.delete(key);
+            first1HGoalMinByMatchKey.delete(key);
             // Clear milestones for this key so new round sends them fresh
             for (const ms of MILESTONES) {
                 sentMilestones.delete(key + '|' + ms.id);
@@ -210,6 +218,7 @@ async function trackGoalEvents(matches) {
             if (gHalf === '1H') {
                 const curLast = last1HGoalMinByMatchKey.get(key) ?? -1;
                 if (gMin > curLast) last1HGoalMinByMatchKey.set(key, gMin);
+                if (!first1HGoalMinByMatchKey.has(key)) first1HGoalMinByMatchKey.set(key, gMin);
             }
             if (gHalf === '2H') {
                 has2HGoalByMatchKey.set(key, true);
@@ -248,6 +257,8 @@ async function trackGoalEvents(matches) {
                         home_team: match?.homeTeam || '',
                         away_team: match?.awayTeam || '',
                         milestone: ms.id,
+                        home_score: String(match?.homeScore ?? '0'),
+                        away_score: String(match?.awayScore ?? '0'),
                     });
                 }
             }
@@ -956,8 +967,8 @@ async function updateLiveState(isRunning, extraState = {}) {
 
 async function restoreRuntimeState() {
     const [localData, sessionData] = await Promise.all([
-        chrome.storage.local.get(['liveRuntimeState']),
-        chrome.storage.session.get(['kickoffTimes', 'registeredKeys', 'sentMilestoneKeys', 'sentLate2HKeys', 'last1HGoalMins', 'has2HGoals'])
+        chrome.storage.local.get(['liveRuntimeState', 'sentLate2HKeys', 'sentDraw1HKeys', 'sentUnggul1HKeys', 'sentEarlyLateKeys']),
+        chrome.storage.session.get(['kickoffTimes', 'registeredKeys', 'sentMilestoneKeys', 'last1HGoalMins', 'has2HGoals'])
     ]);
     const runtimeState = localData.liveRuntimeState || {};
 
@@ -973,8 +984,17 @@ async function restoreRuntimeState() {
     if (Array.isArray(sessionData.sentMilestoneKeys)) {
         sentMilestones = new Set(sessionData.sentMilestoneKeys);
     }
-    if (Array.isArray(sessionData.sentLate2HKeys)) {
-        sentLate2HSignals = new Set(sessionData.sentLate2HKeys);
+    if (Array.isArray(localData.sentLate2HKeys)) {
+        sentLate2HSignals = new Set(localData.sentLate2HKeys);
+    }
+    if (Array.isArray(localData.sentDraw1HKeys)) {
+        sentDraw1HSignals = new Set(localData.sentDraw1HKeys);
+    }
+    if (Array.isArray(localData.sentUnggul1HKeys)) {
+        sentUnggul1HSignals = new Set(localData.sentUnggul1HKeys);
+    }
+    if (Array.isArray(localData.sentEarlyLateKeys)) {
+        sentEarlyLateSignals = new Set(localData.sentEarlyLateKeys);
     }
     if (sessionData.last1HGoalMins) {
         last1HGoalMinByMatchKey = new Map(Object.entries(sessionData.last1HGoalMins).map(([k, v]) => [k, Number(v)]));
@@ -991,14 +1011,21 @@ async function restoreRuntimeState() {
 }
 
 async function persistMatchState() {
-    await chrome.storage.session.set({
-        kickoffTimes: Object.fromEntries(kickoffTimeByMatchKey),
-        registeredKeys: [...registeredMatchKeys],
-        sentMilestoneKeys: [...sentMilestones],
-        sentLate2HKeys: [...sentLate2HSignals],
-        last1HGoalMins: Object.fromEntries(last1HGoalMinByMatchKey),
-        has2HGoals: Object.fromEntries(has2HGoalByMatchKey),
-    });
+    await Promise.all([
+        chrome.storage.session.set({
+            kickoffTimes: Object.fromEntries(kickoffTimeByMatchKey),
+            registeredKeys: [...registeredMatchKeys],
+            sentMilestoneKeys: [...sentMilestones],
+            last1HGoalMins: Object.fromEntries(last1HGoalMinByMatchKey),
+            has2HGoals: Object.fromEntries(has2HGoalByMatchKey),
+        }),
+        chrome.storage.local.set({
+            sentLate2HKeys: [...sentLate2HSignals],
+            sentDraw1HKeys: [...sentDraw1HSignals],
+            sentUnggul1HKeys: [...sentUnggul1HSignals],
+            sentEarlyLateKeys: [...sentEarlyLateSignals],
+        }),
+    ]);
 }
 
 async function setStatus(patch = {}) {
@@ -1214,9 +1241,6 @@ async function trackLate2HSignal(matches) {
     if (!Array.isArray(matches) || !matches.length) return;
 
     for (const match of matches) {
-        const league = String(match?.league || '');
-        if (!league.includes('INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins')) continue;
-
         const key = createMatchKey(match);
         if (!registeredMatchKeys.has(key)) continue;
         if (sentLate2HSignals.has(key)) continue;
@@ -1229,20 +1253,11 @@ async function trackLate2HSignal(matches) {
         const awayScore = parseInt(match?.awayScore ?? '0', 10);
         const diff = Math.abs(homeScore - awayScore);
         const has2HGoal = has2HGoalByMatchKey.get(key) === true;
-        const last1HMin = last1HGoalMinByMatchKey.get(key) ?? -1;
 
-        // SYARAT 1: selisih ≤ 1 + sudah ada goal 2H
-        const signal1 = diff <= 1 && has2HGoal;
-        // SYARAT 2: last 1H goal menit 7-8 + selisih ≤ 2
-        const signal2 = last1HMin >= 7 && diff <= 2;
-
-        if (!signal1 && !signal2) continue;
+        // Syarat: selisih ≤ 1 DAN sudah ada goal 2H
+        if (diff > 1 || !has2HGoal) continue;
 
         sentLate2HSignals.add(key);
-
-        const reason = signal1
-            ? `✅ Selisih ${diff} gol + sudah ada goal 2H`
-            : `✅ Last 1H goal menit ${last1HMin}' + selisih ${diff} gol`;
 
         const home = escapeHtml(match?.homeTeam || '?');
         const away = escapeHtml(match?.awayTeam || '?');
@@ -1252,8 +1267,154 @@ async function trackLate2HSignal(matches) {
             `🚨 <b>SIGNAL LATE 2H GOAL!</b>\n` +
             `⚽ <b>${home} vs ${away}</b>\n` +
             `📊 Skor: <b>${score}</b> | Menit: <b>${escapeHtml(status)}</b>\n` +
-            `📋 ${reason}\n` +
+            `✅ Selisih ${diff} gol + sudah ada goal 2H\n` +
             `🎯 <b>MASUK sekarang — over next goal / 2H 7'+</b>`;
+
+        await sendTelegramText(msg);
+    }
+}
+
+async function trackDraw1HSignal(matches) {
+    if (!Array.isArray(matches) || !matches.length) return;
+
+    for (const match of matches) {
+        const key = createMatchKey(match);
+        if (!registeredMatchKeys.has(key)) continue;
+        if (sentDraw1HSignals.has(key)) continue;
+
+        const status = String(match?.status || '').trim();
+        const { half, min } = parseMatchMinute(status);
+
+        // Trigger saat masih 1H menit 5-9'
+        if (half !== '1H' || min < 5 || min > 9) continue;
+
+        const homeScore = parseInt(match?.homeScore ?? '0', 10);
+        const awayScore = parseInt(match?.awayScore ?? '0', 10);
+
+        // Skor harus seri dan bukan 0-0
+        if (homeScore !== awayScore || homeScore === 0) continue;
+
+        const last1HMin = last1HGoalMinByMatchKey.get(key) ?? -1;
+
+        // Gol penyama baru saja terjadi di menit ini (5-9')
+        if (last1HMin !== min) continue;
+
+        // Belum ada gol 2H (signal ini untuk prediksi, bukan konfirmasi)
+        if (has2HGoalByMatchKey.get(key) === true) continue;
+
+        sentDraw1HSignals.add(key);
+
+        const home = escapeHtml(match?.homeTeam || '?');
+        const away = escapeHtml(match?.awayTeam || '?');
+        const score = `${homeScore}-${awayScore}`;
+        const pct = (min === 7) ? '100%' : (min >= 5 ? '93%' : '85%');
+
+        const msg =
+            `⚡ <b>SIGNAL DRAW 1H — PREDIKSI GOL 2H!</b>\n` +
+            `⚽ <b>${home} vs ${away}</b>\n` +
+            `📊 Skor: <b>${score}</b> | Menit: <b>${escapeHtml(status)}</b>\n` +
+            `✅ Saling balas gol, disamakan mnt ${min}' (${pct} ada gol 2H)\n` +
+            `🎯 <b>PANTAU — siap masuk di awal 2H</b>`;
+
+        await sendTelegramText(msg);
+    }
+}
+
+async function trackUnggul1HSignal(matches) {
+    if (!Array.isArray(matches) || !matches.length) return;
+
+    for (const match of matches) {
+        const key = createMatchKey(match);
+        if (!registeredMatchKeys.has(key)) continue;
+        if (sentUnggul1HSignals.has(key)) continue;
+
+        const status = String(match?.status || '').trim();
+        const { half, min } = parseMatchMinute(status);
+
+        // Trigger saat masih 1H menit 6, 8, atau 9'
+        if (half !== '1H' || ![6, 8, 9].includes(min)) continue;
+
+        const homeScore = parseInt(match?.homeScore ?? '0', 10);
+        const awayScore = parseInt(match?.awayScore ?? '0', 10);
+        const diff = Math.abs(homeScore - awayScore);
+
+        // Selisih tepat 1 gol
+        if (diff !== 1) continue;
+
+        // Total gol 1H harus tepat 1 (berarti 1-0 atau 0-1, tidak ada saling balas)
+        const totalGoals = homeScore + awayScore;
+        if (totalGoals !== 1) continue;
+
+        const last1HMin = last1HGoalMinByMatchKey.get(key) ?? -1;
+
+        // Gol satu-satunya harus terjadi di menit ini
+        if (last1HMin !== min) continue;
+
+        // Belum ada gol 2H
+        if (has2HGoalByMatchKey.get(key) === true) continue;
+
+        sentUnggul1HSignals.add(key);
+
+        const home = escapeHtml(match?.homeTeam || '?');
+        const away = escapeHtml(match?.awayTeam || '?');
+        const score = `${homeScore}-${awayScore}`;
+        const leader = homeScore > awayScore ? home : away;
+
+        const msg =
+            `🎯 <b>SIGNAL UNGGUL LATE 1H — PREDIKSI GOL 2H!</b>\n` +
+            `⚽ <b>${home} vs ${away}</b>\n` +
+            `📊 Skor: <b>${score}</b> | Menit: <b>${escapeHtml(status)}</b>\n` +
+            `✅ ${leader} unggul 1-0 dengan gol di mnt ${min}' (100% ada gol 2H)\n` +
+            `🎯 <b>PANTAU — yang tertinggal bakal balas di 2H</b>`;
+
+        await sendTelegramText(msg);
+    }
+}
+
+async function trackEarlyLateReplySignal(matches) {
+    if (!Array.isArray(matches) || !matches.length) return;
+
+    for (const match of matches) {
+        const key = createMatchKey(match);
+        if (!registeredMatchKeys.has(key)) continue;
+        if (sentEarlyLateSignals.has(key)) continue;
+
+        const status = String(match?.status || '').trim();
+        const { half, min } = parseMatchMinute(status);
+
+        // Hanya saat 1H menit 5-9'
+        if (half !== '1H' || min < 5 || min > 9) continue;
+
+        const homeScore = parseInt(match?.homeScore ?? '0', 10);
+        const awayScore = parseInt(match?.awayScore ?? '0', 10);
+
+        // Skor harus seri (1-1) — artinya sudah ada gol balas
+        if (homeScore !== awayScore || homeScore === 0) continue;
+
+        const first1HMin = first1HGoalMinByMatchKey.get(key) ?? -1;
+        const last1HMin  = last1HGoalMinByMatchKey.get(key) ?? -1;
+
+        // Gol pertama 1H harus di mnt 0-2' (gol awal)
+        if (first1HMin < 0 || first1HMin > 2) continue;
+
+        // Gol balas (last goal) harus di menit sekarang (5-9')
+        if (last1HMin !== min) continue;
+
+        // Belum ada gol 2H
+        if (has2HGoalByMatchKey.get(key) === true) continue;
+
+        sentEarlyLateSignals.add(key);
+
+        const home = escapeHtml(match?.homeTeam || '?');
+        const away = escapeHtml(match?.awayTeam || '?');
+        const score = `${homeScore}-${awayScore}`;
+
+        const msg =
+            `🔥 <b>SIGNAL BALAS TELAT — PREDIKSI GOL 2H!</b>\n` +
+            `⚽ <b>${home} vs ${away}</b>\n` +
+            `📊 Skor: <b>${score}</b> | Menit: <b>${escapeHtml(status)}</b>\n` +
+            `✅ Gol pertama mnt ${first1HMin}', dibalas baru di mnt ${min}' (100% ada gol 2H)\n` +
+            `🎯 <b>PANTAU — siap masuk di awal 2H</b>`;
 
         await sendTelegramText(msg);
     }
@@ -1262,9 +1423,12 @@ async function trackLate2HSignal(matches) {
 async function handleFreshData(data) {
     await setSavedMatchData(data);
     await trackGoalEvents(Array.isArray(data?.matches) ? data.matches : []);
-    await persistMatchState();
+    await trackDraw1HSignal(Array.isArray(data?.matches) ? data.matches : []);
+    await trackUnggul1HSignal(Array.isArray(data?.matches) ? data.matches : []);
+    await trackEarlyLateReplySignal(Array.isArray(data?.matches) ? data.matches : []);
     await trackLate2HSignal(Array.isArray(data?.matches) ? data.matches : []);
     await trackShgAlert(Array.isArray(data?.matches) ? data.matches : []);
+    await persistMatchState(); // dipanggil SETELAH semua signal — agar guard Set tersimpan
     await updateOddTracking(Array.isArray(data?.matches) ? data.matches : []);
     await setStatus({
         pageStatus: '✓ Target page detected',

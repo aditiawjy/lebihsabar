@@ -85,7 +85,9 @@ if ($hasMatches) {
         $awayTeam = trim($m['away_team'] ?? '');
         $league   = trim($m['league']   ?? '');
         if ($homeTeam === '' || $awayTeam === '') continue;
-        $key = $dateOnly . '|' . $hourOnly . ':' . $minuteOnly . '|' . $homeTeam . '|' . $awayTeam;
+        $exactKey = $dateOnly . '|' . $hourOnly . ':' . $minuteOnly . '|' . $homeTeam . '|' . $awayTeam;
+        // Skip if already registered within 30 min window (handles re-registration at slightly different minute)
+        $key = isset($rows[$exactKey]) ? $exactKey : (findExistingKey($rows, $dateOnly, $homeTeam, $awayTeam, $dt) ?? $exactKey);
         if (!isset($rows[$key])) {
             $rows[$key] = [
                 'datetime'   => $datetime,
@@ -93,14 +95,35 @@ if ($hasMatches) {
                 'home_team'  => $homeTeam,
                 'away_team'  => $awayTeam,
                 'goals'      => '',
-                'final_home' => '',
-                'final_away' => '',
+                'final_home' => '0',
+                'final_away' => '0',
                 '1h3'        => '',
                 '2h1'        => '',
                 '2h7'        => '',
             ];
         }
     }
+}
+
+// Find existing row key for same teams on same date (within ±15 min window)
+// Used to merge goals/milestones into a row that was registered at a slightly different minute
+function findExistingKey(array $rows, string $dateOnly, string $homeTeam, string $awayTeam, \DateTime $dt): ?string {
+    $tsIncoming = $dt->getTimestamp();
+    $teamSuffix = '|' . $homeTeam . '|' . $awayTeam;
+    $datePrefix = $dateOnly . '|';
+    foreach ($rows as $key => $_) {
+        if (strpos($key, $datePrefix) !== 0) continue;
+        if (substr($key, -strlen($teamSuffix)) !== $teamSuffix) continue;
+        // Parse the HH:MM from the key
+        $parts = explode('|', $key);
+        if (count($parts) < 2) continue;
+        $existingDt = DateTime::createFromFormat('Y-m-d H:i', $dateOnly . ' ' . $parts[1]);
+        if (!$existingDt) continue;
+        if (abs($existingDt->getTimestamp() - $tsIncoming) <= 1800) { // within 30 minutes
+            return $key;
+        }
+    }
+    return null;
 }
 
 // Merge incoming goal events into rows
@@ -123,7 +146,9 @@ foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
 
     if ($homeTeam === '' || $awayTeam === '') continue;
 
-    $key       = $dateOnly . '|' . $hourOnly . ':' . $minuteOnly . '|' . $homeTeam . '|' . $awayTeam;
+    $exactKey = $dateOnly . '|' . $hourOnly . ':' . $minuteOnly . '|' . $homeTeam . '|' . $awayTeam;
+    // Use existing row if teams match within 15 min window (handles missed-kickoff late registration)
+    $key = isset($rows[$exactKey]) ? $exactKey : (findExistingKey($rows, $dateOnly, $homeTeam, $awayTeam, $dt) ?? $exactKey);
     $goalEntry = $minute . ' (' . $scoreAfter . ')';
 
     if (!isset($rows[$key])) {
@@ -169,12 +194,18 @@ if ($hasMilestones) {
         $msId       = trim($ms['milestone'] ?? '');
         if ($homeTeam === '' || $awayTeam === '') continue;
         if (!in_array($msId, ['1h3', '2h1', '2h7'], true)) continue;
-        $key = $dateOnly . '|' . $hourOnly . ':' . $minuteOnly . '|' . $homeTeam . '|' . $awayTeam;
-        if (isset($rows[$key]) && $rows[$key]['goals'] !== '') {
+        $exactKey = $dateOnly . '|' . $hourOnly . ':' . $minuteOnly . '|' . $homeTeam . '|' . $awayTeam;
+        $key = isset($rows[$exactKey]) ? $exactKey : (findExistingKey($rows, $dateOnly, $homeTeam, $awayTeam, $dt) ?? $exactKey);
+        if (isset($rows[$key])) {
             $rows[$key][$msId] = '✓';
             // 2H milestones imply 1H 3' was also reached
             if ($msId === '2h1' || $msId === '2h7') $rows[$key]['1h3'] = '✓';
             if ($msId === '2h7') $rows[$key]['2h1'] = '✓';
+            // Update final score from milestone if still empty (handles 0-0 matches)
+            $hscore = trim($ms['home_score'] ?? '');
+            $ascore = trim($ms['away_score'] ?? '');
+            if ($hscore !== '' && $rows[$key]['final_home'] === '') $rows[$key]['final_home'] = $hscore;
+            if ($ascore !== '' && $rows[$key]['final_away'] === '') $rows[$key]['final_away'] = $ascore;
         }
     }
 }

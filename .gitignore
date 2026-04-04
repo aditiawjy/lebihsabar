@@ -16,6 +16,11 @@ NUL
 __pycache__/
 *.pyc
 
+# Analysis scripts
+analyze_*.py
+verify_*.py
+find_patterns.py
+
 # Local git worktrees
 .worktrees/
 

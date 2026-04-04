@@ -255,8 +255,8 @@ $p11 = array_filter($matches, fn($m) => $m['switches'] >= 2);
 $p12 = array_filter($matches, fn($m) => $m['h1c'] >= 4);
 // P13: First 0-2' + last 7'+
 $p13 = array_filter($matches, fn($m) => $m['h1c']>=2 && $m['h1_first']<=2 && $m['h1_last']>=7);
-// P14: Seri + gap >= 4
-$p14 = array_filter($matches, fn($m) => $m['h1c']>=2 && $m['sc_h']==$m['sc_a'] && $m['sc_h']>0 && $m['max_gap']>=4);
+// P14: Seri + gap >= 4 + span >= 5 (improved from 83% to 94%)
+$p14 = array_filter($matches, fn($m) => $m['h1c']>=2 && $m['sc_h']==$m['sc_a'] && $m['sc_h']>0 && $m['max_gap']>=4 && ($m['h1_last']-$m['h1_first'])>=5);
 // P15: HT 2-2
 $p15 = array_filter($matches, fn($m) => $m['sc_h']==2 && $m['sc_a']==2);
 // P16: Last gol 1H mnt 6 atau 7, league 16min
@@ -302,7 +302,7 @@ $patterns = [
     ['id'=>'P11','label'=>'Switches 2+ (balas >=2x)','data'=>$p11],
     ['id'=>'P12','label'=>'Total gol 1H >= 4','data'=>$p12],
     ['id'=>'P13','label'=>'First 0-2\' + last 7\'','data'=>$p13],
-    ['id'=>'P14','label'=>'Seri + gap >= 4 mnt','data'=>$p14],
+    ['id'=>'P14','label'=>'Seri + gap >= 4 mnt + span >= 5 mnt','data'=>$p14],
     ['id'=>'P15','label'=>'HT 2-2','data'=>$p15],
     ['id'=>'P16','label'=>'Last gol 1H mnt 6-7, league 16min','data'=>$p16],
     ['id'=>'P17','label'=>'First 1H mnt 1-2 + last mnt 7','data'=>$p17],

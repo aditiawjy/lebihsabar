@@ -313,6 +313,7 @@ echo '<div id="live-section">
   <div id="live-status-bar">
     <span id="live-api-badge" class="api-offline">API Offline</span>
     <button id="btn-start-api" onclick="startApiServer()" style="background:#1a3a22;border:1px solid #238636;color:#3fb950;padding:3px 12px;border-radius:6px;cursor:pointer;font-size:0.78rem;display:none;">▶ Jalankan API</button>
+    <button id="btn-stop-api" onclick="stopApiServer()" style="background:#3a1a1a;border:1px solid #da3633;color:#f85149;padding:3px 12px;border-radius:6px;cursor:pointer;font-size:0.78rem;display:none;">■ Stop API</button>
     <span id="live-last-update"></span>
   </div>
   <div id="live-cards"><div class="live-empty">Menunggu data dari extension...</div></div>
@@ -560,6 +561,7 @@ async function fetchLiveData() {
         document.getElementById('live-api-badge').textContent = 'API Online';
         document.getElementById('live-api-badge').className = 'api-online';
         document.getElementById('btn-start-api').style.display = 'none';
+        document.getElementById('btn-stop-api').style.display = 'inline-block';
         const now = new Date();
         document.getElementById('live-last-update').textContent = 'Update: ' + now.toLocaleTimeString();
         renderLiveCards(data.matches || []);
@@ -567,9 +569,26 @@ async function fetchLiveData() {
         document.getElementById('live-api-badge').textContent = 'API Offline';
         document.getElementById('live-api-badge').className = 'api-offline';
         document.getElementById('btn-start-api').style.display = 'inline-block';
+        document.getElementById('btn-stop-api').style.display = 'none';
         document.getElementById('live-last-update').textContent = '';
         document.getElementById('live-cards').innerHTML = '<div class="live-empty">API tidak aktif — klik ▶ Jalankan API</div>';
     }
+}
+
+async function stopApiServer() {
+    const btn = document.getElementById('btn-stop-api');
+    btn.textContent = '⏳ Menghentikan...';
+    btn.disabled = true;
+    try {
+        const resp = await fetch('stop_api_server.php');
+        const data = await resp.json();
+        document.getElementById('live-last-update').textContent = data.message || 'API dihentikan';
+        setTimeout(fetchLiveData, 2000);
+    } catch(e) {
+        document.getElementById('live-last-update').textContent = 'Gagal stop: ' + e.message;
+    }
+    btn.textContent = '■ Stop API';
+    btn.disabled = false;
 }
 
 async function startApiServer() {

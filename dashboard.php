@@ -438,7 +438,8 @@ function getLeagueType(league) {
 }
 
 function parseStatus(status) {
-    const m = String(status || '').trim().match(/^(1H|2H)\s+(\d+)'$/i);
+    // toleran: 1H/2H + spasi + angka + karakter apapun (', ′, ', mnt, dll)
+    const m = String(status || '').trim().match(/^(1H|2H)\s+(\d+)/i);
     if (!m) return { half: null, min: -1 };
     return { half: m[1].toUpperCase(), min: parseInt(m[2], 10) };
 }
@@ -595,9 +596,11 @@ function renderLiveCards(matches) {
             ? `<span style="color:#d29922;font-weight:700;">2H ${curMin}'</span>`
             : `<span style="color:#3fb950;font-weight:700;animation:pulse 1.4s infinite;display:inline-block;">● 1H ${curMin}'</span>`;
 
+        const lgLabel = lg ? `<span style="color:#58a6ff;font-size:0.72rem;">[${lg}]</span>` : `<span style="color:#484f58;font-size:0.72rem;">[league?]</span>`;
+
         html += `<div class="live-card ${hasSignal ? 'has-signal' : ''}">
             <div class="match-name">${esc(m.homeTeam)} vs ${esc(m.awayTeam)}</div>
-            <div class="match-meta">${esc(m.league)} &nbsp;|&nbsp; ${halfBadge}${phase2H && htLabel ? ' &nbsp;|&nbsp; <span style="color:#8b949e;font-size:0.72rem;">' + htLabel + '</span>' : ''}</div>
+            <div class="match-meta">${lgLabel} ${halfBadge}${phase2H && htLabel ? ' &nbsp;|&nbsp; <span style="color:#8b949e;font-size:0.72rem;">' + htLabel + '</span>' : ''}</div>
             <div class="score-box">${h} - ${a}</div>
             <div class="signals">
                 ${signalHtml || '<span style="color:#484f58;font-size:0.75rem;">Tidak ada signal pattern</span>'}

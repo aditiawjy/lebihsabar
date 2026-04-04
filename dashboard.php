@@ -337,8 +337,14 @@ echo '<div id="live-section">
   <div id="live-cards"><div class="live-empty">Menunggu data dari extension...</div></div>
 </div>';
 
-// Sort patterns by total sample desc
-usort($patterns, fn($a, $b) => count($b['data']) - count($a['data']));
+// Sort patterns by accuracy desc, then by sample size desc
+usort($patterns, function($a, $b) {
+    $ta = count($a['data']); $tb = count($b['data']);
+    $pa = $ta > 0 ? count(array_filter($a['data'], fn($m) => $m['h2c'] > 0)) / $ta : 0;
+    $pb = $tb > 0 ? count(array_filter($b['data'], fn($m) => $m['h2c'] > 0)) / $tb : 0;
+    if ($pb != $pa) return $pb <=> $pa;
+    return $tb - $ta;
+});
 
 // Summary table
 echo '<div class="section"><h2>Summary Akurasi</h2>';

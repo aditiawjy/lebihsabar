@@ -312,6 +312,7 @@ echo '<div id="live-section">
   <h2><span class="live-dot"></span> Live Match Signal</h2>
   <div id="live-status-bar">
     <span id="live-api-badge" class="api-offline">API Offline</span>
+    <button id="btn-start-api" onclick="startApiServer()" style="background:#1a3a22;border:1px solid #238636;color:#3fb950;padding:3px 12px;border-radius:6px;cursor:pointer;font-size:0.78rem;display:none;">▶ Jalankan API</button>
     <span id="live-last-update"></span>
   </div>
   <div id="live-cards"><div class="live-empty">Menunggu data dari extension...</div></div>
@@ -558,14 +559,33 @@ async function fetchLiveData() {
         const data = await resp.json();
         document.getElementById('live-api-badge').textContent = 'API Online';
         document.getElementById('live-api-badge').className = 'api-online';
+        document.getElementById('btn-start-api').style.display = 'none';
         const now = new Date();
         document.getElementById('live-last-update').textContent = 'Update: ' + now.toLocaleTimeString();
         renderLiveCards(data.matches || []);
     } catch(e) {
         document.getElementById('live-api-badge').textContent = 'API Offline';
         document.getElementById('live-api-badge').className = 'api-offline';
-        document.getElementById('live-last-update').textContent = 'Pastikan api_server.py berjalan';
+        document.getElementById('btn-start-api').style.display = 'inline-block';
+        document.getElementById('live-last-update').textContent = '';
+        document.getElementById('live-cards').innerHTML = '<div class="live-empty">API tidak aktif — klik ▶ Jalankan API</div>';
     }
+}
+
+async function startApiServer() {
+    const btn = document.getElementById('btn-start-api');
+    btn.textContent = '⏳ Memulai...';
+    btn.disabled = true;
+    try {
+        const resp = await fetch('start_api_server.php');
+        const data = await resp.json();
+        document.getElementById('live-last-update').textContent = data.message || 'Menunggu API...';
+        setTimeout(fetchLiveData, 3000);
+    } catch(e) {
+        document.getElementById('live-last-update').textContent = 'Gagal: ' + e.message;
+    }
+    btn.textContent = '▶ Jalankan API';
+    btn.disabled = false;
 }
 
 // Fetch live data every 5 seconds

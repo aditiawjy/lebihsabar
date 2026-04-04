@@ -272,6 +272,19 @@ $p21 = array_filter($matches, fn($m) => $m['league']==='15min' && $m['h1_last']=
 $p22 = array_filter($matches, fn($m) => $m['league']==='16min' && $m['sc_a'] > $m['sc_h']);
 // P23: 1 gol di 1H, mnt pertama >= 3, 16min
 $p23 = array_filter($matches, fn($m) => $m['league']==='16min' && $m['h1c']===1 && $m['h1_first']>=3);
+// P24: Team HOME tertentu di 15min (Arminia Bielefeld, CA Osasuna, FC Koln, etc)
+$p24_teams = ['Arminia Bielefeld (V)','CA Osasuna (V)','FC Koln (V)','Leicester City (V)','Manchester United (V)','Borussia Dortmund (V)','Liverpool (V)'];
+$p24 = array_filter($matches, fn($m) => $m['league']==='15min' && in_array(trim($m['home']), $p24_teams));
+// P25: Team AWAY tertentu (Real Sociedad, France, Netherlands, Ukraine)
+$p25_teams = ['Real Sociedad (V)','France (V)','Netherlands (V)','Ukraine (V)'];
+$p25 = array_filter($matches, fn($m) => in_array(trim($m['away']), $p25_teams));
+// P26: HT total ganjil, league 16min
+$p26 = array_filter($matches, fn($m) => $m['league']==='16min' && ($m['sc_h']+$m['sc_a'])%2===1);
+// P27: Last scorer AWAY, league 16min (any HT)
+$p27 = array_filter($matches, fn($m) => $m['league']==='16min' && count($m['h1s'])>0 && $m['h1s'][count($m['h1s'])-1]==='A');
+// P28: Croatia atau France terlibat (home atau away)
+$p28_teams = ['Croatia (V)','France (V)'];
+$p28 = array_filter($matches, fn($m) => in_array(trim($m['home']), $p28_teams) || in_array(trim($m['away']), $p28_teams));
 
 
 $patterns = [
@@ -296,6 +309,11 @@ $patterns = [
     ['id'=>'P21','label'=>'Last gol 1H mnt 5, last AWAY, 15min','data'=>$p21],
     ['id'=>'P22','label'=>'Away menang HT, 16min','data'=>$p22],
     ['id'=>'P23','label'=>'1 gol 1H, mnt pertama >=3, 16min','data'=>$p23],
+    ['id'=>'P24','label'=>'Team HOME 15min: Arminia/Osasuna/FC Koln/dll','data'=>$p24],
+    ['id'=>'P25','label'=>'Team AWAY: Real Sociedad/France/Netherlands/Ukraine','data'=>$p25],
+    ['id'=>'P26','label'=>'HT total ganjil, 16min','data'=>$p26],
+    ['id'=>'P27','label'=>'Last scorer AWAY, 16min','data'=>$p27],
+    ['id'=>'P28','label'=>'Croatia atau France terlibat','data'=>$p28],
 ];
 
 $totalMatches = count($matches);

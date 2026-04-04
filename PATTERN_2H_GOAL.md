@@ -271,7 +271,7 @@
 | P11 | Switches 2+ (balas >=2x) | 16/17 | **94%** |
 | P12 | Total gol 1H >= 4 | 13/14 | **93%** |
 | P13 | First 0-2' + last 7'+ | 17/18 | **94%** |
-| P14 | Seri + gap >= 4 mnt | 13/14 | **93%** |
+| P14 | Seri + gap >= 4 mnt + span >= 5 mnt | 17/18 | **94%** |
 | P15 | HT 2-2 | 5/5 | **100%** |
 | P16 | Last gol 1H mnt 6-7, league 16min | 10/10 | **100%** |
 | P17 | First 1H mnt 1-2 + last mnt 7 | 11/11 | **100%** |

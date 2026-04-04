@@ -51,7 +51,7 @@
         /* Slide panel */
         #slide-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; display: none; }
         #slide-panel {
-            position: fixed; top: 0; right: -100%; width: min(780px, 95vw); height: 100vh;
+            position: fixed; top: 0; right: -100%; width: min(1100px, 97vw); height: 100vh;
             background: #161b22; border-left: 1px solid #30363d;
             z-index: 100; overflow-y: auto; transition: right 0.3s ease;
             padding: 0;

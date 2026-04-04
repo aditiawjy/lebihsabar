@@ -117,9 +117,77 @@
 
 ---
 
+### P18: Span 1H >= 6 Menit (2+ Gol)
+**Record: 26/29 = 90%**
+**Kondisi:** Ada minimal 2 gol di 1H, dan rentang antara gol pertama sampai gol terakhir >= 6 menit.
+**Logika:** Gol tersebar lama = match terus hidup sepanjang 1H, bukan burst sesaat.
+**Contoh:** Gol mnt 1' dan 7' (span 6) ✅. Gol mnt 0' dan 8' (span 8) ✅.
+
 ---
 
-## TIER 3 — SKIP (Jangan Bet)
+### P15: HT 2-2
+**Record: 5/5 = 100%**
+**Kondisi:** Skor akhir 1H sama 2-2.
+**Logika:** Match sudah 4 gol di 1H dan ketat — pasti ada kelanjutan di 2H.
+
+---
+
+### P16: Last Gol 1H Mnt 6-7, League 16min
+**Record: 10/10 = 100%**
+**Kondisi:** Gol terakhir di 1H jatuh di mnt 6 atau 7, league 16min saja.
+**Logika:** Gol telat di 1H = match masih hidup masuk 2H. 16min punya 2H cukup panjang untuk kelanjutan.
+
+---
+
+### P17: First 1H Mnt 1-2 + Last Mnt 7
+**Record: 11/11 = 100%**
+**Kondisi:** Gol pertama 1H di mnt 1 atau 2, DAN gol terakhir 1H di mnt 7. Minimal 2 gol.
+**Logika:** Match aktif dari awal sampai mnt 7 — span panjang = momentum tersebar merata, lanjut ke 2H.
+**Contoh:** Gol mnt 1' dan 7' (span 6), atau mnt 2' dan 7' (span 5).
+
+---
+
+### P19: Last Gol 1H Mnt 3-4, Last Scorer HOME, 20min
+**Record: 10/10 = 100%**
+**Kondisi:** Gol terakhir 1H jatuh di mnt 3 atau 4, dan yang terakhir cetak adalah HOME, league 20min.
+**Logika:** Home masih unggul atau menyamakan di mnt rendah = Away masih punya banyak waktu 2H untuk kejar.
+**Contoh:** HH mnt 2'&4' → skor 2-0, atau AH mnt 2'&3' → skor 1-1, semua punya 2H gol.
+
+---
+
+### P20: Last Gol 1H Mnt 3, Last Scorer AWAY, 16min
+**Record: 5/5 = 100%**
+**Kondisi:** Gol terakhir 1H di mnt 3 saja, dan yang terakhir cetak adalah AWAY, league 16min.
+**Logika:** Away unggul atau menyamakan di mnt 3 = 2H masih panjang, Home kejar.
+**Contoh:** Away gol mnt 3' → skor 0-1 → FT ada 2H gol.
+
+---
+
+### P21: Last Gol 1H Mnt 5, Last Scorer AWAY, 15min
+**Record: 16/17 = 94%**
+**Kondisi:** Gol terakhir 1H di mnt 5, dan yang terakhir cetak adalah AWAY, league 15min.
+**Logika:** Away mencetak atau memimpin di mnt 5 = Home termotivasi kejar di 2H.
+**Contoh:** Away mnt 5' cetak gol, berapa pun skor sebelumnya → hampir pasti ada 2H gol.
+
+---
+
+### P22: Away Menang HT, League 16min
+**Record: 17/18 = 94%**
+**Kondisi:** Away memimpin di akhir 1H (skor HT lebih banyak Away), league 16min.
+**Logika:** Away unggul = Home wajib kejar di 2H, tensi tetap tinggi.
+**Catatan:** 1 failure: Czech Republic vs New Zealand (0-1, gol mnt 9' = 1H sudah terlambat sekali).
+
+---
+
+### P23: 1 Gol di 1H, Mnt Pertama >= 3, 16min
+**Record: 13/14 = 93%**
+**Kondisi:** Hanya 1 gol di 1H, gol itu terjadi di mnt 3 atau lebih, league 16min.
+**Logika:** Gol yang tidak terlalu awal = match masih belum tuntut di 1H, 2H akan lebih ramai.
+**Contoh:** 1 gol mnt 3' (16min) → 13/14 ada 2H gol.
+
+---
+
+## TIER 2 — Sangat Mungkin Ada Goal 2H (87-98%)
 
 | Kondisi | Data | Penjelasan |
 |---|---|---|
@@ -168,3 +236,12 @@
 | P12 | Total gol 1H >= 4 | 13/14 | **93%** |
 | P13 | First 0-2' + last 7'+ | 17/18 | **94%** |
 | P14 | Seri + gap >= 4 mnt | 13/14 | **93%** |
+| P15 | HT 2-2 | 5/5 | **100%** |
+| P16 | Last gol 1H mnt 6-7, league 16min | 10/10 | **100%** |
+| P17 | First 1H mnt 1-2 + last mnt 7 | 11/11 | **100%** |
+| P18 | Span 1H >= 6 mnt (2+ gol) | 26/29 | **90%** |
+| P19 | Last gol 1H mnt 3-4, last HOME, 20min | 10/10 | **100%** |
+| P20 | Last gol 1H mnt 3, last AWAY, 16min | 5/5 | **100%** |
+| P21 | Last gol 1H mnt 5, last AWAY, 15min | 16/17 | **94%** |
+| P22 | Away menang HT, 16min | 17/18 | **94%** |
+| P23 | 1 gol 1H, mnt pertama >=3, 16min | 13/14 | **93%** |

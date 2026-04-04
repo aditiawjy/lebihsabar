@@ -72,6 +72,30 @@
         #slide-body table { font-size: 0.78rem; }
         #slide-body td { padding: 6px 8px; }
         #slide-body th { padding: 8px; }
+
+        /* Live signal section */
+        #live-section { margin-bottom: 28px; }
+        #live-section h2 { font-size: 1.2rem; margin-bottom: 12px; color: #c9d1d9; border-bottom: 1px solid #30363d; padding-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #3fb950; display: inline-block; animation: pulse 1.4s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+        #live-status-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 0.8rem; color: #8b949e; }
+        #live-api-badge { padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+        .api-online { background: #1a3a22; color: #3fb950; border: 1px solid #238636; }
+        .api-offline { background: #3a1a1a; color: #f85149; border: 1px solid #da3633; }
+        #live-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+        .live-card {
+            background: #161b22; border: 1px solid #30363d; border-radius: 10px;
+            padding: 14px 16px; position: relative; overflow: hidden;
+        }
+        .live-card.has-signal { border-color: #2ea043; box-shadow: 0 0 0 1px #238636 inset; }
+        .live-card .match-name { font-weight: 600; font-size: 0.9rem; color: #e1e4e8; margin-bottom: 4px; }
+        .live-card .match-meta { font-size: 0.75rem; color: #8b949e; margin-bottom: 8px; }
+        .live-card .score-box { display: inline-block; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 4px 12px; font-size: 1.1rem; font-weight: 700; color: #58a6ff; letter-spacing: 2px; margin-bottom: 10px; }
+        .live-card .signals { display: flex; flex-direction: column; gap: 5px; }
+        .signal-tag { display: inline-flex; align-items: center; gap: 6px; background: #12261e; border: 1px solid #238636; color: #3fb950; border-radius: 6px; padding: 3px 10px; font-size: 0.75rem; font-weight: 600; }
+        .signal-tag .pid { color: #79c0ff; margin-right: 2px; }
+        .live-empty { color: #484f58; font-size: 0.85rem; padding: 16px 0; text-align: center; }
+        #live-last-update { font-size: 0.72rem; color: #484f58; }
     </style>
 </head>
 <body>
@@ -283,6 +307,16 @@ echo '<div class="stat-card"><div class="value">'.count($patterns).'</div><div c
 echo '<div class="stat-card"><div class="value">'.date('d/m H:i', $csvTime).'</div><div class="label">Last Update</div></div>';
 echo '</div>';
 
+// Live match signal section (populated by JS)
+echo '<div id="live-section">
+  <h2><span class="live-dot"></span> Live Match Signal</h2>
+  <div id="live-status-bar">
+    <span id="live-api-badge" class="api-offline">API Offline</span>
+    <span id="live-last-update"></span>
+  </div>
+  <div id="live-cards"><div class="live-empty">Menunggu data dari extension...</div></div>
+</div>';
+
 // Summary table
 echo '<div class="section"><h2>Summary Akurasi</h2>';
 echo '<table><tr><th>#</th><th>Pattern</th><th>Record</th><th>Akurasi</th><th>Status</th><th></th></tr>';
@@ -366,6 +400,177 @@ setInterval(() => {
     refreshCountdown--;
     if (refreshCountdown <= 0) location.reload();
 }, 1000);
+
+// =============================================
+// LIVE MATCH SIGNAL
+// =============================================
+
+function getLeagueType(league) {
+    if (!league) return null;
+    const l = league.toLowerCase();
+    if (l.includes('20 min') || l.includes('20min')) return '20min';
+    if (l.includes('16 min') || l.includes('16min')) return '16min';
+    if (l.includes('15 min') || l.includes('15min')) return '15min';
+    return null;
+}
+
+function parseStatus(status) {
+    const m = String(status || '').trim().match(/^(1H|2H)\s+(\d+)'$/i);
+    if (!m) return { half: null, min: -1 };
+    return { half: m[1].toUpperCase(), min: parseInt(m[2], 10) };
+}
+
+// Evaluate which patterns a live 1H match currently matches (real-time, partial info)
+// match: { homeTeam, awayTeam, homeScore, awayScore, status, league }
+// goals1h: array of goals seen so far {min, h, a, scorer} built from history (if available)
+function evaluateSignals(match, lg) {
+    const signals = [];
+    const { half, min: curMin } = parseStatus(match.status);
+    if (half !== '1H') return signals; // only signal during 1H
+
+    const h = parseInt(match.homeScore) || 0;
+    const a = parseInt(match.awayScore) || 0;
+    const total = h + a;
+    const diff = Math.abs(h - a);
+
+    // From live data we know: current score, current minute, league
+    // We can infer some patterns without full goal history:
+
+    // P3: AH gap >= 3 (1-1 seri, need to infer sequence — hard without goal history)
+    // P6: 1-1, gol penyama mnt 7
+    if (h === 1 && a === 1 && curMin >= 7) {
+        signals.push({ id: 'P6', label: 'Seri 1-1, mnt 7' });
+    }
+    // P7: 1-1, gap >= 5 (can't fully verify without history, flag as candidate)
+    if (h === 1 && a === 1 && curMin >= 5) {
+        signals.push({ id: 'P7', label: 'Seri 1-1, mnt 5+' });
+    }
+    // P8: HAA (1-2) — Away comeback
+    if (h === 1 && a === 2) {
+        signals.push({ id: 'P8', label: 'Away comeback 1-2 (HAA)' });
+    }
+    // P10: 0-0 di 1H (masih 0-0 saat ini)
+    if (h === 0 && a === 0) {
+        signals.push({ id: 'P10', label: '0-0 di 1H' });
+    }
+    // P12: total gol 1H >= 4
+    if (total >= 4) {
+        signals.push({ id: 'P12', label: 'Total gol 1H >= 4' });
+    }
+    // P13: First gol 0-2' + last gol 7'+ (can't tell first gol time without history, skip)
+    // P15: HT 2-2
+    if (h === 2 && a === 2) {
+        signals.push({ id: 'P15', label: 'HT 2-2' });
+    }
+    // P16: Last gol 1H mnt 6-7, 16min
+    if (lg === '16min' && curMin >= 6) {
+        signals.push({ id: 'P16', label: 'Mnt 6+, 16min' });
+    }
+    // P17: First mnt 1-2 + last mnt 7 (need history)
+    // P18: span >= 6 (need history)
+    // P19: Last gol mnt 3-4, last HOME, 20min
+    if (lg === '20min' && curMin <= 4 && h > a) {
+        signals.push({ id: 'P19', label: 'Home unggul mnt <=4, 20min' });
+    }
+    if (lg === '20min' && curMin <= 4 && h === a && total > 0) {
+        signals.push({ id: 'P19', label: 'Seri mnt <=4, last HOME, 20min' });
+    }
+    // P20: Last gol mnt 3, last AWAY, 16min
+    if (lg === '16min' && curMin <= 3 && a > h) {
+        signals.push({ id: 'P20', label: 'Away unggul mnt <=3, 16min' });
+    }
+    // P21: Last gol mnt 5, last AWAY, 15min
+    if (lg === '15min' && curMin <= 5 && a >= h && total > 0) {
+        signals.push({ id: 'P21', label: 'Away score mnt <=5, 15min' });
+    }
+    // P22: Away menang HT, 16min
+    if (lg === '16min' && a > h) {
+        signals.push({ id: 'P22', label: 'Away unggul, 16min' });
+    }
+    // P23: 1 gol 1H, mnt >= 3, 16min
+    if (lg === '16min' && total === 1 && curMin >= 3) {
+        signals.push({ id: 'P23', label: '1 gol mnt >=3, 16min' });
+    }
+    // P4: 1 gol mnt 8'+, AWAY, 16/20min
+    if ((lg === '16min' || lg === '20min') && total === 1 && a === 1 && h === 0 && curMin >= 8) {
+        signals.push({ id: 'P4', label: '1 gol mnt 8+, AWAY, 16/20min' });
+    }
+    // P2: selisih 2+, last mnt 7, gap >= 3 (can't check gap, flag diff+mnt)
+    if (diff >= 2 && curMin >= 7) {
+        signals.push({ id: 'P2', label: 'Selisih 2+, mnt 7+' });
+    }
+
+    // De-duplicate by id
+    const seen = new Set();
+    return signals.filter(s => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
+}
+
+function renderLiveCards(matches) {
+    const container = document.getElementById('live-cards');
+    if (!matches || !matches.length) {
+        container.innerHTML = '<div class="live-empty">Tidak ada match live saat ini.</div>';
+        return;
+    }
+
+    // Filter only 1H matches that are in a known league
+    const liveMatches = matches.filter(m => {
+        const { half } = parseStatus(m.status);
+        return half === '1H';
+    });
+
+    if (!liveMatches.length) {
+        container.innerHTML = '<div class="live-empty">Tidak ada match yang sedang 1H.</div>';
+        return;
+    }
+
+    let html = '';
+    for (const m of liveMatches) {
+        const lg = getLeagueType(m.league);
+        const signals = lg ? evaluateSignals(m, lg) : [];
+        const hasSignal = signals.length > 0;
+        const h = parseInt(m.homeScore) || 0;
+        const a = parseInt(m.awayScore) || 0;
+
+        const signalHtml = signals.map(s =>
+            `<div class="signal-tag"><span class="pid">${s.id}</span>${s.label}</div>`
+        ).join('');
+
+        html += `<div class="live-card ${hasSignal ? 'has-signal' : ''}">
+            <div class="match-name">${esc(m.homeTeam)} vs ${esc(m.awayTeam)}</div>
+            <div class="match-meta">${esc(m.league)} &nbsp;|&nbsp; ${esc(m.status)}</div>
+            <div class="score-box">${h} - ${a}</div>
+            <div class="signals">
+                ${signalHtml || '<span style="color:#484f58;font-size:0.75rem;">Belum ada signal</span>'}
+            </div>
+        </div>`;
+    }
+    container.innerHTML = html;
+}
+
+function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function fetchLiveData() {
+    try {
+        const resp = await fetch('http://127.0.0.1:5000/api/live-data', { signal: AbortSignal.timeout(3000) });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const data = await resp.json();
+        document.getElementById('live-api-badge').textContent = 'API Online';
+        document.getElementById('live-api-badge').className = 'api-online';
+        const now = new Date();
+        document.getElementById('live-last-update').textContent = 'Update: ' + now.toLocaleTimeString();
+        renderLiveCards(data.matches || []);
+    } catch(e) {
+        document.getElementById('live-api-badge').textContent = 'API Offline';
+        document.getElementById('live-api-badge').className = 'api-offline';
+        document.getElementById('live-last-update').textContent = 'Pastikan api_server.py berjalan';
+    }
+}
+
+// Fetch live data every 5 seconds
+fetchLiveData();
+setInterval(fetchLiveData, 5000);
 </script>
 </body>
 </html>

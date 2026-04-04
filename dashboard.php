@@ -337,6 +337,9 @@ echo '<div id="live-section">
   <div id="live-cards"><div class="live-empty">Menunggu data dari extension...</div></div>
 </div>';
 
+// Sort patterns by total sample desc
+usort($patterns, fn($a, $b) => count($b['data']) - count($a['data']));
+
 // Summary table
 echo '<div class="section"><h2>Summary Akurasi</h2>';
 echo '<table><tr><th>#</th><th>Pattern</th><th>Record</th><th>Akurasi</th><th>Status</th><th></th></tr>';

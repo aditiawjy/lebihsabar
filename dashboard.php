@@ -254,7 +254,7 @@ $p11 = array_filter($matches, fn($m) => $m['switches'] >= 2);
 // P12: Total 1H goals >= 4
 $p12 = array_filter($matches, fn($m) => $m['h1c'] >= 4);
 // P13: First 0-2' + last 7'+
-$p13 = array_filter($matches, fn($m) => $m['h1c']>=2 && $m['h1_first']<=2 && $m['h1_last']>=7);
+$p13 = array_filter($matches, fn($m) => $m['h1c']>=2 && $m['h1_first']<=2 && $m['h1_last']>=7 && abs($m['sc_h']-$m['sc_a'])<=2);
 // P14: Seri + gap >= 4 + span >= 5 (improved from 83% to 94%)
 $p14 = array_filter($matches, fn($m) => $m['h1c']>=2 && $m['sc_h']==$m['sc_a'] && $m['sc_h']>0 && $m['max_gap']>=4 && ($m['h1_last']-$m['h1_first'])>=5);
 // P15: HT 2-2
@@ -264,7 +264,7 @@ $p16 = array_filter($matches, fn($m) => $m['league']==='16min' && ($m['h1_last']
 // P17: First 1H mnt 1-2 + last mnt 7
 $p17 = array_filter($matches, fn($m) => $m['h1c']>=2 && $m['h1_first']>=1 && $m['h1_first']<=2 && $m['h1_last']==7);
 // P18: Span 1H >= 6 mnt (last - first >= 6, 2+ gol)
-$p18 = array_filter($matches, fn($m) => $m['h1c']>=2 && ($m['h1_last']-$m['h1_first'])>=6);
+$p18 = array_filter($matches, fn($m) => $m['h1c']>=2 && ($m['h1_last']-$m['h1_first'])>=6 && abs($m['sc_h']-$m['sc_a'])<=2);
 // P19: Last gol 1H mnt 3-4, last scorer HOME, 20min
 $p19 = array_filter($matches, fn($m) => $m['league']==='20min' && in_array($m['h1_last'],[3,4]) && count($m['h1s'])>0 && $m['h1s'][count($m['h1s'])-1]==='H');
 // P20: Last gol 1H mnt 3, last scorer AWAY, 16min
@@ -301,12 +301,12 @@ $patterns = [
     ['id'=>'P9','label'=>'AH seri 1-1 + gap >= 5 mnt','data'=>$p9],
     ['id'=>'P11','label'=>'Switches 2+ (balas >=2x)','data'=>$p11],
     ['id'=>'P12','label'=>'Total gol 1H >= 4','data'=>$p12],
-    ['id'=>'P13','label'=>'First 0-2\' + last 7\'','data'=>$p13],
+    ['id'=>'P13','label'=>'First 0-2\' + last 7\' + selisih HT <=2','data'=>$p13],
     ['id'=>'P14','label'=>'Seri + gap >= 4 mnt + span >= 5 mnt','data'=>$p14],
     ['id'=>'P15','label'=>'HT 2-2','data'=>$p15],
     ['id'=>'P16','label'=>'Last gol 1H mnt 6-7, league 16min','data'=>$p16],
     ['id'=>'P17','label'=>'First 1H mnt 1-2 + last mnt 7','data'=>$p17],
-    ['id'=>'P18','label'=>'Span 1H >= 6 mnt (2+ gol)','data'=>$p18],
+    ['id'=>'P18','label'=>'Span 1H >= 6 mnt + selisih HT <=2','data'=>$p18],
     ['id'=>'P19','label'=>'Last gol 1H mnt 3-4, last HOME, 20min','data'=>$p19],
     ['id'=>'P20','label'=>'Last gol 1H mnt 3, last AWAY, 16min','data'=>$p20],
     ['id'=>'P21','label'=>'Last gol 1H mnt 5, last AWAY, 15min','data'=>$p21],

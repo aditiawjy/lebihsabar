@@ -309,11 +309,11 @@ $patterns = [
     ['id'=>'P21','label'=>'Last gol 1H mnt 5, last AWAY, 15min','data'=>$p21],
     ['id'=>'P22','label'=>'Away menang HT, 16min','data'=>$p22],
     ['id'=>'P23','label'=>'1 gol 1H, mnt pertama >=3, 16min','data'=>$p23],
-    ['id'=>'P24','label'=>'Team HOME 15min: Arminia/Osasuna/FC Koln/dll','data'=>$p24],
-    ['id'=>'P25','label'=>'Team AWAY: Real Sociedad/France/Netherlands/Ukraine','data'=>$p25],
-    ['id'=>'P26','label'=>'HT total ganjil, 16min','data'=>$p26],
-    ['id'=>'P27','label'=>'Last scorer AWAY, 16min','data'=>$p27],
-    ['id'=>'P28','label'=>'Croatia atau France terlibat','data'=>$p28],
+    ['id'=>'P24','label'=>'HOME 15min: Arminia Bielefeld / CA Osasuna / FC Koln / Leicester City / Man United / Dortmund / Liverpool','data'=>$p24],
+    ['id'=>'P25','label'=>'AWAY: Real Sociedad / France / Netherlands / Ukraine','data'=>$p25],
+    ['id'=>'P26','label'=>'HT total ganjil (1,3,5...), 16min','data'=>$p26],
+    ['id'=>'P27','label'=>'Gol terakhir 1H dicetak AWAY, 16min','data'=>$p27],
+    ['id'=>'P28','label'=>'Croatia atau France main (home atau away)','data'=>$p28],
 ];
 
 $totalMatches = count($matches);

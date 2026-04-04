@@ -2,6 +2,7 @@
 // Simpan atau ambil snapshot akurasi pattern per jam
 // Dipanggil oleh dashboard.php
 
+date_default_timezone_set('Asia/Jakarta');
 $snapshotFile = __DIR__ . '/pattern_snapshots.json';
 
 function saveSnapshot($patterns_data) {

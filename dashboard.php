@@ -118,6 +118,7 @@
     </div>
 
 <?php
+date_default_timezone_set('Asia/Jakarta');
 $csvFile = __DIR__ . '/goal_log.csv';
 $csvTime = filemtime($csvFile);
 

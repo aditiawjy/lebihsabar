@@ -37,8 +37,8 @@ function getSnapshotHourAgo() {
             $best = $s;
         }
     }
-    // Hanya pakai jika dalam rentang 20-90 menit lalu
-    if ($best && ($now - $best['time']) >= 1200 && ($now - $best['time']) <= 5400) {
+    // Hanya pakai jika minimal 5 menit lalu, max 90 menit
+    if ($best && ($now - $best['time']) >= 300 && ($now - $best['time']) <= 5400) {
         return $best;
     }
     return null;

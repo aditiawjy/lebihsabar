@@ -187,6 +187,42 @@
 
 ---
 
+### P24: Team HOME Tertentu di 15min
+**Record: 40/40 = 100%**
+**Kondisi:** Team berikut bermain sebagai HOME di league 15min: Arminia Bielefeld, CA Osasuna, FC Koln, Leicester City, Manchester United, Borussia Dortmund, Liverpool.
+**Logika:** Team-team ini secara konsisten terlibat dalam match yang selalu punya gol 2H saat jadi tuan rumah.
+
+---
+
+### P25: Team AWAY Tertentu
+**Record: 30/30 = 100%**
+**Kondisi:** Team berikut bermain sebagai AWAY (league apapun): Real Sociedad, France, Netherlands, Ukraine.
+**Logika:** Team-team ini selalu menghasilkan 2H gol di semua match yang tercatat, baik sebagai tamu di liga manapun.
+
+---
+
+### P26: HT Total Ganjil, League 16min
+**Record: 21/23 = 91%**
+**Kondisi:** Jumlah total gol 1H ganjil (1, 3, 5...) di league 16min.
+**Logika:** Skor ganjil = ada satu tim yang unggul, pihak yang kalah termotivasi penuh di 2H.
+**Contoh:** HT 1-0, 0-1, 2-1, 1-2 → 91% ada gol 2H di 16min.
+
+---
+
+### P27: Last Scorer AWAY, League 16min
+**Record: 19/21 = 90%**
+**Kondisi:** Gol terakhir di 1H dicetak oleh AWAY, league 16min.
+**Logika:** Away mencetak terakhir = momentum Away masuk 2H, Home terpaksa kejar → selalu ada aksi.
+
+---
+
+### P28: Croatia atau France Terlibat
+**Record: 23/23 = 100%**
+**Kondisi:** Salah satu tim adalah Croatia atau France (boleh home atau away, league apapun).
+**Logika:** Dua tim ini secara statistik selalu terlibat dalam match yang punya gol 2H.
+
+---
+
 ## TIER 2 — Sangat Mungkin Ada Goal 2H (87-98%)
 
 | Kondisi | Data | Penjelasan |
@@ -245,3 +281,8 @@
 | P21 | Last gol 1H mnt 5, last AWAY, 15min | 16/17 | **94%** |
 | P22 | Away menang HT, 16min | 17/18 | **94%** |
 | P23 | 1 gol 1H, mnt pertama >=3, 16min | 13/14 | **93%** |
+| P24 | Team HOME 15min: Arminia/Osasuna/FC Koln/dll | 40/40 | **100%** |
+| P25 | Team AWAY: Real Sociedad/France/Netherlands/Ukraine | 30/30 | **100%** |
+| P26 | HT total ganjil, 16min | 21/23 | **91%** |
+| P27 | Last scorer AWAY, 16min | 19/21 | **90%** |
+| P28 | Croatia atau France terlibat | 23/23 | **100%** |

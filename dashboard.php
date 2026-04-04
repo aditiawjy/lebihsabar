@@ -422,87 +422,104 @@ function parseStatus(status) {
     return { half: m[1].toUpperCase(), min: parseInt(m[2], 10) };
 }
 
-// Evaluate which patterns a live 1H match currently matches (real-time, partial info)
-// match: { homeTeam, awayTeam, homeScore, awayScore, status, league }
-// goals1h: array of goals seen so far {min, h, a, scorer} built from history (if available)
-function evaluateSignals(match, lg) {
-    const signals = [];
-    const { half, min: curMin } = parseStatus(match.status);
-    if (half !== '1H') return signals; // only signal during 1H
+// Track HT score: saat transisi ke 2H, simpan score saat itu sebagai HT
+const htMemory = {}; // matchKey => {h, a}
+const prevStateMemory = {}; // matchKey => {half, h, a}
 
-    const h = parseInt(match.homeScore) || 0;
-    const a = parseInt(match.awayScore) || 0;
+function matchKey(m) {
+    return (m.homeTeam || '') + '|' + (m.awayTeam || '') + '|' + (m.league || '');
+}
+
+function updateHtMemory(matches) {
+    for (const m of matches) {
+        const key = matchKey(m);
+        const { half } = parseStatus(m.status);
+        const h = parseInt(m.homeScore) || 0;
+        const a = parseInt(m.awayScore) || 0;
+        const prev = prevStateMemory[key];
+
+        // Saat pertama kali lihat 2H, simpan score sebelumnya (= HT score)
+        if (half === '2H' && prev && prev.half === '1H') {
+            htMemory[key] = { h: prev.h, a: prev.a };
+        }
+        // Reset saat balik ke 1H (match baru)
+        if (half === '1H' && prev && prev.half === '2H') {
+            delete htMemory[key];
+        }
+        prevStateMemory[key] = { half, h, a };
+    }
+}
+
+// Evaluate pattern signals dari skor HT + info 1H
+function evaluateSignals(lg, htH, htA, curMin1H) {
+    const signals = [];
+    const total = htH + htA;
+    const diff = Math.abs(htH - htA);
+
+    // P10: 0-0 di HT
+    if (htH === 0 && htA === 0) signals.push({ id: 'P10', label: '0-0 di 1H' });
+
+    // P12: total gol 1H >= 4
+    if (total >= 4) signals.push({ id: 'P12', label: 'Total gol >= 4' });
+
+    // P15: HT 2-2
+    if (htH === 2 && htA === 2) signals.push({ id: 'P15', label: 'HT 2-2' });
+
+    // P8: Away comeback (1-2) — skor HT 1-2
+    if (htH === 1 && htA === 2) signals.push({ id: 'P8', label: 'Away comeback HT 1-2' });
+
+    // P7/P14: Seri 1-1 (jika seri, kemungkinan P7/P14/P6 — tidak bisa verif gap tanpa history)
+    if (htH === htA && total >= 2) signals.push({ id: 'P7', label: 'HT Seri ' + htH + '-' + htA });
+
+    // P22: Away menang HT, 16min
+    if (lg === '16min' && htA > htH) signals.push({ id: 'P22', label: 'Away unggul HT, 16min' });
+
+    // P2: selisih 2+
+    if (diff >= 2) signals.push({ id: 'P2', label: 'HT selisih ' + diff + '+' });
+
+    // P16: 16min league (ada gol di 1H)
+    if (lg === '16min' && total > 0 && curMin1H !== null && curMin1H >= 6)
+        signals.push({ id: 'P16', label: 'Last mnt 6+, 16min' });
+
+    // P23: 1 gol 1H, 16min (info dari skor HT)
+    if (lg === '16min' && total === 1) signals.push({ id: 'P23', label: '1 gol HT, 16min' });
+
+    // P19: Home unggul, 20min
+    if (lg === '20min' && htH > htA) signals.push({ id: 'P19', label: 'Home unggul HT, 20min' });
+
+    // P21: Away score, 15min
+    if (lg === '15min' && htA > htH) signals.push({ id: 'P21', label: 'Away unggul HT, 15min' });
+    if (lg === '15min' && htH === htA && htA > 0) signals.push({ id: 'P21', label: 'Seri HT, 15min' });
+
+    // P4: 1 gol, away, 16/20min
+    if ((lg === '16min' || lg === '20min') && total === 1 && htA === 1 && htH === 0)
+        signals.push({ id: 'P4', label: '1 gol AWAY, 16/20min' });
+
+    const seen = new Set();
+    return signals.filter(s => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
+}
+
+// Evaluate signals saat masih 1H (real-time, skor berubah tiap gol)
+function evaluateSignals1H(lg, h, a, curMin) {
+    const signals = [];
     const total = h + a;
     const diff = Math.abs(h - a);
 
-    // From live data we know: current score, current minute, league
-    // We can infer some patterns without full goal history:
+    if (h === 0 && a === 0) signals.push({ id: 'P10', label: '0-0 sedang berjalan' });
+    if (total >= 4) signals.push({ id: 'P12', label: 'Sudah ' + total + ' gol!' });
+    if (h === 2 && a === 2) signals.push({ id: 'P15', label: 'Seri 2-2' });
+    if (h === 1 && a === 2) signals.push({ id: 'P8', label: 'Away comeback 1-2' });
+    if (h === 1 && a === 1 && curMin >= 7) signals.push({ id: 'P6', label: 'Seri 1-1, mnt 7+' });
+    if (h === 1 && a === 1 && curMin >= 5) signals.push({ id: 'P7', label: 'Seri 1-1, mnt 5+' });
+    if (lg === '16min' && a > h) signals.push({ id: 'P22', label: 'Away unggul, 16min' });
+    if (lg === '16min' && curMin >= 6 && total > 0) signals.push({ id: 'P16', label: 'Mnt 6+, 16min' });
+    if (lg === '16min' && total === 1 && curMin >= 3) signals.push({ id: 'P23', label: '1 gol mnt ' + curMin + ', 16min' });
+    if (lg === '20min' && h > a) signals.push({ id: 'P19', label: 'Home unggul, 20min' });
+    if (lg === '15min' && a >= h && total > 0 && curMin >= 4) signals.push({ id: 'P21', label: 'Away score mnt ' + curMin + ', 15min' });
+    if ((lg === '16min' || lg === '20min') && total === 1 && a === 1 && h === 0 && curMin >= 8)
+        signals.push({ id: 'P4', label: '1 gol AWAY mnt ' + curMin });
+    if (diff >= 2 && curMin >= 7) signals.push({ id: 'P2', label: 'Selisih ' + diff + '+, mnt 7+' });
 
-    // P3: AH gap >= 3 (1-1 seri, need to infer sequence — hard without goal history)
-    // P6: 1-1, gol penyama mnt 7
-    if (h === 1 && a === 1 && curMin >= 7) {
-        signals.push({ id: 'P6', label: 'Seri 1-1, mnt 7' });
-    }
-    // P7: 1-1, gap >= 5 (can't fully verify without history, flag as candidate)
-    if (h === 1 && a === 1 && curMin >= 5) {
-        signals.push({ id: 'P7', label: 'Seri 1-1, mnt 5+' });
-    }
-    // P8: HAA (1-2) — Away comeback
-    if (h === 1 && a === 2) {
-        signals.push({ id: 'P8', label: 'Away comeback 1-2 (HAA)' });
-    }
-    // P10: 0-0 di 1H (masih 0-0 saat ini)
-    if (h === 0 && a === 0) {
-        signals.push({ id: 'P10', label: '0-0 di 1H' });
-    }
-    // P12: total gol 1H >= 4
-    if (total >= 4) {
-        signals.push({ id: 'P12', label: 'Total gol 1H >= 4' });
-    }
-    // P13: First gol 0-2' + last gol 7'+ (can't tell first gol time without history, skip)
-    // P15: HT 2-2
-    if (h === 2 && a === 2) {
-        signals.push({ id: 'P15', label: 'HT 2-2' });
-    }
-    // P16: Last gol 1H mnt 6-7, 16min
-    if (lg === '16min' && curMin >= 6) {
-        signals.push({ id: 'P16', label: 'Mnt 6+, 16min' });
-    }
-    // P17: First mnt 1-2 + last mnt 7 (need history)
-    // P18: span >= 6 (need history)
-    // P19: Last gol mnt 3-4, last HOME, 20min
-    if (lg === '20min' && curMin <= 4 && h > a) {
-        signals.push({ id: 'P19', label: 'Home unggul mnt <=4, 20min' });
-    }
-    if (lg === '20min' && curMin <= 4 && h === a && total > 0) {
-        signals.push({ id: 'P19', label: 'Seri mnt <=4, last HOME, 20min' });
-    }
-    // P20: Last gol mnt 3, last AWAY, 16min
-    if (lg === '16min' && curMin <= 3 && a > h) {
-        signals.push({ id: 'P20', label: 'Away unggul mnt <=3, 16min' });
-    }
-    // P21: Last gol mnt 5, last AWAY, 15min
-    if (lg === '15min' && curMin <= 5 && a >= h && total > 0) {
-        signals.push({ id: 'P21', label: 'Away score mnt <=5, 15min' });
-    }
-    // P22: Away menang HT, 16min
-    if (lg === '16min' && a > h) {
-        signals.push({ id: 'P22', label: 'Away unggul, 16min' });
-    }
-    // P23: 1 gol 1H, mnt >= 3, 16min
-    if (lg === '16min' && total === 1 && curMin >= 3) {
-        signals.push({ id: 'P23', label: '1 gol mnt >=3, 16min' });
-    }
-    // P4: 1 gol mnt 8'+, AWAY, 16/20min
-    if ((lg === '16min' || lg === '20min') && total === 1 && a === 1 && h === 0 && curMin >= 8) {
-        signals.push({ id: 'P4', label: '1 gol mnt 8+, AWAY, 16/20min' });
-    }
-    // P2: selisih 2+, last mnt 7, gap >= 3 (can't check gap, flag diff+mnt)
-    if (diff >= 2 && curMin >= 7) {
-        signals.push({ id: 'P2', label: 'Selisih 2+, mnt 7+' });
-    }
-
-    // De-duplicate by id
     const seen = new Set();
     return signals.filter(s => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
 }
@@ -514,35 +531,55 @@ function renderLiveCards(matches) {
         return;
     }
 
-    // Filter only 1H matches that are in a known league
+    // Show 1H and 2H matches
     const liveMatches = matches.filter(m => {
         const { half } = parseStatus(m.status);
-        return half === '1H';
+        return half === '1H' || half === '2H';
     });
 
     if (!liveMatches.length) {
-        container.innerHTML = '<div class="live-empty">Tidak ada match yang sedang 1H.</div>';
+        container.innerHTML = '<div class="live-empty">Tidak ada match aktif (1H/2H).</div>';
         return;
     }
 
     let html = '';
     for (const m of liveMatches) {
         const lg = getLeagueType(m.league);
-        const signals = lg ? evaluateSignals(m, lg) : [];
-        const hasSignal = signals.length > 0;
+        const { half, min: curMin } = parseStatus(m.status);
         const h = parseInt(m.homeScore) || 0;
         const a = parseInt(m.awayScore) || 0;
+        const key = matchKey(m);
 
+        let signals = [];
+        let htLabel = '';
+        let phase2H = false;
+
+        if (half === '2H') {
+            phase2H = true;
+            const ht = htMemory[key];
+            const htH = ht ? ht.h : h; // fallback ke current jika belum ada history
+            const htA = ht ? ht.a : a;
+            htLabel = `HT: ${htH}-${htA}`;
+            signals = lg ? evaluateSignals(lg, htH, htA, null) : [];
+        } else {
+            signals = lg ? evaluateSignals1H(lg, h, a, curMin) : [];
+        }
+
+        const hasSignal = signals.length > 0;
         const signalHtml = signals.map(s =>
             `<div class="signal-tag"><span class="pid">${s.id}</span>${s.label}</div>`
         ).join('');
 
+        const halfBadge = phase2H
+            ? `<span style="color:#d29922;font-weight:700;">2H ${curMin}'</span>`
+            : `<span style="color:#3fb950;font-weight:700;animation:pulse 1.4s infinite;display:inline-block;">● 1H ${curMin}'</span>`;
+
         html += `<div class="live-card ${hasSignal ? 'has-signal' : ''}">
             <div class="match-name">${esc(m.homeTeam)} vs ${esc(m.awayTeam)}</div>
-            <div class="match-meta">${esc(m.league)} &nbsp;|&nbsp; ${esc(m.status)}</div>
+            <div class="match-meta">${esc(m.league)} &nbsp;|&nbsp; ${halfBadge}${phase2H && htLabel ? ' &nbsp;|&nbsp; <span style="color:#8b949e;font-size:0.72rem;">' + htLabel + '</span>' : ''}</div>
             <div class="score-box">${h} - ${a}</div>
             <div class="signals">
-                ${signalHtml || '<span style="color:#484f58;font-size:0.75rem;">Belum ada signal</span>'}
+                ${signalHtml || '<span style="color:#484f58;font-size:0.75rem;">Tidak ada signal pattern</span>'}
             </div>
         </div>`;
     }
@@ -564,6 +601,7 @@ async function fetchLiveData() {
         document.getElementById('btn-stop-api').style.display = 'inline-block';
         const now = new Date();
         document.getElementById('live-last-update').textContent = 'Update: ' + now.toLocaleTimeString();
+        updateHtMemory(data.matches || []);
         renderLiveCards(data.matches || []);
     } catch(e) {
         document.getElementById('live-api-badge').textContent = 'API Offline';

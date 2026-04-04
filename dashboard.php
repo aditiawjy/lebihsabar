@@ -130,6 +130,8 @@ while (($row = fgetcsv($fh)) !== false) {
 }
 fclose($fh);
 
+require_once __DIR__ . '/pattern_snapshot.php';
+
 function parseGoals($gs) {
     $goals = [];
     $parts = explode('|', $gs);
@@ -319,6 +321,18 @@ $patterns = [
 $totalMatches = count($matches);
 $with2h = count(array_filter($matches, fn($m) => $m['h2c'] > 0));
 
+// Build current snapshot data & compare with 1h ago
+$currentSnap = [];
+foreach ($patterns as $p) {
+    $t = count($p['data']);
+    $h = count(array_filter($p['data'], fn($m) => $m['h2c'] > 0));
+    $currentSnap[$p['id']] = ['t' => $t, 'h' => $h];
+}
+$oldSnap = getSnapshotHourAgo();
+$oldSnapData = $oldSnap ? $oldSnap['data'] : [];
+$oldSnapTime = $oldSnap ? $oldSnap['time'] : null;
+saveSnapshot($currentSnap);
+
 echo '<div class="stats-bar">';
 echo '<div class="stat-card"><div class="value">'.$totalMatches.'</div><div class="label">Total Matches</div></div>';
 echo '<div class="stat-card"><div class="value">'.count($patterns).'</div><div class="label">Patterns</div></div>';
@@ -347,8 +361,11 @@ usort($patterns, function($a, $b) {
 });
 
 // Summary table
+$snapLabel = $oldSnapTime ? date('H:i', $oldSnapTime) . '→' . date('H:i') : null;
 echo '<div class="section"><h2>Summary Akurasi</h2>';
-echo '<table><tr><th>#</th><th>Pattern</th><th>Record</th><th>Akurasi</th><th>Status</th><th></th></tr>';
+echo '<table><tr><th>#</th><th>Pattern</th><th>Record</th><th>Akurasi</th><th>Status</th>';
+echo '<th style="color:#8b949e;white-space:nowrap;">' . ($snapLabel ? "+Sample ($snapLabel)" : '+Sample') . '</th>';
+echo '<th></th></tr>';
 foreach ($patterns as $p) {
     $total = count($p['data']);
     $has2h = count(array_filter($p['data'], fn($m) => $m['h2c'] > 0));
@@ -356,12 +373,29 @@ foreach ($patterns as $p) {
     $cls = $pct >= 95 ? 'pct-high' : ($pct >= 85 ? 'pct-mid' : 'pct-low');
     $badge = $pct >= 95 ? 'badge-green' : ($pct >= 85 ? 'badge-yellow' : 'badge-red');
     $status = $pct >= 95 ? 'EXCELLENT' : ($pct >= 85 ? 'GOOD' : 'WARNING');
+
+    // Delta vs 1h ago
+    $deltaHtml = '<span style="color:#484f58">—</span>';
+    if ($oldSnapData && isset($oldSnapData[$p['id']])) {
+        $old = $oldSnapData[$p['id']];
+        $deltaT = $total - $old['t'];
+        $deltaH = $has2h - $old['h'];
+        if ($deltaT > 0) {
+            $sign = $deltaH >= 0 ? '+' : '';
+            $col = $deltaH > 0 ? '#3fb950' : ($deltaH < 0 ? '#f85149' : '#8b949e');
+            $deltaHtml = "<span style=\"color:{$col};font-weight:600;\">+{$deltaT} sample ({$sign}{$deltaH} hit)</span>";
+        } elseif ($deltaT == 0) {
+            $deltaHtml = '<span style="color:#484f58">tidak berubah</span>';
+        }
+    }
+
     echo "<tr>";
     echo "<td><strong>{$p['id']}</strong></td>";
     echo "<td>{$p['label']}</td>";
     echo "<td>{$has2h}/{$total}</td>";
     echo "<td class=\"pct {$cls}\">{$pct}%</td>";
     echo "<td><span class=\"badge {$badge}\">{$status}</span></td>";
+    echo "<td style=\"font-size:0.8rem;\">{$deltaHtml}</td>";
     echo "<td><button class=\"expand-btn\" onclick=\"toggle('{$p['id']}')\">Detail</button></td>";
     echo "</tr>";
 }

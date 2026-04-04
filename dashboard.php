@@ -361,7 +361,8 @@ usort($patterns, function($a, $b) {
 });
 
 // Summary table
-$snapLabel = $oldSnapTime ? date('H:i', $oldSnapTime) . '→' . date('H:i') : null;
+$snapMinsAgo = $oldSnapTime ? round((time() - $oldSnapTime) / 60) : null;
+$snapLabel = $oldSnapTime ? date('H:i', $oldSnapTime) . '→' . date('H:i') . " ({$snapMinsAgo} mnt lalu)" : null;
 echo '<div class="section"><h2>Summary Akurasi</h2>';
 echo '<table><tr><th>#</th><th>Pattern</th><th>Record</th><th>Akurasi</th><th>Status</th>';
 echo '<th style="color:#8b949e;white-space:nowrap;">' . ($snapLabel ? "+Sample ($snapLabel)" : '+Sample') . '</th>';

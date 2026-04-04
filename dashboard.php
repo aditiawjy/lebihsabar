@@ -47,9 +47,43 @@
         .detail-row { display: none; }
         .detail-row.open { display: table-row; }
         .detail-row td { background: #0d1117; padding: 12px; }
+
+        /* Slide panel */
+        #slide-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; display: none; }
+        #slide-panel {
+            position: fixed; top: 0; right: -100%; width: min(780px, 95vw); height: 100vh;
+            background: #161b22; border-left: 1px solid #30363d;
+            z-index: 100; overflow-y: auto; transition: right 0.3s ease;
+            padding: 0;
+        }
+        #slide-panel.open { right: 0; }
+        #slide-header {
+            position: sticky; top: 0; background: #1c2129; border-bottom: 1px solid #30363d;
+            padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; z-index: 1;
+        }
+        #slide-header h3 { font-size: 1rem; color: #58a6ff; margin: 0; }
+        #slide-close {
+            background: none; border: 1px solid #30363d; color: #8b949e;
+            width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #slide-close:hover { background: #da3633; color: #fff; border-color: #da3633; }
+        #slide-body { padding: 16px 20px; }
+        #slide-body table { font-size: 0.78rem; }
+        #slide-body td { padding: 6px 8px; }
+        #slide-body th { padding: 8px; }
     </style>
 </head>
 <body>
+<div id="slide-overlay" onclick="closePanel()"></div>
+<div id="slide-panel">
+    <div id="slide-header">
+        <h3 id="slide-title"></h3>
+        <button id="slide-close" onclick="closePanel()">✕</button>
+    </div>
+    <div id="slide-body"></div>
+</div>
+
 <div class="container">
     <h1>Pattern Accuracy Dashboard</h1>
     <p class="subtitle">Analisis pola gol 1H berdasarkan data goal_log.csv</p>
@@ -270,40 +304,28 @@ foreach ($patterns as $p) {
 }
 echo '</table></div>';
 
-// Detail tables per pattern
-echo '<div class="section"><h2>Detail per Pattern</h2>';
+// Detail tables per pattern — stored as JS data for slide panel
+echo '<script>const PATTERN_DATA = {};';
 foreach ($patterns as $p) {
     $total = count($p['data']);
     $has2h = count(array_filter($p['data'], fn($m) => $m['h2c'] > 0));
     $pct = $total > 0 ? round($has2h/$total*100) : 0;
-    echo "<div id=\"detail-{$p['id']}\" style=\"display:none; margin-bottom:24px;\">";
-    echo "<h3>{$p['id']}: {$p['label']} — {$has2h}/{$total} ({$pct}%)</h3>";
-    echo '<table class="detail-table"><tr><th>Match</th><th>League</th><th>HT</th><th>FT</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Sequence</th><th>2H?</th></tr>';
+    $rows_html = '';
     foreach ($p['data'] as $m) {
         $seq = implode(' → ', array_map('scorerHtml', $m['h1s']));
         $timeline1h = '';
-        foreach ($m['h1'] as $g) {
-            $timeline1h .= "{$g['min']}' ({$g['home']}-{$g['away']})  ";
-        }
+        foreach ($m['h1'] as $g) { $timeline1h .= "{$g['min']}' ({$g['home']}-{$g['away']})&nbsp;&nbsp;"; }
         $timeline2h = '';
-        foreach ($m['h2'] as $g) {
-            $timeline2h .= "{$g['min']}' ({$g['home']}-{$g['away']})  ";
-        }
+        foreach ($m['h2'] as $g) { $timeline2h .= "{$g['min']}' ({$g['home']}-{$g['away']})&nbsp;&nbsp;"; }
         $has2hBadge = $m['h2c'] > 0 ? '<span class="badge badge-green">✓ 2H</span>' : '<span class="badge badge-red">✗ No 2H</span>';
-        echo "<tr>";
-        echo "<td>{$m['home']} vs {$m['away']}</td>";
-        echo "<td>{$m['league']}</td>";
-        echo "<td>{$m['sc_h']}-{$m['sc_a']}</td>";
-        echo "<td><strong>{$m['fh']}-{$m['fa']}</strong></td>";
-        echo "<td class=\"goal-seq\">{$timeline1h}</td>";
-        echo "<td class=\"goal-seq\">".($timeline2h ?: '<span style="color:#484f58">-</span>')."</td>";
-        echo "<td class=\"goal-seq\">{$seq}</td>";
-        echo "<td>{$has2hBadge}</td>";
-        echo "</tr>";
+        $home = htmlspecialchars($m['home']); $away = htmlspecialchars($m['away']);
+        $rows_html .= "<tr><td>{$home} vs {$away}</td><td>{$m['league']}</td><td>{$m['sc_h']}-{$m['sc_a']}</td><td><strong>{$m['fh']}-{$m['fa']}</strong></td><td class=\"goal-seq\">{$timeline1h}</td><td class=\"goal-seq\">".($timeline2h ?: '<span style="color:#484f58">-</span>')."</td><td class=\"goal-seq\">{$seq}</td><td>{$has2hBadge}</td></tr>";
     }
-    echo '</table></div>';
+    $id = $p['id']; $label = addslashes($p['label']);
+    $table = addslashes('<table class="detail-table"><tr><th>Match</th><th>League</th><th>HT</th><th>FT</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Sequence</th><th>2H?</th></tr>'.$rows_html.'</table>');
+    echo "PATTERN_DATA['{$id}'] = { label: '{$label}', record: '{$has2h}/{$total}', pct: '{$pct}%', html: '{$table}' };";
 }
-echo '</div>';
+echo '</script>';
 
 echo '<p class="last-update">CSV last modified: '.date('d/m/Y H:i:s', $csvTime).' | Total '.$totalMatches.' matches | Auto-refresh: 30s</p>';
 echo '<script>document.getElementById("update-time").textContent = "Last: '.date('H:i:s', $csvTime).'";</script>';
@@ -311,18 +333,38 @@ echo '<script>document.getElementById("update-time").textContent = "Last: '.date
 
 </div>
 <script>
+let activePanel = null;
+
 function toggle(id) {
-    const el = document.getElementById('detail-' + id);
-    if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    if (activePanel === id) { closePanel(); return; }
+    const d = PATTERN_DATA[id];
+    if (!d) return;
+    document.getElementById('slide-title').innerHTML = '<strong>' + id + '</strong>: ' + d.label + ' &nbsp;<span style="color:#8b949e;font-size:0.85rem;">' + d.record + ' = ' + d.pct + '</span>';
+    document.getElementById('slide-body').innerHTML = d.html;
+    document.getElementById('slide-overlay').style.display = 'block';
+    document.getElementById('slide-panel').classList.add('open');
+    activePanel = id;
+    sessionStorage.setItem('openPanel', id);
 }
 
-// Auto-refresh every 30s
+function closePanel() {
+    document.getElementById('slide-panel').classList.remove('open');
+    document.getElementById('slide-overlay').style.display = 'none';
+    activePanel = null;
+    sessionStorage.removeItem('openPanel');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+// Restore panel after auto-refresh
+const saved = sessionStorage.getItem('openPanel');
+if (saved) toggle(saved);
+
+// Auto-refresh every 30s, preserve open panel
 let refreshCountdown = 30;
 setInterval(() => {
     refreshCountdown--;
-    if (refreshCountdown <= 0) {
-        location.reload();
-    }
+    if (refreshCountdown <= 0) location.reload();
 }, 1000);
 </script>
 </body>

@@ -1423,11 +1423,11 @@ async function trackEarlyLateReplySignal(matches) {
 async function handleFreshData(data) {
     await setSavedMatchData(data);
     await trackGoalEvents(Array.isArray(data?.matches) ? data.matches : []);
-    await trackDraw1HSignal(Array.isArray(data?.matches) ? data.matches : []);
-    await trackUnggul1HSignal(Array.isArray(data?.matches) ? data.matches : []);
-    await trackEarlyLateReplySignal(Array.isArray(data?.matches) ? data.matches : []);
-    await trackLate2HSignal(Array.isArray(data?.matches) ? data.matches : []);
-    await trackShgAlert(Array.isArray(data?.matches) ? data.matches : []);
+    // trackDraw1HSignal: disabled
+    // trackUnggul1HSignal: disabled
+    // trackEarlyLateReplySignal: disabled
+    // trackLate2HSignal: disabled
+    // trackShgAlert: disabled
     await persistMatchState(); // dipanggil SETELAH semua signal — agar guard Set tersimpan
     await updateOddTracking(Array.isArray(data?.matches) ? data.matches : []);
     await setStatus({

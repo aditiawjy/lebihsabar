@@ -215,6 +215,7 @@ foreach ($rows as $row) {
 
     $matches[] = [
         'home' => $row[2], 'away' => $row[3],
+        'datetime' => $row[0],
         'league' => $league,
         'h1' => $h1,
         'h1c' => count($h1), 'h2c' => count($h2),
@@ -527,10 +528,11 @@ foreach ($patterns as $p) {
         foreach ($m['h2'] as $g) { $timeline2h .= "{$g['min']}' ({$g['home']}-{$g['away']})&nbsp;&nbsp;"; }
         $has2hBadge = $m['h2c'] > 0 ? '<span class="badge badge-green">✓ 2H</span>' : '<span class="badge badge-red">✗ No 2H</span>';
         $home = htmlspecialchars($m['home']); $away = htmlspecialchars($m['away']);
-        $rows_html .= "<tr><td>{$home} vs {$away}</td><td>{$m['league']}</td><td>{$m['sc_h']}-{$m['sc_a']}</td><td><strong>{$m['fh']}-{$m['fa']}</strong></td><td class=\"goal-seq\">{$timeline1h}</td><td class=\"goal-seq\">".($timeline2h ?: '<span style="color:#484f58">-</span>')."</td><td class=\"goal-seq\">{$seq}</td><td>{$has2hBadge}</td></tr>";
+        $dt = htmlspecialchars($m['datetime'] ?? '');
+        $rows_html .= "<tr><td style='white-space:nowrap;color:#8b949e;font-size:0.78rem;'>{$dt}</td><td>{$home} vs {$away}</td><td>{$m['league']}</td><td>{$m['sc_h']}-{$m['sc_a']}</td><td><strong>{$m['fh']}-{$m['fa']}</strong></td><td class=\"goal-seq\">{$timeline1h}</td><td class=\"goal-seq\">".($timeline2h ?: '<span style="color:#484f58">-</span>')."</td><td class=\"goal-seq\">{$seq}</td><td>{$has2hBadge}</td></tr>";
     }
     $id = $p['id']; $label = addslashes($p['label']);
-    $table = addslashes('<table class="detail-table"><tr><th>Match</th><th>League</th><th>HT</th><th>FT</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Sequence</th><th>2H?</th></tr>'.$rows_html.'</table>');
+    $table = addslashes('<table class="detail-table"><tr><th>Tanggal</th><th>Match</th><th>League</th><th>HT</th><th>FT</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Sequence</th><th>2H?</th></tr>'.$rows_html.'</table>');
     echo "PATTERN_DATA['{$id}'] = { label: '{$label}', record: '{$has2h}/{$total}', pct: '{$pct}%', html: '{$table}' };";
 }
 
@@ -556,10 +558,11 @@ foreach ($next_patterns as $ng) {
         $isHit = ($tgt === 'HOME' && $ng_val === 'H') || ($tgt === 'AWAY' && $ng_val === 'A');
         $rowStyle = $isHit ? '' : ' style="opacity:0.5"';
         $home = htmlspecialchars($m['home']); $away = htmlspecialchars($m['away']);
-        $rows_html .= "<tr{$rowStyle}><td>{$home} vs {$away}</td><td>{$m['league']}</td><td>{$m['sc_h']}-{$m['sc_a']}</td><td>{$seq}</td><td class=\"goal-seq\">{$timeline1h}</td><td class=\"goal-seq\">".($timeline2h ?: '<span style="color:#484f58">-</span>')."</td><td>{$nextBadge}</td></tr>";
+        $dt = htmlspecialchars($m['datetime'] ?? '');
+        $rows_html .= "<tr{$rowStyle}><td style='white-space:nowrap;color:#8b949e;font-size:0.78rem;'>{$dt}</td><td>{$home} vs {$away}</td><td>{$m['league']}</td><td>{$m['sc_h']}-{$m['sc_a']}</td><td>{$seq}</td><td class=\"goal-seq\">{$timeline1h}</td><td class=\"goal-seq\">".($timeline2h ?: '<span style="color:#484f58">-</span>')."</td><td>{$nextBadge}</td></tr>";
     }
     $id = $ng['id']; $label = addslashes($ng['label']);
-    $table = addslashes('<table class="detail-table"><tr><th>Match</th><th>League</th><th>HT</th><th>Sequence 1H</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Next Goal</th></tr>'.$rows_html.'</table>');
+    $table = addslashes('<table class="detail-table"><tr><th>Tanggal</th><th>Match</th><th>League</th><th>HT</th><th>Sequence 1H</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Next Goal</th></tr>'.$rows_html.'</table>');
     echo "PATTERN_DATA['{$id}'] = { label: '{$label}', record: '{$hits}/{$total}', pct: '{$pct}%', html: '{$table}' };";
 }
 echo '</script>';

@@ -279,8 +279,8 @@ $p18 = array_filter($matches, fn($m) => $m['h1c']>=3 && ($m['h1_last']-$m['h1_fi
 $p19 = array_filter($matches, fn($m) => $m['league']==='20min' && in_array($m['h1_last'],[3,4]) && count($m['h1s'])>0 && $m['h1s'][count($m['h1s'])-1]==='H' && ($m['h1c']===1 || $m['max_gap']>=2));
 // P20: Last gol 1H mnt 3, last scorer AWAY, 16min
 $p20 = array_filter($matches, fn($m) => $m['league']==='16min' && $m['h1_last']===3 && count($m['h1s'])>0 && $m['h1s'][count($m['h1s'])-1]==='A');
-// P21: Last gol 1H mnt 5, last scorer AWAY, 15min, max_gap>=2
-$p21 = array_filter($matches, fn($m) => $m['league']==='15min' && $m['h1_last']===5 && count($m['h1s'])>0 && $m['h1s'][count($m['h1s'])-1]==='A' && $m['max_gap']>=2);
+// P21: Last gol 1H mnt 5, last scorer AWAY, 15min, max_gap>=2 + (n1h>=3 atau AWAY unggul HT)
+$p21 = array_filter($matches, fn($m) => $m['league']==='15min' && $m['h1_last']===5 && count($m['h1s'])>0 && $m['h1s'][count($m['h1s'])-1]==='A' && $m['max_gap']>=2 && ($m['h1c']>=3 || $m['sc_a']>$m['sc_h']));
 // P22: Away menang HT, 16min, gol>=2 atau selisih>=2
 $p22 = array_filter($matches, fn($m) => $m['league']==='16min' && $m['sc_a'] > $m['sc_h'] && ($m['h1c']>=2 || ($m['sc_a']-$m['sc_h'])>=2));
 // P23: 1 gol di 1H, mnt pertama >= 3, 16min
@@ -354,7 +354,7 @@ $patterns = [
     ['id'=>'P18','label'=>'Span 1H >= 6 mnt + gol 1H >= 3 + selisih <=2','data'=>$p18],
     ['id'=>'P19','label'=>'Last gol 1H mnt 3-4, last HOME, 20min, gap>=2','data'=>$p19],
     ['id'=>'P20','label'=>'Last gol 1H mnt 3, last AWAY, 16min','data'=>$p20],
-    ['id'=>'P21','label'=>'Last gol 1H mnt 5, last AWAY, 15min, max_gap>=2','data'=>$p21],
+    ['id'=>'P21','label'=>'Last gol 1H mnt 5, last AWAY, 15min, max_gap>=2 (n1h>=3 atau AWAY unggul)','data'=>$p21],
     ['id'=>'P22','label'=>'Away menang HT, 16min, gol>=2 atau unggul>=2','data'=>$p22],
     ['id'=>'P23','label'=>'1 gol 1H HOME, mnt pertama >=3, 16min','data'=>$p23],
     ['id'=>'P24','label'=>'HOME 15min: Arminia Bielefeld / CA Osasuna / FC Koln / Leicester City / Man United / Dortmund / Liverpool (lm>=2, selisih <=1)','data'=>$p24],

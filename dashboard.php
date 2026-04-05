@@ -232,6 +232,12 @@ foreach ($rows as $row) {
         'h2' => $h2,
         'h2_first_min' => count($h2) ? $h2[0]['min'] : -1,
         'has_late' => count(array_filter($h2, fn($g) => $g['min'] >= 7)) > 0,
+        'next_goal' => (function($h2, $sc_h, $sc_a) {
+            if (!count($h2)) return null;
+            if ($h2[0]['home'] > $sc_h) return 'H';
+            if ($h2[0]['away'] > $sc_a) return 'A';
+            return null;
+        })($h2, $sh ? $sh['home'] : 0, $sh ? $sh['away'] : 0),
         'h2_eq_min' => (function($h2) {
             foreach ($h2 as $g) { if ($g['home'] == $g['away']) return $g['min']; }
             return -1;
@@ -317,6 +323,20 @@ $p39 = array_filter($matches, fn($m) => $m['league']==='20min' && $m['h1c']>=3 &
 // P40: Total gol 1H genap + gol >= 3, 15min
 $p40 = array_filter($matches, fn($m) => $m['league']==='15min' && $m['h1c']>=3 && ($m['sc_h']+$m['sc_a'])%2===0);
 
+// ===== NEXT GOAL PATTERNS =====
+// NG1: HT 1-0 + gol terakhir mnt 3 → next HOME 87%
+$ng1 = array_filter($matches, fn($m) => $m['h1c']>=1 && $m['sc_h']==1 && $m['sc_a']==0 && $m['h1_last']==3 && $m['h2c']>0);
+// NG2: HOME unggul HT + gol terakhir mnt 3 → next HOME 82%
+$ng2 = array_filter($matches, fn($m) => $m['h1c']>=1 && $m['sc_h']>$m['sc_a'] && $m['h1_last']==3 && $m['h2c']>0);
+// NG3: HT 1-0, league 16min → next HOME 74%
+$ng3 = array_filter($matches, fn($m) => $m['league']==='16min' && $m['h1c']>=1 && $m['sc_h']==1 && $m['sc_a']==0 && $m['h2c']>0);
+
+$next_patterns = [
+    ['id'=>'NG1','label'=>'HT 1-0 + gol terakhir mnt 3','next'=>'HOME','data'=>$ng1],
+    ['id'=>'NG2','label'=>'HOME unggul HT + gol terakhir mnt 3','next'=>'HOME','data'=>$ng2],
+    ['id'=>'NG3','label'=>'HT 1-0, league 16min','next'=>'HOME','data'=>$ng3],
+];
+
 
 $patterns = [
     ['id'=>'P2','label'=>'Selisih 2+ & last mnt 7\' & gap >=3','data'=>$p2],
@@ -365,6 +385,12 @@ foreach ($patterns as $p) {
     $t = count($p['data']);
     $h = count(array_filter($p['data'], fn($m) => $m['h2c'] > 0));
     $currentSnap[$p['id']] = ['t' => $t, 'h' => $h];
+}
+foreach ($next_patterns as $ng) {
+    $tgt = $ng['next'];
+    $t = count($ng['data']);
+    $h = count(array_filter($ng['data'], fn($m) => ($tgt==='HOME' ? $m['next_goal']==='H' : $m['next_goal']==='A')));
+    $currentSnap[$ng['id']] = ['t' => $t, 'h' => $h];
 }
 $oldSnap = getSnapshotHourAgo();
 $oldSnapData = $oldSnap ? $oldSnap['data'] : [];
@@ -440,6 +466,52 @@ foreach ($patterns as $p) {
 }
 echo '</table></div>';
 
+// ===== NEXT GOAL TABLE =====
+echo '<div class="section"><h2>Next Goal Pattern (Gol Pertama Babak 2)</h2>';
+echo '<table><tr><th>#</th><th>Pattern</th><th>Prediksi Next Goal</th><th>Record</th><th>Akurasi</th><th>Status</th>';
+echo '<th style="color:#8b949e;white-space:nowrap;">' . ($snapLabel ? "+Sample ($snapLabel)" : '+Sample') . '</th>';
+echo '<th></th></tr>';
+foreach ($next_patterns as $ng) {
+    $total = count($ng['data']);
+    $nh = count(array_filter($ng['data'], fn($m) => $m['next_goal']==='H'));
+    $na = count(array_filter($ng['data'], fn($m) => $m['next_goal']==='A'));
+    $tgt = $ng['next'];
+    $hits = $tgt === 'HOME' ? $nh : $na;
+    $pct = $total > 0 ? round($hits/$total*100) : 0;
+    $cls = $pct >= 85 ? 'pct-high' : ($pct >= 75 ? 'pct-mid' : 'pct-low');
+    $badge = $pct >= 85 ? 'badge-green' : ($pct >= 75 ? 'badge-yellow' : 'badge-red');
+    $status = $pct >= 85 ? 'STRONG' : ($pct >= 75 ? 'GOOD' : 'WEAK');
+    $nextBadge = $tgt === 'HOME'
+        ? '<span class="scorer-h" style="padding:2px 10px;border-radius:4px;font-weight:700;">HOME</span>'
+        : '<span class="scorer-a" style="padding:2px 10px;border-radius:4px;font-weight:700;">AWAY</span>';
+
+    $deltaHtml = '<span style="color:#484f58">—</span>';
+    if ($oldSnapData && isset($oldSnapData[$ng['id']])) {
+        $old = $oldSnapData[$ng['id']];
+        $deltaT = $total - $old['t'];
+        $deltaH = $hits - $old['h'];
+        if ($deltaT > 0) {
+            $sign = $deltaH >= 0 ? '+' : '';
+            $col = $deltaH > 0 ? '#3fb950' : ($deltaH < 0 ? '#f85149' : '#8b949e');
+            $deltaHtml = "<span style=\"color:{$col};font-weight:600;\">+{$deltaT} sample ({$sign}{$deltaH} hit)</span>";
+        } elseif ($deltaT == 0) {
+            $deltaHtml = '<span style="color:#484f58">tidak berubah</span>';
+        }
+    }
+
+    echo "<tr>";
+    echo "<td><strong>{$ng['id']}</strong></td>";
+    echo "<td>{$ng['label']}</td>";
+    echo "<td>{$nextBadge}</td>";
+    echo "<td>{$hits}/{$total} <span style='color:#484f58;font-size:0.75rem;'>(H:{$nh} A:{$na})</span></td>";
+    echo "<td class=\"pct {$cls}\">{$pct}%</td>";
+    echo "<td><span class=\"badge {$badge}\">{$status}</span></td>";
+    echo "<td style=\"font-size:0.8rem;\">{$deltaHtml}</td>";
+    echo "<td><button class=\"expand-btn\" onclick=\"toggle('{$ng['id']}')\">Detail</button></td>";
+    echo "</tr>";
+}
+echo '</table></div>';
+
 // Detail tables per pattern — stored as JS data for slide panel
 echo '<script>const PATTERN_DATA = {};';
 foreach ($patterns as $p) {
@@ -460,6 +532,35 @@ foreach ($patterns as $p) {
     $id = $p['id']; $label = addslashes($p['label']);
     $table = addslashes('<table class="detail-table"><tr><th>Match</th><th>League</th><th>HT</th><th>FT</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Sequence</th><th>2H?</th></tr>'.$rows_html.'</table>');
     echo "PATTERN_DATA['{$id}'] = { label: '{$label}', record: '{$has2h}/{$total}', pct: '{$pct}%', html: '{$table}' };";
+}
+
+// Next goal patterns detail
+foreach ($next_patterns as $ng) {
+    $total = count($ng['data']);
+    $nh = count(array_filter($ng['data'], fn($m) => $m['next_goal']==='H'));
+    $na = count(array_filter($ng['data'], fn($m) => $m['next_goal']==='A'));
+    $tgt = $ng['next'];
+    $hits = $tgt === 'HOME' ? $nh : $na;
+    $pct = $total > 0 ? round($hits/$total*100) : 0;
+    $rows_html = '';
+    foreach ($ng['data'] as $m) {
+        $seq = implode(' → ', array_map('scorerHtml', $m['h1s']));
+        $timeline1h = '';
+        foreach ($m['h1'] as $g) { $timeline1h .= "{$g['min']}' ({$g['home']}-{$g['away']})&nbsp;&nbsp;"; }
+        $timeline2h = '';
+        foreach ($m['h2'] as $g) { $timeline2h .= "{$g['min']}' ({$g['home']}-{$g['away']})&nbsp;&nbsp;"; }
+        $ng_val = $m['next_goal'];
+        if ($ng_val === 'H') $nextBadge = '<span class="scorer-h" style="padding:1px 8px;border-radius:3px;font-weight:700;">HOME</span>';
+        elseif ($ng_val === 'A') $nextBadge = '<span class="scorer-a" style="padding:1px 8px;border-radius:3px;font-weight:700;">AWAY</span>';
+        else $nextBadge = '<span style="color:#484f58">-</span>';
+        $isHit = ($tgt === 'HOME' && $ng_val === 'H') || ($tgt === 'AWAY' && $ng_val === 'A');
+        $rowStyle = $isHit ? '' : ' style="opacity:0.5"';
+        $home = htmlspecialchars($m['home']); $away = htmlspecialchars($m['away']);
+        $rows_html .= "<tr{$rowStyle}><td>{$home} vs {$away}</td><td>{$m['league']}</td><td>{$m['sc_h']}-{$m['sc_a']}</td><td>{$seq}</td><td class=\"goal-seq\">{$timeline1h}</td><td class=\"goal-seq\">".($timeline2h ?: '<span style="color:#484f58">-</span>')."</td><td>{$nextBadge}</td></tr>";
+    }
+    $id = $ng['id']; $label = addslashes($ng['label']);
+    $table = addslashes('<table class="detail-table"><tr><th>Match</th><th>League</th><th>HT</th><th>Sequence 1H</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Next Goal</th></tr>'.$rows_html.'</table>');
+    echo "PATTERN_DATA['{$id}'] = { label: '{$label}', record: '{$hits}/{$total}', pct: '{$pct}%', html: '{$table}' };";
 }
 echo '</script>';
 

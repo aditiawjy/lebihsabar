@@ -45,6 +45,7 @@ let sentUnggul1HSignals = new Set(); // matchKey already notified for unggul 1-0
 let sentEarlyLateSignals = new Set(); // matchKey already notified for early goal late reply signal
 let last1HGoalMinByMatchKey = new Map(); // matchKey => last 1H goal minute
 let first1HGoalMinByMatchKey = new Map(); // matchKey => first 1H goal minute
+let all1HGoalMinsByMatchKey = new Map(); // matchKey => array of all 1H goal minutes
 let has2HGoalByMatchKey = new Map(); // matchKey => true if any 2H goal seen
 
 const MILESTONES = [
@@ -190,6 +191,7 @@ async function trackGoalEvents(matches) {
             sentUnggul1HSignals.delete(key);
             sentEarlyLateSignals.delete(key);
             first1HGoalMinByMatchKey.delete(key);
+            all1HGoalMinsByMatchKey.delete(key);
             // Clear milestones for this key so new round sends them fresh
             for (const ms of MILESTONES) {
                 sentMilestones.delete(key + '|' + ms.id);
@@ -219,6 +221,9 @@ async function trackGoalEvents(matches) {
                 const curLast = last1HGoalMinByMatchKey.get(key) ?? -1;
                 if (gMin > curLast) last1HGoalMinByMatchKey.set(key, gMin);
                 if (!first1HGoalMinByMatchKey.has(key)) first1HGoalMinByMatchKey.set(key, gMin);
+                const allMins = all1HGoalMinsByMatchKey.get(key) || [];
+                allMins.push(gMin);
+                all1HGoalMinsByMatchKey.set(key, allMins);
             }
             if (gHalf === '2H') {
                 has2HGoalByMatchKey.set(key, true);
@@ -1581,7 +1586,9 @@ async function getPopupState() {
             runtimeState: data.liveRuntimeState || {
                 isLiveRunning: false,
                 currentTabId: null
-            }
+            },
+            goalMinutes: Object.fromEntries(first1HGoalMinByMatchKey),
+            allGoalMinutes: Object.fromEntries(all1HGoalMinsByMatchKey)
         }
     };
 }

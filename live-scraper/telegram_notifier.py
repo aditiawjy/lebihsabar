@@ -4,7 +4,6 @@ Telegram Notifier untuk Live Scraper
 """
 
 import requests
-import json
 import re
 from datetime import datetime
 from telegram_config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, ALERT_SETTINGS
@@ -16,6 +15,8 @@ class TelegramNotifier:
         self.chat_id = TELEGRAM_CHAT_ID
         self.base_url = f"https://api.telegram.org/bot{self.bot_token}"
         self.sent_alerts = set()
+        # Track score history per match: match_name -> {"last_score": (0,0), "goal_minutes": [(half, minute)]}
+        self.match_score_history = {}
 
     def get_match_name(self, match_data):
         """Ambil nama match yang stabil untuk display dan dedup."""
@@ -91,6 +92,122 @@ class TelegramNotifier:
 
         minute = int(second_half_match.group(1))
         return minute >= 2
+
+    def _parse_score(self, score_str):
+        """Parse '1 - 0' -> (1, 0)"""
+        parts = re.split(r"\s*-\s*", score_str.strip())
+        if len(parts) == 2:
+            try:
+                return (int(parts[0].strip()), int(parts[1].strip()))
+            except ValueError:
+                pass
+        return (0, 0)
+
+    def _parse_status_half_minute(self, status_str):
+        """Parse '1H 3'' -> (1, 3), '2H 0'' -> (2, 0), else None"""
+        m = re.fullmatch(r"([12])H\s+(\d+)'", status_str.strip())
+        if m:
+            return (int(m.group(1)), int(m.group(2)))
+        return None
+
+    def track_goal_minutes(self, match_data):
+        """Catat menit goal setiap kali score berubah naik."""
+        match_name = self.get_match_name(match_data)
+        status = match_data.get("status", "").strip()
+        score_str = match_data.get("score", "0-0")
+
+        current_score = self._parse_score(score_str)
+        parsed = self._parse_status_half_minute(status)
+
+        if match_name not in self.match_score_history:
+            self.match_score_history[match_name] = {
+                "last_score": (0, 0),
+                "goal_minutes": [],
+            }
+
+        history = self.match_score_history[match_name]
+        last_home, last_away = history["last_score"]
+        cur_home, cur_away = current_score
+        new_goals = (cur_home + cur_away) - (last_home + last_away)
+
+        if new_goals > 0 and parsed is not None:
+            for _ in range(new_goals):
+                history["goal_minutes"].append(parsed)
+            history["last_score"] = current_score
+            print(f"[TRACK] Goal recorded at {status} for {match_name} | goals so far: {history['goal_minutes']}")
+        elif new_goals > 0:
+            # Bisa catat tapi tanpa menit yang valid
+            history["last_score"] = current_score
+        # Jika score tidak naik, tidak update goal_minutes
+
+    def should_send_early_goal_2h_start_alert(self, match_data):
+        """
+        Cek apakah perlu kirim alert: sudah 2H 0'-2' dan hanya ada 1 goal
+        yang terjadi di babak pertama (menit awal).
+        """
+        status = match_data.get("status", "").strip()
+        score_str = match_data.get("score", "0-0")
+
+        parsed = self._parse_status_half_minute(status)
+        if parsed is None:
+            return False
+
+        half, minute = parsed
+        if half != 2 or minute > 2:
+            return False
+
+        cur_home, cur_away = self._parse_score(score_str)
+        total_goals = cur_home + cur_away
+        if total_goals != 1:
+            return False
+
+        return True
+
+    def check_and_alert_early_goal_2h_start(self, match_data):
+        """Kirim alert saat 2H 0' jika hanya ada 1 goal di babak pertama."""
+        if not self.should_send_early_goal_2h_start_alert(match_data):
+            return False
+
+        match_name = self.get_match_name(match_data)
+        alert_key = f"{match_name}_early_goal_2h_start"
+
+        if alert_key in self.sent_alerts:
+            return False
+
+        status = match_data.get("status", "").strip()
+        score_str = match_data.get("score", "0-0")
+
+        # Cari menit goal dari history
+        history = self.match_score_history.get(match_name, {})
+        goal_minutes = history.get("goal_minutes", [])
+
+        if goal_minutes:
+            goal_half, goal_minute = goal_minutes[0]
+            goal_info = f"{goal_half}H {goal_minute}'"
+        else:
+            goal_info = "babak pertama"
+
+        current_time = datetime.now().strftime("%H:%M:%S")
+
+        message = f"🔔 <b>EARLY GOAL ALERT - BABAK 2 MULAI</b>\n\n"
+        message += f"⚽ <b>{match_name}</b>\n"
+        message += f"📊 Score: <b>{score_str}</b>\n"
+        message += f"🏆 League: {match_data.get('league', 'Unknown League')}\n"
+        message += f"⏰ Status: {status}\n"
+        message += f"📅 Alert Time: {current_time}\n\n"
+        message += f"🎯 <i>Hanya ada 1 goal di menit {goal_info}!</i>\n"
+        message += f"💡 <i>Babak kedua baru mulai — pantau pergerakan odds.</i>"
+
+        if match_data.get("odds"):
+            message += f"\n\n📈 <b>Current Odds:</b>\n"
+            for odd in match_data["odds"][:3]:
+                message += f"• {odd}\n"
+
+        success = self.send_message(message)
+        if success:
+            self.sent_alerts.add(alert_key)
+            print(f"[ALERT] Early goal 2H start alert sent for: {match_name} (goal at {goal_info})")
+        return success
 
     def send_test_message(self):
         """Kirim pesan test"""

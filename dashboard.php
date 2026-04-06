@@ -257,7 +257,7 @@ foreach ($rows as $row) {
 }
 
 // P2: Diff 2+ & last 1H mnt 7' & all gaps >= 3
-$p2 = array_filter($matches, fn($m) => $m['h1c'] >= 2 && abs($m['sc_h']-$m['sc_a']) >= 2 && $m['h1_last'] == 7 && $m['all_gaps_ge3']);
+$p2 = array_filter($matches, fn($m) => $m['h1c'] >= 2 && abs($m['sc_h']-$m['sc_a']) >= 2 && $m['h1_last'] == 7 && $m['all_gaps_ge3'] && $m['max_run'] <= 2);
 // P3: AH seri 1-1, gap >= 3, 15/16min
 $p3 = array_filter($matches, fn($m) => in_array($m['league'],['15min','16min']) && $m['h1c']==2 && $m['sc_h']==1 && $m['sc_a']==1 && $m['h1s']==['A','H'] && ($m['h1'][1]['min']-$m['h1'][0]['min']) >= 3);
 // P6: Seri 1-1 + equalizer at mnt 7'
@@ -268,30 +268,28 @@ $p7 = array_filter($matches, fn($m) => $m['h1c']==2 && $m['sc_h']==1 && $m['sc_a
 $p9 = array_filter($matches, fn($m) => $m['h1c']==2 && $m['sc_h']==1 && $m['sc_a']==1 && $m['h1s']==['A','H'] && $m['max_gap']>=5 && $m['h1_first']!==1);
 // P10: 0-0 di 1H (skip)
 $p10 = array_filter($matches, fn($m) => $m['h1c'] == 0);
-// P11: Switches 2+
-$p11 = array_filter($matches, fn($m) => $m['switches'] >= 2 && $m['h1_last'] >= 6 && $m['league']==='15min');
 // P29: Balas >=2x + last mnt >=6 + min_gap>=1 (semua league)
-$p29 = array_filter($matches, fn($m) => $m['switches'] >= 2 && $m['h1_last'] >= 6 && $m['min_gap'] >= 1);
+$p29 = array_filter($matches, fn($m) => $m['switches'] >= 2 && $m['h1_last'] >= 6 && $m['min_gap'] >= 1 && ($m['h1_last']-$m['h1_first']) >= 6);
 // P12: Total 1H goals >= 4
-$p12 = array_filter($matches, fn($m) => $m['h1c'] >= 4 && ($m['h1_last']-$m['h1_first']) >= 6 && $m['min_gap'] >= 1 && $m['h1_last'] <= 9);
+$p12 = array_filter($matches, fn($m) => $m['h1c'] >= 4 && ($m['h1_last']-$m['h1_first']) >= 6 && $m['min_gap'] >= 1 && $m['h1_last'] <= 9 && $m['h1_first'] >= 1);
 // P13: First 0-2' + last 7'+
 $p13 = array_filter($matches, fn($m) => $m['h1c']>=2 && $m['h1_first']<=2 && $m['h1_last']===7 && abs($m['sc_h']-$m['sc_a'])<=2 && $m['min_gap']>=2);
 // P14: Seri + gap >= 4 + span >= 5 + first goal != mnt 1 (100%)
 $p14 = array_filter($matches, fn($m) => $m['h1c']>=2 && $m['sc_h']==$m['sc_a'] && $m['sc_h']>0 && $m['max_gap']>=4 && ($m['h1_last']-$m['h1_first'])>=5 && $m['h1_first']!==1);
 // P15: HT 2-2
-$p15 = array_filter($matches, fn($m) => $m['sc_h']==2 && $m['sc_a']==2);
+$p15 = array_filter($matches, fn($m) => $m['sc_h']==2 && $m['sc_a']==2 && $m['max_gap']<=4);
 // P16: Last gol 1H mnt 6 atau 7, league 16min
 $p16 = array_filter($matches, fn($m) => $m['league']==='16min' && ($m['h1_last']==6 || $m['h1_last']==7) && ($m['h1_last']-$m['h1_first'])>=3);
 // P17: First 1H mnt 1-2 + last mnt 7
 $p17 = array_filter($matches, fn($m) => $m['h1c']>=2 && $m['h1_first']>=1 && $m['h1_first']<=2 && $m['h1_last']==7 && $m['max_gap']>=2 && $m['min_gap']>=2);
 // P18: Span 1H >= 6 mnt, gol 1H >= 3, selisih HT <= 2
-$p18 = array_filter($matches, fn($m) => $m['h1c']>=3 && ($m['h1_last']-$m['h1_first'])>=6 && abs($m['sc_h']-$m['sc_a'])<=2 && $m['max_run']<=2);
+$p18 = array_filter($matches, fn($m) => $m['h1c']>=3 && ($m['h1_last']-$m['h1_first'])>=6 && abs($m['sc_h']-$m['sc_a'])<=2 && $m['max_run']<=2 && $m['switches']>=2);
 // P19: Last gol 1H mnt 3-4, last scorer HOME, 20min
 $p19 = array_filter($matches, fn($m) => $m['league']==='20min' && in_array($m['h1_last'],[3,4]) && count($m['h1s'])>0 && $m['h1s'][count($m['h1s'])-1]==='H' && ($m['h1c']===1 || $m['max_gap']>=2));
 // P20: Last gol 1H mnt 3, last scorer AWAY, 16min
 $p20 = array_filter($matches, fn($m) => $m['league']==='16min' && $m['h1_last']===3 && count($m['h1s'])>0 && $m['h1s'][count($m['h1s'])-1]==='A');
-// P21: Last gol 1H mnt 5, last scorer AWAY, 15min, max_gap>=2 + (n1h>=3 atau AWAY unggul HT)
-$p21 = array_filter($matches, fn($m) => $m['league']==='15min' && $m['h1_last']===5 && count($m['h1s'])>0 && $m['h1s'][count($m['h1s'])-1]==='A' && $m['max_gap']>=2 && ($m['h1c']>=3 || $m['sc_a']>$m['sc_h']));
+// P21: Last gol 1H mnt 5, last scorer AWAY, 15min, max_gap>=2 + sw>=1 + (n1h>=3 atau AWAY unggul HT)
+$p21 = array_filter($matches, fn($m) => $m['league']==='15min' && $m['h1_last']===5 && count($m['h1s'])>0 && $m['h1s'][count($m['h1s'])-1]==='A' && $m['max_gap']>=2 && ($m['h1c']>=3 || $m['sc_a']>$m['sc_h']) && $m['switches']>=1);
 // P22: Away menang HT, 16min, gol>=2 atau selisih>=2
 $p22 = array_filter($matches, fn($m) => $m['league']==='16min' && $m['sc_a'] > $m['sc_h'] && ($m['h1c']>=2 || ($m['sc_a']-$m['sc_h'])>=2));
 // P23: 1 gol di 1H, mnt pertama >= 3, 16min
@@ -311,12 +309,10 @@ $p28_teams = ['Croatia (V)','France (V)'];
 $p28 = array_filter($matches, fn($m) => (in_array(trim($m['home']), $p28_teams) || in_array(trim($m['away']), $p28_teams)) && $m['h1_last']>=3);
 // P30: Total gol ganjil + last mnt >=6, 16min
 $p30 = array_filter($matches, fn($m) => $m['league']==='16min' && ($m['sc_h']+$m['sc_a'])%2===1 && $m['h1_last']>=6);
-// P31: Total gol 1H >=4 + span >=6 mnt + selisih HT <=2
-$p31 = array_filter($matches, fn($m) => $m['h1c']>=4 && ($m['h1_last']-$m['h1_first'])>=6 && abs($m['sc_h']-$m['sc_a'])<=2);
 // P32: Span >=8 mnt + gol 1H >=2, 20min
 $p32 = array_filter($matches, fn($m) => $m['league']==='20min' && $m['h1c']>=2 && ($m['h1_last']-$m['h1_first'])>=8);
 // P33: Total gol 1H >=4, 15min
-$p33 = array_filter($matches, fn($m) => $m['league']==='15min' && $m['h1c']>=4 && abs($m['sc_h']-$m['sc_a'])<=2);
+$p33 = array_filter($matches, fn($m) => $m['league']==='15min' && $m['h1c']>=4 && abs($m['sc_h']-$m['sc_a'])<=2 && $m['min_gap']>=1);
 // P34: First AWAY + last HOME + span >=5, 15min
 $p34 = array_filter($matches, fn($m) => $m['league']==='15min' && count($m['h1s'])>0 && $m['h1s'][0]==='A' && $m['h1s'][count($m['h1s'])-1]==='H' && ($m['h1_last']-$m['h1_first'])>=5);
 // P35: Team AWAY: Mexico / Belgium / Germany / Man City
@@ -327,12 +323,8 @@ $p36_teams = ['Paris Saint Germain (V)','Germany (V)','Mexico (V)','Belgium (V)'
 $p36 = array_filter($matches, fn($m) => in_array(trim($m['home']), $p36_teams) && $m['h1c']>=2 && ($m['h1_last']-$m['h1_first'])>=1);
 // P37: First AWAY + last AWAY + span >= 6 mnt + (n1h>=3 or lm<=7) (100%)
 $p37 = array_filter($matches, fn($m) => $m['h1c']>=2 && count($m['h1s'])>0 && $m['h1s'][0]==='A' && $m['h1s'][count($m['h1s'])-1]==='A' && ($m['h1_last']-$m['h1_first'])>=6 && ($m['h1c']>=3 || $m['h1_last']<=7));
-// P38: Tepat 2 gol 1H + span >= 5 mnt, 15min
-$p38 = array_filter($matches, fn($m) => $m['league']==='15min' && $m['h1c']===2 && ($m['h1_last']-$m['h1_first'])>=5);
 // P39: Gol 1H >= 3 + span >= 7 mnt, 20min
 $p39 = array_filter($matches, fn($m) => $m['league']==='20min' && $m['h1c']>=3 && ($m['h1_last']-$m['h1_first'])>=7);
-// P40: Total gol 1H genap + gol >= 3, 15min
-$p40 = array_filter($matches, fn($m) => $m['league']==='15min' && $m['h1c']>=3 && ($m['sc_h']+$m['sc_a'])%2===0);
 
 // ===== NEXT GOAL PATTERNS =====
 // NG1: HT 1-0 + gol terakhir mnt 3 → next HOME 87%
@@ -359,22 +351,21 @@ $next_patterns = [
 
 
 $patterns = [
-    ['id'=>'P2','label'=>'Selisih 2+ & last mnt 7\' & gap >=3','data'=>$p2],
+    ['id'=>'P2','label'=>'Selisih 2+ & last mnt 7\' & gap >=3 & max_run<=2','data'=>$p2],
     ['id'=>'P3','label'=>'AH gap >=3 mnt, 15min/16min','data'=>$p3],
     ['id'=>'P6','label'=>'Seri 1-1 + gol penyama mnt 7\'','data'=>$p6],
     ['id'=>'P7','label'=>'Seri 1-1 + gap >= 5 mnt + first goal != mnt 1','data'=>$p7],
     ['id'=>'P9','label'=>'AH seri 1-1 + gap >= 5 mnt + first goal != mnt 1','data'=>$p9],
-    ['id'=>'P11','label'=>'Balas >=2x + last mnt >=6, 15min','data'=>$p11],
-    ['id'=>'P12','label'=>'Total gol 1H >= 4 + span >= 6 mnt + min_gap>=1 + lm<=9','data'=>$p12],
+    ['id'=>'P12','label'=>'Total gol 1H >= 4 + span >= 6 mnt + min_gap>=1 + lm<=9 + fm>=1','data'=>$p12],
     ['id'=>'P13','label'=>'First 0-2\' + last 7\' + selisih <=2 + min_gap>=2','data'=>$p13],
     ['id'=>'P14','label'=>'Seri + gap >= 4 mnt + span >= 5 mnt + first goal != mnt 1','data'=>$p14],
-    ['id'=>'P15','label'=>'HT 2-2','data'=>$p15],
+    ['id'=>'P15','label'=>'HT 2-2 + max_gap<=4','data'=>$p15],
     ['id'=>'P16','label'=>'Last gol 1H mnt 6-7 + span >=3, 16min','data'=>$p16],
     ['id'=>'P17','label'=>'First 1H mnt 1-2 + last mnt 7 + min_gap>=2','data'=>$p17],
-    ['id'=>'P18','label'=>'Span 1H >= 6 mnt + gol 1H >= 3 + selisih <=2 + max_run <=2','data'=>$p18],
+    ['id'=>'P18','label'=>'Span 1H >= 6 mnt + gol 1H >= 3 + selisih <=2 + max_run <=2 + sw>=2','data'=>$p18],
     ['id'=>'P19','label'=>'Last gol 1H mnt 3-4, last HOME, 20min, gap>=2','data'=>$p19],
     ['id'=>'P20','label'=>'Last gol 1H mnt 3, last AWAY, 16min','data'=>$p20],
-    ['id'=>'P21','label'=>'Last gol 1H mnt 5, last AWAY, 15min, max_gap>=2 (n1h>=3 atau AWAY unggul)','data'=>$p21],
+    ['id'=>'P21','label'=>'Last gol 1H mnt 5, last AWAY, 15min, max_gap>=2 + sw>=1 (n1h>=3 atau AWAY unggul)','data'=>$p21],
     ['id'=>'P22','label'=>'Away menang HT, 16min, gol>=2 atau unggul>=2','data'=>$p22],
     ['id'=>'P23','label'=>'1 gol 1H HOME, mnt pertama >=3, 16min','data'=>$p23],
     ['id'=>'P24','label'=>'HOME 15min: Arminia Bielefeld / CA Osasuna / FC Koln / Leicester City / Man United / Dortmund / Liverpool (lm>=2, selisih <=1, HOME cetak >=1, fm>=1)','data'=>$p24],
@@ -382,18 +373,15 @@ $patterns = [
     ['id'=>'P26','label'=>'HT total ganjil (1,3,5...), 16min, last mnt >=6','data'=>$p26],
     ['id'=>'P27','label'=>'Gol terakhir 1H dicetak AWAY, 16min, max_gap>=3','data'=>$p27],
     ['id'=>'P28','label'=>'Croatia atau France main (home atau away) + last mnt >=3','data'=>$p28],
-    ['id'=>'P29','label'=>'Balas >=2x + last mnt >=6 + min_gap>=1 (semua league)','data'=>$p29],
+    ['id'=>'P29','label'=>'Balas >=2x + last mnt >=6 + min_gap>=1 + span>=6 (semua league)','data'=>$p29],
     ['id'=>'P30','label'=>'Total gol ganjil + last mnt >=6, 16min','data'=>$p30],
-    ['id'=>'P31','label'=>'Total gol 1H >=4 + span >=6 mnt + selisih HT <=2','data'=>$p31],
     ['id'=>'P32','label'=>'Span 1H >=8 mnt + gol >=2, 20min','data'=>$p32],
-    ['id'=>'P33','label'=>'Total gol 1H >=4 + selisih HT <=2, 15min','data'=>$p33],
+    ['id'=>'P33','label'=>'Total gol 1H >=4 + selisih HT <=2 + min_gap>=1, 15min','data'=>$p33],
     ['id'=>'P34','label'=>'First AWAY + last HOME + span >=5, 15min','data'=>$p34],
     ['id'=>'P35','label'=>'AWAY: Mexico / Belgium / Germany / Man City (last mnt >=3 + selisih HT <=1)','data'=>$p35],
     ['id'=>'P36','label'=>'HOME: PSG / Germany / Mexico / Belgium (gol>=2, span>=1)','data'=>$p36],
     ['id'=>'P37','label'=>'First & last scorer AWAY + span >=6 mnt (n1h>=3 atau lm<=7)','data'=>$p37],
-    ['id'=>'P38','label'=>'Tepat 2 gol 1H + span >=5 mnt, 15min','data'=>$p38],
     ['id'=>'P39','label'=>'Gol 1H >=3 + span >=7 mnt, 20min','data'=>$p39],
-    ['id'=>'P40','label'=>'Total gol 1H genap + gol >=3, 15min','data'=>$p40],
 ];
 
 $totalMatches = count($matches);

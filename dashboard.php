@@ -296,7 +296,7 @@ $p22 = array_filter($matches, fn($m) => $m['league']==='16min' && $m['sc_a'] > $
 $p23 = array_filter($matches, fn($m) => $m['league']==='16min' && $m['h1c']===1 && $m['h1_first']>=3 && count($m['h1s'])>0 && $m['h1s'][0]==='H');
 // P24: Team HOME tertentu di 15min (Arminia Bielefeld, CA Osasuna, FC Koln, etc)
 $p24_teams = ['Arminia Bielefeld (V)','CA Osasuna (V)','FC Koln (V)','Leicester City (V)','Manchester United (V)','Borussia Dortmund (V)','Liverpool (V)'];
-$p24 = array_filter($matches, fn($m) => $m['league']==='15min' && in_array(trim($m['home']), $p24_teams) && $m['h1c']>=1 && $m['h1_last']>=2 && abs($m['sc_h']-$m['sc_a'])<=1 && $m['sc_h']>=1 && $m['h1_first']>=1);
+$p24 = array_filter($matches, fn($m) => $m['league']==='15min' && in_array(trim($m['home']), $p24_teams) && $m['h1c']>=1 && $m['h1_last']>=4 && abs($m['sc_h']-$m['sc_a'])<=1 && $m['sc_h']>=1 && $m['h1_first']>=1);
 // P25: Team AWAY tertentu (Real Sociedad, France, Netherlands, Ukraine)
 $p25_teams = ['Real Sociedad (V)','France (V)','Netherlands (V)','Ukraine (V)'];
 $p25 = array_filter($matches, fn($m) => in_array(trim($m['away']), $p25_teams) && $m['h1_last']>=2 && abs($m['sc_h']-$m['sc_a'])<=1 && ($m['h1_last']-$m['h1_first'])!==2);
@@ -368,7 +368,7 @@ $patterns = [
     ['id'=>'P21','label'=>'Last gol 1H mnt 5, last AWAY, 15min, max_gap>=2 + sw>=1 (n1h>=3 atau AWAY unggul)','data'=>$p21],
     ['id'=>'P22','label'=>'Away menang HT, 16min, gol>=2 atau unggul>=2','data'=>$p22],
     ['id'=>'P23','label'=>'1 gol 1H HOME, mnt pertama >=3, 16min','data'=>$p23],
-    ['id'=>'P24','label'=>'HOME 15min: Arminia Bielefeld / CA Osasuna / FC Koln / Leicester City / Man United / Dortmund / Liverpool (lm>=2, selisih <=1, HOME cetak >=1, fm>=1)','data'=>$p24],
+    ['id'=>'P24','label'=>'HOME 15min: Arminia Bielefeld / CA Osasuna / FC Koln / Leicester City / Man United / Dortmund / Liverpool (lm>=4, selisih <=1, HOME cetak >=1, fm>=1)','data'=>$p24],
     ['id'=>'P25','label'=>'AWAY: Real Sociedad / France / Netherlands / Ukraine (lm>=2, selisih<=1)','data'=>$p25],
     ['id'=>'P26','label'=>'HT total ganjil (1,3,5...), 16min, last mnt >=6','data'=>$p26],
     ['id'=>'P27','label'=>'Gol terakhir 1H dicetak AWAY, 16min, max_gap>=3','data'=>$p27],

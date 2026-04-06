@@ -3,6 +3,8 @@ let currentViewFilter = 'all';
 let popupDataCache = {
     groupedMatches: null,
     oddInsights: null,
+    goalMinutes: null,
+    allGoalMinutes: null,
     count: null
 };
 const DEFAULT_CUSTOM_WATCH_THRESHOLD = 1.8;
@@ -302,7 +304,7 @@ function renderOddInsights(oddInsights = {}) {
     `).join('')}</div>`;
 }
 
-function renderTable(matches, oddInsights = {}) {
+function renderTable(matches, oddInsights = {}, allGoalMinutes = {}) {
     if (!isExtensionContextValid()) {
         return;
     }
@@ -355,6 +357,8 @@ function renderTable(matches, oddInsights = {}) {
         const rowsHtml = leagueMatches.map((m) => {
             const timeClass = m.status?.includes('H.Time') ? 'time-ht' : 'time-live';
             const insight = oddInsights[createMatchKey(m)] || null;
+            const matchKey = createMatchKey(m);
+            const allGoalMins = Array.isArray(allGoalMinutes[matchKey]) ? allGoalMinutes[matchKey] : null;
             const watchContext = getMatchWatchContextInPopup(m);
             const watchBadge = watchContext.isWatchedTeam
                 ? ' <span style="background:#fff3cd;color:#856404;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;">WATCH TEAM</span>'
@@ -400,11 +404,15 @@ function renderTable(matches, oddInsights = {}) {
                 }).join('');
             }
 
+            const goalBadge = allGoalMins?.length
+                ? `<div style="margin-top:3px;font-size:9px;color:#856404;background:#fff3cd;border-radius:10px;padding:1px 6px;display:inline-block;">⚽ 1H: ${allGoalMins.map((min) => `${min}'`).join(', ')}</div>`
+                : '';
+
             return `<tr>
                 <td class="team-name">${m.homeTeam || '-'}</td>
                 <td class="team-name">${m.awayTeam || '-'}${watchBadge}</td>
                 <td><span class="${timeClass}">${m.status || '-'}</span></td>
-                <td class="score">${m.score || '-'}</td>
+                <td class="score">${m.score || '-'}${goalBadge}</td>
                 <td class="score">${insight?.htScore || '-'}</td>
                 <td class="odds-focus">${insight ? `${formatOdd(insight.currentOdd)} <span class="delta-text">(${formatDelta(insight.deltaFromPrevious)})</span><div class="pattern-meta">${formatComparisonOdds(insight.comparisonOdds)}</div>` : '-'}</td>
                 <td>${insight ? `<span class="${getPatternBadgeClass(insight)}"><span class="pattern-icon">${getPatternIcon(insight)}</span>${insight.pattern}</span><div class="pattern-meta">${getWatchRuleText(insight)} • Above ${formatDuration(insight.aboveThresholdDurationMs)}</div>` : '<span class="pattern-badge pattern-muted"><span class="pattern-icon">--</span>No 2H data</span>'}</td>
@@ -464,6 +472,8 @@ function applyPopupState(state) {
     const liveStatus = data.liveStatus || {};
     const groupedMatches = data.groupedMatches?.length ? data.groupedMatches : data.matches;
     const oddInsights = data.oddInsights || {};
+    const goalMinutes = data.goalMinutes || {};
+    const allGoalMinutes = data.allGoalMinutes || {};
     const hasMatchData = Array.isArray(groupedMatches) && groupedMatches.length > 0;
     const hasOddData = oddInsights && Object.keys(oddInsights).length > 0;
 
@@ -475,12 +485,20 @@ function applyPopupState(state) {
         popupDataCache.oddInsights = oddInsights;
     }
 
+    if (Object.keys(allGoalMinutes).length > 0) {
+        popupDataCache.goalMinutes = goalMinutes;
+        popupDataCache.allGoalMinutes = allGoalMinutes;
+    }
+
     const matchesToRender = hasMatchData
         ? groupedMatches
         : (popupDataCache.groupedMatches || []);
     const insightsToRender = hasOddData
         ? oddInsights
         : (popupDataCache.oddInsights || {});
+    const allGoalMinutesToRender = Object.keys(allGoalMinutes).length > 0
+        ? allGoalMinutes
+        : (popupDataCache.allGoalMinutes || {});
     const countFromState = Number.isFinite(data.count) ? data.count : 0;
     if (hasMatchData) {
         popupDataCache.count = countFromState;
@@ -494,7 +512,7 @@ function applyPopupState(state) {
     renderOddInsights(insightsToRender);
 
     if (matchesToRender?.length) {
-        renderTable(matchesToRender, insightsToRender);
+        renderTable(matchesToRender, insightsToRender, allGoalMinutesToRender);
     }
 
     document.getElementById('matchCount').textContent = `${matchCountToShow} matches`;

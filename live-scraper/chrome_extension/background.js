@@ -43,6 +43,7 @@ let sentLate2HSignals = new Set();   // matchKey already notified for late 2H si
 let sentDraw1HSignals = new Set();   // matchKey already notified for draw 1H signal
 let sentUnggul1HSignals = new Set(); // matchKey already notified for unggul 1-0 late 1H signal
 let sentEarlyLateSignals = new Set(); // matchKey already notified for early goal late reply signal
+let sentNG1Signals = new Set();       // matchKey already notified for NG1 (HT 1-0 + lm=3)
 let last1HGoalMinByMatchKey = new Map(); // matchKey => last 1H goal minute
 let first1HGoalMinByMatchKey = new Map(); // matchKey => first 1H goal minute
 let all1HGoalMinsByMatchKey = new Map(); // matchKey => array of all 1H goal minutes
@@ -190,6 +191,7 @@ async function trackGoalEvents(matches) {
             sentDraw1HSignals.delete(key);
             sentUnggul1HSignals.delete(key);
             sentEarlyLateSignals.delete(key);
+            sentNG1Signals.delete(key);
             first1HGoalMinByMatchKey.delete(key);
             all1HGoalMinsByMatchKey.delete(key);
             // Clear milestones for this key so new round sends them fresh
@@ -972,7 +974,7 @@ async function updateLiveState(isRunning, extraState = {}) {
 
 async function restoreRuntimeState() {
     const [localData, sessionData] = await Promise.all([
-        chrome.storage.local.get(['liveRuntimeState', 'sentLate2HKeys', 'sentDraw1HKeys', 'sentUnggul1HKeys', 'sentEarlyLateKeys']),
+        chrome.storage.local.get(['liveRuntimeState', 'sentLate2HKeys', 'sentDraw1HKeys', 'sentUnggul1HKeys', 'sentEarlyLateKeys', 'sentNG1Keys']),
         chrome.storage.session.get(['kickoffTimes', 'registeredKeys', 'sentMilestoneKeys', 'last1HGoalMins', 'has2HGoals'])
     ]);
     const runtimeState = localData.liveRuntimeState || {};
@@ -1000,6 +1002,9 @@ async function restoreRuntimeState() {
     }
     if (Array.isArray(localData.sentEarlyLateKeys)) {
         sentEarlyLateSignals = new Set(localData.sentEarlyLateKeys);
+    }
+    if (Array.isArray(localData.sentNG1Keys)) {
+        sentNG1Signals = new Set(localData.sentNG1Keys);
     }
     if (sessionData.last1HGoalMins) {
         last1HGoalMinByMatchKey = new Map(Object.entries(sessionData.last1HGoalMins).map(([k, v]) => [k, Number(v)]));
@@ -1029,6 +1034,7 @@ async function persistMatchState() {
             sentDraw1HKeys: [...sentDraw1HSignals],
             sentUnggul1HKeys: [...sentUnggul1HSignals],
             sentEarlyLateKeys: [...sentEarlyLateSignals],
+            sentNG1Keys: [...sentNG1Signals],
         }),
     ]);
 }
@@ -1425,9 +1431,50 @@ async function trackEarlyLateReplySignal(matches) {
     }
 }
 
+async function trackNG1Signal(matches) {
+    if (!Array.isArray(matches) || !matches.length) return;
+
+    for (const match of matches) {
+        const key = createMatchKey(match);
+        if (!registeredMatchKeys.has(key)) continue;
+        if (sentNG1Signals.has(key)) continue;
+
+        const status = String(match?.status || '').trim();
+        const shMin = getShMinute(status);
+        // Trigger di 2H 0' atau 2H 1' (jaga kalau scraper miss tepat 0')
+        if (shMin < 0 || shMin > 1) continue;
+
+        const homeScore = parseInt(match?.homeScore ?? '0', 10);
+        const awayScore = parseInt(match?.awayScore ?? '0', 10);
+
+        // NG1: HT harus 1-0
+        if (homeScore !== 1 || awayScore !== 0) continue;
+
+        // Gol terakhir 1H harus menit 3
+        const last1HMin = last1HGoalMinByMatchKey.get(key) ?? -1;
+        if (last1HMin !== 3) continue;
+
+        sentNG1Signals.add(key);
+
+        const home = escapeHtml(match?.homeTeam || '?');
+        const away = escapeHtml(match?.awayTeam || '?');
+
+        const msg =
+            `🎯 <b>NG1 SIGNAL — BABAK 2 MULAI!</b>\n` +
+            `⚽ <b>${home} vs ${away}</b>\n` +
+            `📊 Skor HT: <b>1-0</b> | Gol terakhir 1H: menit <b>3'</b>\n` +
+            `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
+            `📈 Pola NG1: HT 1-0 + gol mnt 3 → <b>HOME 83%</b>\n` +
+            `🔥 <i>Pantau — prediksi gol HOME di babak kedua!</i>`;
+
+        await sendTelegramText(msg);
+    }
+}
+
 async function handleFreshData(data) {
     await setSavedMatchData(data);
     await trackGoalEvents(Array.isArray(data?.matches) ? data.matches : []);
+    await trackNG1Signal(Array.isArray(data?.matches) ? data.matches : []);
     // trackDraw1HSignal: disabled
     // trackUnggul1HSignal: disabled
     // trackEarlyLateReplySignal: disabled

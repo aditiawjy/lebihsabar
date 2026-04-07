@@ -5,6 +5,8 @@ let popupDataCache = {
     oddInsights: null,
     goalMinutes: null,
     allGoalMinutes: null,
+    all2HGoalMinutes: null,
+    htScores: null,
     count: null
 };
 const DEFAULT_CUSTOM_WATCH_THRESHOLD = 1.8;
@@ -304,7 +306,7 @@ function renderOddInsights(oddInsights = {}) {
     `).join('')}</div>`;
 }
 
-function renderTable(matches, oddInsights = {}, allGoalMinutes = {}) {
+function renderTable(matches, oddInsights = {}, allGoalMinutes = {}, htScores = {}, all2HGoalMinutes = {}) {
     if (!isExtensionContextValid()) {
         return;
     }
@@ -356,9 +358,11 @@ function renderTable(matches, oddInsights = {}, allGoalMinutes = {}) {
     container.innerHTML = prioritizedGroups.map(({ league, matches: leagueMatches }) => {
         const rowsHtml = leagueMatches.map((m) => {
             const timeClass = m.status?.includes('H.Time') ? 'time-ht' : 'time-live';
-            const insight = oddInsights[createMatchKey(m)] || null;
             const matchKey = createMatchKey(m);
+            const insight = oddInsights[matchKey] || null;
             const allGoalMins = Array.isArray(allGoalMinutes[matchKey]) ? allGoalMinutes[matchKey] : null;
+            const all2HGoalMins = Array.isArray(all2HGoalMinutes[matchKey]) ? all2HGoalMinutes[matchKey] : null;
+            const htScore = insight?.htScore || htScores[matchKey] || null;
             const watchContext = getMatchWatchContextInPopup(m);
             const watchBadge = watchContext.isWatchedTeam
                 ? ' <span style="background:#fff3cd;color:#856404;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;">WATCH TEAM</span>'
@@ -413,7 +417,7 @@ function renderTable(matches, oddInsights = {}, allGoalMinutes = {}) {
                 <td class="team-name">${m.awayTeam || '-'}${watchBadge}</td>
                 <td><span class="${timeClass}">${m.status || '-'}</span></td>
                 <td class="score">${m.score || '-'}${goalBadge}</td>
-                <td class="score">${insight?.htScore || '-'}</td>
+                <td class="score">${htScore || '-'}${all2HGoalMins?.length ? `<div style="margin-top:3px;font-size:9px;color:#155724;background:#d4edda;border-radius:10px;padding:1px 6px;display:inline-block;">⚽ 2H: ${all2HGoalMins.map((min) => `${min}'`).join(', ')}</div>` : ''}</td>
                 <td class="odds-focus">${insight ? `${formatOdd(insight.currentOdd)} <span class="delta-text">(${formatDelta(insight.deltaFromPrevious)})</span><div class="pattern-meta">${formatComparisonOdds(insight.comparisonOdds)}</div>` : '-'}</td>
                 <td>${insight ? `<span class="${getPatternBadgeClass(insight)}"><span class="pattern-icon">${getPatternIcon(insight)}</span>${insight.pattern}</span><div class="pattern-meta">${getWatchRuleText(insight)} • Above ${formatDuration(insight.aboveThresholdDurationMs)}</div>` : '<span class="pattern-badge pattern-muted"><span class="pattern-icon">--</span>No 2H data</span>'}</td>
                 <td class="odds-text">${oddsHtml}</td>
@@ -474,6 +478,8 @@ function applyPopupState(state) {
     const oddInsights = data.oddInsights || {};
     const goalMinutes = data.goalMinutes || {};
     const allGoalMinutes = data.allGoalMinutes || {};
+    const all2HGoalMinutes = data.all2HGoalMinutes || {};
+    const htScores = data.htScores || {};
     const hasMatchData = Array.isArray(groupedMatches) && groupedMatches.length > 0;
     const hasOddData = oddInsights && Object.keys(oddInsights).length > 0;
 
@@ -490,6 +496,14 @@ function applyPopupState(state) {
         popupDataCache.allGoalMinutes = allGoalMinutes;
     }
 
+    if (Object.keys(all2HGoalMinutes).length > 0) {
+        popupDataCache.all2HGoalMinutes = all2HGoalMinutes;
+    }
+
+    if (Object.keys(htScores).length > 0) {
+        popupDataCache.htScores = htScores;
+    }
+
     const matchesToRender = hasMatchData
         ? groupedMatches
         : (popupDataCache.groupedMatches || []);
@@ -499,6 +513,12 @@ function applyPopupState(state) {
     const allGoalMinutesToRender = Object.keys(allGoalMinutes).length > 0
         ? allGoalMinutes
         : (popupDataCache.allGoalMinutes || {});
+    const all2HGoalMinutesToRender = Object.keys(all2HGoalMinutes).length > 0
+        ? all2HGoalMinutes
+        : (popupDataCache.all2HGoalMinutes || {});
+    const htScoresToRender = Object.keys(htScores).length > 0
+        ? htScores
+        : (popupDataCache.htScores || {});
     const countFromState = Number.isFinite(data.count) ? data.count : 0;
     if (hasMatchData) {
         popupDataCache.count = countFromState;
@@ -512,7 +532,7 @@ function applyPopupState(state) {
     renderOddInsights(insightsToRender);
 
     if (matchesToRender?.length) {
-        renderTable(matchesToRender, insightsToRender, allGoalMinutesToRender);
+        renderTable(matchesToRender, insightsToRender, allGoalMinutesToRender, htScoresToRender, all2HGoalMinutesToRender);
     }
 
     document.getElementById('matchCount').textContent = `${matchCountToShow} matches`;

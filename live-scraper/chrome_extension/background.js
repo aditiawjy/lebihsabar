@@ -44,10 +44,12 @@ let sentDraw1HSignals = new Set();   // matchKey already notified for draw 1H si
 let sentUnggul1HSignals = new Set(); // matchKey already notified for unggul 1-0 late 1H signal
 let sentEarlyLateSignals = new Set(); // matchKey already notified for early goal late reply signal
 let sentNG1Signals = new Set();       // matchKey already notified for NG1 (HT 1-0 + lm=3)
+let sentHT22Signals = new Set();      // matchKey already notified for HT 2-2 at 2H 2'
 let last1HGoalMinByMatchKey = new Map(); // matchKey => last 1H goal minute
 let first1HGoalMinByMatchKey = new Map(); // matchKey => first 1H goal minute
 let all1HGoalMinsByMatchKey = new Map(); // matchKey => array of all 1H goal minutes
 let has2HGoalByMatchKey = new Map(); // matchKey => true if any 2H goal seen
+let all2HGoalMinsByMatchKey = new Map(); // matchKey => array of all 2H goal minutes
 
 const MILESTONES = [
     { id: '1h3', half: '1H', minThreshold: 3 },
@@ -99,7 +101,8 @@ async function trackShgAlert(matches) {
         const scoreStr = `${homeScore}-${awayScore}`;
         const status = String(match?.status || '').trim();
 
-        if (isSecondHalfStart(status) && !shScoreByMatchKey.has(key)) {
+        const isHalftime = /^H\.?Time$/i.test(status);
+        if ((isSecondHalfStart(status) || isHalftime) && !shScoreByMatchKey.has(key)) {
             shScoreByMatchKey.set(key, scoreStr);
         }
 
@@ -192,8 +195,10 @@ async function trackGoalEvents(matches) {
             sentUnggul1HSignals.delete(key);
             sentEarlyLateSignals.delete(key);
             sentNG1Signals.delete(key);
+            sentHT22Signals.delete(key);
             first1HGoalMinByMatchKey.delete(key);
             all1HGoalMinsByMatchKey.delete(key);
+            all2HGoalMinsByMatchKey.delete(key);
             // Clear milestones for this key so new round sends them fresh
             for (const ms of MILESTONES) {
                 sentMilestones.delete(key + '|' + ms.id);
@@ -205,6 +210,16 @@ async function trackGoalEvents(matches) {
                 away_team: match?.awayTeam || '',
             });
             continue;
+        }
+
+        // Record HT score when H.Time or 2H starts (whichever comes first)
+        const isHalftime = /^H\.?Time$/i.test(minute);
+        if ((isHalftime || isSecondHalfStart(minute)) && !shScoreByMatchKey.has(key)) {
+            shScoreByMatchKey.set(key, scoreStr);
+        }
+        // Reset HT score on new kickoff
+        if (isKickoffMinute(minute) && shScoreByMatchKey.has(key)) {
+            shScoreByMatchKey.delete(key);
         }
 
         // Only track goals for registered matches
@@ -229,6 +244,9 @@ async function trackGoalEvents(matches) {
             }
             if (gHalf === '2H') {
                 has2HGoalByMatchKey.set(key, true);
+                const all2HMins = all2HGoalMinsByMatchKey.get(key) || [];
+                all2HMins.push(gMin);
+                all2HGoalMinsByMatchKey.set(key, all2HMins);
             }
 
             newGoals.push({
@@ -295,6 +313,11 @@ async function trackGoalEvents(matches) {
     }
 
     if (!newGoals.length) return;
+
+    // Persist HT scores so popup can display them even when odds are LOCKED
+    await chrome.storage.local.set({
+        liveHtScores: Object.fromEntries(shScoreByMatchKey)
+    });
 
     // append to chrome.storage goalLog
     const stored = await chrome.storage.local.get(['goalLog']);
@@ -892,7 +915,8 @@ async function updateOddTracking(matches) {
     }
 
     await chrome.storage.local.set({
-        liveOddInsights: Object.fromEntries(Array.from(oddInsightByMatchKey.entries()))
+        liveOddInsights: Object.fromEntries(Array.from(oddInsightByMatchKey.entries())),
+        liveHtScores: Object.fromEntries(Array.from(shScoreByMatchKey.entries()))
     });
 }
 
@@ -1471,10 +1495,50 @@ async function trackNG1Signal(matches) {
     }
 }
 
+async function trackHT22Signal(matches) {
+    if (!Array.isArray(matches) || !matches.length) return;
+
+    for (const match of matches) {
+        const key = createMatchKey(match);
+        if (!registeredMatchKeys.has(key)) continue;
+        if (sentHT22Signals.has(key)) continue;
+
+        const status = String(match?.status || '').trim();
+        const shMin = getShMinute(status);
+        // Trigger di 2H 2' (jaga juga 2H 3' kalau scraper miss)
+        if (shMin < 2 || shMin > 3) continue;
+
+        const homeScore = parseInt(match?.homeScore ?? '0', 10);
+        const awayScore = parseInt(match?.awayScore ?? '0', 10);
+
+        // HT harus 2-2
+        const htScore = shScoreByMatchKey.get(key);
+        if (htScore !== '2-2') continue;
+
+        sentHT22Signals.add(key);
+
+        const home = escapeHtml(match?.homeTeam || '?');
+        const away = escapeHtml(match?.awayTeam || '?');
+        const league = escapeHtml(match?.league || '?');
+        const currentScore = `${homeScore}-${awayScore}`;
+
+        const msg =
+            `🚨 <b>SIGNAL HT 2-2 — BABAK 2 BERJALAN!</b>\n` +
+            `⚽ <b>${home} vs ${away}</b>\n` +
+            `🏆 League: ${league}\n` +
+            `📊 Skor HT: <b>2-2</b> | Skor sekarang: <b>${currentScore}</b>\n` +
+            `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
+            `🔥 <i>Match dengan HT 2-2 — pantau peluang gol babak kedua!</i>`;
+
+        await sendTelegramText(msg);
+    }
+}
+
 async function handleFreshData(data) {
     await setSavedMatchData(data);
     await trackGoalEvents(Array.isArray(data?.matches) ? data.matches : []);
     await trackNG1Signal(Array.isArray(data?.matches) ? data.matches : []);
+    await trackHT22Signal(Array.isArray(data?.matches) ? data.matches : []);
     // trackDraw1HSignal: disabled
     // trackUnggul1HSignal: disabled
     // trackEarlyLateReplySignal: disabled
@@ -1615,6 +1679,7 @@ async function getPopupState() {
         'lastCount',
         'lastUpdate',
         'liveOddInsights',
+        'liveHtScores',
         'liveStatus',
         'liveRuntimeState',
         CUSTOM_WATCH_CONFIG_KEY
@@ -1628,6 +1693,7 @@ async function getPopupState() {
             count: data.lastCount || 0,
             time: data.lastUpdate || '-',
             oddInsights: data.liveOddInsights || {},
+            htScores: data.liveHtScores || {},
             liveStatus: data.liveStatus || null,
             customWatchConfig: data[CUSTOM_WATCH_CONFIG_KEY] || getDefaultCustomWatchConfig(),
             runtimeState: data.liveRuntimeState || {
@@ -1635,7 +1701,8 @@ async function getPopupState() {
                 currentTabId: null
             },
             goalMinutes: Object.fromEntries(first1HGoalMinByMatchKey),
-            allGoalMinutes: Object.fromEntries(all1HGoalMinsByMatchKey)
+            allGoalMinutes: Object.fromEntries(all1HGoalMinsByMatchKey),
+            all2HGoalMinutes: Object.fromEntries(all2HGoalMinsByMatchKey)
         }
     };
 }

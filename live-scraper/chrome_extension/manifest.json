@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "BPVM Scraper",
+  "version": "1.0",
+  "description": "Scraper for g943gp.bpvmr7u6.com",
+  "permissions": [
+    "activeTab",
+    "alarms",
+    "scripting",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://g943gp.bpvmr7u6.com/*",
+    "https://api.telegram.org/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://g943gp.bpvmr7u6.com/*"
+      ],
+      "js": [
+        "lib/utils.js",
+        "content.js"
+      ]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "BPVM Scraper"
+  }
+}

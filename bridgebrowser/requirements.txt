@@ -1,0 +1,13 @@
+# Requirements untuk API Server
+Flask==2.3.3
+Flask-CORS==4.0.0
+requests==2.31.0
+Werkzeug==2.3.7
+
+# Requirements untuk Selenium Scraping
+selenium==4.15.2
+webdriver-manager==4.0.1
+
+# Optional untuk development
+gunicorn==21.2.0
+waitress==2.1.2

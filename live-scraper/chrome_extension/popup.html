@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 900px;
+            padding: 15px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+        }
+        h3 {
+            margin: 0 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #007bff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .status-bar {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .live-indicator {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .live-on { background: #d4edda; color: #155724; }
+        .live-off { background: #f8d7da; color: #721c24; }
+        .view-toggle {
+            display: inline-flex;
+            gap: 6px;
+            margin-left: auto;
+            flex-wrap: wrap;
+        }
+        .view-toggle__btn {
+            background: #e9ecef;
+            color: #495057;
+            border: 1px solid #ced4da;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .view-toggle__btn.active {
+            background: #174ea6;
+            color: white;
+            border-color: #174ea6;
+        }
+        table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+        th {
+            background: #007bff;
+            color: white;
+            padding: 10px 8px;
+            text-align: left;
+        }
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .team-name { 
+            font-weight: 500; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+        }
+        .score { font-weight: bold; color: #dc3545; font-size: 13px; }
+        .time-live { 
+            background: #d4edda; 
+            color: #155724; 
+            padding: 2px 8px; 
+            border-radius: 12px;
+            font-size: 10px;
+        }
+        .time-ht { 
+            background: #fff3cd; 
+            color: #856404; 
+            padding: 2px 8px; 
+            border-radius: 12px;
+            font-size: 10px;
+        }
+        .odds-text { font-size: 10px; line-height: 1.4; }
+        .odds-focus { font-size: 11px; font-weight: 700; color: #174ea6; white-space: nowrap; }
+        .delta-text { color: #6c757d; font-size: 10px; font-weight: 600; }
+        .odds-normal { color: #212529; }
+        .odds-favorite { color: #007bff; font-weight: 500; }
+        .odds-minus { color: #dc3545; font-weight: 600; }
+        .pattern-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .pattern-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 22px;
+            margin-right: 6px;
+            padding: 1px 4px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.45);
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+        .pattern-danger { background: #f8d7da; color: #721c24; }
+        .pattern-warning { background: #fff3cd; color: #856404; }
+        .pattern-neutral { background: #d1ecf1; color: #0c5460; }
+        .pattern-muted { background: #e2e3e5; color: #495057; }
+        .pattern-meta {
+            margin-top: 4px;
+            font-size: 10px;
+            color: #6c757d;
+            line-height: 1.3;
+        }
+        .error-box {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #007bff;
+        }
+        .league-group {
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        .league-title {
+            background: #eef4ff;
+            color: #174ea6;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 8px 10px;
+            border-bottom: 1px solid #d6e4ff;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        .insight-panel {
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        .insight-panel__header {
+            background: linear-gradient(90deg, #174ea6, #007bff);
+            color: white;
+            padding: 10px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .insight-panel__body {
+            padding: 10px 12px;
+        }
+        .insight-empty {
+            color: #6c757d;
+            font-size: 11px;
+        }
+        .insight-list {
+            display: grid;
+            gap: 8px;
+        }
+        .insight-card {
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 8px 10px;
+            background: #f8fbff;
+        }
+        .insight-card__top {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .insight-card__teams {
+            font-size: 11px;
+            font-weight: 700;
+            color: #1f2933;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .insight-card__meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 10px;
+            color: #6c757d;
+        }
+        .insight-card__odd {
+            font-weight: 700;
+            color: #174ea6;
+        }
+
+        .custom-watch {
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            padding: 10px 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .custom-watch__title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #174ea6;
+            margin-bottom: 8px;
+        }
+
+        .custom-watch__row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .custom-watch input {
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 6px 8px;
+            font-size: 12px;
+        }
+
+        .custom-watch__chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .team-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #eef4ff;
+            font-size: 11px;
+            color: #174ea6;
+            border: 1px solid #d6e4ff;
+        }
+
+        .team-chip button {
+            background: transparent;
+            color: #174ea6;
+            border: none;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h3>
+        BPVM Live Scraper
+        <span id="matchCount" style="font-size: 14px; background: #007bff; color: white; padding: 4px 12px; border-radius: 12px;">0 matches</span>
+    </h3>
+    
+    <div class="controls">
+        <button id="refreshBtn" class="btn-primary">Refresh Data</button>
+        <button id="startLiveBtn" class="btn-success">Start Live</button>
+        <button id="stopLiveBtn" class="btn-danger" disabled>Stop Live</button>
+        <button id="sendBtn" class="btn-secondary">Send to Server</button>
+        <span id="liveStatus" class="live-indicator live-off">AUTO LIVE: OFF</span>
+        <div class="view-toggle">
+            <button id="viewAllBtn" class="view-toggle__btn active">All</button>
+            <button id="view2HBtn" class="view-toggle__btn">2H only</button>
+            <button id="viewOddBtn" class="view-toggle__btn">Odd Aneh only</button>
+        </div>
+    </div>
+    
+    <div class="custom-watch">
+        <div class="custom-watch__title">Team target (mode ALL): notifikasi team ini gunakan rule odd custom</div>
+        <div class="custom-watch__row">
+            <input id="teamInput" type="text" placeholder="Masukkan nama team" />
+            <button id="addTeamBtn" class="btn-primary">Add team</button>
+            <label for="customMarketInput" style="font-size:11px;color:#495057;">Market:</label>
+            <input id="customMarketInput" type="text" placeholder="0.5" style="width:64px;" />
+            <label for="customOddInput" style="font-size:11px;color:#495057;">Odd threshold:</label>
+            <input id="customOddInput" type="number" min="1" step="0.01" style="width:90px;" />
+            <button id="saveWatchBtn" class="btn-success">Save custom rule</button>
+        </div>
+        <div id="teamChips" class="custom-watch__chips"></div>
+        <div id="customWatchInfo" style="font-size:11px;color:#6c757d;margin-top:6px;"></div>
+    </div>
+
+    <div class="status-bar">
+        <span id="pageStatus">Checking page...</span>
+        <span id="lastUpdate">Last update: -</span>
+        <span id="lastSent">Last sent: -</span>
+        <span id="lastRetry">Last retry: 0</span>
+        <span id="serverStatus">Server: -</span>
+    </div>
+    <div class="status-bar" style="margin-top:-8px;font-size:11px;flex-wrap:wrap;gap:8px;">
+        <span id="lastCycle">Cycle: -</span>
+        <span id="lastRefresh">Refresh: -</span>
+        <span id="lastExtractStatus">Extract: -</span>
+    </div>
+    
+    <div id="errorBox"></div>
+
+    <div class="insight-panel">
+        <div class="insight-panel__header">
+            <span>Top Odd Aneh</span>
+            <span id="oddInsightCount">0 aktif</span>
+        </div>
+        <div id="oddInsightsPanel" class="insight-panel__body">
+            <div class="insight-empty">Belum ada breakout, spike, atau pola odd 2H yang cukup kuat.</div>
+        </div>
+    </div>
+    
+    <div style="max-height: 400px; overflow-y: auto;">
+        <div id="matchesTable">
+            <div style="text-align:center;padding:40px;background:white;">Click "Refresh Data" or "Start Live" to load matches</div>
+        </div>
+    </div>
+    
+    <script src="lib/utils.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>

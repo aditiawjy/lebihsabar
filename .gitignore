@@ -1,0 +1,41 @@
+# Debug files
+sabar_debug.log
+*.log
+
+# Windows system files
+nul
+NUL
+
+# IDE files
+.claude/settings.local.json
+
+# Local MCP config
+.mcp.json
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Analysis scripts
+analyze_*.py
+verify_*.py
+find_patterns.py
+
+# Local git worktrees
+.worktrees/
+
+# Local CSV backup snapshots
+csv_backups/
+
+
+# OMC / Claude tools
+.omc/
+AGENTS.md
+
+# Node / Playwright testing
+node_modules/
+package-lock.json
+package.json
+playwright.config.js
+test-results/
+tests/

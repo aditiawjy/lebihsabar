@@ -44,6 +44,17 @@ saveSnapshot($currentSnap);
 
 $patterns = $data['patterns'];
 $nextPatterns = $data['next_patterns'];
+usort($nextPatterns, function($a, $b) {
+    $ta = count($a['data']); $tb = count($b['data']);
+    if ($tb != $ta) return $tb <=> $ta;
+    $tgt_a = $a['next'];
+    $tgt_b = $b['next'];
+    $ha = $tgt_a === 'HOME' ? count(array_filter($a['data'], fn($m) => $m['next_goal']==='H')) : count(array_filter($a['data'], fn($m) => $m['next_goal']==='A'));
+    $hb = $tgt_b === 'HOME' ? count(array_filter($b['data'], fn($m) => $m['next_goal']==='H')) : count(array_filter($b['data'], fn($m) => $m['next_goal']==='A'));
+    $pa = $ta > 0 ? $ha / $ta : 0;
+    $pb = $tb > 0 ? $hb / $tb : 0;
+    return $pb <=> $pa;
+});
 $totalMatches = $data['total_matches'];
 $patternCount = count($patterns);
 $csvExists = $data['csv_exists'];
@@ -51,10 +62,10 @@ $csvTime = $data['csv_time'];
 
 usort($patterns, function($a, $b) {
     $ta = count($a['data']); $tb = count($b['data']);
+    if ($tb != $ta) return $tb <=> $ta;
     $pa = $ta > 0 ? count(array_filter($a['data'], fn($m) => $m['h2c'] > 0)) / $ta : 0;
     $pb = $tb > 0 ? count(array_filter($b['data'], fn($m) => $m['h2c'] > 0)) / $tb : 0;
-    if ($pb != $pa) return $pb <=> $pa;
-    return $tb - $ta;
+    return $pb <=> $pa;
 });
 
 if (!$csvExists): ?>

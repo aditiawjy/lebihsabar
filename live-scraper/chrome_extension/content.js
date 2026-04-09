@@ -1,5 +1,8 @@
 function extractLiveData() {
 
+    function parseLocaleFloat(value) {
+        return parseFloat(String(value || '').replace(',', '.'));
+    }
 
     const matches = [];
     const groupedMatches = [];

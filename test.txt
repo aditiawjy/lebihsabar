@@ -1,0 +1,16 @@
+Istilah	Arti sederhana	Ciri utama	Contoh hero
+Front-to-back	War dari depan ke belakang	Tank depan, damage di belakang, fokus target terdekat	Hylos, Tigreal, Atlas, Alpha, Terizla, Brody, Xavier, Yve
+Burst	Damage besar dalam waktu cepat	Sekali combo target bisa langsung mati	Eudora, Kadita, Vale, Julian, Aamon, Luo Yi
+Backline	Hero baris belakang	Biasanya tipis tapi damage/heal besar	Layla, Miya, Brody, Claude, Xavier, Yve, Estes
+Vision	Informasi posisi musuh	Buka bush, kontrol map, tahu arah musuh	Popol and Kupa, Chip, Selena, Diggie, tank pembuka bush seperti Akai
+Zoning	Mengusir atau menahan musuh dari area tertentu	Bikin musuh takut masuk	Yve, Valir, Xavier, Cecilion, Vexana, Hylos, Terizla
+War panjang	Teamfight lama	Menang lewat sustain, DPS stabil, posisi rapi	Estes, Alpha, Yu Zhong, Terizla, Ruby, Hylos, Yve, Xavier
+Flank	Masuk dari samping atau belakang	Incar mage/mm lawan, bukan tabrak depan	Hayabusa, Ling, Fanny, Natalia, Aamon, Kadita
+Hero deket-deket	Hero yang kuat kalau tim rapat	Saling cover, heal, follow-up CC	Estes, Angela, Rafaela, Hylos, Tigreal, Atlas, Alpha, Yu Zhong, Xavier, Yve
+Peel	Melindungi backline sendiri	Usir hero lawan yang masuk ke mm/mage	Akai, Valir, Ruby, Minotaur, Lolita, Diggie
+Engage	Pembuka war	Masuk duluan untuk mulai teamfight	Atlas, Tigreal, Khufra, Akai, Gatotkaca, Minotaur
+Pickoff	Culik satu target sebelum war besar	Cari mage/mm lawan yang salah posisi	Franco, Kaja, Kadita, Hayabusa, Natalia, Aamon
+Sustain	Tahan lama di fight	Bisa heal, shield, regen, atau kuat lama	Estes, Rafaela, Alpha, Ruby, Yu Zhong, Terizla, Hylos
+Poke	Cicil damage dari jauh	Lemahnya lawan dihabisi pelan-pelan sebelum war	Xavier, Yve, Cecilion, Valir, Pharsa
+Dive	Masuk paksa ke backline	Langsung tekan hero belakang	Yu Zhong, Kadita, Julian, Hayabusa, Ling, Fanny
+Counter-engage	Membalas saat musuh duluan masuk	Bukan buka duluan, tapi hajar saat lawan commit	Akai, Valir, Ruby, Minotaur, Diggie

@@ -564,6 +564,34 @@ tr:hover td {
     font-size: 0.75rem;
 }
 
+th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+th.sortable:hover {
+    color: var(--accent);
+}
+
+.sort-arrow {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 0.65rem;
+    opacity: 0.3;
+}
+
+.sort-arrow.sort-asc::before {
+    content: '\25B2';
+    opacity: 1;
+    color: var(--accent);
+}
+
+.sort-arrow.sort-desc::before {
+    content: '\25BC';
+    opacity: 1;
+    color: var(--accent);
+}
+
 @media (max-width: 768px) {
     body { padding: 12px; }
     h1 { font-size: 1.4rem; }

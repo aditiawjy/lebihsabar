@@ -11,6 +11,11 @@
     var refreshCountdown = 30;
     var countdownEl = document.getElementById('countdown');
 
+    var summarySortState = { col: null, dir: 'desc' };
+    var nextSortState = { col: null, dir: 'desc' };
+    var currentSummaryData = [];
+    var currentNextData = [];
+
     var SIGNAL_DEFS = [
         { id: 'P10', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return htH===0&&htA===0; }, labelFn: function() { return '0-0 di 1H'; }, phase: 'ht' },
         { id: 'P12', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return (htH+htA)>=4; }, labelFn: function(lg,htH,htA) { return 'Total gol >= 4'; }, phase: 'ht' },
@@ -158,10 +163,26 @@
         }
     }
 
+    function applySummarySort(patterns) {
+        if (!summarySortState.col) return patterns;
+        return patterns.slice().sort(function(a, b) {
+            return sortSummary(patterns, a, b, summarySortState.col, summarySortState.dir);
+        });
+    }
+
+    function applyNextSort(nextPatterns) {
+        if (!nextSortState.col) return nextPatterns;
+        return nextPatterns.slice().sort(function(a, b) {
+            return sortNext(nextPatterns, a, b, nextSortState.col, nextSortState.dir);
+        });
+    }
+
     function renderSummaryTable(patterns) {
+        currentSummaryData = patterns;
+        var sorted = applySummarySort(patterns);
         var tbody = document.getElementById('summary-body');
-        tbody.innerHTML = patterns.map(function(p) {
-            return '<tr>'
+        tbody.innerHTML = sorted.map(function(p) {
+            return '<tr data-total="' + p.total + '" data-hits="' + p.has2h + '" data-pct="' + p.pct + '">'
                 + '<td><strong>' + p.id + '</strong></td>'
                 + '<td>' + escHtml(p.label) + '</td>'
                 + '<td>' + p.has2h + '/' + p.total + '</td>'
@@ -175,12 +196,14 @@
     }
 
     function renderNextTable(nextPatterns) {
+        currentNextData = nextPatterns;
+        var sorted = applyNextSort(nextPatterns);
         var tbody = document.getElementById('next-body');
-        tbody.innerHTML = nextPatterns.map(function(ng) {
+        tbody.innerHTML = sorted.map(function(ng) {
             var nextBadge = ng.next === 'HOME'
                 ? '<span class="scorer-h next-badge-home">HOME</span>'
                 : '<span class="scorer-a next-badge-away">AWAY</span>';
-            return '<tr>'
+            return '<tr data-total="' + ng.total + '" data-hits="' + ng.hits + '" data-nh="' + ng.nh + '" data-na="' + ng.na + '" data-pct="' + ng.pct + '">'
                 + '<td><strong>' + ng.id + '</strong></td>'
                 + '<td>' + escHtml(ng.label) + '</td>'
                 + '<td>' + nextBadge + '</td>'
@@ -369,6 +392,192 @@
     window.closePanel = closePanel;
     window.startApiServer = startApiServer;
     window.stopApiServer = stopApiServer;
+
+    function sortSummary(data, a, b, col, dir) {
+        var mult = dir === 'asc' ? 1 : -1;
+        if (col === 'record') {
+            var ta = a.total, tb = b.total;
+            if (ta !== tb) return mult * (ta - tb);
+            var ha = a.has2h, hb = b.has2h;
+            return mult * (ha - hb);
+        }
+        if (col === 'pct') {
+            var pa = a.total > 0 ? a.has2h / a.total : 0;
+            var pb = b.total > 0 ? b.has2h / b.total : 0;
+            if (pa !== pb) return mult * (pa - pb);
+            return mult * (a.total - b.total);
+        }
+        return 0;
+    }
+
+    function sortNext(data, a, b, col, dir) {
+        var mult = dir === 'asc' ? 1 : -1;
+        if (col === 'record') {
+            var ta = a.total, tb = b.total;
+            if (ta !== tb) return mult * (ta - tb);
+            var ha = a.hits, hb = b.hits;
+            return mult * (ha - hb);
+        }
+        if (col === 'pct') {
+            var pa = a.total > 0 ? a.hits / a.total : 0;
+            var pb = b.total > 0 ? b.hits / b.total : 0;
+            if (pa !== pb) return mult * (pa - pb);
+            return mult * (a.total - b.total);
+        }
+        return 0;
+    }
+
+    function sortSummaryRows() {
+        var tbody = document.getElementById('summary-body');
+        var rows = Array.from(tbody.querySelectorAll('tr'));
+        if (!rows.length) return;
+        var st = summarySortState;
+        if (!st.col) return;
+        rows.sort(function(a, b) {
+            var dir = st.dir === 'asc' ? 1 : -1;
+            if (st.col === 'record') {
+                var ta = parseInt(a.getAttribute('data-total')) || 0;
+                var tb = parseInt(b.getAttribute('data-total')) || 0;
+                if (ta !== tb) return dir * (ta - tb);
+                var ha = parseInt(a.getAttribute('data-hits')) || 0;
+                var hb = parseInt(b.getAttribute('data-hits')) || 0;
+                return dir * (ha - hb);
+            }
+            if (st.col === 'pct') {
+                var pa = parseInt(a.getAttribute('data-pct')) || 0;
+                var pb = parseInt(b.getAttribute('data-pct')) || 0;
+                if (pa !== pb) return dir * (pa - pb);
+                var ta2 = parseInt(a.getAttribute('data-total')) || 0;
+                var tb2 = parseInt(b.getAttribute('data-total')) || 0;
+                return dir * (ta2 - tb2);
+            }
+            return 0;
+        });
+        rows.forEach(function(row) { tbody.appendChild(row); });
+    }
+
+    function sortNextRows() {
+        var tbody = document.getElementById('next-body');
+        var rows = Array.from(tbody.querySelectorAll('tr'));
+        if (!rows.length) return;
+        var st = nextSortState;
+        if (!st.col) return;
+        rows.sort(function(a, b) {
+            var dir = st.dir === 'asc' ? 1 : -1;
+            if (st.col === 'record') {
+                var ta = parseInt(a.getAttribute('data-total')) || 0;
+                var tb = parseInt(b.getAttribute('data-total')) || 0;
+                if (ta !== tb) return dir * (ta - tb);
+                var ha = parseInt(a.getAttribute('data-hits')) || 0;
+                var hb = parseInt(b.getAttribute('data-hits')) || 0;
+                return dir * (ha - hb);
+            }
+            if (st.col === 'pct') {
+                var pa = parseInt(a.getAttribute('data-pct')) || 0;
+                var pb = parseInt(b.getAttribute('data-pct')) || 0;
+                if (pa !== pb) return dir * (pa - pb);
+                var ta2 = parseInt(a.getAttribute('data-total')) || 0;
+                var tb2 = parseInt(b.getAttribute('data-total')) || 0;
+                return dir * (ta2 - tb2);
+            }
+            return 0;
+        });
+        rows.forEach(function(row) { tbody.appendChild(row); });
+    }
+
+    function updateSortArrows() {
+        document.querySelectorAll('.sortable[data-table="summary"]').forEach(function(th) {
+            var arrow = th.querySelector('.sort-arrow');
+            if (th.getAttribute('data-sort') === summarySortState.col) {
+                arrow.className = 'sort-arrow ' + (summarySortState.dir === 'asc' ? 'sort-asc' : 'sort-desc');
+            } else {
+                arrow.className = 'sort-arrow';
+            }
+        });
+        document.querySelectorAll('.sortable[data-table="next"]').forEach(function(th) {
+            var arrow = th.querySelector('.sort-arrow');
+            if (th.getAttribute('data-sort') === nextSortState.col) {
+                arrow.className = 'sort-arrow ' + (nextSortState.dir === 'asc' ? 'sort-asc' : 'sort-desc');
+            } else {
+                arrow.className = 'sort-arrow';
+            }
+        });
+    }
+
+    function handleSortClick(e) {
+        var th = e.currentTarget;
+        var table = th.getAttribute('data-table');
+        var col = th.getAttribute('data-sort');
+        if (table === 'summary') {
+            if (summarySortState.col === col) {
+                summarySortState.dir = summarySortState.dir === 'asc' ? 'desc' : 'asc';
+            } else {
+                summarySortState.col = col;
+                summarySortState.dir = 'desc';
+            }
+            if (currentSummaryData.length) {
+                renderSummaryTable(currentSummaryData);
+            } else {
+                sortSummaryRows();
+            }
+        } else {
+            if (nextSortState.col === col) {
+                nextSortState.dir = nextSortState.dir === 'asc' ? 'desc' : 'asc';
+            } else {
+                nextSortState.col = col;
+                nextSortState.dir = 'desc';
+            }
+            if (currentNextData.length) {
+                renderNextTable(currentNextData);
+            } else {
+                sortNextRows();
+            }
+        }
+        updateSortArrows();
+    }
+
+    document.querySelectorAll('.sortable').forEach(function(th) {
+        console.log('Binding sortable header:', th.getAttribute('data-sort'));
+        th.addEventListener('click', handleSortClick);
+    });
+
+    function initSortFromDom() {
+        var summaryRows = document.querySelectorAll('#summary-body tr');
+        if (summaryRows.length && !currentSummaryData.length) {
+            currentSummaryData = Array.from(summaryRows).map(function(tr) {
+                return {
+                    id: tr.cells[0].textContent.trim(),
+                    label: tr.cells[1].textContent.trim(),
+                    total: parseInt(tr.getAttribute('data-total')) || 0,
+                    has2h: parseInt(tr.getAttribute('data-hits')) || 0,
+                    pct: parseInt(tr.getAttribute('data-pct')) || 0,
+                    cls: tr.cells[3].className.replace('pct ', '').trim(),
+                    badge: tr.cells[4].querySelector('.badge').className.replace('badge ', '').trim(),
+                    status: tr.cells[4].querySelector('.badge').textContent.trim(),
+                    delta: null
+                };
+            });
+        }
+        var nextRows = document.querySelectorAll('#next-body tr');
+        if (nextRows.length && !currentNextData.length) {
+            currentNextData = Array.from(nextRows).map(function(tr) {
+                return {
+                    id: tr.cells[0].textContent.trim(),
+                    label: tr.cells[1].textContent.trim(),
+                    total: parseInt(tr.getAttribute('data-total')) || 0,
+                    hits: parseInt(tr.getAttribute('data-hits')) || 0,
+                    nh: parseInt(tr.getAttribute('data-nh')) || 0,
+                    na: parseInt(tr.getAttribute('data-na')) || 0,
+                    pct: parseInt(tr.getAttribute('data-pct')) || 0,
+                    cls: tr.cells[4].className.replace('pct ', '').trim(),
+                    badge: tr.cells[5].querySelector('.badge').className.replace('badge ', '').trim(),
+                    status: tr.cells[5].querySelector('.badge').textContent.trim(),
+                    delta: null
+                };
+            });
+        }
+    }
+    initSortFromDom();
 
     buildPatternData();
 

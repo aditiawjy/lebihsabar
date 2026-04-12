@@ -98,7 +98,7 @@ if (!$csvExists): ?>
         <table id="summary-table">
             <thead>
             <tr>
-                <th>#</th><th>Pattern</th><th>Record</th><th>Akurasi</th><th>Status</th>
+                <th>#</th><th>Pattern</th><th class="sortable" data-table="summary" data-sort="record">Record <span class="sort-arrow"></span></th><th class="sortable" data-table="summary" data-sort="pct">Akurasi <span class="sort-arrow"></span></th><th>Status</th>
                 <th id="snap-header" style="color:#8b949e;white-space:nowrap;">+Sample<?= $oldSnapTime ? ' (' . date('H:i', $oldSnapTime) . '→' . date('H:i') . ')' : '' ?></th>
                 <th></th>
             </tr>
@@ -113,7 +113,7 @@ if (!$csvExists): ?>
     $status = $pct >= 95 ? 'EXCELLENT' : ($pct >= 85 ? 'GOOD' : 'WARNING');
     $delta = buildDelta($p['id'], $total, $has2h, $oldSnapData);
 ?>
-            <tr>
+            <tr data-total="<?= $total ?>" data-hits="<?= $has2h ?>" data-pct="<?= $pct ?>">
                 <td><strong><?= esc($p['id']) ?></strong></td>
                 <td><?= esc($p['label']) ?></td>
                 <td><?= $has2h ?>/<?= $total ?></td>
@@ -132,7 +132,7 @@ if (!$csvExists): ?>
         <table id="next-table">
             <thead>
             <tr>
-                <th>#</th><th>Pattern</th><th>Prediksi Next Goal</th><th>Record</th><th>Akurasi</th><th>Status</th>
+                <th>#</th><th>Pattern</th><th>Prediksi Next Goal</th><th class="sortable" data-table="next" data-sort="record">Record <span class="sort-arrow"></span></th><th class="sortable" data-table="next" data-sort="pct">Akurasi <span class="sort-arrow"></span></th><th>Status</th>
                 <th id="next-snap-header" style="color:#8b949e;white-space:nowrap;">+Sample<?= $oldSnapTime ? ' (' . date('H:i', $oldSnapTime) . '→' . date('H:i') . ')' : '' ?></th>
                 <th></th>
             </tr>
@@ -153,11 +153,11 @@ if (!$csvExists): ?>
         : '<span class="scorer-a next-badge-away">AWAY</span>';
     $delta = buildDelta($ng['id'], $total, $hits, $oldSnapData);
 ?>
-            <tr>
+<tr data-total="<?= count($ng['data']) ?>" data-hits="<?= $hits ?>" data-nh="<?= $nh ?>" data-na="<?= $na ?>" data-pct="<?= $pct ?>">
                 <td><strong><?= esc($ng['id']) ?></strong></td>
                 <td><?= esc($ng['label']) ?></td>
                 <td><?= $nextBadge ?></td>
-                <td><?= $hits ?>/<?= $total ?> <span class="record-sub">(H:<?= $nh ?> A:<?= $na ?>)</span></td>
+                <td><?= $hits ?>/<?= count($ng['data']) ?> <span class="record-sub">(H:<?= $nh ?> A:<?= $na ?>)</span></td>
                 <td class="pct <?= $cls ?>"><?= $pct ?>%</td>
                 <td><span class="badge <?= $badge ?>"><?= $status ?></span></td>
                 <td style="font-size:0.8rem;"><?= $delta['html'] ?></td>

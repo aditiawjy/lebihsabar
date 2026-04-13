@@ -6,89 +6,78 @@ $matches = $data['all_matches'] ?? [];
 $tc = getTeamConfig();
 $p28_teams = $tc['p28_teams'];
 
-// Original P28
-$filtered = array_filter($matches, function($m) use($p28_teams) {
-    return (in_array(trim($m['home']), $p28_teams) || in_array(trim($m['away']), $p28_teams)) && 
-           $m['h1_last'] >= 3;
-});
-$total = count($filtered);
-$hits = count(array_filter($filtered, function($m) { return $m['h2c'] > 0; }));
-echo "ORIGINAL: $total match, $hits hit (" . ($total > 0 ? round($hits/$total*100) : 0) . "%)\n";
+$base = array_filter($matches, fn($m) => (in_array(trim($m['home']), $p28_teams) || in_array(trim($m['away']), $p28_teams)) && $m['h1_last']>=3 && ($m['h1_last']-$m['h1_first'])>=3);
+echo "Base P28: " . count($base) . " matches\n\n";
 
-// Opsi A: last >= 4
-$filtered2 = array_filter($matches, function($m) use($p28_teams) {
-    return (in_array(trim($m['home']), $p28_teams) || in_array(trim($m['away']), $p28_teams)) && 
-           $m['h1_last'] >= 4;
-});
-$total2 = count($filtered2);
-$hits2 = count(array_filter($filtered2, function($m) { return $m['h2c'] > 0; }));
-echo "OPSI A (last>=4): $total2 match, $hits2 hit (" . ($total2 > 0 ? round($hits2/$total2*100) : 0) . "%)\n";
+$fail = array_filter($base, fn($m) => $m['h2c'] == 0);
+echo "=== FAIL matches (" . count($fail) . ") ===\n";
+foreach ($fail as $m) {
+    echo "  {$m['home']} vs {$m['away']} | league={$m['league']} | h1s=" . json_encode($m['h1s']) . " | first={$m['h1_first']} last={$m['h1_last']} h1c={$m['h1c']} sc={$m['sc_h']}-{$m['sc_a']} max_gap={$m['max_gap']} min_gap={$m['min_gap']} sw={$m['switches']} mr={$m['max_run']}\n";
+}
 
-// Opsi B: last >= 5
-$filtered3 = array_filter($matches, function($m) use($p28_teams) {
-    return (in_array(trim($m['home']), $p28_teams) || in_array(trim($m['away']), $p28_teams)) && 
-           $m['h1_last'] >= 5;
-});
-$total3 = count($filtered3);
-$hits3 = count(array_filter($filtered3, function($m) { return $m['h2c'] > 0; }));
-echo "OPSI B (last>=5): $total3 match, $hits3 hit (" . ($total3 > 0 ? round($hits3/$total3*100) : 0) . "%)\n";
+echo "\n=== Testing filters ===\n";
+$filters = [
+    'switches>=1' => fn($m) => $m['switches']>=1,
+    'switches>=2' => fn($m) => $m['switches']>=2,
+    'max_run<=2' => fn($m) => $m['max_run']<=2,
+    'max_run<=1' => fn($m) => $m['max_run']<=1,
+    'selisih<=1' => fn($m) => abs($m['sc_h']-$m['sc_a'])<=1,
+    'selisih<=0' => fn($m) => abs($m['sc_h']-$m['sc_a'])==0,
+    'min_gap>=2' => fn($m) => $m['min_gap']>=2,
+    'min_gap>=3' => fn($m) => $m['min_gap']>=3,
+    'span>=4' => fn($m) => ($m['h1_last']-$m['h1_first'])>=4,
+    'span>=5' => fn($m) => ($m['h1_last']-$m['h1_first'])>=5,
+    'first>=2' => fn($m) => $m['h1_first']>=2,
+    'first>=3' => fn($m) => $m['h1_first']>=3,
+    'first!=1' => fn($m) => $m['h1_first']!=1,
+    'last>=4' => fn($m) => $m['h1_last']>=4,
+    'last>=5' => fn($m) => $m['h1_last']>=5,
+    'max_gap>=2' => fn($m) => $m['max_gap']>=2,
+    'max_gap>=3' => fn($m) => $m['max_gap']>=3,
+    'h1c>=2' => fn($m) => $m['h1c']>=2,
+    'h1c>=3' => fn($m) => $m['h1c']>=3,
+    'sc_h==sc_a' => fn($m) => $m['sc_h']==$m['sc_a'],
+    'league=16min' => fn($m) => $m['league']==='16min',
+    'league=15min' => fn($m) => $m['league']==='15min',
+    'league=20min' => fn($m) => $m['league']==='20min',
+];
 
-// Opsi C: min_gap >= 1
-$filtered4 = array_filter($matches, function($m) use($p28_teams) {
-    return (in_array(trim($m['home']), $p28_teams) || in_array(trim($m['away']), $p28_teams)) && 
-           $m['h1_last'] >= 3 &&
-           $m['min_gap'] >= 1;
-});
-$total4 = count($filtered4);
-$hits4 = count(array_filter($filtered4, function($m) { return $m['h2c'] > 0; }));
-echo "OPSI C (min_gap>=1): $total4 match, $hits4 hit (" . ($total4 > 0 ? round($hits4/$total4*100) : 0) . "%)\n";
+foreach ($filters as $label => $fn) {
+    $filtered = array_filter($base, $fn);
+    $t = count($filtered);
+    $h = count(array_filter($filtered, fn($m) => $m['h2c']>0));
+    $pct = $t > 0 ? round($h/$t*100) : 0;
+    echo "  $label: $h/$t = $pct%\n";
+}
 
-// Opsi D: h1c >= 1
-$filtered5 = array_filter($matches, function($m) use($p28_teams) {
-    return (in_array(trim($m['home']), $p28_teams) || in_array(trim($m['away']), $p28_teams)) && 
-           $m['h1_last'] >= 3 &&
-           $m['h1c'] >= 1;
-});
-$total5 = count($filtered5);
-$hits5 = count(array_filter($filtered5, function($m) { return $m['h2c'] > 0; }));
-echo "OPSI D (h1c>=1): $total5 match, $hits5 hit (" . ($total5 > 0 ? round($hits5/$total5*100) : 0) . "%)\n";
+echo "\n=== Combo filters ===\n";
+$combos = [
+    'switches>=1 + selisih<=1' => fn($m) => $m['switches']>=1 && abs($m['sc_h']-$m['sc_a'])<=1,
+    'switches>=1 + min_gap>=2' => fn($m) => $m['switches']>=1 && $m['min_gap']>=2,
+    'switches>=1 + first!=1' => fn($m) => $m['switches']>=1 && $m['h1_first']!=1,
+    'switches>=1 + span>=4' => fn($m) => $m['switches']>=1 && ($m['h1_last']-$m['h1_first'])>=4,
+    'selisih<=1 + min_gap>=2' => fn($m) => abs($m['sc_h']-$m['sc_a'])<=1 && $m['min_gap']>=2,
+    'selisih<=1 + first!=1' => fn($m) => abs($m['sc_h']-$m['sc_a'])<=1 && $m['h1_first']!=1,
+    'selisih<=1 + span>=4' => fn($m) => abs($m['sc_h']-$m['sc_a'])<=1 && ($m['h1_last']-$m['h1_first'])>=4,
+    'min_gap>=2 + span>=4' => fn($m) => $m['min_gap']>=2 && ($m['h1_last']-$m['h1_first'])>=4,
+    'min_gap>=2 + first!=1' => fn($m) => $m['min_gap']>=2 && $m['h1_first']!=1,
+    'first!=1 + span>=4' => fn($m) => $m['h1_first']!=1 && ($m['h1_last']-$m['h1_first'])>=4,
+    'first!=1 + selisih<=0' => fn($m) => $m['h1_first']!=1 && abs($m['sc_h']-$m['sc_a'])==0,
+    'h1c>=2 + switches>=1' => fn($m) => $m['h1c']>=2 && $m['switches']>=1,
+    'h1c>=2 + selisih<=1' => fn($m) => $m['h1c']>=2 && abs($m['sc_h']-$m['sc_a'])<=1,
+    'h1c>=2 + first!=1' => fn($m) => $m['h1c']>=2 && $m['h1_first']!=1,
+    'max_gap>=2 + switches>=1' => fn($m) => $m['max_gap']>=2 && $m['switches']>=1,
+    'last>=4 + selisih<=1' => fn($m) => $m['h1_last']>=4 && abs($m['sc_h']-$m['sc_a'])<=1,
+    'last>=4 + min_gap>=2' => fn($m) => $m['h1_last']>=4 && $m['min_gap']>=2,
+    'last>=4 + switches>=1' => fn($m) => $m['h1_last']>=4 && $m['switches']>=1,
+    'span>=4 + min_gap>=2' => fn($m) => ($m['h1_last']-$m['h1_first'])>=4 && $m['min_gap']>=2,
+    'span>=4 + switches>=1' => fn($m) => ($m['h1_last']-$m['h1_first'])>=4 && $m['switches']>=1,
+];
 
-// Opsi E: h1c >= 2
-$filtered6 = array_filter($matches, function($m) use($p28_teams) {
-    return (in_array(trim($m['home']), $p28_teams) || in_array(trim($m['away']), $p28_teams)) && 
-           $m['h1_last'] >= 3 &&
-           $m['h1c'] >= 2;
-});
-$total6 = count($filtered6);
-$hits6 = count(array_filter($filtered6, function($m) { return $m['h2c'] > 0; }));
-echo "OPSI E (h1c>=2): $total6 match, $hits6 hit (" . ($total6 > 0 ? round($hits6/$total6*100) : 0) . "%)\n";
-
-// Opsi F: span >= 3
-$filtered7 = array_filter($matches, function($m) use($p28_teams) {
-    return (in_array(trim($m['home']), $p28_teams) || in_array(trim($m['away']), $p28_teams)) && 
-           $m['h1_last'] >= 3 &&
-           ($m['h1_last'] - $m['h1_first']) >= 3;
-});
-$total7 = count($filtered7);
-$hits7 = count(array_filter($filtered7, function($m) { return $m['h2c'] > 0; }));
-echo "OPSI F (span>=3): $total7 match, $hits7 hit (" . ($total7 > 0 ? round($hits7/$total7*100) : 0) . "%)\n";
-
-// Opsi G: h1_first >= 1
-$filtered8 = array_filter($matches, function($m) use($p28_teams) {
-    return (in_array(trim($m['home']), $p28_teams) || in_array(trim($m['away']), $p28_teams)) && 
-           $m['h1_last'] >= 3 &&
-           $m['h1_first'] >= 1;
-});
-$total8 = count($filtered8);
-$hits8 = count(array_filter($filtered8, function($m) { return $m['h2c'] > 0; }));
-echo "OPSI G (first>=1): $total8 match, $hits8 hit (" . ($total8 > 0 ? round($hits8/$total8*100) : 0) . "%)\n";
-
-// Opsi H: last >= 4 + min_gap >= 1
-$filtered9 = array_filter($matches, function($m) use($p28_teams) {
-    return (in_array(trim($m['home']), $p28_teams) || in_array(trim($m['away']), $p28_teams)) && 
-           $m['h1_last'] >= 4 &&
-           $m['min_gap'] >= 1;
-});
-$total9 = count($filtered9);
-$hits9 = count(array_filter($filtered9, function($m) { return $m['h2c'] > 0; }));
-echo "OPSI H (last>=4+min_gap>=1): $total9 match, $hits9 hit (" . ($total9 > 0 ? round($hits9/$total9*100) : 0) . "%)\n";
+foreach ($combos as $label => $fn) {
+    $filtered = array_filter($base, $fn);
+    $t = count($filtered);
+    $h = count(array_filter($filtered, fn($m) => $m['h2c']>0));
+    $pct = $t > 0 ? round($h/$t*100) : 0;
+    echo "  $label: $h/$t = $pct%\n";
+}

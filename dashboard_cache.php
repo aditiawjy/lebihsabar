@@ -225,7 +225,7 @@ function computePatterns(array $matches): array {
 
     return [
         ['id'=>'P2',  'label'=>'Selisih 2+ & last mnt 7\' & gap >=3 & max_run<=2, 16min', 'data'=>array_values(array_filter($matches, fn($m) => $m['league']==='16min' && $m['h1c'] >= 2 && abs($m['sc_h']-$m['sc_a']) >= 2 && $m['h1_last'] == 7 && $m['all_gaps_ge3'] && $m['max_run'] <= 2))],
-        ['id'=>'P3',  'label'=>'AH gap >=3 mnt + lm>=6, 15min/16min', 'data'=>array_values(array_filter($matches, fn($m) => in_array($m['league'],['15min','16min']) && $m['h1c']==2 && $m['sc_h']==1 && $m['sc_a']==1 && $m['h1s']==['A','H'] && ($m['h1'][1]['min']-$m['h1'][0]['min']) >= 3 && $m['h1_last']>=6))],
+        ['id'=>'P3',  'label'=>'AH gap >=4 mnt + lm>=4, 15min/16min', 'data'=>array_values(array_filter($matches, fn($m) => in_array($m['league'],['15min','16min']) && $m['h1c']==2 && $m['sc_h']==1 && $m['sc_a']==1 && $m['h1s']==['A','H'] && ($m['h1'][1]['min']-$m['h1'][0]['min']) >= 4 && $m['h1_last']>=4))],
         ['id'=>'P6',  'label'=>'Seri 1-1 + gol penyama mnt 7\'', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']==2 && $m['sc_h']==1 && $m['sc_a']==1 && $m['h1_last']==7))],
         ['id'=>'P7',  'label'=>'Seri 1-1 + gap >= 5 mnt + first goal != mnt 1', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']==2 && $m['sc_h']==1 && $m['sc_a']==1 && $m['max_gap']>=5 && $m['h1_first']!==1))],
         ['id'=>'P9',  'label'=>'AH seri 1-1 + gap >= 5 mnt + first goal != mnt 1', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']==2 && $m['sc_h']==1 && $m['sc_a']==1 && $m['h1s']==['A','H'] && $m['max_gap']>=5 && $m['h1_first']!==1))],

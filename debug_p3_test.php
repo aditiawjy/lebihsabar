@@ -60,6 +60,20 @@ $total4 = count($filtered4);
 $hits4 = count(array_filter($filtered4, function($m) { return $m['h2c'] > 0; }));
 echo "OPSI C (gap>=4): $total4 match, $hits4 hit (" . ($total4 > 0 ? round($hits4/$total4*100) : 0) . "%)\n";
 
+// Opsi F: gap>=4 + last>=6
+$filtered6 = array_filter($matches, function($m) {
+    return in_array($m['league'], ['15min','16min']) && 
+           $m['h1c'] == 2 && 
+           $m['sc_h'] == 1 && 
+           $m['sc_a'] == 1 && 
+           $m['h1s'] == ['A','H'] && 
+           ($m['h1'][1]['min'] - $m['h1'][0]['min']) >= 4 && 
+           $m['h1_last'] >= 6;
+});
+$total6 = count($filtered6);
+$hits6 = count(array_filter($filtered6, function($m) { return $m['h2c'] > 0; }));
+echo "OPSI F (gap>=4+last>=6): $total6 match, $hits6 hit (" . ($total6 > 0 ? round($hits6/$total6*100) : 0) . "%)\n";
+
 // Opsi D: min_gap >= 1
 $filtered5 = array_filter($matches, function($m) {
     return in_array($m['league'], ['15min','16min']) && 

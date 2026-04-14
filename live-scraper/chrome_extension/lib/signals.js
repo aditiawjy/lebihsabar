@@ -223,20 +223,31 @@ async function trackHT22Signal(matches) {
         const htScore = shScoreByMatchKey.get(key);
         if (htScore !== '2-2') continue;
 
+        const goalMins = all1HGoalMinsByMatchKey.get(key) || [];
+        if (goalMins.length < 2) continue;
+
+        let maxGap = 0;
+        for (let i = 1; i < goalMins.length; i += 1) {
+            maxGap = Math.max(maxGap, goalMins[i] - goalMins[i - 1]);
+        }
+        if (maxGap > 2) continue;
+
         sentHT22Signals.add(key);
 
         const home = escapeHtml(match?.homeTeam || '?');
         const away = escapeHtml(match?.awayTeam || '?');
         const league = escapeHtml(match?.league || '?');
         const currentScore = `${homeScore}-${awayScore}`;
+        const minuteText = goalMins.map((min) => `${min}'`).join(', ');
 
         const msg =
-            `🚨 <b>SIGNAL HT 2-2 — BABAK 2 BERJALAN!</b>\n` +
+            `🚨 <b>P15 SIGNAL — HT 2-2 + MAX GAP <= 2</b>\n` +
             `⚽ <b>${home} vs ${away}</b>\n` +
             `🏆 League: ${league}\n` +
             `📊 Skor HT: <b>2-2</b> | Skor sekarang: <b>${currentScore}</b>\n` +
-            `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
-            `🔥 <i>Match dengan HT 2-2 — pantau peluang gol babak kedua!</i>`;
+            `⏰ Status: <b>${escapeHtml(status)}</b>\n` +
+            `📌 Gol 1H: <b>${escapeHtml(minuteText)}</b> | Max gap: <b>${maxGap}</b> menit\n\n` +
+            `🔥 <i>P15 lolos: HT 2-2 dengan jeda gol rapat. Pantau peluang gol babak kedua!</i>`;
 
         await sendTelegramText(msg);
     }

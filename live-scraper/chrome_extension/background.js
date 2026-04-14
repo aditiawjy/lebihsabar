@@ -227,6 +227,7 @@ async function handleFreshData(data) {
     await trackNG1Signal(Array.isArray(data?.matches) ? data.matches : []);
     await trackHT22Signal(Array.isArray(data?.matches) ? data.matches : []);
     await trackP14Signal(Array.isArray(data?.matches) ? data.matches : []);
+    await trackP19Signal(Array.isArray(data?.matches) ? data.matches : []);
     await persistMatchState();
     await updateOddTracking(Array.isArray(data?.matches) ? data.matches : []);
     await setStatus({

@@ -14,9 +14,11 @@ let sentMilestones = new Set();
 let sentNG1Signals = new Set();
 let sentHT22Signals = new Set();
 let sentP14Signals = new Set();
+let sentP19Signals = new Set();
 let last1HGoalMinByMatchKey = new Map();
 let first1HGoalMinByMatchKey = new Map();
 let all1HGoalMinsByMatchKey = new Map();
+let all1HScorersByMatchKey = new Map();
 let has2HGoalByMatchKey = new Map();
 let all2HGoalMinsByMatchKey = new Map();
 
@@ -47,8 +49,8 @@ async function updateLiveState(isRunning, extraState = {}) {
 
 async function restoreRuntimeState() {
     const [localData, sessionData] = await Promise.all([
-        chrome.storage.local.get(['liveRuntimeState', 'sentNG1Keys', 'sentP14Keys']),
-        chrome.storage.session.get(['kickoffTimes', 'registeredKeys', 'sentMilestoneKeys', 'last1HGoalMins', 'has2HGoals'])
+        chrome.storage.local.get(['liveRuntimeState', 'sentNG1Keys', 'sentP14Keys', 'sentP19Keys']),
+        chrome.storage.session.get(['kickoffTimes', 'registeredKeys', 'sentMilestoneKeys', 'last1HGoalMins', 'all1HScorers', 'has2HGoals'])
     ]);
     const runtimeState = localData.liveRuntimeState || {};
 
@@ -70,8 +72,14 @@ async function restoreRuntimeState() {
     if (Array.isArray(localData.sentP14Keys)) {
         sentP14Signals = new Set(localData.sentP14Keys);
     }
+    if (Array.isArray(localData.sentP19Keys)) {
+        sentP19Signals = new Set(localData.sentP19Keys);
+    }
     if (sessionData.last1HGoalMins) {
         last1HGoalMinByMatchKey = new Map(Object.entries(sessionData.last1HGoalMins).map(([k, v]) => [k, Number(v)]));
+    }
+    if (sessionData.all1HScorers) {
+        all1HScorersByMatchKey = new Map(Object.entries(sessionData.all1HScorers));
     }
     if (sessionData.has2HGoals) {
         has2HGoalByMatchKey = new Map(Object.entries(sessionData.has2HGoals));
@@ -91,11 +99,13 @@ async function persistMatchState() {
             registeredKeys: [...registeredMatchKeys],
             sentMilestoneKeys: [...sentMilestones],
             last1HGoalMins: Object.fromEntries(last1HGoalMinByMatchKey),
+            all1HScorers: Object.fromEntries(all1HScorersByMatchKey),
             has2HGoals: Object.fromEntries(has2HGoalByMatchKey),
         }),
         chrome.storage.local.set({
             sentNG1Keys: [...sentNG1Signals],
             sentP14Keys: [...sentP14Signals],
+            sentP19Keys: [...sentP19Signals],
         }),
     ]);
 }

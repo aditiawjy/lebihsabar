@@ -25,8 +25,10 @@ async function trackGoalEvents(matches) {
             sentNG1Signals.delete(key);
             sentHT22Signals.delete(key);
             sentP14Signals.delete(key);
+            sentP19Signals.delete(key);
             first1HGoalMinByMatchKey.delete(key);
             all1HGoalMinsByMatchKey.delete(key);
+            all1HScorersByMatchKey.delete(key);
             all2HGoalMinsByMatchKey.delete(key);
             for (const ms of MILESTONES) {
                 sentMilestones.delete(key + '|' + ms.id);
@@ -65,6 +67,18 @@ async function trackGoalEvents(matches) {
                 const allMins = all1HGoalMinsByMatchKey.get(key) || [];
                 allMins.push(gMin);
                 all1HGoalMinsByMatchKey.set(key, allMins);
+
+                const prevParts = String(prev).split('-').map((value) => parseInt(value, 10) || 0);
+                const prevHome = prevParts[0] || 0;
+                const prevAway = prevParts[1] || 0;
+                const curHome = parseInt(homeScore, 10) || 0;
+                const curAway = parseInt(awayScore, 10) || 0;
+                const homeDelta = Math.max(0, curHome - prevHome);
+                const awayDelta = Math.max(0, curAway - prevAway);
+                const allScorers = all1HScorersByMatchKey.get(key) || [];
+                for (let i = 0; i < homeDelta; i += 1) allScorers.push('H');
+                for (let i = 0; i < awayDelta; i += 1) allScorers.push('A');
+                all1HScorersByMatchKey.set(key, allScorers);
             }
             if (gHalf === '2H') {
                 has2HGoalByMatchKey.set(key, true);
@@ -280,6 +294,64 @@ async function trackP14Signal(matches) {
             `• First goal menit <b>${firstGoalMin}'</b>\n` +
             `• Urutan menit gol: <b>${escapeHtml(minuteText)}</b>\n\n` +
             `🔥 <i>P14 historis 95% — indikasi kuat ada gol di babak kedua.</i>`;
+
+        await sendTelegramText(msg);
+    }
+}
+
+async function trackP19Signal(matches) {
+    if (!Array.isArray(matches) || !matches.length) return;
+
+    for (const match of matches) {
+        const key = createMatchKey(match);
+        if (!registeredMatchKeys.has(key)) continue;
+        if (sentP19Signals.has(key)) continue;
+
+        const status = String(match?.status || '').trim();
+        const isHalftime = /^H\.?Time$/i.test(status);
+        const shMin = getShMinute(status);
+        const isEarlySecondHalf = shMin >= 0 && shMin <= 1;
+        if (!isHalftime && !isEarlySecondHalf) continue;
+        if (has2HGoalByMatchKey.get(key)) continue;
+        if (!/20\s+Mins/i.test(String(match?.league || ''))) continue;
+
+        const homeScore = parseInt(match?.homeScore ?? '0', 10);
+        const awayScore = parseInt(match?.awayScore ?? '0', 10);
+        const goalMins = all1HGoalMinsByMatchKey.get(key) || [];
+        const scorers = all1HScorersByMatchKey.get(key) || [];
+
+        if (!goalMins.length || !scorers.length) continue;
+
+        const lastGoalMin = goalMins[goalMins.length - 1];
+        const lastScorer = scorers[scorers.length - 1];
+        if (![3, 4].includes(lastGoalMin) || lastScorer !== 'H') continue;
+
+        let maxGap = 0;
+        for (let i = 1; i < goalMins.length; i += 1) {
+            maxGap = Math.max(maxGap, goalMins[i] - goalMins[i - 1]);
+        }
+        if (goalMins.length > 1 && maxGap < 2) continue;
+
+        sentP19Signals.add(key);
+
+        const home = escapeHtml(match?.homeTeam || '?');
+        const away = escapeHtml(match?.awayTeam || '?');
+        const league = escapeHtml(match?.league || '?');
+        const score = `${homeScore}-${awayScore}`;
+        const minuteText = goalMins.map((min) => `${min}'`).join(', ');
+
+        const msg =
+            `🚨 <b>P19 SIGNAL — POTENSI GOL BABAK 2</b>\n` +
+            `⚽ <b>${home} vs ${away}</b>\n` +
+            `🏆 League: ${league}\n` +
+            `📊 Skor: <b>${score}</b>\n` +
+            `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
+            `📌 Pola P19 terpenuhi:\n` +
+            `• Last goal 1H menit <b>${lastGoalMin}'</b>\n` +
+            `• Last scorer <b>HOME</b>\n` +
+            `• Gap gol max <b>${maxGap}</b> menit\n` +
+            `• Urutan menit gol 1H: <b>${escapeHtml(minuteText)}</b>\n\n` +
+            `🔥 <i>P19 aktif — indikasi kuat ada gol di babak kedua.</i>`;
 
         await sendTelegramText(msg);
     }

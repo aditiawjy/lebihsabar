@@ -13,6 +13,7 @@ let shScoreByMatchKey = new Map();
 let sentMilestones = new Set();
 let sentNG1Signals = new Set();
 let sentHT22Signals = new Set();
+let sentP14Signals = new Set();
 let last1HGoalMinByMatchKey = new Map();
 let first1HGoalMinByMatchKey = new Map();
 let all1HGoalMinsByMatchKey = new Map();
@@ -46,7 +47,7 @@ async function updateLiveState(isRunning, extraState = {}) {
 
 async function restoreRuntimeState() {
     const [localData, sessionData] = await Promise.all([
-        chrome.storage.local.get(['liveRuntimeState', 'sentNG1Keys']),
+        chrome.storage.local.get(['liveRuntimeState', 'sentNG1Keys', 'sentP14Keys']),
         chrome.storage.session.get(['kickoffTimes', 'registeredKeys', 'sentMilestoneKeys', 'last1HGoalMins', 'has2HGoals'])
     ]);
     const runtimeState = localData.liveRuntimeState || {};
@@ -65,6 +66,9 @@ async function restoreRuntimeState() {
     }
     if (Array.isArray(localData.sentNG1Keys)) {
         sentNG1Signals = new Set(localData.sentNG1Keys);
+    }
+    if (Array.isArray(localData.sentP14Keys)) {
+        sentP14Signals = new Set(localData.sentP14Keys);
     }
     if (sessionData.last1HGoalMins) {
         last1HGoalMinByMatchKey = new Map(Object.entries(sessionData.last1HGoalMins).map(([k, v]) => [k, Number(v)]));
@@ -91,6 +95,7 @@ async function persistMatchState() {
         }),
         chrome.storage.local.set({
             sentNG1Keys: [...sentNG1Signals],
+            sentP14Keys: [...sentP14Signals],
         }),
     ]);
 }

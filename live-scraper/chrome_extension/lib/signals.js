@@ -24,6 +24,7 @@ async function trackGoalEvents(matches) {
             has2HGoalByMatchKey.delete(key);
             sentNG1Signals.delete(key);
             sentHT22Signals.delete(key);
+            sentP14Signals.delete(key);
             first1HGoalMinByMatchKey.delete(key);
             all1HGoalMinsByMatchKey.delete(key);
             all2HGoalMinsByMatchKey.delete(key);
@@ -221,6 +222,64 @@ async function trackHT22Signal(matches) {
             `📊 Skor HT: <b>2-2</b> | Skor sekarang: <b>${currentScore}</b>\n` +
             `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
             `🔥 <i>Match dengan HT 2-2 — pantau peluang gol babak kedua!</i>`;
+
+        await sendTelegramText(msg);
+    }
+}
+
+async function trackP14Signal(matches) {
+    if (!Array.isArray(matches) || !matches.length) return;
+
+    for (const match of matches) {
+        const key = createMatchKey(match);
+        if (!registeredMatchKeys.has(key)) continue;
+        if (sentP14Signals.has(key)) continue;
+
+        const status = String(match?.status || '').trim();
+        const isHalftime = /^H\.?Time$/i.test(status);
+        const shMin = getShMinute(status);
+        const isEarlySecondHalf = shMin >= 0 && shMin <= 1;
+        if (!isHalftime && !isEarlySecondHalf) continue;
+        if (has2HGoalByMatchKey.get(key)) continue;
+
+        const homeScore = parseInt(match?.homeScore ?? '0', 10);
+        const awayScore = parseInt(match?.awayScore ?? '0', 10);
+        if (homeScore !== awayScore || homeScore === 0) continue;
+
+        const goalMins = all1HGoalMinsByMatchKey.get(key) || [];
+        if (goalMins.length < 2) continue;
+
+        const firstGoalMin = goalMins[0];
+        const lastGoalMin = goalMins[goalMins.length - 1];
+        const span = lastGoalMin - firstGoalMin;
+        let maxGap = 0;
+        for (let i = 1; i < goalMins.length; i += 1) {
+            maxGap = Math.max(maxGap, goalMins[i] - goalMins[i - 1]);
+        }
+
+        if (firstGoalMin === 1 || span < 5 || maxGap < 4) continue;
+
+        sentP14Signals.add(key);
+
+        const home = escapeHtml(match?.homeTeam || '?');
+        const away = escapeHtml(match?.awayTeam || '?');
+        const league = escapeHtml(match?.league || '?');
+        const score = `${homeScore}-${awayScore}`;
+        const minuteText = goalMins.map((min) => `${min}'`).join(', ');
+
+        const msg =
+            `🚨 <b>P14 SIGNAL — POTENSI GOL BABAK 2</b>\n` +
+            `⚽ <b>${home} vs ${away}</b>\n` +
+            `🏆 League: ${league}\n` +
+            `📊 Skor: <b>${score}</b>\n` +
+            `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
+            `📌 Pola P14 terpenuhi:\n` +
+            `• Seri di babak pertama\n` +
+            `• Gap gol max <b>${maxGap}</b> menit\n` +
+            `• Span gol <b>${span}</b> menit\n` +
+            `• First goal menit <b>${firstGoalMin}'</b>\n` +
+            `• Urutan menit gol: <b>${escapeHtml(minuteText)}</b>\n\n` +
+            `🔥 <i>P14 historis 95% — indikasi kuat ada gol di babak kedua.</i>`;
 
         await sendTelegramText(msg);
     }

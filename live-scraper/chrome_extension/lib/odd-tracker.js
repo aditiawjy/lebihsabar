@@ -6,6 +6,16 @@ function getDefaultCustomWatchConfig() {
     };
 }
 
+function migrateLegacyDefaultThreshold(threshold, selection) {
+    const normalizedSelection = normalizeWatchMarketSelection(selection, DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection);
+    const normalizedThreshold = toThresholdNumber(threshold, DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold);
+    if (normalizedSelection === 'o0.75' && (normalizedThreshold === 1.8 || normalizedThreshold === 1.85)) {
+        return TARGET_ODD_MIN;
+    }
+
+    return normalizedThreshold;
+}
+
 function normalizeWatchTeamRule(rule = {}, fallback = {}) {
     const fallbackThreshold = toThresholdNumber(fallback.customOddThreshold, DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold);
     const fallbackSelection = normalizeWatchMarketSelection(fallback.customOddSelection, DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection);
@@ -47,8 +57,8 @@ async function getCustomWatchConfig() {
     const data = await chrome.storage.local.get([CUSTOM_WATCH_CONFIG_KEY]);
     const stored = data?.[CUSTOM_WATCH_CONFIG_KEY] || {};
 
-    const fallbackThreshold = toThresholdNumber(stored.customOddThreshold, DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold);
     const fallbackSelection = normalizeWatchMarketSelection(stored.customOddSelection, DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection);
+    const fallbackThreshold = migrateLegacyDefaultThreshold(stored.customOddThreshold, fallbackSelection);
     const legacyTeamList = Array.isArray(stored.teamList)
         ? stored.teamList
             .map((team) => normalizeTeamName(team))
@@ -131,8 +141,8 @@ function getMatchWatchContext(match, customConfig = {}) {
 }
 
 async function setCustomWatchConfig(payload = {}) {
-    const fallbackThreshold = toThresholdNumber(payload.customOddThreshold, DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold);
     const fallbackSelection = normalizeWatchMarketSelection(payload.customOddSelection, DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection);
+    const fallbackThreshold = migrateLegacyDefaultThreshold(payload.customOddThreshold, fallbackSelection);
     const legacyTeamList = Array.isArray(payload.teamList)
         ? payload.teamList
             .map((team) => normalizeTeamName(team))
@@ -152,7 +162,7 @@ async function setCustomWatchConfig(payload = {}) {
 
     const normalized = {
         teamRules: normalizedRulesFromPayload.length ? normalizedRulesFromPayload : fallbackRules,
-        customOddThreshold: toThresholdNumber(payload.customOddThreshold, DEFAULT_CUSTOM_WATCH_CONFIG.customOddThreshold),
+        customOddThreshold: fallbackThreshold,
         customOddSelection: normalizeWatchMarketSelection(payload.customOddSelection, DEFAULT_CUSTOM_WATCH_CONFIG.customOddSelection)
     };
 

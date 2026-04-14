@@ -9,7 +9,7 @@ let popupDataCache = {
     htScores: null,
     count: null
 };
-const DEFAULT_CUSTOM_WATCH_THRESHOLD = 1.8;
+const DEFAULT_CUSTOM_WATCH_THRESHOLD = 1.95;
 const DEFAULT_CUSTOM_WATCH_MARKET = '0.75';
 let customWatchConfig = {
     teamRules: [],

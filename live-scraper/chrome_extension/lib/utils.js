@@ -29,7 +29,7 @@ function normalizeTeamName(value) {
         .trim();
 }
 
-function toThresholdNumber(value, fallback = 1.8) {
+function toThresholdNumber(value, fallback = 1.95) {
     const parsed = Number(value);
     return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }

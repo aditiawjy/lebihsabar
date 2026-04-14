@@ -30,6 +30,33 @@ async function getTargetTab() {
     return targetTab;
 }
 
+async function keepTargetTabAlive(tab) {
+    if (!tab?.id) {
+        return null;
+    }
+
+    try {
+        return await chrome.tabs.update(tab.id, { autoDiscardable: false });
+    } catch (_) {
+        return tab;
+    }
+}
+
+async function ensureTargetTabReady(tab) {
+    const protectedTab = await keepTargetTabAlive(tab);
+    if (!protectedTab?.id) {
+        return null;
+    }
+
+    if (!protectedTab.discarded) {
+        return protectedTab;
+    }
+
+    await chrome.tabs.reload(protectedTab.id);
+    await delay(REFRESH_SETTLE_MS + 1000);
+    return chrome.tabs.get(protectedTab.id);
+}
+
 async function requestContentAction(tabId, action) {
     await ensureContentScript(tabId);
     return chrome.tabs.sendMessage(tabId, { action });
@@ -261,7 +288,8 @@ async function runLiveCycle() {
     isLiveCycleRunning = true;
 
     try {
-        const targetTab = await getTargetTab();
+        const foundTab = await getTargetTab();
+        const targetTab = await ensureTargetTabReady(foundTab);
         if (!targetTab?.id || !isTargetUrl(targetTab.url)) {
             await setStatus({
                 pageStatus: '✗ Not on target page',
@@ -275,7 +303,7 @@ async function runLiveCycle() {
         await setStatus({
             pageStatus: '✓ Target page detected',
             lastCycle: new Date().toLocaleTimeString(),
-            error: ''
+            error: foundTab?.discarded ? 'Target tab was discarded and has been reloaded.' : ''
         });
 
         const refreshResult = await clickPageRefresh(targetTab.id);
@@ -310,7 +338,8 @@ async function runLiveCycle() {
 }
 
 async function startLive() {
-    const targetTab = await getTargetTab();
+    const foundTab = await getTargetTab();
+    const targetTab = await ensureTargetTabReady(foundTab);
     if (!targetTab?.id || !isTargetUrl(targetTab.url)) {
         await updateLiveState(false);
         await setStatus({

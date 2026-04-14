@@ -262,7 +262,7 @@ function computeNextPatterns(array $matches): array {
         ['id'=>'NG1','label'=>'HT 1-0 + gol terakhir mnt 3, 16min','next'=>'HOME','data'=>array_values(array_filter($matches, fn($m) => $m['league']==='16min' && $m['h1c']>=1 && $m['sc_h']==1 && $m['sc_a']==0 && $m['h1_last']==3))],
         ['id'=>'NG2','label'=>'HOME unggul HT + gol terakhir mnt 3, 16min','next'=>'HOME','data'=>array_values(array_filter($matches, fn($m) => $m['league']==='16min' && $m['h1c']>=1 && $m['sc_h']>$m['sc_a'] && $m['h1_last']==3))],
         ['id'=>'NG5','label'=>'Seri 1-1 + scorer HA + gol terakhir mnt 7','next'=>'AWAY','data'=>array_values(array_filter($matches, fn($m) => $m['sc_h']==1 && $m['sc_a']==1 && $m['h1c']==2 && count($m['h1s'])>=2 && $m['h1s'][0]==='H' && $m['h1s'][count($m['h1s'])-1]==='A' && $m['h1_last']==7))],
-        ['id'=>'NG6','label'=>'Seri 1-1 + gol terakhir mnt 7, league 20min','next'=>'AWAY','data'=>array_values(array_filter($matches, fn($m) => $m['league']==='20min' && $m['sc_h']==1 && $m['sc_a']==1 && $m['h1_last']==7))],
+        ['id'=>'NG6','label'=>'Seri 1-1 + gol terakhir mnt 7 + span>=5, league 20min','next'=>'AWAY','data'=>array_values(array_filter($matches, fn($m) => $m['league']==='20min' && $m['sc_h']==1 && $m['sc_a']==1 && $m['h1_last']==7 && ($m['h1_last']-$m['h1_first'])>=5))],
     ];
 }
 

@@ -4,6 +4,7 @@
     var INITIAL_DATA = JSON.parse(document.getElementById('initial-data').textContent);
     var PATTERN_DATA = {};
     var PATTERN_DEFS = INITIAL_DATA.patternDefs || [];
+    var TEAM_CONFIG = INITIAL_DATA.teamConfig || {};
 
     var activePanel = null;
     var htMemory = {};
@@ -352,6 +353,154 @@
         };
     }
 
+    function countSwitchesJS(scorers) {
+        var total = 0;
+        for (var i = 1; i < scorers.length; i++) {
+            if (scorers[i] !== scorers[i - 1]) total += 1;
+        }
+        return total;
+    }
+
+    function maxRunJS(scorers) {
+        if (!scorers.length) return 0;
+        var max = 1;
+        var current = 1;
+        for (var i = 1; i < scorers.length; i++) {
+            current = scorers[i] === scorers[i - 1] ? current + 1 : 1;
+            if (current > max) max = current;
+        }
+        return max;
+    }
+
+    function minGapJS(goalMins) {
+        if (goalMins.length < 2) return 99;
+        var min = 99;
+        for (var i = 1; i < goalMins.length; i++) {
+            min = Math.min(min, goalMins[i] - goalMins[i - 1]);
+        }
+        return min;
+    }
+
+    function allGapsGeJS(goalMins, minGap) {
+        for (var i = 1; i < goalMins.length; i++) {
+            if ((goalMins[i] - goalMins[i - 1]) < minGap) return false;
+        }
+        return true;
+    }
+
+    function arrayEqualsJS(a, b) {
+        if (a.length !== b.length) return false;
+        for (var i = 0; i < a.length; i++) {
+            if (a[i] !== b[i]) return false;
+        }
+        return true;
+    }
+
+    function scorerCountsJS(scorers) {
+        var home = 0;
+        var away = 0;
+        scorers.forEach(function(s) {
+            if (s === 'H') home += 1;
+            if (s === 'A') away += 1;
+        });
+        return { home: home, away: away };
+    }
+
+    function deriveFallbackScorers(goalMins, match) {
+        if (goalMins.length !== 1) return [];
+        var score = getMatchScores(match);
+        if (score.home === 1 && score.away === 0) return ['H'];
+        if (score.home === 0 && score.away === 1) return ['A'];
+        return [];
+    }
+
+    function buildLivePatternState(match, livePayload) {
+        var key = matchKey(match);
+        var goalMins = getLiveGoalMinutes(livePayload, key);
+        var scorers = getLiveGoalScorers(livePayload, key);
+        if (!scorers.length && goalMins.length) {
+            scorers = deriveFallbackScorers(goalMins, match);
+        }
+        if (goalMins.length !== scorers.length) {
+            return null;
+        }
+
+        var counts = scorerCountsJS(scorers);
+        return {
+            home: getMatchHomeTeam(match),
+            away: getMatchAwayTeam(match),
+            league: getLeagueTypeJS(getMatchLeague(match)),
+            h1c: goalMins.length,
+            sc_h: counts.home,
+            sc_a: counts.away,
+            h1_first: goalMins.length ? goalMins[0] : -1,
+            h1_last: goalMins.length ? goalMins[goalMins.length - 1] : -1,
+            h1s: scorers,
+            switches: countSwitchesJS(scorers),
+            max_gap: getMaxGap(goalMins),
+            min_gap: minGapJS(goalMins),
+            max_run: maxRunJS(scorers),
+            all_gaps_ge3: allGapsGeJS(goalMins, 3)
+        };
+    }
+
+    function inTeamConfig(listName, team) {
+        return Array.isArray(TEAM_CONFIG[listName]) && TEAM_CONFIG[listName].indexOf(team) !== -1;
+    }
+
+    function matchesSummaryPatternLive(pid, s) {
+        if (!s) return false;
+        var span = s.h1c >= 2 ? (s.h1_last - s.h1_first) : 0;
+        var diff = Math.abs(s.sc_h - s.sc_a);
+        var lastScorer = s.h1s.length ? s.h1s[s.h1s.length - 1] : null;
+        var firstScorer = s.h1s.length ? s.h1s[0] : null;
+
+        switch (pid) {
+            case 'P2': return s.league === '16min' && s.h1c >= 2 && diff >= 2 && s.h1_last === 7 && s.all_gaps_ge3 && s.max_run <= 2 && s.h1_first <= 1;
+            case 'P3': return ['15min', '16min'].indexOf(s.league) !== -1 && s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.max_gap >= 4 && s.h1_last >= 4 && s.h1_first >= 2;
+            case 'P6': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 4 && s.h1_first !== 1;
+            case 'P7': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.max_gap >= 5 && s.h1_first !== 1;
+            case 'P9': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.max_gap >= 5 && s.h1_first !== 1;
+            case 'P12': return s.h1c >= 4 && span >= 6 && s.min_gap >= 1 && s.h1_last <= 9 && s.h1_first >= 1 && s.h1_first !== 1;
+            case 'P13': return s.h1c >= 2 && s.h1_first <= 2 && s.h1_last === 7 && diff <= 2 && s.min_gap >= 3 && s.switches >= 1;
+            case 'P14': return s.h1c >= 2 && s.sc_h === s.sc_a && s.sc_h > 0 && s.max_gap >= 4 && span >= 5 && s.h1_first !== 1 && s.min_gap >= 2;
+            case 'P15': return s.sc_h === 2 && s.sc_a === 2 && s.max_gap <= 2;
+            case 'P16': return s.league === '16min' && s.h1_last === 7 && span >= 3 && s.switches >= 1 && s.h1_first !== 1;
+            case 'P17': return s.h1c >= 2 && s.h1_first >= 1 && s.h1_first <= 2 && s.h1_last === 7 && s.max_gap >= 2 && s.min_gap >= 2 && s.switches >= 1 && firstScorer === 'A';
+            case 'P18': return s.h1c >= 3 && span >= 6 && diff <= 2 && s.max_run <= 2 && s.switches >= 3 && s.min_gap >= 1 && s.h1_first >= 1;
+            case 'P19': return s.league === '20min' && [3, 4].indexOf(s.h1_last) !== -1 && lastScorer === 'H' && (s.h1c === 1 || s.max_gap >= 2);
+            case 'P20': return s.league === '16min' && s.h1_last === 3 && lastScorer === 'A';
+            case 'P21': return s.league === '15min' && s.h1_last === 5 && lastScorer === 'A' && s.max_gap >= 2 && s.min_gap >= 1 && (s.h1c >= 3 || s.sc_a > s.sc_h) && s.switches >= 1 && s.max_run <= 2;
+            case 'P22': return s.league === '16min' && s.sc_a > s.sc_h && s.h1c >= 2 && span >= 3 && s.switches >= 1;
+            case 'P24': return s.league === '15min' && inTeamConfig('p24_teams', s.home) && s.h1c >= 1 && s.h1_last >= 4 && diff <= 1 && s.sc_h >= 1 && s.h1_first >= 4 && firstScorer === 'H';
+            case 'P25': return inTeamConfig('p25_teams', s.away) && s.h1_last >= 2 && diff <= 1 && span >= 3 && s.min_gap >= 2;
+            case 'P26': return s.league === '16min' && ((s.sc_h + s.sc_a) % 2 === 1) && s.h1_last >= 6 && s.h1c >= 2 && s.sc_a > s.sc_h;
+            case 'P27': return s.league === '16min' && lastScorer === 'A' && s.max_gap >= 3 && s.h1_first !== 1 && span >= 6;
+            case 'P28': return (inTeamConfig('p28_teams', s.home) || inTeamConfig('p28_teams', s.away)) && s.h1_last >= 3 && span >= 3 && diff <= 1;
+            case 'P32': return s.league === '20min' && s.h1c >= 2 && span >= 9 && s.sc_h === s.sc_a && s.min_gap >= 3 && s.switches >= 1 && s.h1_first !== 1;
+            case 'P33': return s.league === '15min' && s.h1c >= 4 && diff <= 1 && s.min_gap >= 1;
+            case 'P34': return s.league === '15min' && firstScorer === 'A' && lastScorer === 'H' && span >= 6 && s.h1c >= 4;
+            case 'P35': return inTeamConfig('p35_teams', s.away) && s.h1_last >= 4 && diff <= 1 && s.h1_first >= 3 && s.switches >= 1;
+            case 'P36': return inTeamConfig('p36_teams', s.home) && s.h1c >= 2 && span >= 1 && diff <= 1 && s.min_gap >= 2;
+            case 'P37': return s.league === '16min' && s.h1c >= 2 && s.h1_first <= 1 && firstScorer === 'A' && lastScorer === 'A' && s.switches === 0;
+            case 'P39': return s.league === '20min' && s.h1c >= 3 && span >= 7 && diff <= 3 && s.min_gap >= 3 && s.h1_first >= 1;
+            case 'P40': return s.league === '16min' && diff >= 2 && s.h1_first <= 1;
+            case 'P41': return diff >= 2 && s.h1_first >= 2 && span >= 6;
+            case 'P42': return s.h1_first >= 2 && span >= 6 && s.min_gap >= 3;
+            case 'P43': return s.sc_a > s.sc_h && span >= 6 && lastScorer === 'H';
+            case 'P44': return diff >= 2 && s.h1_first >= 2 && s.switches >= 1;
+            case 'P45': return s.league === '16min' && s.h1_first !== 1 && span >= 6;
+            case 'P46': return s.league === '16min' && span >= 6 && s.min_gap >= 2;
+            case 'P47': return s.sc_h === s.sc_a && s.h1_first !== 1 && s.switches >= 2;
+            case 'P48': return s.sc_h === s.sc_a && span >= 7 && s.switches >= 2;
+            case 'P49': return s.league === '16min' && diff >= 2 && span >= 6;
+            case 'P50': return s.league === '16min' && s.sc_a > s.sc_h && span >= 6;
+            case 'P51': return s.league === '16min' && s.switches >= 2;
+            case 'P52': return s.league === '16min' && span >= 6 && s.min_gap >= 3;
+            default: return false;
+        }
+    }
+
     function matchKey(m) {
         return getMatchHomeTeam(m) + '|' + getMatchAwayTeam(m) + '|' + getMatchLeague(m);
     }
@@ -476,28 +625,13 @@
             var s = parseStatus(statusText);
             if (s.half !== '1H' && s.half !== '2H' && !/^H\.?Time$/i.test(statusText)) return;
 
-            var lg = getLeagueTypeJS(getMatchLeague(match));
-            if (!lg) return;
+            var state = buildLivePatternState(match, livePayload);
+            if (!state) return;
 
-            var score = getMatchScores(match);
-            var h = score.home;
-            var a = score.away;
-            var key = matchKey(match);
-            var signals = [];
-
-            if (s.half === '2H') {
-                var ht = htMemory[key];
-                var htH = ht ? ht.h : h;
-                var htA = ht ? ht.a : a;
-                signals = buildLiveSignals(match, livePayload, lg, htH, htA, h, a, s.min, 'ht');
-            } else if (/^H\.?Time$/i.test(statusText)) {
-                signals = buildLiveSignals(match, livePayload, lg, h, a, h, a, 0, 'ht');
-            } else {
-                signals = buildLiveSignals(match, livePayload, lg, h, a, h, a, s.min, '1h');
-            }
-
-            signals.forEach(function(sig) {
-                counts[sig.id] = (counts[sig.id] || 0) + 1;
+            PATTERN_DEFS.forEach(function(pattern) {
+                if (matchesSummaryPatternLive(pattern.id, state)) {
+                    counts[pattern.id] = (counts[pattern.id] || 0) + 1;
+                }
             });
         });
 
@@ -528,8 +662,10 @@
 
     function renderLiveCards(matches, livePayload) {
         var container = document.getElementById('live-cards');
+        var signalMatches = [];
         if (!matches || !matches.length) {
             container.innerHTML = '<div class="live-empty">Tidak ada match live saat ini.</div>';
+            renderLiveAlerts([]);
             return;
         }
         var liveMatches = matches.filter(function(m) {
@@ -538,6 +674,7 @@
         });
         if (!liveMatches.length) {
             container.innerHTML = '<div class="live-empty">Tidak ada match aktif (1H/2H).</div>';
+            renderLiveAlerts([]);
             return;
         }
         var html = '';
@@ -563,6 +700,16 @@
                 signals = lg ? buildLiveSignals(m, livePayload, lg, h, a, h, a, s.min, '1h') : [];
             }
             var hasSignal = signals.length > 0;
+            if (hasSignal) {
+                signalMatches.push({
+                    home: getMatchHomeTeam(m),
+                    away: getMatchAwayTeam(m),
+                    league: lg,
+                    score: h + ' - ' + a,
+                    status: (phase2H ? '2H ' : '1H ') + s.min + "\u2019",
+                    signals: signals
+                });
+            }
             var signalHtml = signals.map(function(sig) {
                 return '<div class="signal-tag"><span class="pid">' + sig.id + '</span>' + sig.label + '</div>';
             }).join('');
@@ -579,6 +726,50 @@
                 + '</div></div>';
         }
         container.innerHTML = html;
+        renderLiveAlerts(signalMatches);
+    }
+
+    function renderLiveAlerts(signalMatches) {
+        var alertBox = document.getElementById('live-alerts');
+        var updateStatus = document.getElementById('update-status');
+        if (!alertBox || !updateStatus) return;
+
+        if (!signalMatches || !signalMatches.length) {
+            alertBox.className = 'live-alerts-empty';
+            alertBox.textContent = 'Belum ada alert pattern live.';
+            updateStatus.textContent = '\u25CF LIVE';
+            updateStatus.className = 'badge badge-green';
+            document.title = 'Pattern Accuracy Dashboard';
+            return;
+        }
+
+        var totalSignals = signalMatches.reduce(function(sum, item) {
+            return sum + item.signals.length;
+        }, 0);
+
+        var itemsHtml = signalMatches.map(function(item) {
+            var patternsHtml = item.signals.map(function(sig) {
+                return '<span class="live-alert-pattern"><span class="pid">' + sig.id + '</span>' + escHtml(sig.label) + '</span>';
+            }).join('');
+
+            return '<div class="live-alert-item">'
+                + '<div class="live-alert-match">' + escHtml(item.home) + ' vs ' + escHtml(item.away) + '</div>'
+                + '<div class="live-alert-meta">[' + escHtml(item.league || 'league?') + '] ' + escHtml(item.status) + ' | Skor ' + escHtml(item.score) + '</div>'
+                + '<div class="live-alert-patterns">' + patternsHtml + '</div>'
+                + '</div>';
+        }).join('');
+
+        alertBox.className = 'live-alerts-active';
+        alertBox.innerHTML = '<div class="live-alerts-head">'
+            + '<span class="live-alert-badge">ALERT ' + signalMatches.length + ' MATCH</span>'
+            + '<span class="live-alerts-title">Ada indikasi pattern live</span>'
+            + '<span class="live-alert-sub">' + totalSignals + ' signal aktif terdeteksi dari live scraper.</span>'
+            + '</div>'
+            + '<div class="live-alert-list">' + itemsHtml + '</div>';
+
+        updateStatus.textContent = '\u25CF ALERT ' + signalMatches.length;
+        updateStatus.className = 'badge badge-red';
+        document.title = '(' + signalMatches.length + ') Pattern Alert';
     }
 
     async function fetchLiveData() {
@@ -604,6 +795,7 @@
             document.getElementById('live-cards').innerHTML = '<div class="live-empty">API tidak aktif \u2014 klik \u25B6 Jalankan API</div>';
             liveCandidateCounts = {};
             applyLiveCandidateIndicators();
+            renderLiveAlerts([]);
         }
     }
 

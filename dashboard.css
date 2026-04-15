@@ -326,6 +326,104 @@ tr:hover td {
     color: var(--text-secondary);
 }
 
+#live-alerts {
+    margin-bottom: 14px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    padding: 12px 14px;
+}
+
+.live-alerts-empty {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+}
+
+.live-alerts-active {
+    border-color: var(--green-border) !important;
+    background: linear-gradient(180deg, rgba(35,134,54,0.14), rgba(22,27,34,0.98));
+    box-shadow: 0 0 0 1px rgba(35,134,54,0.2) inset;
+}
+
+.live-alerts-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.live-alerts-title {
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.live-alert-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--green-border);
+    color: #fff;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.live-alert-sub {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+}
+
+.live-alert-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 8px;
+}
+
+.live-alert-item {
+    border: 1px solid rgba(121,192,255,0.22);
+    background: rgba(13,17,23,0.72);
+    border-radius: var(--radius-md);
+    padding: 8px 10px;
+}
+
+.live-alert-match {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.82rem;
+    margin-bottom: 3px;
+}
+
+.live-alert-meta {
+    color: var(--text-secondary);
+    font-size: 0.74rem;
+    margin-bottom: 5px;
+}
+
+.live-alert-patterns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.live-alert-pattern {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #12261e;
+    border: 1px solid var(--green-border);
+    color: var(--green);
+    border-radius: var(--radius-pill);
+    padding: 2px 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.live-alert-pattern .pid {
+    color: var(--blue-soft);
+}
+
 #live-api-badge {
     padding: 3px 10px;
     border-radius: var(--radius-pill);
@@ -599,6 +697,7 @@ th.sortable:hover {
     .stat-card { min-width: 120px; padding: 10px 16px; }
     .stat-card .value { font-size: 1.3rem; }
     #live-cards { grid-template-columns: 1fr; }
+    .live-alert-list { grid-template-columns: 1fr; }
     #slide-panel { width: 100vw; }
     table { font-size: 0.8rem; }
     th, td { padding: 8px 6px; }

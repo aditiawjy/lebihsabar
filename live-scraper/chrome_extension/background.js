@@ -7,6 +7,8 @@ importScripts(
     'lib/signals.js'
 );
 
+const DASHBOARD_API_URL = 'http://127.0.0.1:5000/api/live-data';
+
 
 function isTargetUrl(url) {
     return typeof url === 'string' && url.includes(TARGET_HOST);
@@ -219,6 +221,30 @@ async function sendToServer(data, isAutoSend = false) {
     return false;
 }
 
+async function sendDashboardLiveData(data) {
+    const matches = Array.isArray(data?.matches) ? data.matches : [];
+    if (!matches.length) return false;
+
+    try {
+        await fetch(DASHBOARD_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                matches,
+                allGoalMinutes: Object.fromEntries(all1HGoalMinsByMatchKey),
+                allGoalScorers: Object.fromEntries(all1HScorersByMatchKey),
+                all2HGoalMinutes: Object.fromEntries(all2HGoalMinsByMatchKey),
+                all2HScorers: Object.fromEntries(all2HScorersByMatchKey),
+                htScores: Object.fromEntries(shScoreByMatchKey),
+                timestamp: new Date().toISOString()
+            })
+        });
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
 
 async function sendToServerWithRetry(data) {
     let attempt = 0;
@@ -257,6 +283,7 @@ async function handleFreshData(data) {
     await trackP14Signal(Array.isArray(data?.matches) ? data.matches : []);
     await trackP19Signal(Array.isArray(data?.matches) ? data.matches : []);
     await persistMatchState();
+    await sendDashboardLiveData(data);
     await updateOddTracking(Array.isArray(data?.matches) ? data.matches : []);
     await setStatus({
         pageStatus: '✓ Target page detected',

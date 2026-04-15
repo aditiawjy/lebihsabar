@@ -12,7 +12,9 @@
   ],
   "host_permissions": [
     "https://g943gp.bpvmr7u6.com/*",
-    "https://api.telegram.org/*"
+    "https://api.telegram.org/*",
+    "http://127.0.0.1:5000/*",
+    "http://localhost/*"
   ],
   "background": {
     "service_worker": "background.js"

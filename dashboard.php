@@ -32,6 +32,8 @@
 require_once __DIR__ . '/dashboard_cache.php';
 require_once __DIR__ . '/pattern_snapshot.php';
 
+$teamConfig = require __DIR__ . '/dashboard_config.php';
+
 $csvFile = __DIR__ . '/goal_log.csv';
 $cacheFile = __DIR__ . '/dashboard_cache.json';
 $data = getCachedDashboardData($csvFile, $cacheFile);
@@ -99,6 +101,7 @@ if (!$csvExists): ?>
             <button id="btn-stop-api" class="btn-api-stop" onclick="stopApiServer()" style="display:none;">&#x25A0; Stop API</button>
             <span id="live-last-update"></span>
         </div>
+        <div id="live-alerts" class="live-alerts-empty">Belum ada alert pattern live.</div>
         <div id="live-cards"><div class="live-empty">Menunggu data dari extension...</div></div>
     </div>
 
@@ -128,7 +131,7 @@ if (!$csvExists): ?>
                 <td><?= $has2h ?>/<?= $total ?></td>
                 <td class="pct <?= $cls ?>"><?= $pct ?>%</td>
                 <td><span class="badge <?= $badge ?>"><?= $status ?></span></td>
-                <td style="font-size:0.8rem;"><?= $delta['html'] ?></td>
+                <td class="delta-cell" style="font-size:0.8rem;"><?= $delta['html'] ?></td>
                 <td><button class="expand-btn" data-pid="<?= esc($p['id']) ?>">Detail</button></td>
             </tr>
 <?php endforeach; ?>
@@ -229,6 +232,7 @@ echo json_encode([
     'patterns' => $patterns,
     'nextPatterns' => $nextPatterns,
     'latePatterns' => $latePatterns,
+    'teamConfig' => $teamConfig,
     'patternDefs' => $patternDefs,
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 echo '</script>' . "\n";

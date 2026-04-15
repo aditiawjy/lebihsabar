@@ -95,6 +95,17 @@ function buildTrackedGoalEventsForMatch(key, match, timestamp) {
     return events;
 }
 
+function buildScoreSnapshot(match, timestamp) {
+    return {
+        timestamp,
+        league: match?.league || '',
+        home_team: match?.homeTeam || '',
+        away_team: match?.awayTeam || '',
+        home_score: String(match?.homeScore ?? '0'),
+        away_score: String(match?.awayScore ?? '0'),
+    };
+}
+
 function buildVisibleGoalBackfill(key, match, minute, scoreStr, timestamp) {
     const parsed = parseMatchMinute(minute);
     if (parsed.half !== '1H') return null;
@@ -237,12 +248,20 @@ async function trackGoalEvents(matches) {
         }
     }
 
-    if (newMatches.length) {
+    const scoreSnapshots = [];
+    for (const match of matches) {
+        const key = createMatchKey(match);
+        if (!registeredMatchKeys.has(key)) continue;
+        scoreSnapshots.push(buildScoreSnapshot(match, kickoffTimeByMatchKey.get(key) || timestamp));
+    }
+
+    const matchPayload = [...newMatches, ...scoreSnapshots];
+    if (matchPayload.length) {
         try {
             await fetch('http://localhost/lebihsabar/goal-log-save.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ matches: newMatches })
+                body: JSON.stringify({ matches: matchPayload })
             });
         } catch (_) {}
     }
@@ -273,7 +292,8 @@ async function trackGoalEvents(matches) {
         const key = createMatchKey(match);
         if (!registeredMatchKeys.has(key)) continue;
         const trackedEvents = buildTrackedGoalEventsForMatch(key, match, kickoffTimeByMatchKey.get(key) || timestamp);
-        if (trackedEvents.length) {
+        const trackedFinal = trackedEvents.length ? trackedEvents[trackedEvents.length - 1].score_after : null;
+        if (trackedEvents.length && trackedFinal === `${String(match?.homeScore ?? '0').trim()}-${String(match?.awayScore ?? '0').trim()}`) {
             syncGoals.push(...trackedEvents);
         }
     }

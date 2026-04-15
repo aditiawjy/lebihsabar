@@ -11,7 +11,7 @@ require_once __DIR__ . '/pattern_snapshot.php';
 $csvFile = __DIR__ . '/goal_log.csv';
 $data = getCachedDashboardData($csvFile, __DIR__ . '/dashboard_cache.json');
 
-$currentSnap = computeSnapshotData($data['patterns'], $data['next_patterns']);
+$currentSnap = computeSnapshotData($data['patterns'], $data['next_patterns'], $data['late_patterns'] ?? []);
 $oldSnap = getSnapshotHourAgo();
 $oldSnapData = $oldSnap ? $oldSnap['data'] : [];
 $oldSnapTime = $oldSnap ? $oldSnap['time'] : null;
@@ -35,6 +35,7 @@ $response = [
     'snapshot_label' => $oldSnapTime ? buildSnapshotLabel($oldSnapTime) : null,
     'patterns' => buildPatternSummary($data['patterns'], $oldSnapData),
     'next_patterns' => buildNextPatternSummary($data['next_patterns'], $oldSnapData),
+    'late_patterns' => buildLatePatternSummary($data['late_patterns'] ?? [], $oldSnapData),
     'pattern_defs' => $patternDefs,
 ];
 
@@ -109,6 +110,29 @@ function buildNextPatternSummary(array $nextPatterns, array $oldSnapData): array
             'delta' => $delta,
         ];
     }, $nextPatterns);
+}
+
+function buildLatePatternSummary(array $latePatterns, array $oldSnapData): array {
+    return array_map(function($lp) use ($oldSnapData) {
+        $total = count($lp['data']);
+        $lateHits = count(array_filter($lp['data'], fn($m) => $m['has_late']));
+        $pct = $total > 0 ? round($lateHits / $total * 100) : 0;
+        $cls = $pct >= 80 ? 'pct-high' : ($pct >= 70 ? 'pct-mid' : 'pct-low');
+        $badge = $pct >= 80 ? 'badge-green' : ($pct >= 70 ? 'badge-yellow' : 'badge-red');
+        $status = $pct >= 80 ? 'STRONG' : ($pct >= 70 ? 'GOOD' : 'WATCH');
+        $delta = buildDelta($lp['id'], $total, $lateHits, $oldSnapData);
+        return [
+            'id' => $lp['id'],
+            'label' => $lp['label'],
+            'total' => $total,
+            'late_hits' => $lateHits,
+            'pct' => $pct,
+            'cls' => $cls,
+            'badge' => $badge,
+            'status' => $status,
+            'delta' => $delta,
+        ];
+    }, $latePatterns);
 }
 
 

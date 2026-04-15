@@ -36,7 +36,7 @@ $csvFile = __DIR__ . '/goal_log.csv';
 $cacheFile = __DIR__ . '/dashboard_cache.json';
 $data = getCachedDashboardData($csvFile, $cacheFile);
 
-$currentSnap = computeSnapshotData($data['patterns'], $data['next_patterns']);
+$currentSnap = computeSnapshotData($data['patterns'], $data['next_patterns'], $data['late_patterns'] ?? []);
 $oldSnap = getSnapshotHourAgo();
 $oldSnapData = $oldSnap ? $oldSnap['data'] : [];
 $oldSnapTime = $oldSnap ? $oldSnap['time'] : null;
@@ -44,6 +44,7 @@ saveSnapshot($currentSnap);
 
 $patterns = $data['patterns'];
 $nextPatterns = $data['next_patterns'];
+$latePatterns = $data['late_patterns'] ?? [];
 usort($nextPatterns, function($a, $b) {
     $ta = count($a['data']); $tb = count($b['data']);
     if ($tb != $ta) return $tb <=> $ta;
@@ -54,6 +55,14 @@ usort($nextPatterns, function($a, $b) {
     $pa = $ta > 0 ? $ha / $ta : 0;
     $pb = $tb > 0 ? $hb / $tb : 0;
     return $pb <=> $pa;
+});
+
+usort($latePatterns, function($a, $b) {
+    $ta = count($a['data']); $tb = count($b['data']);
+    $ha = $ta > 0 ? count(array_filter($a['data'], fn($m) => $m['has_late'])) / $ta : 0;
+    $hb = $tb > 0 ? count(array_filter($b['data'], fn($m) => $m['has_late'])) / $tb : 0;
+    if ($hb != $ha) return $hb <=> $ha;
+    return $tb <=> $ta;
 });
 $totalMatches = $data['total_matches'];
 $patternCount = count($patterns);
@@ -113,7 +122,7 @@ if (!$csvExists): ?>
     $status = $pct >= 95 ? 'EXCELLENT' : ($pct >= 85 ? 'GOOD' : 'WARNING');
     $delta = buildDelta($p['id'], $total, $has2h, $oldSnapData);
 ?>
-            <tr data-total="<?= $total ?>" data-hits="<?= $has2h ?>" data-pct="<?= $pct ?>">
+            <tr data-pid="<?= esc($p['id']) ?>" data-total="<?= $total ?>" data-hits="<?= $has2h ?>" data-pct="<?= $pct ?>">
                 <td><strong><?= esc($p['id']) ?></strong></td>
                 <td><?= esc($p['label']) ?></td>
                 <td><?= $has2h ?>/<?= $total ?></td>
@@ -168,6 +177,40 @@ if (!$csvExists): ?>
         </table>
     </div>
 
+    <div class="section" id="late-section">
+        <h2>Late Goal Pattern (Gol Menit Akhir 2H)</h2>
+        <table id="late-table">
+            <thead>
+            <tr>
+                <th>#</th><th>Pattern</th><th>Record Late Goal</th><th>Akurasi</th><th>Status</th>
+                <th id="late-snap-header" style="color:#8b949e;white-space:nowrap;">+Sample<?= $oldSnapTime ? ' (' . date('H:i', $oldSnapTime) . '→' . date('H:i') . ')' : '' ?></th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody id="late-body">
+<?php foreach ($latePatterns as $lp):
+    $total = count($lp['data']);
+    $lateHits = count(array_filter($lp['data'], fn($m) => $m['has_late']));
+    $pct = $total > 0 ? round($lateHits / $total * 100) : 0;
+    $cls = $pct >= 80 ? 'pct-high' : ($pct >= 70 ? 'pct-mid' : 'pct-low');
+    $badge = $pct >= 80 ? 'badge-green' : ($pct >= 70 ? 'badge-yellow' : 'badge-red');
+    $status = $pct >= 80 ? 'STRONG' : ($pct >= 70 ? 'GOOD' : 'WATCH');
+    $delta = buildDelta($lp['id'], $total, $lateHits, $oldSnapData);
+?>
+            <tr data-total="<?= $total ?>" data-hits="<?= $lateHits ?>" data-pct="<?= $pct ?>">
+                <td><strong><?= esc($lp['id']) ?></strong></td>
+                <td><?= esc($lp['label']) ?></td>
+                <td><?= $lateHits ?>/<?= $total ?></td>
+                <td class="pct <?= $cls ?>"><?= $pct ?>%</td>
+                <td><span class="badge <?= $badge ?>"><?= $status ?></span></td>
+                <td class="delta-cell" style="font-size:0.8rem;"><?= $delta['html'] ?></td>
+                <td><button class="expand-btn" data-pid="<?= esc($lp['id']) ?>">Detail</button></td>
+            </tr>
+<?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+
     <p class="last-update" id="last-update">
         CSV last modified: <?= $csvTime ? date('d/m/Y H:i:s', $csvTime) : '-' ?> |
         Total <?= $totalMatches ?> matches |
@@ -185,6 +228,7 @@ echo json_encode([
     'all_matches' => $data['all_matches'],
     'patterns' => $patterns,
     'nextPatterns' => $nextPatterns,
+    'latePatterns' => $latePatterns,
     'patternDefs' => $patternDefs,
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 echo '</script>' . "\n";
@@ -192,6 +236,6 @@ echo '</script>' . "\n";
 
 </div>
 
-<script src="dashboard.js"></script>
+<script src="dashboard.js?v=<?= filemtime(__DIR__ . '/dashboard.js') ?>"></script>
 </body>
 </html>

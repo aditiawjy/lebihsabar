@@ -231,13 +231,9 @@ function getTargetOverOdd(match, marketSelection = TARGET_ODD_SELECTION, marketF
     return oddsMap[normalizedSelection] || null;
 }
 
-function getQualifiedOddsAlert(match, marketSelection = TARGET_ODD_SELECTION, threshold = TARGET_ODD_MIN, isWatched = false) {
-    if (!isWatched && !isSecondHalfStatus(match)) {
-        return null;
-    }
-
+function getQualifiedOddsAlert(match, marketSelection = TARGET_ODD_SELECTION, threshold = TARGET_ODD_MIN) {
     const normalizedSelection = normalizeWatchMarketSelection(marketSelection, TARGET_ODD_SELECTION);
-    const marketFilter = isWatched ? TARGET_FT_ODD_MARKET : TARGET_ODD_MARKET;
+    const marketFilter = TARGET_FT_ODD_MARKET;
     const targetOdd = getTargetOverOdd(match, normalizedSelection, marketFilter);
     const numericThreshold = toThresholdNumber(threshold, TARGET_ODD_MIN);
 

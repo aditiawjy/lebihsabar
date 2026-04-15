@@ -37,12 +37,13 @@ $teamConfig = require __DIR__ . '/dashboard_config.php';
 $csvFile = __DIR__ . '/goal_log.csv';
 $cacheFile = __DIR__ . '/dashboard_cache.json';
 $data = getCachedDashboardData($csvFile, $cacheFile);
+$currentSnapTime = (int)($data['generated_at'] ?? time());
 
 $currentSnap = computeSnapshotData($data['patterns'], $data['next_patterns'], $data['late_patterns'] ?? []);
-$oldSnap = getSnapshotHourAgo();
+$oldSnap = getSnapshotHourAgo($currentSnapTime);
 $oldSnapData = $oldSnap ? $oldSnap['data'] : [];
 $oldSnapTime = $oldSnap ? $oldSnap['time'] : null;
-saveSnapshot($currentSnap);
+saveSnapshot($currentSnap, $currentSnapTime);
 
 $patterns = $data['patterns'];
 $nextPatterns = $data['next_patterns'];
@@ -111,7 +112,7 @@ if (!$csvExists): ?>
             <thead>
             <tr>
                 <th>#</th><th>Pattern</th><th class="sortable" data-table="summary" data-sort="record">Record <span class="sort-arrow"></span></th><th class="sortable" data-table="summary" data-sort="pct">Akurasi <span class="sort-arrow"></span></th><th>Status</th>
-                <th id="snap-header" style="color:#8b949e;white-space:nowrap;">+Sample<?= $oldSnapTime ? ' (' . date('H:i', $oldSnapTime) . '→' . date('H:i') . ')' : '' ?></th>
+                <th id="snap-header" style="color:#8b949e;white-space:nowrap;">+Sample<?= $oldSnapTime ? ' (' . date('H:i', $oldSnapTime) . '→' . date('H:i', $currentSnapTime) . ')' : '' ?></th>
                 <th></th>
             </tr>
             </thead>
@@ -145,7 +146,7 @@ if (!$csvExists): ?>
             <thead>
             <tr>
                 <th>#</th><th>Pattern</th><th>Prediksi Next Goal</th><th class="sortable" data-table="next" data-sort="record">Record <span class="sort-arrow"></span></th><th class="sortable" data-table="next" data-sort="pct">Akurasi <span class="sort-arrow"></span></th><th>Status</th>
-                <th id="next-snap-header" style="color:#8b949e;white-space:nowrap;">+Sample<?= $oldSnapTime ? ' (' . date('H:i', $oldSnapTime) . '→' . date('H:i') . ')' : '' ?></th>
+                <th id="next-snap-header" style="color:#8b949e;white-space:nowrap;">+Sample<?= $oldSnapTime ? ' (' . date('H:i', $oldSnapTime) . '→' . date('H:i', $currentSnapTime) . ')' : '' ?></th>
                 <th></th>
             </tr>
             </thead>

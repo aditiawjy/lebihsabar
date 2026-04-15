@@ -52,8 +52,6 @@ def receive_live_data():
                 notifier.check_and_alert_second_half_zero_zero(match)
                 continue
 
-            notifier.send_match_update(match)
-
         return jsonify(
             {
                 "success": True,

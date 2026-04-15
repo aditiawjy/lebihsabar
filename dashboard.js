@@ -794,9 +794,10 @@
 
     async function fetchLiveData() {
         try {
-            var resp = await fetch('http://127.0.0.1:5000/api/live-data', { signal: AbortSignal.timeout(3000) });
+            var resp = await fetch('live_api_proxy.php', { signal: AbortSignal.timeout(3000) });
             if (!resp.ok) throw new Error('HTTP ' + resp.status);
             var data = await resp.json();
+            if (data && data.online === false) throw new Error(data.error || 'API offline');
             var livePayload = normalizeLivePayload(data);
             document.getElementById('live-api-badge').textContent = 'API Online';
             document.getElementById('live-api-badge').className = 'api-online';

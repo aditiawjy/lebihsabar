@@ -9,7 +9,7 @@ TELEGRAM_CHAT_ID = "6801623296"
 
 # Pengaturan Alert
 ALERT_SETTINGS = {
-    "enable_match_updates": True,  # Alert untuk update match
+    "enable_match_updates": False,  # Nonaktifkan spam live match update
     "enable_score_alerts": True,   # Alert untuk perubahan skor
     "enable_new_match_alerts": True,  # Alert untuk match baru
     "alert_cooldown_minutes": 2  # Minimum waktu antar alert

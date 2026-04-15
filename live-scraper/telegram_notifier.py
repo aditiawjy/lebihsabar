@@ -56,27 +56,8 @@ class TelegramNotifier:
         return False
 
     def send_match_update(self, match_data):
-        """Kirim update match ke Telegram"""
-        if not ALERT_SETTINGS["enable_match_updates"]:
-            return False
-
-        current_time = datetime.now().strftime("%H:%M:%S")
-        match_name = self.get_match_name(match_data)
-
-        message = f"📊 <b>LIVE MATCH UPDATE</b>\n\n"
-        message += f"⚽ <b>{match_name}</b>\n"
-        message += f"📊 Score: <b>{match_data.get('score', '0-0')}</b>\n"
-        message += f"🏆 League: {match_data.get('league', 'N/A')}\n"
-        message += f"⏰ Status: {match_data.get('status', 'Live')}\n"
-        message += f"📅 Time: {current_time}\n\n"
-
-        # Tambahkan odds jika ada
-        if match_data.get("odds"):
-            message += f"📈 <b>Odds:</b>\n"
-            for odd in match_data["odds"][:3]:
-                message += f"• {odd}\n"
-
-        return self.send_message(message)
+        """Live match update umum dimatikan agar tidak spam Telegram."""
+        return False
 
     def should_send_second_half_zero_zero_alert(self, match_data):
         """Cek apakah match sudah lewat 2H 2' dan masih 0-0"""

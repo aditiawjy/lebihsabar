@@ -116,6 +116,27 @@ function createDataSignature(data) {
     });
 }
 
+async function syncLiveDataToApi(data) {
+    try {
+        const resp = await fetch('http://127.0.0.1:5000/api/live-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data || {})
+        });
+
+        if (!resp.ok) {
+            throw new Error(`Live API HTTP ${resp.status}`);
+        }
+
+        return true;
+    } catch (error) {
+        await setStatus({
+            error: error.message || 'Live API sync failed'
+        });
+        return false;
+    }
+}
+
 async function sendToServer(data, isAutoSend = false) {
     try {
         const matches = Array.isArray(data?.matches) ? data.matches : [];
@@ -141,7 +162,7 @@ async function sendToServer(data, isAutoSend = false) {
                     match,
                     matchKey,
                     stateKey: getThresholdStateKey(matchKey, threshold, marketSelection),
-                    targetOdd: getQualifiedOddsAlert(match, marketSelection, threshold, watchContext.isWatched),
+                    targetOdd: getQualifiedOddsAlert(match, marketSelection, threshold),
                     watchContext
                 };
             });
@@ -160,11 +181,11 @@ async function sendToServer(data, isAutoSend = false) {
             });
 
             const defaultThresholdText = TARGET_ODD_MIN.toFixed(2);
-            const defaultSelectionText = formatWatchMarketForDisplay(TARGET_ODD_SELECTION);
+            const defaultSelectionText = `FT ${formatWatchMarketForDisplay(TARGET_ODD_SELECTION)}`;
             const watchTeamsCount = Array.isArray(watchConfig.teamRules) ? watchConfig.teamRules.length : 0;
             const hasWatchTeams = watchTeamsCount > 0;
             const customThresholdText = toThresholdNumber(watchConfig.customOddThreshold, TARGET_ODD_MIN).toFixed(2);
-            const customSelectionText = formatWatchMarketForDisplay(watchConfig.customOddSelection);
+            const customSelectionText = `FT ${formatWatchMarketForDisplay(watchConfig.customOddSelection)}`;
             const statusText = hasWatchTeams
                 ? `Telegram: No alert on ${defaultSelectionText} > ${defaultThresholdText} (team watch uses per-team rules; fallback ${customSelectionText} > ${customThresholdText})`
                 : `Telegram: No alert on ${defaultSelectionText} > ${defaultThresholdText}`;
@@ -276,12 +297,14 @@ async function sendToServerWithRetry(data) {
 
 async function handleFreshData(data) {
     await setSavedMatchData(data);
+    await syncLiveDataToApi(data);
     await trackGoalEvents(Array.isArray(data?.matches) ? data.matches : []);
     await trackNG1Signal(Array.isArray(data?.matches) ? data.matches : []);
     await trackHT22Signal(Array.isArray(data?.matches) ? data.matches : []);
     await trackP7Signal(Array.isArray(data?.matches) ? data.matches : []);
     await trackP14Signal(Array.isArray(data?.matches) ? data.matches : []);
     await trackP19Signal(Array.isArray(data?.matches) ? data.matches : []);
+    await trackP28Signal(Array.isArray(data?.matches) ? data.matches : []);
     await persistMatchState();
     await sendDashboardLiveData(data);
     await updateOddTracking(Array.isArray(data?.matches) ? data.matches : []);

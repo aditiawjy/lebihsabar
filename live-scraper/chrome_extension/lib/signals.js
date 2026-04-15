@@ -398,6 +398,18 @@ async function trackGoalEvents(matches) {
     } catch (_) {}
 }
 
+function getPatternTelegramOdd(match) {
+    return getQualifiedOddsAlert(match, TARGET_ODD_SELECTION, TARGET_ODD_MIN);
+}
+
+function isPatternNotificationWindow(status) {
+    if (/^H\.?Time$/i.test(String(status || '').trim())) {
+        return true;
+    }
+
+    return getShMinute(status) >= 0;
+}
+
 async function trackNG1Signal(matches) {
     if (!Array.isArray(matches) || !matches.length) return;
 
@@ -407,8 +419,8 @@ async function trackNG1Signal(matches) {
         if (sentNG1Signals.has(key)) continue;
 
         const status = String(match?.status || '').trim();
-        const shMin = getShMinute(status);
-        if (shMin < 0 || shMin > 1) continue;
+        if (!isPatternNotificationWindow(status)) continue;
+        if (has2HGoalByMatchKey.get(key)) continue;
 
         const homeScore = parseInt(match?.homeScore ?? '0', 10);
         const awayScore = parseInt(match?.awayScore ?? '0', 10);
@@ -417,6 +429,9 @@ async function trackNG1Signal(matches) {
 
         const last1HMin = last1HGoalMinByMatchKey.get(key) ?? -1;
         if (last1HMin !== 3) continue;
+
+        const targetOdd = getPatternTelegramOdd(match);
+        if (!targetOdd) continue;
 
         sentNG1Signals.add(key);
 
@@ -428,8 +443,9 @@ async function trackNG1Signal(matches) {
             `⚽ <b>${home} vs ${away}</b>\n` +
             `📊 Skor HT: <b>1-0</b> | Gol terakhir 1H: menit <b>3'</b>\n` +
             `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
+            `🎯 Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n\n` +
             `📈 Pola NG1: HT 1-0 + gol mnt 3 → <b>HOME 83%</b>\n` +
-            `🔥 <i>Pantau — prediksi gol HOME di babak kedua!</i>`;
+            `🔥 <i>Notif dikirim saat FT O/U O0.75 sudah > 1.95.</i>`;
 
         await sendTelegramText(msg);
     }
@@ -444,8 +460,8 @@ async function trackHT22Signal(matches) {
         if (sentHT22Signals.has(key)) continue;
 
         const status = String(match?.status || '').trim();
-        const shMin = getShMinute(status);
-        if (shMin < 2 || shMin > 3) continue;
+        if (!isPatternNotificationWindow(status)) continue;
+        if (has2HGoalByMatchKey.get(key)) continue;
 
         const homeScore = parseInt(match?.homeScore ?? '0', 10);
         const awayScore = parseInt(match?.awayScore ?? '0', 10);
@@ -462,6 +478,9 @@ async function trackHT22Signal(matches) {
         }
         if (maxGap > 2) continue;
 
+        const targetOdd = getPatternTelegramOdd(match);
+        if (!targetOdd) continue;
+
         sentHT22Signals.add(key);
 
         const home = escapeHtml(match?.homeTeam || '?');
@@ -476,8 +495,9 @@ async function trackHT22Signal(matches) {
             `🏆 League: ${league}\n` +
             `📊 Skor HT: <b>2-2</b> | Skor sekarang: <b>${currentScore}</b>\n` +
             `⏰ Status: <b>${escapeHtml(status)}</b>\n` +
+            `🎯 Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n` +
             `📌 Gol 1H: <b>${escapeHtml(minuteText)}</b> | Max gap: <b>${maxGap}</b> menit\n\n` +
-            `🔥 <i>P15 lolos: HT 2-2 dengan jeda gol rapat. Pantau peluang gol babak kedua!</i>`;
+            `🔥 <i>P15 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
 
         await sendTelegramText(msg);
     }
@@ -492,10 +512,7 @@ async function trackP14Signal(matches) {
         if (sentP14Signals.has(key)) continue;
 
         const status = String(match?.status || '').trim();
-        const isHalftime = /^H\.?Time$/i.test(status);
-        const shMin = getShMinute(status);
-        const isEarlySecondHalf = shMin >= 0 && shMin <= 1;
-        if (!isHalftime && !isEarlySecondHalf) continue;
+        if (!isPatternNotificationWindow(status)) continue;
         if (has2HGoalByMatchKey.get(key)) continue;
 
         const homeScore = parseInt(match?.homeScore ?? '0', 10);
@@ -520,6 +537,9 @@ async function trackP14Signal(matches) {
 
         if (firstGoalMin === 1 || span < 5 || maxGap < 4 || minGap < 2) continue;
 
+        const targetOdd = getPatternTelegramOdd(match);
+        if (!targetOdd) continue;
+
         sentP14Signals.add(key);
 
         const home = escapeHtml(match?.homeTeam || '?');
@@ -534,6 +554,7 @@ async function trackP14Signal(matches) {
             `🏆 League: ${league}\n` +
             `📊 Skor: <b>${score}</b>\n` +
             `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
+            `🎯 Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n\n` +
             `📌 Pola P14 terpenuhi:\n` +
             `• Seri di babak pertama\n` +
             `• Gap gol max <b>${maxGap}</b> menit\n` +
@@ -541,7 +562,7 @@ async function trackP14Signal(matches) {
             `• Span gol <b>${span}</b> menit\n` +
             `• First goal menit <b>${firstGoalMin}'</b>\n` +
             `• Urutan menit gol: <b>${escapeHtml(minuteText)}</b>\n\n` +
-            `🔥 <i>P14 historis 95% — indikasi kuat ada gol di babak kedua.</i>`;
+            `🔥 <i>P14 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
 
         await sendTelegramText(msg);
     }
@@ -556,10 +577,7 @@ async function trackP7Signal(matches) {
         if (sentP7Signals.has(key)) continue;
 
         const status = String(match?.status || '').trim();
-        const isHalftime = /^H\.?Time$/i.test(status);
-        const shMin = getShMinute(status);
-        const isEarlySecondHalf = shMin >= 0 && shMin <= 1;
-        if (!isHalftime && !isEarlySecondHalf) continue;
+        if (!isPatternNotificationWindow(status)) continue;
         if (has2HGoalByMatchKey.get(key)) continue;
 
         const homeScore = parseInt(match?.homeScore ?? '0', 10);
@@ -574,6 +592,9 @@ async function trackP7Signal(matches) {
         const maxGap = secondGoalMin - firstGoalMin;
         if (firstGoalMin === 1 || maxGap < 5) continue;
 
+        const targetOdd = getPatternTelegramOdd(match);
+        if (!targetOdd) continue;
+
         sentP7Signals.add(key);
 
         const home = escapeHtml(match?.homeTeam || '?');
@@ -587,12 +608,13 @@ async function trackP7Signal(matches) {
             `🏆 League: ${league}\n` +
             `📊 Skor: <b>1-1</b>\n` +
             `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
+            `🎯 Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n\n` +
             `📌 Pola P7 terpenuhi:\n` +
             `• HT seri <b>1-1</b>\n` +
             `• Gap antar gol <b>${maxGap}</b> menit\n` +
             `• First goal menit <b>${firstGoalMin}'</b>\n` +
             `• Urutan menit gol 1H: <b>${escapeHtml(minuteText)}</b>\n\n` +
-            `🔥 <i>P7 historis sangat kuat — indikasi ada gol di babak kedua.</i>`;
+            `🔥 <i>P7 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
 
         await sendTelegramText(msg);
     }
@@ -607,10 +629,7 @@ async function trackP19Signal(matches) {
         if (sentP19Signals.has(key)) continue;
 
         const status = String(match?.status || '').trim();
-        const isHalftime = /^H\.?Time$/i.test(status);
-        const shMin = getShMinute(status);
-        const isEarlySecondHalf = shMin >= 0 && shMin <= 2;
-        if (!isHalftime && !isEarlySecondHalf) continue;
+        if (!isPatternNotificationWindow(status)) continue;
         if (has2HGoalByMatchKey.get(key)) continue;
         if (!/20\s+Mins/i.test(String(match?.league || ''))) continue;
 
@@ -631,6 +650,9 @@ async function trackP19Signal(matches) {
         }
         if (goalMins.length > 1 && maxGap < 2) continue;
 
+        const targetOdd = getPatternTelegramOdd(match);
+        if (!targetOdd) continue;
+
         sentP19Signals.add(key);
 
         const home = escapeHtml(match?.homeTeam || '?');
@@ -646,12 +668,72 @@ async function trackP19Signal(matches) {
             `🏆 League: ${league}\n` +
             `📊 Skor: <b>${score}</b>\n` +
             `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
+            `🎯 Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n\n` +
             `📌 Pola P19 terpenuhi:\n` +
             `• Last goal 1H menit <b>${lastGoalMin}'</b>\n` +
             `• Last scorer <b>HOME</b>\n` +
             `• ${gapText}\n` +
             `• Urutan menit gol 1H: <b>${escapeHtml(minuteText)}</b>\n\n` +
-            `🔥 <i>P19 aktif — indikasi kuat ada gol di babak kedua.</i>`;
+            `🔥 <i>P19 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
+
+        await sendTelegramText(msg);
+    }
+}
+
+async function trackP28Signal(matches) {
+    if (!Array.isArray(matches) || !matches.length) return;
+
+    for (const match of matches) {
+        const key = createMatchKey(match);
+        if (!registeredMatchKeys.has(key)) continue;
+        if (sentP28Signals.has(key)) continue;
+
+        const status = String(match?.status || '').trim();
+        if (!isPatternNotificationWindow(status)) continue;
+        if (has2HGoalByMatchKey.get(key)) continue;
+
+        const homeTeam = normalizeTeamName(match?.homeTeam || '');
+        const awayTeam = normalizeTeamName(match?.awayTeam || '');
+        const isTargetTeam = ['croatia', 'france'].some((team) => homeTeam.includes(team) || awayTeam.includes(team));
+        if (!isTargetTeam) continue;
+
+        const homeScore = parseInt(match?.homeScore ?? '0', 10);
+        const awayScore = parseInt(match?.awayScore ?? '0', 10);
+        const goalMins = all1HGoalMinsByMatchKey.get(key) || [];
+        if (!goalMins.length) continue;
+
+        const firstGoalMin = goalMins[0];
+        const lastGoalMin = goalMins[goalMins.length - 1];
+        const span = lastGoalMin - firstGoalMin;
+        const diff = Math.abs(homeScore - awayScore);
+
+        if (lastGoalMin < 3 || span < 3 || diff > 1) continue;
+
+        const targetOdd = getPatternTelegramOdd(match);
+        if (!targetOdd) continue;
+
+        sentP28Signals.add(key);
+
+        const home = escapeHtml(match?.homeTeam || '?');
+        const away = escapeHtml(match?.awayTeam || '?');
+        const league = escapeHtml(match?.league || '?');
+        const score = `${homeScore}-${awayScore}`;
+        const minuteText = goalMins.map((min) => `${min}'`).join(', ');
+
+        const msg =
+            `🚨 <b>P28 SIGNAL — POTENSI GOL BABAK 2</b>\n` +
+            `⚽ <b>${home} vs ${away}</b>\n` +
+            `🏆 League: ${league}\n` +
+            `📊 Skor: <b>${score}</b>\n` +
+            `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
+            `🎯 Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n\n` +
+            `📌 Pola P28 terpenuhi:\n` +
+            `• Croatia atau France bermain\n` +
+            `• Last goal 1H menit <b>${lastGoalMin}'</b>\n` +
+            `• Span gol <b>${span}</b> menit\n` +
+            `• Selisih HT <b>${diff}</b>\n` +
+            `• Urutan menit gol 1H: <b>${escapeHtml(minuteText)}</b>\n\n` +
+            `🔥 <i>P28 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
 
         await sendTelegramText(msg);
     }

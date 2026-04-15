@@ -49,6 +49,7 @@ function buildDashboardData(string $csvFile, bool $csvExists): array {
     $parsedMatches = parseMatches($matches);
     $patterns = computePatterns($parsedMatches);
     $nextPatterns = computeNextPatterns($parsedMatches);
+    $latePatterns = computeLatePatterns($parsedMatches);
 
     return [
         'generated_at' => time(),
@@ -58,6 +59,7 @@ function buildDashboardData(string $csvFile, bool $csvExists): array {
         'with_2h' => count(array_filter($parsedMatches, fn($m) => $m['h2c'] > 0)),
         'patterns' => $patterns,
         'next_patterns' => $nextPatterns,
+        'late_patterns' => $latePatterns,
         'all_matches' => $parsedMatches,
     ];
 }
@@ -278,7 +280,38 @@ function computeNextPatterns(array $matches): array {
     ];
 }
 
-function computeSnapshotData(array $patterns, array $nextPatterns): array {
+function computeLatePatterns(array $matches): array {
+    $latePatterns = [
+        [
+            'id' => 'LG1',
+            'label' => 'Last gol 1H mnt 9 + first<=1 + AWAY unggul HT',
+            'data' => array_values(array_filter($matches, fn($m) => $m['h1_last'] === 9 && $m['h1_first'] <= 1 && $m['sc_a'] > $m['sc_h'])),
+        ],
+        [
+            'id' => 'LG2',
+            'label' => 'Last gol 1H mnt 9 + span>=7 + AWAY unggul HT',
+            'data' => array_values(array_filter($matches, fn($m) => $m['h1_last'] === 9 && ($m['h1_last'] - $m['h1_first']) >= 7 && $m['sc_a'] > $m['sc_h'])),
+        ],
+        [
+            'id' => 'LG3',
+            'label' => '16min + gol 1H>=3 + first scorer AWAY',
+            'data' => array_values(array_filter($matches, fn($m) => $m['league'] === '16min' && $m['h1c'] >= 3 && count($m['h1s']) > 0 && $m['h1s'][0] === 'A')),
+        ],
+    ];
+
+    usort($latePatterns, function($a, $b) {
+        $ta = count($a['data']);
+        $tb = count($b['data']);
+        $ha = $ta > 0 ? count(array_filter($a['data'], fn($m) => $m['has_late'])) / $ta : 0;
+        $hb = $tb > 0 ? count(array_filter($b['data'], fn($m) => $m['has_late'])) / $tb : 0;
+        if ($hb != $ha) return $hb <=> $ha;
+        return $tb <=> $ta;
+    });
+
+    return $latePatterns;
+}
+
+function computeSnapshotData(array $patterns, array $nextPatterns, array $latePatterns = []): array {
     $snap = [];
     foreach ($patterns as $p) {
         $t = count($p['data']);
@@ -290,6 +323,11 @@ function computeSnapshotData(array $patterns, array $nextPatterns): array {
         $t = count($ng['data']);
         $h = count(array_filter($ng['data'], fn($m) => ($tgt==='HOME' ? $m['next_goal']==='H' : $m['next_goal']==='A')));
         $snap[$ng['id']] = ['t' => $t, 'h' => $h];
+    }
+    foreach ($latePatterns as $lp) {
+        $t = count($lp['data']);
+        $h = count(array_filter($lp['data'], fn($m) => $m['has_late']));
+        $snap[$lp['id']] = ['t' => $t, 'h' => $h];
     }
     return $snap;
 }

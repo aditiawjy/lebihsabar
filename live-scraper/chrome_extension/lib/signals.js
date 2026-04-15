@@ -1,3 +1,124 @@
+function registerMatchIfNeeded(key, match, timestamp, newMatches) {
+    if (registeredMatchKeys.has(key)) return false;
+
+    registeredMatchKeys.add(key);
+    kickoffTimeByMatchKey.set(key, timestamp);
+    newMatches.push({
+        timestamp,
+        league: match?.league || '',
+        home_team: match?.homeTeam || '',
+        away_team: match?.awayTeam || '',
+    });
+    return true;
+}
+
+function appendGoalState(key, prevScore, homeScore, awayScore, half, minuteValue) {
+    const prevParts = String(prevScore).split('-').map((value) => parseInt(value, 10) || 0);
+    const prevHome = prevParts[0] || 0;
+    const prevAway = prevParts[1] || 0;
+    const curHome = parseInt(homeScore, 10) || 0;
+    const curAway = parseInt(awayScore, 10) || 0;
+    const homeDelta = Math.max(0, curHome - prevHome);
+    const awayDelta = Math.max(0, curAway - prevAway);
+    const goalCount = homeDelta + awayDelta;
+
+    if (half === '1H') {
+        const curLast = last1HGoalMinByMatchKey.get(key) ?? -1;
+        if (minuteValue > curLast) last1HGoalMinByMatchKey.set(key, minuteValue);
+        if (!first1HGoalMinByMatchKey.has(key)) first1HGoalMinByMatchKey.set(key, minuteValue);
+
+        const allMins = all1HGoalMinsByMatchKey.get(key) || [];
+        for (let i = 0; i < goalCount; i += 1) allMins.push(minuteValue);
+        all1HGoalMinsByMatchKey.set(key, allMins);
+        const allScorers = all1HScorersByMatchKey.get(key) || [];
+        for (let i = 0; i < homeDelta; i += 1) allScorers.push('H');
+        for (let i = 0; i < awayDelta; i += 1) allScorers.push('A');
+        all1HScorersByMatchKey.set(key, allScorers);
+    }
+
+    if (half === '2H') {
+        has2HGoalByMatchKey.set(key, true);
+        const all2HMins = all2HGoalMinsByMatchKey.get(key) || [];
+        for (let i = 0; i < goalCount; i += 1) all2HMins.push(minuteValue);
+        all2HGoalMinsByMatchKey.set(key, all2HMins);
+        const all2HScorers = all2HScorersByMatchKey.get(key) || [];
+        for (let i = 0; i < homeDelta; i += 1) all2HScorers.push('H');
+        for (let i = 0; i < awayDelta; i += 1) all2HScorers.push('A');
+        all2HScorersByMatchKey.set(key, all2HScorers);
+    }
+}
+
+function buildTrackedGoalEventsForMatch(key, match, timestamp) {
+    const events = [];
+    let home = 0;
+    let away = 0;
+    const league = match?.league || '';
+    const homeTeam = match?.homeTeam || '';
+    const awayTeam = match?.awayTeam || '';
+    const scorePairs = [
+        {
+            half: '1H',
+            mins: all1HGoalMinsByMatchKey.get(key) || [],
+            scorers: all1HScorersByMatchKey.get(key) || []
+        },
+        {
+            half: '2H',
+            mins: all2HGoalMinsByMatchKey.get(key) || [],
+            scorers: all2HScorersByMatchKey.get(key) || []
+        }
+    ];
+
+    for (const part of scorePairs) {
+        const mins = Array.isArray(part.mins) ? part.mins : [];
+        const scorers = Array.isArray(part.scorers) ? part.scorers : [];
+        const count = Math.min(mins.length, scorers.length);
+        for (let i = 0; i < count; i += 1) {
+            const scorer = scorers[i];
+            if (scorer === 'H') home += 1;
+            else if (scorer === 'A') away += 1;
+            else continue;
+
+            events.push({
+                timestamp,
+                league,
+                home_team: homeTeam,
+                away_team: awayTeam,
+                minute: `${part.half} ${mins[i]}'`,
+                score_before: '0-0',
+                score_after: `${home}-${away}`,
+                home_score: String(home),
+                away_score: String(away),
+            });
+        }
+    }
+
+    return events;
+}
+
+function buildVisibleGoalBackfill(key, match, minute, scoreStr, timestamp) {
+    const parsed = parseMatchMinute(minute);
+    if (parsed.half !== '1H') return null;
+    if (all1HGoalMinsByMatchKey.has(key) || all2HGoalMinsByMatchKey.has(key)) return null;
+
+    const homeScore = parseInt(match?.homeScore ?? '0', 10) || 0;
+    const awayScore = parseInt(match?.awayScore ?? '0', 10) || 0;
+    if (homeScore + awayScore !== 1) return null;
+
+    appendGoalState(key, '0-0', String(homeScore), String(awayScore), parsed.half, parsed.min);
+
+    return {
+        timestamp,
+        league: match?.league || '',
+        home_team: match?.homeTeam || '',
+        away_team: match?.awayTeam || '',
+        minute,
+        score_before: '0-0',
+        score_after: scoreStr,
+        home_score: String(match?.homeScore ?? '0'),
+        away_score: String(match?.awayScore ?? '0'),
+    };
+}
+
 async function trackGoalEvents(matches) {
     if (!Array.isArray(matches) || !matches.length) return;
 
@@ -12,14 +133,17 @@ async function trackGoalEvents(matches) {
         const awayScore = String(match?.awayScore ?? '0').trim();
         const scoreStr = `${homeScore}-${awayScore}`;
         const minute = String(match?.status || '').trim();
+        const parsedMinute = parseMatchMinute(minute);
+        const isTrackableLiveState = parsedMinute.half === '1H' || parsedMinute.half === '2H' || /^H\.?Time$/i.test(minute);
 
         const isNewRound = isKickoffMinute(minute) && scoreStr === '0-0' &&
             registeredMatchKeys.has(key) &&
             (lastScoreByMatchKey.get(key) || '0-0') !== '0-0';
         if (isKickoffMinute(minute) && (!registeredMatchKeys.has(key) || isNewRound)) {
-            registeredMatchKeys.add(key);
-            kickoffTimeByMatchKey.set(key, timestamp);
-            lastScoreByMatchKey.set(key, scoreStr);
+            if (isNewRound) {
+                registeredMatchKeys.delete(key);
+            }
+            registerMatchIfNeeded(key, match, timestamp, newMatches);
             last1HGoalMinByMatchKey.delete(key);
             has2HGoalByMatchKey.delete(key);
             sentNG1Signals.delete(key);
@@ -31,16 +155,22 @@ async function trackGoalEvents(matches) {
             all1HGoalMinsByMatchKey.delete(key);
             all1HScorersByMatchKey.delete(key);
             all2HGoalMinsByMatchKey.delete(key);
+            all2HScorersByMatchKey.delete(key);
             for (const ms of MILESTONES) {
                 sentMilestones.delete(key + '|' + ms.id);
             }
-            newMatches.push({
-                timestamp,
-                league: match?.league || '',
-                home_team: match?.homeTeam || '',
-                away_team: match?.awayTeam || '',
-            });
+
+            const kickoffBackfill = buildVisibleGoalBackfill(key, match, minute, scoreStr, kickoffTimeByMatchKey.get(key) || timestamp);
+            if (kickoffBackfill) {
+                newGoals.push(kickoffBackfill);
+            }
+
+            lastScoreByMatchKey.set(key, scoreStr);
             continue;
+        }
+
+        if (!registeredMatchKeys.has(key) && isTrackableLiveState) {
+            registerMatchIfNeeded(key, match, timestamp, newMatches);
         }
 
         const isHalftime = /^H\.?Time$/i.test(minute);
@@ -55,38 +185,17 @@ async function trackGoalEvents(matches) {
 
         const prev = lastScoreByMatchKey.get(key);
         if (prev === undefined) {
+            const inferredGoal = buildVisibleGoalBackfill(key, match, minute, scoreStr, kickoffTimeByMatchKey.get(key) || timestamp);
+            if (inferredGoal) {
+                newGoals.push(inferredGoal);
+            }
             lastScoreByMatchKey.set(key, scoreStr);
             continue;
         }
 
         if (prev !== scoreStr) {
             const { half: gHalf, min: gMin } = parseMatchMinute(minute);
-            if (gHalf === '1H') {
-                const curLast = last1HGoalMinByMatchKey.get(key) ?? -1;
-                if (gMin > curLast) last1HGoalMinByMatchKey.set(key, gMin);
-                if (!first1HGoalMinByMatchKey.has(key)) first1HGoalMinByMatchKey.set(key, gMin);
-                const allMins = all1HGoalMinsByMatchKey.get(key) || [];
-                allMins.push(gMin);
-                all1HGoalMinsByMatchKey.set(key, allMins);
-
-                const prevParts = String(prev).split('-').map((value) => parseInt(value, 10) || 0);
-                const prevHome = prevParts[0] || 0;
-                const prevAway = prevParts[1] || 0;
-                const curHome = parseInt(homeScore, 10) || 0;
-                const curAway = parseInt(awayScore, 10) || 0;
-                const homeDelta = Math.max(0, curHome - prevHome);
-                const awayDelta = Math.max(0, curAway - prevAway);
-                const allScorers = all1HScorersByMatchKey.get(key) || [];
-                for (let i = 0; i < homeDelta; i += 1) allScorers.push('H');
-                for (let i = 0; i < awayDelta; i += 1) allScorers.push('A');
-                all1HScorersByMatchKey.set(key, allScorers);
-            }
-            if (gHalf === '2H') {
-                has2HGoalByMatchKey.set(key, true);
-                const all2HMins = all2HGoalMinsByMatchKey.get(key) || [];
-                all2HMins.push(gMin);
-                all2HGoalMinsByMatchKey.set(key, all2HMins);
-            }
+            appendGoalState(key, prev, homeScore, awayScore, gHalf, gMin);
 
             newGoals.push({
                 timestamp: kickoffTimeByMatchKey.get(key) || timestamp,
@@ -148,22 +257,35 @@ async function trackGoalEvents(matches) {
         } catch (_) {}
     }
 
-    if (!newGoals.length) return;
-
     await chrome.storage.local.set({
         liveHtScores: Object.fromEntries(shScoreByMatchKey)
     });
 
-    const stored = await chrome.storage.local.get(['goalLog']);
-    const existing = Array.isArray(stored.goalLog) ? stored.goalLog : [];
-    const updated = [...existing, ...newGoals].slice(-500);
-    await chrome.storage.local.set({ goalLog: updated });
+    if (newGoals.length) {
+        const stored = await chrome.storage.local.get(['goalLog']);
+        const existing = Array.isArray(stored.goalLog) ? stored.goalLog : [];
+        const updated = [...existing, ...newGoals].slice(-500);
+        await chrome.storage.local.set({ goalLog: updated });
+    }
+
+    const syncGoals = [];
+    for (const match of matches) {
+        const key = createMatchKey(match);
+        if (!registeredMatchKeys.has(key)) continue;
+        const trackedEvents = buildTrackedGoalEventsForMatch(key, match, kickoffTimeByMatchKey.get(key) || timestamp);
+        if (trackedEvents.length) {
+            syncGoals.push(...trackedEvents);
+        }
+    }
+
+    const goalsToPersist = syncGoals.length ? syncGoals : newGoals;
+    if (!goalsToPersist.length) return;
 
     try {
         await fetch('http://localhost/lebihsabar/goal-log-save.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ goals: newGoals })
+            body: JSON.stringify({ goals: goalsToPersist })
         });
     } catch (_) {}
 }

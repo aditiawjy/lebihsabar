@@ -42,6 +42,46 @@ function parseCsvDatetime(string $val): array {
     ];
 }
 
+function extractGoalSnapshots(string $goals): array {
+    $matches = [];
+    preg_match_all('/(1H|2H)\s+(\d+)\'\s*\((\d+)-(\d+)\)/', $goals, $matches, PREG_SET_ORDER);
+    return $matches;
+}
+
+function hasValidGoalProgression(string $goals): bool {
+    $goals = trim($goals);
+    if ($goals === '') return true;
+
+    $leftovers = preg_replace('/(?:^|\|)\s*(?:1H|2H)\s+\d+\'\s*\(\d+-\d+\)\s*/', '', $goals);
+    if (trim((string)$leftovers, " \t\n\r\0\x0B|") !== '') return false;
+
+    $snapshots = extractGoalSnapshots($goals);
+    if (!$snapshots) return false;
+
+    $prevHome = 0;
+    $prevAway = 0;
+
+    foreach ($snapshots as $index => $snapshot) {
+        $home = (int)$snapshot[3];
+        $away = (int)$snapshot[4];
+
+        if ($index === 0 && !(($home === 1 && $away === 0) || ($home === 0 && $away === 1))) {
+            return false;
+        }
+
+        $deltaHome = $home - $prevHome;
+        $deltaAway = $away - $prevAway;
+        if (!(($deltaHome === 1 && $deltaAway === 0) || ($deltaHome === 0 && $deltaAway === 1))) {
+            return false;
+        }
+
+        $prevHome = $home;
+        $prevAway = $away;
+    }
+
+    return true;
+}
+
 // Open CSV with exclusive lock to prevent race conditions
 $lockFile = $csvFile . '.lock';
 $lock = fopen($lockFile, 'c');
@@ -151,13 +191,23 @@ foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
     $key = isset($rows[$exactKey]) ? $exactKey : (findExistingKey($rows, $dateOnly, $homeTeam, $awayTeam, $dt) ?? $exactKey);
     $goalEntry = $minute . ' (' . $scoreAfter . ')';
 
+    $existingGoals = trim((string)($rows[$key]['goals'] ?? ''));
+    $candidateGoals = $existingGoals;
+    if ($candidateGoals === '') {
+        $candidateGoals = $goalEntry;
+    } elseif (strpos($candidateGoals, $goalEntry) === false) {
+        $candidateGoals .= ' | ' . $goalEntry;
+    }
+
+    if (!hasValidGoalProgression($candidateGoals)) continue;
+
     if (!isset($rows[$key])) {
         $rows[$key] = [
             'datetime'   => $datetime,
             'league'     => $league,
             'home_team'  => $homeTeam,
             'away_team'  => $awayTeam,
-            'goals'      => $goalEntry,
+            'goals'      => $candidateGoals,
             'final_home' => $homeFinal,
             'final_away' => $awayFinal,
             '1h3'        => '',
@@ -165,10 +215,7 @@ foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
             '2h7'        => '',
         ];
     } else {
-        $existing = $rows[$key]['goals'];
-        if (strpos($existing, $goalEntry) === false) {
-            $rows[$key]['goals'] = $existing . ' | ' . $goalEntry;
-        }
+        $rows[$key]['goals'] = $candidateGoals;
         $rows[$key]['final_home'] = $homeFinal;
         $rows[$key]['final_away'] = $awayFinal;
     }
@@ -186,9 +233,11 @@ if ($hasMilestones) {
     foreach ($payload['milestones'] as $ms) {
         $ts = $ms['timestamp'] ?? date('c');
         $dt = (new DateTime($ts))->setTimezone(new DateTimeZone('Asia/Jakarta'));
+        $datetime   = $dt->format('d/m/Y H:i');
         $dateOnly   = $dt->format('Y-m-d');
         $hourOnly   = $dt->format('H');
         $minuteOnly = $dt->format('i');
+        $league     = trim($ms['league'] ?? '');
         $homeTeam   = trim($ms['home_team'] ?? '');
         $awayTeam   = trim($ms['away_team'] ?? '');
         $msId       = trim($ms['milestone'] ?? '');
@@ -196,19 +245,41 @@ if ($hasMilestones) {
         if (!in_array($msId, ['1h3', '2h1', '2h7'], true)) continue;
         $exactKey = $dateOnly . '|' . $hourOnly . ':' . $minuteOnly . '|' . $homeTeam . '|' . $awayTeam;
         $key = isset($rows[$exactKey]) ? $exactKey : (findExistingKey($rows, $dateOnly, $homeTeam, $awayTeam, $dt) ?? $exactKey);
-        if (isset($rows[$key])) {
-            $rows[$key][$msId] = '✓';
-            // 2H milestones imply 1H 3' was also reached
-            if ($msId === '2h1' || $msId === '2h7') $rows[$key]['1h3'] = '✓';
-            if ($msId === '2h7') $rows[$key]['2h1'] = '✓';
-            // Update final score from milestone if still empty (handles 0-0 matches)
-            $hscore = trim($ms['home_score'] ?? '');
-            $ascore = trim($ms['away_score'] ?? '');
-            if ($hscore !== '' && $rows[$key]['final_home'] === '') $rows[$key]['final_home'] = $hscore;
-            if ($ascore !== '' && $rows[$key]['final_away'] === '') $rows[$key]['final_away'] = $ascore;
+        if (!isset($rows[$key])) {
+            $rows[$key] = [
+                'datetime'   => $datetime,
+                'league'     => $league,
+                'home_team'  => $homeTeam,
+                'away_team'  => $awayTeam,
+                'goals'      => '',
+                'final_home' => trim($ms['home_score'] ?? '0'),
+                'final_away' => trim($ms['away_score'] ?? '0'),
+                '1h3'        => '',
+                '2h1'        => '',
+                '2h7'        => '',
+            ];
         }
+
+        $rows[$key][$msId] = '✓';
+        // 2H milestones imply 1H 3' was also reached.
+        if ($msId === '2h1' || $msId === '2h7') $rows[$key]['1h3'] = '✓';
+        if ($msId === '2h7') $rows[$key]['2h1'] = '✓';
+        // Update final score from milestone if still empty (handles 0-0 matches).
+        $hscore = trim($ms['home_score'] ?? '');
+        $ascore = trim($ms['away_score'] ?? '');
+        if ($hscore !== '' && $rows[$key]['final_home'] === '') $rows[$key]['final_home'] = $hscore;
+        if ($ascore !== '' && $rows[$key]['final_away'] === '') $rows[$key]['final_away'] = $ascore;
     }
 }
+
+// Keep only completed matches that reached 2H 7'.
+$rows = array_filter($rows, static fn(array $row): bool => trim((string)($row['2h7'] ?? '')) !== '');
+
+// Drop rows with malformed or incomplete goal progressions.
+$rows = array_filter($rows, static function (array $row): bool {
+    $goals = trim((string)($row['goals'] ?? ''));
+    return $goals === '' || hasValidGoalProgression($goals);
+});
 
 // Write CSV
 $fh = fopen($csvFile, 'w');

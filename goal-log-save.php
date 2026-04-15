@@ -82,6 +82,29 @@ function hasValidGoalProgression(string $goals): bool {
     return true;
 }
 
+function getLastGoalSnapshot(string $goals): ?array {
+    $snapshots = extractGoalSnapshots($goals);
+    if (!$snapshots) return null;
+    $last = $snapshots[count($snapshots) - 1];
+    return ['home' => (int)$last[3], 'away' => (int)$last[4]];
+}
+
+function shouldKeepPendingRow(array $row): bool {
+    if (trim((string)($row['2h7'] ?? '')) !== '') return true;
+
+    $dt = DateTime::createFromFormat('d/m/Y H:i', (string)($row['datetime'] ?? ''));
+    if (!$dt) {
+        try {
+            $dt = new DateTime((string)($row['datetime'] ?? 'now'));
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    $now = new DateTime('now', new DateTimeZone('Asia/Jakarta'));
+    return ($now->getTimestamp() - $dt->getTimestamp()) <= 7200;
+}
+
 // Open CSV with exclusive lock to prevent race conditions
 $lockFile = $csvFile . '.lock';
 $lock = fopen($lockFile, 'c');
@@ -124,6 +147,8 @@ if ($hasMatches) {
         $homeTeam = trim($m['home_team'] ?? '');
         $awayTeam = trim($m['away_team'] ?? '');
         $league   = trim($m['league']   ?? '');
+        $homeScore = array_key_exists('home_score', $m) ? trim((string)$m['home_score']) : null;
+        $awayScore = array_key_exists('away_score', $m) ? trim((string)$m['away_score']) : null;
         if ($homeTeam === '' || $awayTeam === '') continue;
         $exactKey = $dateOnly . '|' . $hourOnly . ':' . $minuteOnly . '|' . $homeTeam . '|' . $awayTeam;
         // Skip if already registered within 30 min window (handles re-registration at slightly different minute)
@@ -142,6 +167,9 @@ if ($hasMatches) {
                 '2h7'        => '',
             ];
         }
+
+        if ($homeScore !== null && $homeScore !== '') $rows[$key]['final_home'] = $homeScore;
+        if ($awayScore !== null && $awayScore !== '') $rows[$key]['final_away'] = $awayScore;
     }
 }
 
@@ -272,12 +300,28 @@ if ($hasMilestones) {
     }
 }
 
-// Keep only completed matches that reached 2H 7'.
-$rows = array_filter($rows, static fn(array $row): bool => trim((string)($row['2h7'] ?? '')) !== '');
+// Keep completed rows and recent live rows for debugging/tracking.
+$rows = array_filter($rows, static fn(array $row): bool => shouldKeepPendingRow($row));
 
 // Drop rows with malformed or incomplete goal progressions.
 $rows = array_filter($rows, static function (array $row): bool {
     $goals = trim((string)($row['goals'] ?? ''));
+    $finalHome = (int)($row['final_home'] ?? 0);
+    $finalAway = (int)($row['final_away'] ?? 0);
+
+    // If the match has goals on the scoreboard but no goal timeline, the row is incomplete.
+    if ($goals === '' && ($finalHome + $finalAway) > 0) {
+        return false;
+    }
+
+    if ($goals !== '') {
+        $lastSnapshot = getLastGoalSnapshot($goals);
+        if (!$lastSnapshot) return false;
+        if ($lastSnapshot['home'] !== $finalHome || $lastSnapshot['away'] !== $finalAway) {
+            return false;
+        }
+    }
+
     return $goals === '' || hasValidGoalProgression($goals);
 });
 

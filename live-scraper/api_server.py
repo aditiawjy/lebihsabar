@@ -15,8 +15,16 @@ CORS(app)
 # Initialize Telegram notifier
 notifier = TelegramNotifier()
 
-# Store last matches
-last_matches = []
+# Store latest dashboard payload
+last_payload = {
+    "matches": [],
+    "allGoalMinutes": {},
+    "allGoalScorers": {},
+    "all2HGoalMinutes": {},
+    "all2HScorers": {},
+    "htScores": {},
+    "timestamp": None,
+}
 
 
 @app.route("/api/live-data", methods=["POST"])
@@ -26,9 +34,17 @@ def receive_live_data():
         data = request.get_json() or {}
         matches = data.get("matches", [])
 
-        # Simpan data
-        global last_matches
-        last_matches = matches
+        # Simpan data lengkap untuk dashboard live
+        global last_payload
+        last_payload = {
+            "matches": matches,
+            "allGoalMinutes": data.get("allGoalMinutes", {}) or {},
+            "allGoalScorers": data.get("allGoalScorers", {}) or {},
+            "all2HGoalMinutes": data.get("all2HGoalMinutes", {}) or {},
+            "all2HScorers": data.get("all2HScorers", {}) or {},
+            "htScores": data.get("htScores", {}) or {},
+            "timestamp": data.get("timestamp") or datetime.now().isoformat(),
+        }
 
         # Kirim notifikasi untuk match baru atau update
         for match in matches:
@@ -64,13 +80,10 @@ def receive_live_data():
 @app.route("/api/live-data", methods=["GET"])
 def get_live_data():
     """Ambil data match terakhir"""
-    return jsonify(
-        {
-            "matches": last_matches,
-            "count": len(last_matches),
-            "timestamp": datetime.now().isoformat(),
-        }
-    )
+    response = dict(last_payload)
+    response["count"] = len(last_payload.get("matches", []))
+    response["timestamp"] = datetime.now().isoformat()
+    return jsonify(response)
 
 
 @app.route("/api/test-telegram", methods=["POST"])
@@ -92,7 +105,7 @@ def get_status():
         {
             "status": "online",
             "timestamp": datetime.now().isoformat(),
-            "matches_count": len(last_matches),
+            "matches_count": len(last_payload.get("matches", [])),
         }
     )
 

@@ -37,7 +37,8 @@ function buildDashboardData(string $csvFile, bool $csvExists): array {
         if ($fh !== false) {
             fgetcsv($fh);
             while (($row = fgetcsv($fh)) !== false) {
-                if (count($row) < 7) continue;
+                if (count($row) < 10) continue;
+                if (trim((string)($row[9] ?? '')) === '') continue;
                 $goalsStr = trim($row[4] ?? '');
                 if ($goalsStr === '' && (int)($row[5] ?? 0) === 0 && (int)($row[6] ?? 0) === 0) continue;
                 $matches[] = $row;

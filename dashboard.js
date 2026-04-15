@@ -536,6 +536,13 @@
         return Array.isArray(allGoalScorers[key]) ? allGoalScorers[key] : [];
     }
 
+    function getLiveSecondHalfGoalMinutes(livePayload, key) {
+        var all2HGoalMinutes = livePayload && livePayload.all2HGoalMinutes ? livePayload.all2HGoalMinutes : {};
+        return Array.isArray(all2HGoalMinutes[key])
+            ? all2HGoalMinutes[key].map(function(min) { return parseInt(min, 10); }).filter(function(min) { return !Number.isNaN(min); })
+            : [];
+    }
+
     function getMaxGap(goalMins) {
         var maxGap = 0;
         for (var i = 1; i < goalMins.length; i++) {
@@ -623,7 +630,12 @@
         (matches || []).forEach(function(match) {
             var statusText = getMatchStatusText(match);
             var s = parseStatus(statusText);
-            if (s.half !== '1H' && s.half !== '2H' && !/^H\.?Time$/i.test(statusText)) return;
+            var isHalftime = /^H\.?Time$/i.test(statusText);
+            var key = matchKey(match);
+            var hasSecondHalfGoal = getLiveSecondHalfGoalMinutes(livePayload, key).length > 0;
+            var isFirstHalf = s.half === '1H';
+            var isPreSecondHalfGoalWindow = s.half === '2H' && !hasSecondHalfGoal;
+            if (!isFirstHalf && !isHalftime && !isPreSecondHalfGoalWindow) return;
 
             var state = buildLivePatternState(match, livePayload);
             if (!state) return;

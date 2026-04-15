@@ -23,6 +23,8 @@ let all1HScorersByMatchKey = new Map();
 let has2HGoalByMatchKey = new Map();
 let all2HGoalMinsByMatchKey = new Map();
 let all2HScorersByMatchKey = new Map();
+let lastSeenAtByMatchKey = new Map();
+let lastStatusByMatchKey = new Map();
 
 
 async function saveRuntimeState(partialState = {}) {
@@ -52,7 +54,7 @@ async function updateLiveState(isRunning, extraState = {}) {
 async function restoreRuntimeState() {
     const [localData, sessionData] = await Promise.all([
         chrome.storage.local.get(['liveRuntimeState', 'sentNG1Keys', 'sentP7Keys', 'sentP14Keys', 'sentP19Keys']),
-        chrome.storage.session.get(['kickoffTimes', 'registeredKeys', 'sentMilestoneKeys', 'lastScores', 'shScores', 'last1HGoalMins', 'first1HGoalMins', 'all1HGoalMins', 'all1HScorers', 'has2HGoals', 'all2HGoalMins', 'all2HScorers'])
+        chrome.storage.session.get(['kickoffTimes', 'registeredKeys', 'sentMilestoneKeys', 'lastScores', 'shScores', 'last1HGoalMins', 'first1HGoalMins', 'all1HGoalMins', 'all1HScorers', 'has2HGoals', 'all2HGoalMins', 'all2HScorers', 'lastSeenAt', 'lastStatuses'])
     ]);
     const runtimeState = localData.liveRuntimeState || {};
 
@@ -107,6 +109,12 @@ async function restoreRuntimeState() {
     if (sessionData.all2HScorers) {
         all2HScorersByMatchKey = new Map(Object.entries(sessionData.all2HScorers));
     }
+    if (sessionData.lastSeenAt) {
+        lastSeenAtByMatchKey = new Map(Object.entries(sessionData.lastSeenAt).map(([k, v]) => [k, Number(v)]));
+    }
+    if (sessionData.lastStatuses) {
+        lastStatusByMatchKey = new Map(Object.entries(sessionData.lastStatuses));
+    }
 
     if (isLiveRunning) {
         await chrome.alarms.create(LIVE_ALARM_NAME, {
@@ -130,6 +138,8 @@ async function persistMatchState() {
             has2HGoals: Object.fromEntries(has2HGoalByMatchKey),
             all2HGoalMins: Object.fromEntries(all2HGoalMinsByMatchKey),
             all2HScorers: Object.fromEntries(all2HScorersByMatchKey),
+            lastSeenAt: Object.fromEntries(lastSeenAtByMatchKey),
+            lastStatuses: Object.fromEntries(lastStatusByMatchKey),
         }),
         chrome.storage.local.set({
             sentNG1Keys: [...sentNG1Signals],

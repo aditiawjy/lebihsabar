@@ -1,3 +1,94 @@
+const MATCH_STATE_STALE_MS = 45 * 60 * 1000;
+
+function clearThresholdAlertState(matchKey) {
+    for (const stateKey of Array.from(notifiedMatchKeys)) {
+        if (String(stateKey).startsWith(`${matchKey}::`)) {
+            notifiedMatchKeys.delete(stateKey);
+        }
+    }
+
+    for (const stateKey of Array.from(wasAboveThresholdByMatchKey.keys())) {
+        if (String(stateKey).startsWith(`${matchKey}::`)) {
+            wasAboveThresholdByMatchKey.delete(stateKey);
+        }
+    }
+}
+
+function resetMatchTrackingState(key) {
+    registeredMatchKeys.delete(key);
+    kickoffTimeByMatchKey.delete(key);
+    lastScoreByMatchKey.delete(key);
+    shScoreByMatchKey.delete(key);
+    sentNG1Signals.delete(key);
+    sentHT22Signals.delete(key);
+    sentP7Signals.delete(key);
+    sentP14Signals.delete(key);
+    sentP19Signals.delete(key);
+    last1HGoalMinByMatchKey.delete(key);
+    first1HGoalMinByMatchKey.delete(key);
+    all1HGoalMinsByMatchKey.delete(key);
+    all1HScorersByMatchKey.delete(key);
+    has2HGoalByMatchKey.delete(key);
+    all2HGoalMinsByMatchKey.delete(key);
+    all2HScorersByMatchKey.delete(key);
+    lastSeenAtByMatchKey.delete(key);
+    lastStatusByMatchKey.delete(key);
+    oddHistoryByMatchKey.delete(key);
+    oddInsightByMatchKey.delete(key);
+    clearThresholdAlertState(key);
+    for (const ms of MILESTONES) {
+        sentMilestones.delete(key + '|' + ms.id);
+    }
+}
+
+function parseScoreTuple(scoreStr) {
+    const parts = String(scoreStr || '0-0').split('-').map((value) => parseInt(value, 10) || 0);
+    return { home: parts[0] || 0, away: parts[1] || 0, total: (parts[0] || 0) + (parts[1] || 0) };
+}
+
+function shouldResetFixtureState(key, minute, scoreStr, nowMs) {
+    if (!registeredMatchKeys.has(key)) return false;
+
+    const lastSeenAt = lastSeenAtByMatchKey.get(key) || 0;
+    const lastStatus = String(lastStatusByMatchKey.get(key) || '').trim();
+    const prevStatus = parseMatchMinute(lastStatus);
+    const curStatus = parseMatchMinute(minute);
+    const prevScore = parseScoreTuple(lastScoreByMatchKey.get(key) || '0-0');
+    const curScore = parseScoreTuple(scoreStr);
+    const wasHalftime = /^H\.?Time$/i.test(lastStatus);
+    const isHalftime = /^H\.?Time$/i.test(String(minute || '').trim());
+
+    if (lastSeenAt && (nowMs - lastSeenAt) > MATCH_STATE_STALE_MS) {
+        return true;
+    }
+
+    if (prevScore.total > curScore.total && isKickoffMinute(minute)) {
+        return true;
+    }
+
+    if ((prevStatus.half === '2H' || wasHalftime) && curStatus.half === '1H') {
+        return true;
+    }
+
+    if (prevStatus.half === curStatus.half && prevStatus.min >= 0 && curStatus.min >= 0 && curStatus.min + 2 < prevStatus.min) {
+        return true;
+    }
+
+    if ((prevStatus.half === '2H' || wasHalftime) && isKickoffMinute(minute)) {
+        return true;
+    }
+
+    if ((last1HGoalMinByMatchKey.get(key) || -1) >= 7 && curStatus.half === '1H' && curStatus.min >= 0 && curStatus.min <= 4) {
+        return true;
+    }
+
+    if (has2HGoalByMatchKey.get(key) && (isHalftime || (curStatus.half === '2H' && curStatus.min <= 2))) {
+        return true;
+    }
+
+    return false;
+}
+
 function registerMatchIfNeeded(key, match, timestamp, newMatches) {
     if (registeredMatchKeys.has(key)) return false;
 
@@ -137,6 +228,7 @@ async function trackGoalEvents(matches) {
     const newMatches = [];
     const now = new Date();
     const timestamp = now.toISOString();
+    const nowMs = now.getTime();
 
     for (const match of matches) {
         const key = createMatchKey(match);
@@ -147,29 +239,18 @@ async function trackGoalEvents(matches) {
         const parsedMinute = parseMatchMinute(minute);
         const isTrackableLiveState = parsedMinute.half === '1H' || parsedMinute.half === '2H' || /^H\.?Time$/i.test(minute);
 
+        if (shouldResetFixtureState(key, minute, scoreStr, nowMs)) {
+            resetMatchTrackingState(key);
+        }
+
         const isNewRound = isKickoffMinute(minute) && scoreStr === '0-0' &&
             registeredMatchKeys.has(key) &&
             (lastScoreByMatchKey.get(key) || '0-0') !== '0-0';
         if (isKickoffMinute(minute) && (!registeredMatchKeys.has(key) || isNewRound)) {
             if (isNewRound) {
-                registeredMatchKeys.delete(key);
+                resetMatchTrackingState(key);
             }
             registerMatchIfNeeded(key, match, timestamp, newMatches);
-            last1HGoalMinByMatchKey.delete(key);
-            has2HGoalByMatchKey.delete(key);
-            sentNG1Signals.delete(key);
-            sentHT22Signals.delete(key);
-            sentP7Signals.delete(key);
-            sentP14Signals.delete(key);
-            sentP19Signals.delete(key);
-            first1HGoalMinByMatchKey.delete(key);
-            all1HGoalMinsByMatchKey.delete(key);
-            all1HScorersByMatchKey.delete(key);
-            all2HGoalMinsByMatchKey.delete(key);
-            all2HScorersByMatchKey.delete(key);
-            for (const ms of MILESTONES) {
-                sentMilestones.delete(key + '|' + ms.id);
-            }
 
             const kickoffBackfill = buildVisibleGoalBackfill(key, match, minute, scoreStr, kickoffTimeByMatchKey.get(key) || timestamp);
             if (kickoffBackfill) {
@@ -177,6 +258,8 @@ async function trackGoalEvents(matches) {
             }
 
             lastScoreByMatchKey.set(key, scoreStr);
+            lastSeenAtByMatchKey.set(key, nowMs);
+            lastStatusByMatchKey.set(key, minute);
             continue;
         }
 
@@ -201,6 +284,8 @@ async function trackGoalEvents(matches) {
                 newGoals.push(inferredGoal);
             }
             lastScoreByMatchKey.set(key, scoreStr);
+            lastSeenAtByMatchKey.set(key, nowMs);
+            lastStatusByMatchKey.set(key, minute);
             continue;
         }
 
@@ -221,6 +306,9 @@ async function trackGoalEvents(matches) {
             });
             lastScoreByMatchKey.set(key, scoreStr);
         }
+
+        lastSeenAtByMatchKey.set(key, nowMs);
+        lastStatusByMatchKey.set(key, minute);
     }
 
     const newMilestones = [];
@@ -521,7 +609,7 @@ async function trackP19Signal(matches) {
         const status = String(match?.status || '').trim();
         const isHalftime = /^H\.?Time$/i.test(status);
         const shMin = getShMinute(status);
-        const isEarlySecondHalf = shMin >= 0 && shMin <= 1;
+        const isEarlySecondHalf = shMin >= 0 && shMin <= 2;
         if (!isHalftime && !isEarlySecondHalf) continue;
         if (has2HGoalByMatchKey.get(key)) continue;
         if (!/20\s+Mins/i.test(String(match?.league || ''))) continue;
@@ -550,6 +638,7 @@ async function trackP19Signal(matches) {
         const league = escapeHtml(match?.league || '?');
         const score = `${homeScore}-${awayScore}`;
         const minuteText = goalMins.map((min) => `${min}'`).join(', ');
+        const gapText = goalMins.length === 1 ? 'Single goal 1H' : `Gap max <b>${maxGap}</b> menit`;
 
         const msg =
             `🚨 <b>P19 SIGNAL — POTENSI GOL BABAK 2</b>\n` +
@@ -560,7 +649,7 @@ async function trackP19Signal(matches) {
             `📌 Pola P19 terpenuhi:\n` +
             `• Last goal 1H menit <b>${lastGoalMin}'</b>\n` +
             `• Last scorer <b>HOME</b>\n` +
-            `• Gap gol max <b>${maxGap}</b> menit\n` +
+            `• ${gapText}\n` +
             `• Urutan menit gol 1H: <b>${escapeHtml(minuteText)}</b>\n\n` +
             `🔥 <i>P19 aktif — indikasi kuat ada gol di babak kedua.</i>`;
 

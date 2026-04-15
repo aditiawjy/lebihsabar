@@ -9,7 +9,9 @@
     var activePanel = null;
     var htMemory = {};
     var prevStateMemory = {};
-    var refreshCountdown = 30;
+    var SUMMARY_REFRESH_SECONDS = 30;
+    var LIVE_FETCH_INTERVAL_MS = 2000;
+    var refreshCountdown = SUMMARY_REFRESH_SECONDS;
     var countdownEl = document.getElementById('countdown');
 
     var summarySortState = { col: null, dir: 'desc' };
@@ -29,8 +31,6 @@
         { id: 'P16', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return lg==='16min'&&(htH+htA)>0&&curMin1H!==null&&curMin1H>=6; }, labelFn: function() { return 'Last mnt 6+, 16min'; }, phase: 'ht' },
         { id: 'P23', fn: function(lg,htH,htA) { return lg==='16min'&&(htH+htA)===1; }, labelFn: function() { return '1 gol HT, 16min'; }, phase: 'ht' },
         { id: 'P19', fn: function(lg,htH,htA) { return lg==='20min'&&htH>htA; }, labelFn: function() { return 'Home unggul HT, 20min'; }, phase: 'ht' },
-        { id: 'P21', fn: function(lg,htH,htA) { return lg==='15min'&&htA>htH; }, labelFn: function() { return 'Away unggul HT, 15min'; }, phase: 'ht' },
-        { id: 'P21b', fn: function(lg,htH,htA) { return lg==='15min'&&htH===htA&&htA>0; }, labelFn: function() { return 'Seri HT, 15min'; }, phase: 'ht' },
         { id: 'P10_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return h===0&&a===0; }, labelFn: function() { return '0-0 sedang berjalan'; }, phase: '1h' },
         { id: 'P12_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return (h+a)>=4; }, labelFn: function(lg,htH,htA,curMin1H,h,a,curMin) { return 'Sudah ' + (h+a) + ' gol!'; }, phase: '1h' },
         { id: 'P15_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return h===2&&a===2; }, labelFn: function() { return 'Seri 2-2'; }, phase: '1h' },
@@ -40,7 +40,6 @@
         { id: 'P16_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return lg==='16min'&&curMin>=6&&(h+a)>0; }, labelFn: function(lg,htH,htA,curMin1H,h,a,curMin) { return 'Mnt ' + curMin + '+, 16min'; }, phase: '1h' },
         { id: 'P23_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return lg==='16min'&&(h+a)===1&&curMin>=3; }, labelFn: function(lg,htH,htA,curMin1H,h,a,curMin) { return '1 gol mnt ' + curMin + ', 16min'; }, phase: '1h' },
         { id: 'P19_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return lg==='20min'&&h>a; }, labelFn: function() { return 'Home unggul, 20min'; }, phase: '1h' },
-        { id: 'P21_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return lg==='15min'&&a>=h&&(h+a)>0&&curMin>=4; }, labelFn: function(lg,htH,htA,curMin1H,h,a,curMin) { return 'Away score mnt ' + curMin + ', 15min'; }, phase: '1h' },
         { id: 'P2_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return Math.abs(h-a)>=2&&curMin>=7; }, labelFn: function(lg,htH,htA,curMin1H,h,a,curMin) { return 'Selisih ' + Math.abs(h-a) + '+, mnt 7+'; }, phase: '1h' },
     ];
 
@@ -173,7 +172,7 @@
         if (countdownEl) countdownEl.textContent = 'Refresh: ' + refreshCountdown + 's';
         if (refreshCountdown <= 0) {
             refreshDashboard();
-            refreshCountdown = 30;
+            refreshCountdown = SUMMARY_REFRESH_SECONDS;
         }
     }
 
@@ -196,7 +195,7 @@
             document.getElementById('update-time').textContent = 'Last: ' + new Date().toLocaleTimeString();
             document.getElementById('last-update').textContent =
                 'CSV last modified: ' + (apiData.csv_time ? new Date(apiData.csv_time * 1000).toLocaleString() : '-')
-                + ' | Total ' + apiData.total_matches + ' matches | Auto-refresh: 30s via AJAX';
+                + ' | Total ' + apiData.total_matches + ' matches | Auto-refresh: ' + SUMMARY_REFRESH_SECONDS + 's via AJAX';
         } catch(e) {
             // silent — keep current data
         }
@@ -414,9 +413,19 @@
         return [];
     }
 
+    function deriveFallbackGoalMinutes(match) {
+        var status = parseStatus(getMatchStatusText(match));
+        if (status.half !== '1H' || status.min < 0) return [];
+        var score = getMatchScores(match);
+        return (score.home + score.away) === 1 ? [status.min] : [];
+    }
+
     function buildLivePatternState(match, livePayload) {
         var key = matchKey(match);
         var goalMins = getLiveGoalMinutes(livePayload, key);
+        if (!goalMins.length) {
+            goalMins = deriveFallbackGoalMinutes(match);
+        }
         var scorers = getLiveGoalScorers(livePayload, key);
         if (!scorers.length && goalMins.length) {
             scorers = deriveFallbackScorers(goalMins, match);
@@ -470,7 +479,6 @@
             case 'P18': return s.h1c >= 3 && span >= 6 && diff <= 2 && s.max_run <= 2 && s.switches >= 3 && s.min_gap >= 1 && s.h1_first >= 1;
             case 'P19': return s.league === '20min' && [3, 4].indexOf(s.h1_last) !== -1 && lastScorer === 'H' && (s.h1c === 1 || s.max_gap >= 2);
             case 'P20': return s.league === '16min' && s.h1_last === 3 && lastScorer === 'A';
-            case 'P21': return s.league === '15min' && s.h1_last === 5 && lastScorer === 'A' && s.max_gap >= 2 && s.min_gap >= 1 && (s.h1c >= 3 || s.sc_a > s.sc_h) && s.switches >= 1 && s.max_run <= 2;
             case 'P22': return s.league === '16min' && s.sc_a > s.sc_h && s.h1c >= 2 && span >= 3 && s.switches >= 1;
             case 'P24': return s.league === '15min' && inTeamConfig('p24_teams', s.home) && s.h1c >= 1 && s.h1_last >= 4 && diff <= 1 && s.sc_h >= 1 && s.h1_first >= 4 && firstScorer === 'H';
             case 'P25': return inTeamConfig('p25_teams', s.away) && s.h1_last >= 2 && diff <= 1 && span >= 3 && s.min_gap >= 2;
@@ -485,7 +493,7 @@
             case 'P37': return s.league === '16min' && s.h1c >= 2 && s.h1_first <= 1 && firstScorer === 'A' && lastScorer === 'A' && s.switches === 0;
             case 'P39': return s.league === '20min' && s.h1c >= 3 && span >= 7 && diff <= 3 && s.min_gap >= 3 && s.h1_first >= 1;
             case 'P40': return s.league === '16min' && diff >= 2 && s.h1_first <= 1;
-            case 'P41': return diff >= 2 && s.h1_first >= 2 && span >= 6;
+            case 'P41': return diff >= 2 && s.h1_first >= 2 && span >= 6 && s.max_gap >= 5;
             case 'P42': return s.h1_first >= 2 && span >= 6 && s.min_gap >= 3;
             case 'P43': return s.sc_a > s.sc_h && span >= 6 && lastScorer === 'H';
             case 'P44': return s.league === '20min' && diff >= 2 && s.h1_first >= 2 && s.switches >= 1 && s.h1_last <= 9;
@@ -835,7 +843,7 @@
             var resp = await fetch('start_api_server.php');
             var result = await resp.json();
             document.getElementById('live-last-update').textContent = result.message || 'Menunggu API...';
-            setTimeout(fetchLiveData, 3000);
+            setTimeout(fetchLiveData, LIVE_FETCH_INTERVAL_MS);
         } catch(e) {
             document.getElementById('live-last-update').textContent = 'Gagal: ' + e.message;
         }
@@ -1043,5 +1051,5 @@
 
     setInterval(updateCountdown, 1000);
     fetchLiveData();
-    setInterval(fetchLiveData, 5000);
+    setInterval(fetchLiveData, LIVE_FETCH_INTERVAL_MS);
 })();

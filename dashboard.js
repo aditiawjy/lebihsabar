@@ -462,7 +462,7 @@
             case 'P7': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.max_gap >= 5 && s.h1_first !== 1;
             case 'P9': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.max_gap >= 5 && s.h1_first !== 1;
             case 'P12': return s.h1c >= 4 && span >= 6 && s.min_gap >= 1 && s.h1_last <= 9 && s.h1_first >= 1 && s.h1_first !== 1;
-            case 'P13': return s.h1c >= 2 && s.h1_first <= 2 && s.h1_last === 7 && diff <= 2 && s.min_gap >= 3 && s.switches >= 1;
+            case 'P13': return s.h1c >= 2 && [0, 2].indexOf(s.h1_first) !== -1 && s.h1_last === 7 && diff <= 2 && s.min_gap >= 3 && s.switches >= 1;
             case 'P14': return s.h1c >= 2 && s.sc_h === s.sc_a && s.sc_h > 0 && s.max_gap >= 4 && span >= 5 && s.h1_first !== 1 && s.min_gap >= 2;
             case 'P15': return s.sc_h === 2 && s.sc_a === 2 && s.max_gap <= 2;
             case 'P16': return s.league === '16min' && s.h1_last === 7 && span >= 3 && s.switches >= 1 && s.h1_first !== 1;
@@ -488,7 +488,7 @@
             case 'P41': return diff >= 2 && s.h1_first >= 2 && span >= 6;
             case 'P42': return s.h1_first >= 2 && span >= 6 && s.min_gap >= 3;
             case 'P43': return s.sc_a > s.sc_h && span >= 6 && lastScorer === 'H';
-            case 'P44': return diff >= 2 && s.h1_first >= 2 && s.switches >= 1;
+            case 'P44': return s.league === '20min' && diff >= 2 && s.h1_first >= 2 && s.switches >= 1 && s.h1_last <= 9;
             case 'P45': return s.league === '16min' && s.h1_first !== 1 && span >= 6;
             case 'P46': return s.league === '16min' && span >= 6 && s.min_gap >= 2;
             case 'P47': return s.sc_h === s.sc_a && s.h1_first !== 1 && s.switches >= 2;

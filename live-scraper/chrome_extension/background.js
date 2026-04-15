@@ -7,7 +7,7 @@ importScripts(
     'lib/signals.js'
 );
 
-const DASHBOARD_API_URL = 'http://127.0.0.1:5000/api/live-data';
+const DASHBOARD_API_URL = 'http://127.0.0.1:5000/api/dashboard-live-data';
 
 
 function isTargetUrl(url) {

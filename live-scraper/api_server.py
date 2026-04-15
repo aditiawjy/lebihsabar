@@ -29,22 +29,10 @@ last_payload = {
 
 @app.route("/api/live-data", methods=["POST"])
 def receive_live_data():
-    """Terima data dari Chrome Extension"""
+    """Terima data untuk notifikasi Telegram"""
     try:
         data = request.get_json() or {}
         matches = data.get("matches", [])
-
-        # Simpan data lengkap untuk dashboard live
-        global last_payload
-        last_payload = {
-            "matches": matches,
-            "allGoalMinutes": data.get("allGoalMinutes", {}) or {},
-            "allGoalScorers": data.get("allGoalScorers", {}) or {},
-            "all2HGoalMinutes": data.get("all2HGoalMinutes", {}) or {},
-            "all2HScorers": data.get("all2HScorers", {}) or {},
-            "htScores": data.get("htScores", {}) or {},
-            "timestamp": data.get("timestamp") or datetime.now().isoformat(),
-        }
 
         # Kirim notifikasi untuk match baru atau update
         for match in matches:
@@ -70,6 +58,35 @@ def receive_live_data():
             {
                 "success": True,
                 "message": f"Received {len(matches)} matches",
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/dashboard-live-data", methods=["POST"])
+def receive_dashboard_live_data():
+    """Terima data live lengkap untuk dashboard tanpa kirim Telegram."""
+    try:
+        data = request.get_json() or {}
+        matches = data.get("matches", [])
+
+        global last_payload
+        last_payload = {
+            "matches": matches,
+            "allGoalMinutes": data.get("allGoalMinutes", {}) or {},
+            "allGoalScorers": data.get("allGoalScorers", {}) or {},
+            "all2HGoalMinutes": data.get("all2HGoalMinutes", {}) or {},
+            "all2HScorers": data.get("all2HScorers", {}) or {},
+            "htScores": data.get("htScores", {}) or {},
+            "timestamp": data.get("timestamp") or datetime.now().isoformat(),
+        }
+
+        return jsonify(
+            {
+                "success": True,
+                "message": f"Stored {len(matches)} dashboard matches",
                 "timestamp": datetime.now().isoformat(),
             }
         )
@@ -115,15 +132,12 @@ if __name__ == "__main__":
     print("Live Scraper API Server")
     print("=" * 60)
     print("\nEndpoints:")
-    print("  POST /api/live-data     - Kirim data dari extension")
-    print("  GET  /api/live-data     - Ambil data match")
-    print("  POST /api/test-telegram - Test Telegram")
-    print("  GET  /api/status        - Cek status")
+    print("  POST /api/live-data              - Kirim data notifikasi Telegram")
+    print("  POST /api/dashboard-live-data    - Simpan data live untuk dashboard")
+    print("  GET  /api/live-data              - Ambil data match dashboard")
+    print("  POST /api/test-telegram          - Test Telegram")
+    print("  GET  /api/status                 - Cek status")
     print("\nServer running on http://127.0.0.1:5000")
     print("=" * 60)
-
-    # Test Telegram saat startup
-    print("\nTesting Telegram...")
-    notifier.send_test_message()
 
     app.run(host="127.0.0.1", port=5000, debug=False)

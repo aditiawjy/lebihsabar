@@ -59,21 +59,6 @@ class TelegramNotifier:
         """Live match update umum dimatikan agar tidak spam Telegram."""
         return False
 
-    def should_send_second_half_zero_zero_alert(self, match_data):
-        """Cek apakah match sudah lewat 2H 2' dan masih 0-0"""
-        status = match_data.get("status", "").strip()
-        score = match_data.get("score", "0-0").strip()
-
-        if score not in {"0-0", "0 - 0"}:
-            return False
-
-        second_half_match = re.fullmatch(r"2H\s+(\d+)'", status)
-        if not second_half_match:
-            return False
-
-        minute = int(second_half_match.group(1))
-        return minute >= 2
-
     def _parse_score(self, score_str):
         """Parse '1 - 0' -> (1, 0)"""
         parts = re.split(r"\s*-\s*", score_str.strip())
@@ -115,80 +100,13 @@ class TelegramNotifier:
             for _ in range(new_goals):
                 history["goal_minutes"].append(parsed)
             history["last_score"] = current_score
-            print(f"[TRACK] Goal recorded at {status} for {match_name} | goals so far: {history['goal_minutes']}")
+            print(
+                f"[TRACK] Goal recorded at {status} for {match_name} | goals so far: {history['goal_minutes']}"
+            )
         elif new_goals > 0:
             # Bisa catat tapi tanpa menit yang valid
             history["last_score"] = current_score
         # Jika score tidak naik, tidak update goal_minutes
-
-    def should_send_early_goal_2h_start_alert(self, match_data):
-        """
-        Cek apakah perlu kirim alert: sudah 2H 0'-2' dan hanya ada 1 goal
-        yang terjadi di babak pertama (menit awal).
-        """
-        status = match_data.get("status", "").strip()
-        score_str = match_data.get("score", "0-0")
-
-        parsed = self._parse_status_half_minute(status)
-        if parsed is None:
-            return False
-
-        half, minute = parsed
-        if half != 2 or minute > 2:
-            return False
-
-        cur_home, cur_away = self._parse_score(score_str)
-        total_goals = cur_home + cur_away
-        if total_goals != 1:
-            return False
-
-        return True
-
-    def check_and_alert_early_goal_2h_start(self, match_data):
-        """Kirim alert saat 2H 0' jika hanya ada 1 goal di babak pertama."""
-        if not self.should_send_early_goal_2h_start_alert(match_data):
-            return False
-
-        match_name = self.get_match_name(match_data)
-        alert_key = f"{match_name}_early_goal_2h_start"
-
-        if alert_key in self.sent_alerts:
-            return False
-
-        status = match_data.get("status", "").strip()
-        score_str = match_data.get("score", "0-0")
-
-        # Cari menit goal dari history
-        history = self.match_score_history.get(match_name, {})
-        goal_minutes = history.get("goal_minutes", [])
-
-        if goal_minutes:
-            goal_half, goal_minute = goal_minutes[0]
-            goal_info = f"{goal_half}H {goal_minute}'"
-        else:
-            goal_info = "babak pertama"
-
-        current_time = datetime.now().strftime("%H:%M:%S")
-
-        message = f"🔔 <b>EARLY GOAL ALERT - BABAK 2 MULAI</b>\n\n"
-        message += f"⚽ <b>{match_name}</b>\n"
-        message += f"📊 Score: <b>{score_str}</b>\n"
-        message += f"🏆 League: {match_data.get('league', 'Unknown League')}\n"
-        message += f"⏰ Status: {status}\n"
-        message += f"📅 Alert Time: {current_time}\n\n"
-        message += f"🎯 <i>Hanya ada 1 goal di menit {goal_info}!</i>\n"
-        message += f"💡 <i>Babak kedua baru mulai — pantau pergerakan odds.</i>"
-
-        if match_data.get("odds"):
-            message += f"\n\n📈 <b>Current Odds:</b>\n"
-            for odd in match_data["odds"][:3]:
-                message += f"• {odd}\n"
-
-        success = self.send_message(message)
-        if success:
-            self.sent_alerts.add(alert_key)
-            print(f"[ALERT] Early goal 2H start alert sent for: {match_name} (goal at {goal_info})")
-        return success
 
     def send_test_message(self):
         """Kirim pesan test"""
@@ -200,42 +118,6 @@ class TelegramNotifier:
         test_message += f"🔔 Live scraper is active."
 
         return self.send_message(test_message)
-
-    def check_and_alert_second_half_zero_zero(self, match_data):
-        """Cek dan kirim alert jika sudah lewat 2H 2' dan skor masih 0-0"""
-        if not self.should_send_second_half_zero_zero_alert(match_data):
-            return False
-
-        status = match_data.get("status", "").strip()
-        match_name = self.get_match_name(match_data)
-        match_id = f"{match_name}_secondhalf_2h2_0-0"
-
-        if match_id in self.sent_alerts:
-            return False
-
-        current_time = datetime.now().strftime("%H:%M:%S")
-
-        message = f"⚠️ <b>SECOND HALF 0-0 ALERT!</b> ⚠️\n\n"
-        message += f"⚽ <b>{match_name}</b>\n"
-        message += f"📊 Score: <b>0-0</b>\n"
-        message += f"🏆 League: {match_data.get('league', 'Unknown League')}\n"
-        message += f"⏰ Status: {status}\n"
-        message += f"📅 Alert Time: {current_time}\n\n"
-        message += "🔥 <i>Babak kedua tepat 2H 2' dan skor masih 0-0.</i>\n\n"
-
-        if match_data.get("odds"):
-            message += f"📈 <b>Current Odds:</b>\n"
-            for odd in match_data["odds"][:3]:
-                message += f"• {odd}\n"
-            message += "\n"
-
-        message += "💡 <i>Pantau terus untuk peluang betting terbaik!</i>"
-
-        success = self.send_message(message)
-        if success:
-            self.sent_alerts.add(match_id)
-            print(f"[ALERT] Second half 0-0 alert sent for: {match_name}")
-        return success
 
 
 # Test function

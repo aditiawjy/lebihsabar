@@ -632,7 +632,6 @@
 
         switch (pid) {
             case 'P2': return s.league === '16min' && s.h1c >= 2 && diff >= 2 && s.h1_last === 7 && s.all_gaps_ge3 && s.max_run <= 2 && s.h1_first <= 1;
-            case 'P3': return ['15min', '16min'].indexOf(s.league) !== -1 && s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.max_gap >= 4 && s.h1_last >= 4 && s.h1_first >= 2;
             case 'P6': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 4 && s.h1_first !== 1;
             case 'P7': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.max_gap >= 5 && s.h1_first !== 1;
             case 'P9': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.max_gap >= 5 && s.h1_first !== 1;

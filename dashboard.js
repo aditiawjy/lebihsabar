@@ -640,7 +640,6 @@
             case 'P13': return s.h1c >= 2 && [0, 2].indexOf(s.h1_first) !== -1 && s.h1_last === 7 && diff <= 2 && s.min_gap >= 3 && s.switches >= 1;
             case 'P14': return s.h1c >= 2 && s.sc_h === s.sc_a && s.sc_h > 0 && s.max_gap >= 4 && span >= 5 && s.h1_first !== 1 && s.min_gap >= 2;
             case 'P15': return s.sc_h === 2 && s.sc_a === 2 && s.max_gap <= 2;
-            case 'P16': return s.league === '16min' && s.h1_last === 7 && span >= 3 && s.switches >= 1 && s.h1_first !== 1;
             case 'P17': return s.h1c >= 2 && s.h1_first >= 1 && s.h1_first <= 2 && s.h1_last === 7 && s.max_gap >= 2 && s.min_gap >= 2 && s.switches >= 1 && firstScorer === 'A';
             case 'P18': return s.h1c >= 3 && span >= 6 && diff <= 2 && s.max_run <= 2 && s.switches >= 3 && s.min_gap >= 1 && s.h1_first >= 1;
             case 'P19': return s.league === '20min' && s.h1c >= 2 && [3, 4].indexOf(s.h1_last) !== -1 && lastScorer === 'H' && s.max_gap >= 2;

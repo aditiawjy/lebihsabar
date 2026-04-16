@@ -39,19 +39,6 @@ def receive_live_data():
             # Selalu track perubahan score untuk rekam menit goal
             notifier.track_goal_minutes(match)
 
-            # Alert: 2H mulai dan hanya ada 1 goal di babak pertama
-            if notifier.should_send_early_goal_2h_start_alert(match):
-                notifier.check_and_alert_early_goal_2h_start(match)
-                continue
-
-            # Alert: 2H 2'+ dan skor masih 0-0
-            is_second_half_zero_zero = notifier.should_send_second_half_zero_zero_alert(
-                match
-            )
-            if is_second_half_zero_zero:
-                notifier.check_and_alert_second_half_zero_zero(match)
-                continue
-
         return jsonify(
             {
                 "success": True,

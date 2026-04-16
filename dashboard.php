@@ -37,7 +37,7 @@ $teamConfig = require __DIR__ . '/dashboard_config.php';
 $csvFile = __DIR__ . '/goal_log.csv';
 $cacheFile = __DIR__ . '/dashboard_cache.json';
 $data = getCachedDashboardData($csvFile, $cacheFile);
-$currentSnapTime = (int)($data['generated_at'] ?? time());
+$currentSnapTime = time();
 
 $currentSnap = computeSnapshotData($data['patterns'], $data['next_patterns'], $data['late_patterns'] ?? []);
 $oldSnap = getSnapshotHourAgo($currentSnapTime);

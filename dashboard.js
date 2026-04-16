@@ -444,6 +444,41 @@
         liveScorerMemory[key] = scorers.slice();
     }
 
+    function inferUniformScorers(score) {
+        var totalGoals = score.home + score.away;
+        if (!totalGoals) return [];
+        if (score.home > 0 && score.away === 0) {
+            return Array(score.home).fill('H');
+        }
+        if (score.away > 0 && score.home === 0) {
+            return Array(score.away).fill('A');
+        }
+        return [];
+    }
+
+    function distributeGoalMinutes(startMin, endMin, goalCount) {
+        if (goalCount <= 0) return [];
+        if (goalCount === 1) return [endMin];
+
+        var boundedStart = Math.max(0, startMin);
+        var boundedEnd = Math.max(boundedStart, endMin);
+        var minutes = [];
+        for (var i = 0; i < goalCount; i++) {
+            var ratio = goalCount === 1 ? 1 : (i / (goalCount - 1));
+            var raw = boundedStart + ((boundedEnd - boundedStart) * ratio);
+            var minute = Math.round(raw);
+            if (i === 0) {
+                minute = boundedStart;
+            } else if (i === goalCount - 1) {
+                minute = boundedEnd;
+            } else if (minute < minutes[i - 1]) {
+                minute = minutes[i - 1];
+            }
+            minutes.push(minute);
+        }
+        return minutes;
+    }
+
     function syncLiveGoalMemory(matches, livePayload) {
         for (var i = 0; i < matches.length; i++) {
             var match = matches[i];
@@ -451,20 +486,27 @@
             var status = parseStatus(getMatchStatusText(match));
             var score = getMatchScores(match);
             var totalGoals = score.home + score.away;
+            var goalMins = getStoredGoalMinutes(key);
+            var scorers = getStoredGoalScorers(key);
 
             if (status.half === '1H' && status.min >= 0 && status.min <= 1 && totalGoals === 0) {
                 clearLiveGoalMemory(key);
+                goalMins = [];
+                scorers = [];
             }
 
             var payloadGoalMins = getLiveGoalMinutes(livePayload, key);
             var payloadScorers = getLiveGoalScorers(livePayload, key);
             if (payloadGoalMins.length && payloadGoalMins.length === payloadScorers.length) {
-                persistLiveGoalMemory(key, payloadGoalMins, payloadScorers);
-                continue;
+                var storedCount = goalMins.length;
+                var payloadCount = payloadGoalMins.length;
+                var shouldAcceptPayload = payloadCount >= storedCount;
+                if (shouldAcceptPayload) {
+                    persistLiveGoalMemory(key, payloadGoalMins, payloadScorers);
+                    continue;
+                }
             }
 
-            var goalMins = getStoredGoalMinutes(key);
-            var scorers = getStoredGoalScorers(key);
             if (goalMins.length !== scorers.length) {
                 clearLiveGoalMemory(key);
                 goalMins = [];
@@ -489,17 +531,37 @@
             }
 
             var prev = prevStateMemory[key];
+            if (!goalMins.length && !prev && totalGoals > 1) {
+                var uniformScorers = inferUniformScorers(score);
+                if (uniformScorers.length === totalGoals) {
+                    goalMins = distributeGoalMinutes(1, status.min, totalGoals);
+                    scorers = uniformScorers;
+                }
+            }
+
             if (prev && prev.half === '1H' && !seededFromCurrentScore) {
                 var homeDelta = Math.max(0, score.home - prev.h);
                 var awayDelta = Math.max(0, score.away - prev.a);
+                var goalCountDelta = homeDelta + awayDelta;
+                var prevMin = Number.isFinite(prev.min) ? prev.min : status.min;
 
-                for (var hIdx = 0; hIdx < homeDelta; hIdx++) {
-                    goalMins.push(status.min);
-                    scorers.push('H');
-                }
-                for (var aIdx = 0; aIdx < awayDelta; aIdx++) {
-                    goalMins.push(status.min);
-                    scorers.push('A');
+                if (goalCountDelta > 0) {
+                    var inferredMinutes = goalCountDelta > 1
+                        ? distributeGoalMinutes(Math.min(status.min, prevMin + 1), status.min, goalCountDelta)
+                        : [status.min];
+                    var inferredScorers = [];
+
+                    for (var hIdx = 0; hIdx < homeDelta; hIdx++) {
+                        inferredScorers.push('H');
+                    }
+                    for (var aIdx = 0; aIdx < awayDelta; aIdx++) {
+                        inferredScorers.push('A');
+                    }
+
+                    for (var gIdx = 0; gIdx < inferredScorers.length; gIdx++) {
+                        goalMins.push(inferredMinutes[gIdx] || status.min);
+                        scorers.push(inferredScorers[gIdx]);
+                    }
                 }
             }
 
@@ -509,16 +571,27 @@
 
     function buildLivePatternState(match, livePayload) {
         var key = matchKey(match);
-        var goalMins = getLiveGoalMinutes(livePayload, key);
+        var payloadGoalMins = getLiveGoalMinutes(livePayload, key);
+        var payloadScorers = getLiveGoalScorers(livePayload, key);
+        var storedGoalMins = getStoredGoalMinutes(key);
+        var storedScorers = getStoredGoalScorers(key);
+
+        var useStored = storedGoalMins.length > payloadGoalMins.length;
+        var goalMins = useStored ? storedGoalMins : payloadGoalMins;
+        var scorers = useStored ? storedScorers : payloadScorers;
+
         if (!goalMins.length) {
-            goalMins = getStoredGoalMinutes(key);
+            goalMins = storedGoalMins;
+            scorers = storedScorers;
         }
         if (!goalMins.length) {
             goalMins = deriveFallbackGoalMinutes(match);
         }
-        var scorers = getLiveGoalScorers(livePayload, key);
         if (!scorers.length && goalMins.length) {
-            scorers = getStoredGoalScorers(key);
+            scorers = storedScorers;
+        }
+        if (!scorers.length && goalMins.length) {
+            scorers = payloadScorers;
         }
         if (!scorers.length && goalMins.length) {
             scorers = deriveFallbackScorers(goalMins, match);
@@ -573,7 +646,6 @@
             case 'P19': return s.league === '20min' && s.h1c >= 2 && [3, 4].indexOf(s.h1_last) !== -1 && lastScorer === 'H' && s.max_gap >= 2;
             case 'P20': return s.league === '16min' && s.h1_last === 3 && lastScorer === 'A';
             case 'P22': return s.league === '16min' && s.sc_a > s.sc_h && s.h1c >= 2 && span >= 3 && s.switches >= 1;
-            case 'P24': return s.league === '15min' && inTeamConfig('p24_teams', s.home) && s.h1c >= 1 && s.h1_last >= 4 && diff <= 1 && s.sc_h >= 1 && s.h1_first >= 4 && firstScorer === 'H';
             case 'P25': return inTeamConfig('p25_teams', s.away) && s.h1_last >= 2 && diff <= 1 && span >= 3 && s.min_gap >= 2;
             case 'P26': return s.league === '16min' && ((s.sc_h + s.sc_a) % 2 === 1) && s.h1_last >= 6 && s.h1c >= 2 && s.sc_a > s.sc_h;
             case 'P27': return s.league === '16min' && lastScorer === 'A' && s.max_gap >= 3 && s.h1_first !== 1 && span >= 6;
@@ -583,9 +655,9 @@
             case 'P34': return s.league === '15min' && firstScorer === 'A' && lastScorer === 'H' && span >= 6 && s.h1c >= 4;
             case 'P35': return inTeamConfig('p35_teams', s.away) && s.h1_last >= 4 && diff <= 1 && s.h1_first >= 3 && s.switches >= 1;
             case 'P36': return inTeamConfig('p36_teams', s.home) && s.h1c >= 2 && span >= 1 && diff <= 1 && s.min_gap >= 2;
-            case 'P37': return s.league === '16min' && s.h1c >= 2 && s.h1_first <= 1 && firstScorer === 'A' && lastScorer === 'A' && s.switches === 0;
+            case 'P37': return s.league === '16min' && s.h1c >= 2 && s.h1_first <= 1 && s.h1_last <= 4 && firstScorer === 'A' && lastScorer === 'A' && s.switches === 0;
             case 'P39': return s.league === '20min' && s.h1c >= 3 && span >= 7 && diff <= 3 && s.min_gap >= 3 && s.h1_first >= 1;
-            case 'P40': return s.league === '16min' && diff >= 2 && s.h1_first <= 1;
+            case 'P40': return s.league === '16min' && diff === 2 && s.h1_first <= 1 && span >= 5;
             case 'P41': return diff >= 2 && s.h1_first >= 2 && span >= 6 && s.max_gap >= 5;
             case 'P42': return s.h1_first >= 2 && span >= 6 && s.min_gap >= 3;
             case 'P43': return s.sc_a > s.sc_h && span >= 6 && lastScorer === 'H';
@@ -613,7 +685,7 @@
             case 'LG2':
                 return s.h1_last === 9 && span >= 7 && s.sc_a > s.sc_h;
             case 'LG3':
-                return s.league === '16min' && s.h1c >= 3 && firstScorer === 'A';
+                return s.league === '16min' && s.h1c >= 3 && firstScorer === 'A' && s.h1_last === 6;
             default:
                 return false;
         }
@@ -689,7 +761,7 @@
                 delete htMemory[key];
                 clearLiveGoalMemory(key);
             }
-            prevStateMemory[key] = { half: s.half, h: h, a: a };
+            prevStateMemory[key] = { half: s.half, h: h, a: a, min: s.min };
         }
     }
 
@@ -942,11 +1014,12 @@
             return;
         }
         var liveMatches = matches.filter(function(m) {
-            var s = parseStatus(getMatchStatusText(m));
-            return s.half === '1H' || s.half === '2H';
+            var statusText = getMatchStatusText(m);
+            var s = parseStatus(statusText);
+            return s.half === '1H' || s.half === '2H' || /^H\.?Time$/i.test(statusText);
         });
         if (!liveMatches.length) {
-            container.innerHTML = '<div class="live-empty">Tidak ada match aktif (1H/2H).</div>';
+            container.innerHTML = '<div class="live-empty">Tidak ada match aktif (1H/HT/2H).</div>';
             renderLiveAlerts([]);
             return;
         }
@@ -954,7 +1027,8 @@
         for (var i = 0; i < liveMatches.length; i++) {
             var m = liveMatches[i];
             var lg = getLeagueTypeJS(getMatchLeague(m));
-            var s = parseStatus(getMatchStatusText(m));
+            var statusText = getMatchStatusText(m);
+            var s = parseStatus(statusText);
             var score = getMatchScores(m);
             var h = score.home;
             var a = score.away;
@@ -962,6 +1036,7 @@
             var signals = [];
             var htLabel = '';
             var phase2H = false;
+            var isHalftime = /^H\.?Time$/i.test(statusText);
             if (s.half === '2H') {
                 phase2H = true;
                 var ht = htMemory[key];
@@ -969,6 +1044,9 @@
                 var htA = ht ? ht.a : a;
                 htLabel = 'HT: ' + htH + '-' + htA;
                 signals = lg ? buildLiveSignals(m, livePayload, lg, htH, htA, h, a, s.min, 'ht') : [];
+            } else if (isHalftime) {
+                htLabel = 'HT: ' + h + '-' + a;
+                signals = lg ? buildLiveSignals(m, livePayload, lg, h, a, h, a, 0, 'ht') : [];
             } else {
                 signals = lg ? buildLiveSignals(m, livePayload, lg, h, a, h, a, s.min, '1h') : [];
             }
@@ -979,7 +1057,7 @@
                     away: getMatchAwayTeam(m),
                     league: lg,
                     score: h + ' - ' + a,
-                    status: (phase2H ? '2H ' : '1H ') + s.min + "\u2019",
+                    status: phase2H ? ('2H ' + s.min + "\u2019") : (isHalftime ? 'HT' : ('1H ' + s.min + "\u2019")),
                     signals: signals
                 });
             }
@@ -989,10 +1067,16 @@
             var halfBadge = phase2H
                 ? '<span class="half-badge-2h">2H ' + s.min + "\u2019</span>"
                 : '<span class="half-badge-1h">\u25CF 1H ' + s.min + "\u2019</span>";
+            if (isHalftime) {
+                halfBadge = '<span class="half-badge-1h">\u25CF HT</span>';
+            }
             var lgLabel = lg ? '<span class="league-tag">[' + lg + ']</span>' : '<span class="league-unknown">[league?]</span>';
+            var metaSuffix = ((phase2H || isHalftime) && htLabel)
+                ? ' &nbsp;|&nbsp; <span class="ht-meta">' + htLabel + '</span>'
+                : '';
             html += '<div class="live-card ' + (hasSignal ? 'has-signal' : '') + '">' 
                 + '<div class="match-name">' + escHtml(getMatchHomeTeam(m)) + ' vs ' + escHtml(getMatchAwayTeam(m)) + '</div>'
-                + '<div class="match-meta">' + lgLabel + ' ' + halfBadge + (phase2H && htLabel ? ' &nbsp;|&nbsp; <span class="ht-meta">' + htLabel + '</span>' : '') + '</div>'
+                + '<div class="match-meta">' + lgLabel + ' ' + halfBadge + metaSuffix + '</div>'
                 + '<div class="score-box">' + h + ' - ' + a + '</div>'
                 + '<div class="signals">'
                 + (signalHtml || '<span style="color:var(--text-muted);font-size:0.75rem;">Tidak ada signal pattern</span>')

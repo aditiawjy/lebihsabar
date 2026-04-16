@@ -9,6 +9,8 @@
     var activePanel = null;
     var htMemory = {};
     var prevStateMemory = {};
+    var liveGoalMemory = {};
+    var liveScorerMemory = {};
     var SUMMARY_REFRESH_SECONDS = 30;
     var LIVE_FETCH_INTERVAL_MS = 2000;
     var refreshCountdown = SUMMARY_REFRESH_SECONDS;
@@ -20,28 +22,29 @@
     var currentNextData = [];
     var currentLateData = [];
     var liveCandidateCounts = {};
+    var nextLiveCandidateCounts = {};
+    var lateLiveCandidateCounts = {};
 
-    var SIGNAL_DEFS = [
-        { id: 'P10', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return htH===0&&htA===0; }, labelFn: function() { return '0-0 di 1H'; }, phase: 'ht' },
-        { id: 'P12', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return (htH+htA)>=4; }, labelFn: function(lg,htH,htA) { return 'Total gol >= 4'; }, phase: 'ht' },
-        { id: 'P15', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return htH===2&&htA===2; }, labelFn: function() { return 'HT 2-2'; }, phase: 'ht' },
-        { id: 'P2',  fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return Math.abs(htH-htA)>=2; }, labelFn: function(lg,htH,htA) { return 'HT selisih ' + Math.abs(htH-htA) + '+'; }, phase: 'ht' },
-        { id: 'P7',  fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return htH===htA&&(htH+htA)>=2; }, labelFn: function(lg,htH,htA) { return 'HT Seri ' + htH + '-' + htA; }, phase: 'ht' },
-        { id: 'P22', fn: function(lg,htH,htA) { return lg==='16min'&&htA>htH; }, labelFn: function() { return 'Away unggul HT, 16min'; }, phase: 'ht' },
-        { id: 'P16', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return lg==='16min'&&(htH+htA)>0&&curMin1H!==null&&curMin1H>=6; }, labelFn: function() { return 'Last mnt 6+, 16min'; }, phase: 'ht' },
-        { id: 'P23', fn: function(lg,htH,htA) { return lg==='16min'&&(htH+htA)===1; }, labelFn: function() { return '1 gol HT, 16min'; }, phase: 'ht' },
-        { id: 'P19', fn: function(lg,htH,htA) { return lg==='20min'&&htH>htA; }, labelFn: function() { return 'Home unggul HT, 20min'; }, phase: 'ht' },
-        { id: 'P10_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return h===0&&a===0; }, labelFn: function() { return '0-0 sedang berjalan'; }, phase: '1h' },
-        { id: 'P12_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return (h+a)>=4; }, labelFn: function(lg,htH,htA,curMin1H,h,a,curMin) { return 'Sudah ' + (h+a) + ' gol!'; }, phase: '1h' },
-        { id: 'P15_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return h===2&&a===2; }, labelFn: function() { return 'Seri 2-2'; }, phase: '1h' },
-        { id: 'P6_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return h===1&&a===1&&curMin>=7; }, labelFn: function() { return 'Seri 1-1, mnt 7+'; }, phase: '1h' },
-        { id: 'P7_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return h===1&&a===1&&curMin>=5; }, labelFn: function() { return 'Seri 1-1, mnt 5+'; }, phase: '1h' },
-        { id: 'P22_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return lg==='16min'&&a>h; }, labelFn: function() { return 'Away unggul, 16min'; }, phase: '1h' },
-        { id: 'P16_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return lg==='16min'&&curMin>=6&&(h+a)>0; }, labelFn: function(lg,htH,htA,curMin1H,h,a,curMin) { return 'Mnt ' + curMin + '+, 16min'; }, phase: '1h' },
-        { id: 'P23_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return lg==='16min'&&(h+a)===1&&curMin>=3; }, labelFn: function(lg,htH,htA,curMin1H,h,a,curMin) { return '1 gol mnt ' + curMin + ', 16min'; }, phase: '1h' },
-        { id: 'P19_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return lg==='20min'&&h>a; }, labelFn: function() { return 'Home unggul, 20min'; }, phase: '1h' },
-        { id: 'P2_1h', fn: function(lg,htH,htA,curMin1H,h,a,curMin) { return Math.abs(h-a)>=2&&curMin>=7; }, labelFn: function(lg,htH,htA,curMin1H,h,a,curMin) { return 'Selisih ' + Math.abs(h-a) + '+, mnt 7+'; }, phase: '1h' },
-    ];
+    function getPatternLabelById(id) {
+        for (var i = 0; i < PATTERN_DEFS.length; i++) {
+            if (PATTERN_DEFS[i] && PATTERN_DEFS[i].id === id) {
+                return PATTERN_DEFS[i].label || id;
+            }
+        }
+        var lateDefs = INITIAL_DATA.latePatterns || [];
+        for (var j = 0; j < lateDefs.length; j++) {
+            if (lateDefs[j] && lateDefs[j].id === id) {
+                return lateDefs[j].label || id;
+            }
+        }
+        var nextDefs = INITIAL_DATA.nextPatterns || [];
+        for (var k = 0; k < nextDefs.length; k++) {
+            if (nextDefs[k] && nextDefs[k].id === id) {
+                return nextDefs[k].label || id;
+            }
+        }
+        return id;
+    }
 
     function escHtml(s) {
         return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -242,18 +245,19 @@
             var nextBadge = ng.next === 'HOME'
                 ? '<span class="scorer-h next-badge-home">HOME</span>'
                 : '<span class="scorer-a next-badge-away">AWAY</span>';
-            return '<tr data-total="' + ng.total + '" data-hits="' + ng.hits + '" data-nh="' + ng.nh + '" data-na="' + ng.na + '" data-pct="' + ng.pct + '">'
+            return '<tr data-pid="' + ng.id + '" data-total="' + ng.total + '" data-hits="' + ng.hits + '" data-nh="' + ng.nh + '" data-na="' + ng.na + '" data-pct="' + ng.pct + '">'
                 + '<td><strong>' + ng.id + '</strong></td>'
                 + '<td>' + escHtml(ng.label) + '</td>'
                 + '<td>' + nextBadge + '</td>'
                 + '<td>' + ng.hits + '/' + ng.total + ' <span class="record-sub">(H:' + ng.nh + ' A:' + ng.na + ')</span></td>'
                 + '<td class="pct ' + ng.cls + '">' + ng.pct + '%</td>'
                 + '<td><span class="badge ' + ng.badge + '">' + ng.status + '</span></td>'
-                + '<td style="font-size:0.8rem;">' + (ng.delta && ng.delta.html ? ng.delta.html : '<span class="delta-zero">\u2014</span>') + '</td>'
+                + '<td class="delta-cell" style="font-size:0.8rem;">' + (ng.delta && ng.delta.html ? ng.delta.html : '<span class="delta-zero">\u2014</span>') + '</td>'
                 + '<td><button class="expand-btn" data-pid="' + ng.id + '">Detail</button></td>'
                 + '</tr>';
         }).join('');
         bindExpandButtons(tbody);
+        applyNextLiveCandidateIndicators();
     }
 
     function renderLateTable(latePatterns) {
@@ -261,17 +265,18 @@
         var tbody = document.getElementById('late-body');
         if (!tbody) return;
         tbody.innerHTML = latePatterns.map(function(lp) {
-            return '<tr data-total="' + lp.total + '" data-hits="' + lp.late_hits + '" data-pct="' + lp.pct + '">'
+            return '<tr data-pid="' + lp.id + '" data-total="' + lp.total + '" data-hits="' + lp.late_hits + '" data-pct="' + lp.pct + '">'
                 + '<td><strong>' + lp.id + '</strong></td>'
                 + '<td>' + escHtml(lp.label) + '</td>'
                 + '<td>' + lp.late_hits + '/' + lp.total + '</td>'
                 + '<td class="pct ' + lp.cls + '">' + lp.pct + '%</td>'
                 + '<td><span class="badge ' + lp.badge + '">' + lp.status + '</span></td>'
-                + '<td style="font-size:0.8rem;">' + (lp.delta && lp.delta.html ? lp.delta.html : '<span class="delta-zero">\u2014</span>') + '</td>'
+                + '<td class="delta-cell" style="font-size:0.8rem;">' + (lp.delta && lp.delta.html ? lp.delta.html : '<span class="delta-zero">\u2014</span>') + '</td>'
                 + '<td><button class="expand-btn" data-pid="' + lp.id + '">Detail</button></td>'
                 + '</tr>';
         }).join('');
         bindExpandButtons(tbody);
+        applyLateLiveCandidateIndicators();
     }
 
     function bindExpandButtons(root) {
@@ -420,13 +425,101 @@
         return (score.home + score.away) === 1 ? [status.min] : [];
     }
 
+    function clearLiveGoalMemory(key) {
+        delete liveGoalMemory[key];
+        delete liveScorerMemory[key];
+    }
+
+    function getStoredGoalMinutes(key) {
+        return Array.isArray(liveGoalMemory[key]) ? liveGoalMemory[key].slice() : [];
+    }
+
+    function getStoredGoalScorers(key) {
+        return Array.isArray(liveScorerMemory[key]) ? liveScorerMemory[key].slice() : [];
+    }
+
+    function persistLiveGoalMemory(key, goalMins, scorers) {
+        if (!goalMins.length || goalMins.length !== scorers.length) return;
+        liveGoalMemory[key] = goalMins.slice();
+        liveScorerMemory[key] = scorers.slice();
+    }
+
+    function syncLiveGoalMemory(matches, livePayload) {
+        for (var i = 0; i < matches.length; i++) {
+            var match = matches[i];
+            var key = matchKey(match);
+            var status = parseStatus(getMatchStatusText(match));
+            var score = getMatchScores(match);
+            var totalGoals = score.home + score.away;
+
+            if (status.half === '1H' && status.min >= 0 && status.min <= 1 && totalGoals === 0) {
+                clearLiveGoalMemory(key);
+            }
+
+            var payloadGoalMins = getLiveGoalMinutes(livePayload, key);
+            var payloadScorers = getLiveGoalScorers(livePayload, key);
+            if (payloadGoalMins.length && payloadGoalMins.length === payloadScorers.length) {
+                persistLiveGoalMemory(key, payloadGoalMins, payloadScorers);
+                continue;
+            }
+
+            var goalMins = getStoredGoalMinutes(key);
+            var scorers = getStoredGoalScorers(key);
+            if (goalMins.length !== scorers.length) {
+                clearLiveGoalMemory(key);
+                goalMins = [];
+                scorers = [];
+            }
+
+            if (totalGoals < goalMins.length) {
+                clearLiveGoalMemory(key);
+                goalMins = [];
+                scorers = [];
+            }
+
+            if (status.half !== '1H' || status.min < 0) {
+                continue;
+            }
+
+            var seededFromCurrentScore = false;
+            if (!goalMins.length && totalGoals === 1) {
+                goalMins = [status.min];
+                scorers = score.home > score.away ? ['H'] : ['A'];
+                seededFromCurrentScore = true;
+            }
+
+            var prev = prevStateMemory[key];
+            if (prev && prev.half === '1H' && !seededFromCurrentScore) {
+                var homeDelta = Math.max(0, score.home - prev.h);
+                var awayDelta = Math.max(0, score.away - prev.a);
+
+                for (var hIdx = 0; hIdx < homeDelta; hIdx++) {
+                    goalMins.push(status.min);
+                    scorers.push('H');
+                }
+                for (var aIdx = 0; aIdx < awayDelta; aIdx++) {
+                    goalMins.push(status.min);
+                    scorers.push('A');
+                }
+            }
+
+            persistLiveGoalMemory(key, goalMins, scorers);
+        }
+    }
+
     function buildLivePatternState(match, livePayload) {
         var key = matchKey(match);
         var goalMins = getLiveGoalMinutes(livePayload, key);
         if (!goalMins.length) {
+            goalMins = getStoredGoalMinutes(key);
+        }
+        if (!goalMins.length) {
             goalMins = deriveFallbackGoalMinutes(match);
         }
         var scorers = getLiveGoalScorers(livePayload, key);
+        if (!scorers.length && goalMins.length) {
+            scorers = getStoredGoalScorers(key);
+        }
         if (!scorers.length && goalMins.length) {
             scorers = deriveFallbackScorers(goalMins, match);
         }
@@ -470,14 +563,14 @@
             case 'P6': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 4 && s.h1_first !== 1;
             case 'P7': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.max_gap >= 5 && s.h1_first !== 1;
             case 'P9': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.max_gap >= 5 && s.h1_first !== 1;
-            case 'P12': return s.h1c >= 4 && span >= 6 && s.min_gap >= 1 && s.h1_last <= 9 && s.h1_first >= 1 && s.h1_first !== 1;
+            case 'P12': return s.h1c >= 4 && span >= 6 && s.min_gap >= 1 && s.h1_last <= 9 && s.h1_first >= 1 && s.h1_first !== 1 && s.max_run <= 2;
             case 'P13': return s.h1c >= 2 && [0, 2].indexOf(s.h1_first) !== -1 && s.h1_last === 7 && diff <= 2 && s.min_gap >= 3 && s.switches >= 1;
             case 'P14': return s.h1c >= 2 && s.sc_h === s.sc_a && s.sc_h > 0 && s.max_gap >= 4 && span >= 5 && s.h1_first !== 1 && s.min_gap >= 2;
             case 'P15': return s.sc_h === 2 && s.sc_a === 2 && s.max_gap <= 2;
             case 'P16': return s.league === '16min' && s.h1_last === 7 && span >= 3 && s.switches >= 1 && s.h1_first !== 1;
             case 'P17': return s.h1c >= 2 && s.h1_first >= 1 && s.h1_first <= 2 && s.h1_last === 7 && s.max_gap >= 2 && s.min_gap >= 2 && s.switches >= 1 && firstScorer === 'A';
             case 'P18': return s.h1c >= 3 && span >= 6 && diff <= 2 && s.max_run <= 2 && s.switches >= 3 && s.min_gap >= 1 && s.h1_first >= 1;
-            case 'P19': return s.league === '20min' && [3, 4].indexOf(s.h1_last) !== -1 && lastScorer === 'H' && (s.h1c === 1 || s.max_gap >= 2);
+            case 'P19': return s.league === '20min' && s.h1c >= 2 && [3, 4].indexOf(s.h1_last) !== -1 && lastScorer === 'H' && s.max_gap >= 2;
             case 'P20': return s.league === '16min' && s.h1_last === 3 && lastScorer === 'A';
             case 'P22': return s.league === '16min' && s.sc_a > s.sc_h && s.h1c >= 2 && span >= 3 && s.switches >= 1;
             case 'P24': return s.league === '15min' && inTeamConfig('p24_teams', s.home) && s.h1c >= 1 && s.h1_last >= 4 && diff <= 1 && s.sc_h >= 1 && s.h1_first >= 4 && firstScorer === 'H';
@@ -509,6 +602,73 @@
         }
     }
 
+    function matchesLatePatternLive(pid, s) {
+        if (!s) return false;
+        var span = s.h1c >= 2 ? (s.h1_last - s.h1_first) : 0;
+        var firstScorer = s.h1s.length ? s.h1s[0] : null;
+
+        switch (pid) {
+            case 'LG1':
+                return s.h1_last === 9 && s.h1_first <= 1 && s.sc_a > s.sc_h;
+            case 'LG2':
+                return s.h1_last === 9 && span >= 7 && s.sc_a > s.sc_h;
+            case 'LG3':
+                return s.league === '16min' && s.h1c >= 3 && firstScorer === 'A';
+            default:
+                return false;
+        }
+    }
+
+    function matchesNextPatternLive(pid, s) {
+        if (!s) return false;
+        var span = s.h1c >= 2 ? (s.h1_last - s.h1_first) : 0;
+
+        switch (pid) {
+            case 'NG1':
+                return s.league === '16min' && s.h1c >= 1 && s.sc_h === 1 && s.sc_a === 0 && s.h1_last === 3;
+            case 'NG2':
+                return s.league === '16min' && s.h1c >= 1 && (s.sc_h - s.sc_a) === 1 && s.h1_last === 3;
+            case 'NG5':
+                return s.sc_h === 1 && s.sc_a === 1 && s.h1c === 2 && s.h1s.length >= 2 && s.h1s[0] === 'H' && s.h1s[s.h1s.length - 1] === 'A' && s.h1_last === 7 && s.h1_first >= 2 && s.max_gap >= 4;
+            case 'NG6':
+                return s.league === '20min' && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 5;
+            default:
+                return false;
+        }
+    }
+
+    function isNextPatternSignalWindow(match, livePayload) {
+        var statusText = getMatchStatusText(match);
+        var parsedStatus = parseStatus(statusText);
+        var isHalftime = /^H\.?Time$/i.test(statusText);
+        if (isHalftime) return true;
+
+        var key = matchKey(match);
+        if (getLiveSecondHalfGoalMinutes(livePayload, key).length > 0) return false;
+
+        if (parsedStatus.half === '1H') return true;
+        if (parsedStatus.half === '2H' && parsedStatus.min >= 0) return true;
+        return false;
+    }
+
+    function hasLateSecondHalfGoal(livePayload, key) {
+        return getLiveSecondHalfGoalMinutes(livePayload, key).some(function(min) { return min >= 7; });
+    }
+
+    function isLatePatternSignalWindow(match, livePayload) {
+        var statusText = getMatchStatusText(match);
+        var parsedStatus = parseStatus(statusText);
+        var isHalftime = /^H\.?Time$/i.test(statusText);
+        if (isHalftime) return true;
+
+        var key = matchKey(match);
+        if (hasLateSecondHalfGoal(livePayload, key)) return false;
+
+        if (parsedStatus.half === '1H') return true;
+        if (parsedStatus.half === '2H' && parsedStatus.min >= 0 && parsedStatus.min < 7) return true;
+        return false;
+    }
+
     function matchKey(m) {
         return getMatchHomeTeam(m) + '|' + getMatchAwayTeam(m) + '|' + getMatchLeague(m);
     }
@@ -527,6 +687,7 @@
             }
             if (s.half === '1H' && prev && prev.half === '2H') {
                 delete htMemory[key];
+                clearLiveGoalMemory(key);
             }
             prevStateMemory[key] = { half: s.half, h: h, a: a };
         }
@@ -597,17 +758,50 @@
         var lastGoalMin = goalMins[goalMins.length - 1];
         if (lastGoalMin !== 3 && lastGoalMin !== 4) return false;
 
-        if (goalMins.length > 1 && getMaxGap(goalMins) < 2) return false;
+        if (goalMins.length < 2 || getMaxGap(goalMins) < 2) return false;
 
         return isLastScorerHome(goalMins, getLiveGoalScorers(livePayload, key), htH, htA);
     }
 
     function buildLiveSignals(match, livePayload, lg, htH, htA, h, a, curMin, phase) {
-        var signals = evaluateSignalsForMatch(lg, htH, htA, phase === '1h' ? curMin : null, h, a, curMin, phase)
-            .filter(function(sig) { return sig.id !== 'P19'; });
+        var liveState = buildLivePatternState(match, livePayload);
+        var signals = [];
+        var seen = {};
+
+        if (liveState) {
+            PATTERN_DEFS.forEach(function(pattern) {
+                if (!pattern || !pattern.id) return;
+                if (matchesSummaryPatternLive(pattern.id, liveState)) {
+                    seen[pattern.id] = true;
+                    signals.push({ id: pattern.id, label: pattern.label || pattern.id });
+                }
+            });
+        }
+
+        if (liveState && isNextPatternSignalWindow(match, livePayload)) {
+            (INITIAL_DATA.nextPatterns || []).forEach(function(pattern) {
+                if (!pattern || !pattern.id || seen[pattern.id]) return;
+                if (matchesNextPatternLive(pattern.id, liveState)) {
+                    seen[pattern.id] = true;
+                    signals.push({ id: pattern.id, label: (pattern.label || pattern.id) + ' => ' + (pattern.next || '?') });
+                }
+            });
+        }
+
+        if (liveState && isLatePatternSignalWindow(match, livePayload)) {
+            (INITIAL_DATA.latePatterns || []).forEach(function(pattern) {
+                if (!pattern || !pattern.id || seen[pattern.id]) return;
+                if (matchesLatePatternLive(pattern.id, liveState)) {
+                    seen[pattern.id] = true;
+                    signals.push({ id: pattern.id, label: pattern.label || pattern.id });
+                }
+            });
+        }
 
         if (isHistoricalP19LiveCandidate(match, livePayload)) {
-            signals.push({ id: 'P19', label: 'Last gol 1H mnt 3-4, last HOME, 20min, gap>=2' });
+            if (!seen.P19) {
+                signals.push({ id: 'P19', label: getPatternLabelById('P19') });
+            }
         }
 
         return signals;
@@ -625,6 +819,46 @@
 
             var baseHtml = deltaCell.dataset.baseHtml;
             var liveCount = liveCandidateCounts[pid] || 0;
+            if (liveCount > 0) {
+                deltaCell.innerHTML = baseHtml + '<br><span style="color:#58a6ff;font-weight:600;">live ' + liveCount + ' candidate' + (liveCount > 1 ? 's' : '') + '</span>';
+            } else {
+                deltaCell.innerHTML = baseHtml;
+            }
+        });
+    }
+
+    function applyNextLiveCandidateIndicators() {
+        document.querySelectorAll('#next-body tr').forEach(function(row) {
+            var pid = row.getAttribute('data-pid') || (row.cells[0] ? row.cells[0].textContent.trim() : '');
+            var deltaCell = row.querySelector('.delta-cell') || row.cells[6];
+            if (!pid || !deltaCell) return;
+
+            if (!deltaCell.dataset.baseHtml) {
+                deltaCell.dataset.baseHtml = deltaCell.innerHTML;
+            }
+
+            var baseHtml = deltaCell.dataset.baseHtml;
+            var liveCount = nextLiveCandidateCounts[pid] || 0;
+            if (liveCount > 0) {
+                deltaCell.innerHTML = baseHtml + '<br><span style="color:#58a6ff;font-weight:600;">live ' + liveCount + ' candidate' + (liveCount > 1 ? 's' : '') + '</span>';
+            } else {
+                deltaCell.innerHTML = baseHtml;
+            }
+        });
+    }
+
+    function applyLateLiveCandidateIndicators() {
+        document.querySelectorAll('#late-body tr').forEach(function(row) {
+            var pid = row.getAttribute('data-pid') || (row.cells[0] ? row.cells[0].textContent.trim() : '');
+            var deltaCell = row.querySelector('.delta-cell') || row.cells[5];
+            if (!pid || !deltaCell) return;
+
+            if (!deltaCell.dataset.baseHtml) {
+                deltaCell.dataset.baseHtml = deltaCell.innerHTML;
+            }
+
+            var baseHtml = deltaCell.dataset.baseHtml;
+            var liveCount = lateLiveCandidateCounts[pid] || 0;
             if (liveCount > 0) {
                 deltaCell.innerHTML = baseHtml + '<br><span style="color:#58a6ff;font-weight:600;">live ' + liveCount + ' candidate' + (liveCount > 1 ? 's' : '') + '</span>';
             } else {
@@ -659,25 +893,44 @@
         applyLiveCandidateIndicators();
     }
 
-    function evaluateSignalsForMatch(lg, htH, htA, curMin1H, h, a, curMin, phase) {
-        var signals = [];
-        var seen = {};
-        for (var i = 0; i < SIGNAL_DEFS.length; i++) {
-            var def = SIGNAL_DEFS[i];
-            if (def.phase !== phase) continue;
-            var args = [lg, htH, htA, curMin1H, h, a, curMin];
-            try {
-                if (def.fn.apply(null, args)) {
-                    var label = typeof def.labelFn === 'function' ? def.labelFn.apply(null, args) : def.labelFn;
-                    var cleanId = def.id.replace('_1h','').replace('_b','');
-                    if (!seen[cleanId]) {
-                        seen[cleanId] = true;
-                        signals.push({ id: cleanId, label: label });
-                    }
+    function collectNextLiveCandidateCounts(matches, livePayload) {
+        var counts = {};
+        (matches || []).forEach(function(match) {
+            if (!isNextPatternSignalWindow(match, livePayload)) return;
+
+            var state = buildLivePatternState(match, livePayload);
+            if (!state) return;
+
+            (INITIAL_DATA.nextPatterns || []).forEach(function(pattern) {
+                if (!pattern || !pattern.id) return;
+                if (matchesNextPatternLive(pattern.id, state)) {
+                    counts[pattern.id] = (counts[pattern.id] || 0) + 1;
                 }
-            } catch(e) {}
-        }
-        return signals;
+            });
+        });
+
+        nextLiveCandidateCounts = counts;
+        applyNextLiveCandidateIndicators();
+    }
+
+    function collectLateLiveCandidateCounts(matches, livePayload) {
+        var counts = {};
+        (matches || []).forEach(function(match) {
+            if (!isLatePatternSignalWindow(match, livePayload)) return;
+
+            var state = buildLivePatternState(match, livePayload);
+            if (!state) return;
+
+            (INITIAL_DATA.latePatterns || []).forEach(function(pattern) {
+                if (!pattern || !pattern.id) return;
+                if (matchesLatePatternLive(pattern.id, state)) {
+                    counts[pattern.id] = (counts[pattern.id] || 0) + 1;
+                }
+            });
+        });
+
+        lateLiveCandidateCounts = counts;
+        applyLateLiveCandidateIndicators();
     }
 
     function renderLiveCards(matches, livePayload) {
@@ -799,6 +1052,7 @@
             var data = await resp.json();
             if (data && data.online === false) throw new Error(data.error || 'API offline');
             var livePayload = normalizeLivePayload(data);
+            syncLiveGoalMemory(livePayload.matches || [], livePayload);
             document.getElementById('live-api-badge').textContent = 'API Online';
             document.getElementById('live-api-badge').className = 'api-online';
             document.getElementById('btn-start-api').style.display = 'none';
@@ -807,6 +1061,8 @@
             updateHtMemory(livePayload.matches || []);
             renderLiveCards(livePayload.matches || [], livePayload);
             collectLiveCandidateCounts(livePayload.matches || [], livePayload);
+            collectNextLiveCandidateCounts(livePayload.matches || [], livePayload);
+            collectLateLiveCandidateCounts(livePayload.matches || [], livePayload);
         } catch(e) {
             document.getElementById('live-api-badge').textContent = 'API Offline';
             document.getElementById('live-api-badge').className = 'api-offline';
@@ -815,7 +1071,11 @@
             document.getElementById('live-last-update').textContent = '';
             document.getElementById('live-cards').innerHTML = '<div class="live-empty">API tidak aktif \u2014 klik \u25B6 Jalankan API</div>';
             liveCandidateCounts = {};
+            nextLiveCandidateCounts = {};
+            lateLiveCandidateCounts = {};
             applyLiveCandidateIndicators();
+            applyNextLiveCandidateIndicators();
+            applyLateLiveCandidateIndicators();
             renderLiveAlerts([]);
         }
     }

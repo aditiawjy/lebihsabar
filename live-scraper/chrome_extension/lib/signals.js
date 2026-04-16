@@ -610,9 +610,9 @@ async function trackP7Signal(matches) {
             `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
             `🎯 Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n\n` +
             `📌 Pola P7 terpenuhi:\n` +
-            `• HT seri <b>1-1</b>\n` +
-            `• Gap antar gol <b>${maxGap}</b> menit\n` +
-            `• First goal menit <b>${firstGoalMin}'</b>\n` +
+            `• Seri <b>1-1</b>\n` +
+            `• Gap antar gol >= <b>5</b> menit (aktual <b>${maxGap}</b>)\n` +
+            `• First goal != menit <b>1</b> (aktual <b>${firstGoalMin}'</b>)\n` +
             `• Urutan menit gol 1H: <b>${escapeHtml(minuteText)}</b>\n\n` +
             `🔥 <i>P7 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
 
@@ -644,11 +644,13 @@ async function trackP19Signal(matches) {
         const lastScorer = scorers[scorers.length - 1];
         if (![3, 4].includes(lastGoalMin) || lastScorer !== 'H') continue;
 
+        if (goalMins.length < 2) continue;
+
         let maxGap = 0;
         for (let i = 1; i < goalMins.length; i += 1) {
             maxGap = Math.max(maxGap, goalMins[i] - goalMins[i - 1]);
         }
-        if (goalMins.length > 1 && maxGap < 2) continue;
+        if (maxGap < 2) continue;
 
         const targetOdd = getPatternTelegramOdd(match);
         if (!targetOdd) continue;
@@ -660,7 +662,7 @@ async function trackP19Signal(matches) {
         const league = escapeHtml(match?.league || '?');
         const score = `${homeScore}-${awayScore}`;
         const minuteText = goalMins.map((min) => `${min}'`).join(', ');
-        const gapText = goalMins.length === 1 ? 'Single goal 1H' : `Gap max <b>${maxGap}</b> menit`;
+        const gapText = `Gap max <b>${maxGap}</b> menit`;
 
         const msg =
             `🚨 <b>P19 SIGNAL — POTENSI GOL BABAK 2</b>\n` +

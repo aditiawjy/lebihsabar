@@ -643,7 +643,6 @@
             case 'P18': return s.h1c >= 3 && span >= 6 && diff <= 2 && s.max_run <= 2 && s.switches >= 3 && s.min_gap >= 1 && s.h1_first >= 1;
             case 'P19': return s.league === '20min' && s.h1c >= 2 && [3, 4].indexOf(s.h1_last) !== -1 && lastScorer === 'H' && s.max_gap >= 2;
             case 'P20': return s.league === '16min' && s.h1_last === 3 && lastScorer === 'A';
-            case 'P22': return s.league === '16min' && s.sc_a > s.sc_h && s.h1c >= 2 && span >= 3 && s.switches >= 1;
             case 'P26': return s.league === '16min' && ((s.sc_h + s.sc_a) % 2 === 1) && s.h1_last >= 6 && s.h1c >= 2 && s.sc_a > s.sc_h;
             case 'P27': return s.league === '16min' && lastScorer === 'A' && s.max_gap >= 3 && s.h1_first !== 1 && span >= 6;
             case 'P28': return (inTeamConfig('p28_teams', s.home) || inTeamConfig('p28_teams', s.away)) && s.h1_last >= 3 && span >= 3 && diff <= 1;
@@ -664,8 +663,13 @@
             case 'P48': return s.sc_h === s.sc_a && span >= 7 && s.switches >= 2;
             case 'P49': return s.league === '16min' && diff >= 2 && span >= 6;
             case 'P50': return s.league === '16min' && s.sc_a > s.sc_h && span >= 6;
-            case 'P51': return s.league === '16min' && s.switches >= 2;
+            case 'P51': return s.league === '16min' && s.switches >= 2 && s.h1_first !== 1;
             case 'P52': return s.league === '16min' && span >= 6 && s.min_gap >= 3;
+            case 'P53': return s.league === '20min' && s.h1_last === 3 && lastScorer === 'H';
+            case 'P54': return s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && span >= 4;
+            case 'P55': return s.league === '16min' && s.h1_last === 8 && s.sc_a > s.sc_h;
+            case 'P56': return s.league === '16min' && s.max_gap >= 6;
+            case 'P57': return s.h1_first === 0 && s.h1_last === 6 && firstScorer === 'A';
             default: return false;
         }
     }
@@ -692,14 +696,16 @@
         var span = s.h1c >= 2 ? (s.h1_last - s.h1_first) : 0;
 
         switch (pid) {
-            case 'NG1':
-                return s.league === '16min' && s.h1c >= 1 && s.sc_h === 1 && s.sc_a === 0 && s.h1_last === 3;
-            case 'NG2':
-                return s.league === '16min' && s.h1c >= 1 && (s.sc_h - s.sc_a) === 1 && s.h1_last === 3;
-            case 'NG5':
-                return s.sc_h === 1 && s.sc_a === 1 && s.h1c === 2 && s.h1s.length >= 2 && s.h1s[0] === 'H' && s.h1s[s.h1s.length - 1] === 'A' && s.h1_last === 7 && s.h1_first >= 2 && s.max_gap >= 4;
             case 'NG6':
                 return s.league === '20min' && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 5;
+            case 'NG7':
+                return s.h1c >= 3 && s.max_gap >= 5 && Math.abs(s.sc_h - s.sc_a) === 2;
+            case 'NG8':
+                return s.h1_first === 3 && span >= 5 && s.min_gap >= 3;
+            case 'NG9':
+                return s.league === '20min' && s.min_gap >= 1 && s.switches >= 3;
+            case 'NG10':
+                return s.league === '20min' && s.h1_first === 4 && s.h1_last === 9 && s.switches >= 1;
             default:
                 return false;
         }

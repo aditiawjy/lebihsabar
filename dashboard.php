@@ -24,6 +24,7 @@
     <div id="update-indicator">
         <span class="badge badge-green" id="update-status">&#x25CF; LIVE</span>
         <span style="color:#8b949e; font-size:0.8rem; margin-left:8px;" id="update-time"></span>
+        <span style="color:#58a6ff; font-size:0.8rem; margin-left:8px;" id="summary-sync-state"></span>
         <span id="countdown"></span>
         <button class="btn-action" onclick="location.reload()">&#x21BB; Refresh</button>
     </div>
@@ -31,6 +32,8 @@
 <?php
 require_once __DIR__ . '/dashboard_cache.php';
 require_once __DIR__ . '/pattern_snapshot.php';
+
+const SUMMARY_MIN_SAMPLE = 5;
 
 $teamConfig = require __DIR__ . '/dashboard_config.php';
 
@@ -48,6 +51,7 @@ saveSnapshot($currentSnap, $currentSnapTime);
 $patterns = $data['patterns'];
 $nextPatterns = $data['next_patterns'];
 $latePatterns = $data['late_patterns'] ?? [];
+$visiblePatterns = array_values(array_filter($patterns, fn($p) => count($p['data']) >= SUMMARY_MIN_SAMPLE));
 usort($nextPatterns, function($a, $b) {
     if ($a['next'] !== $b['next']) {
         return $a['next'] === 'HOME' ? -1 : 1;
@@ -71,7 +75,7 @@ usort($latePatterns, function($a, $b) {
     return $tb <=> $ta;
 });
 $totalMatches = $data['total_matches'];
-$patternCount = count($patterns);
+$patternCount = count($visiblePatterns);
 $csvExists = $data['csv_exists'];
 $csvTime = $data['csv_time'];
 
@@ -121,13 +125,14 @@ if (!$csvExists): ?>
             </thead>
             <tbody id="summary-body">
 <?php foreach ($patterns as $p):
+    if (count($p['data']) < SUMMARY_MIN_SAMPLE) continue;
     $total = count($p['data']);
     $has2h = count(array_filter($p['data'], fn($m) => $m['h2c'] > 0));
     $pct = $total > 0 ? round($has2h/$total*100) : 0;
     $cls = $pct >= 95 ? 'pct-high' : ($pct >= 85 ? 'pct-mid' : 'pct-low');
     $badge = $pct >= 95 ? 'badge-green' : ($pct >= 85 ? 'badge-yellow' : 'badge-red');
     $status = $pct >= 95 ? 'EXCELLENT' : ($pct >= 85 ? 'GOOD' : 'WARNING');
-    $delta = buildDelta($p['id'], $total, $has2h, $oldSnapData);
+    $delta = buildRangeDelta($p['data'], fn($m) => $m['h2c'] > 0, $oldSnapTime, $currentSnapTime);
 ?>
             <tr data-pid="<?= esc($p['id']) ?>" data-total="<?= $total ?>" data-hits="<?= $has2h ?>" data-pct="<?= $pct ?>">
                 <td><strong><?= esc($p['id']) ?></strong></td>
@@ -155,6 +160,7 @@ if (!$csvExists): ?>
             </thead>
             <tbody id="next-body">
 <?php foreach ($nextPatterns as $ng):
+    if (count($ng['data']) < SUMMARY_MIN_SAMPLE) continue;
     $total = count($ng['data']);
     $nh = count(array_filter($ng['data'], fn($m) => $m['next_goal']==='H'));
     $na = count(array_filter($ng['data'], fn($m) => $m['next_goal']==='A'));
@@ -167,7 +173,7 @@ if (!$csvExists): ?>
     $nextBadge = $tgt === 'HOME'
         ? '<span class="scorer-h next-badge-home">HOME</span>'
         : '<span class="scorer-a next-badge-away">AWAY</span>';
-    $delta = buildDelta($ng['id'], $total, $hits, $oldSnapData);
+    $delta = buildRangeDelta($ng['data'], fn($m) => ($tgt === 'HOME' ? $m['next_goal'] === 'H' : $m['next_goal'] === 'A'), $oldSnapTime, $currentSnapTime);
 ?>
 <tr data-total="<?= count($ng['data']) ?>" data-hits="<?= $hits ?>" data-nh="<?= $nh ?>" data-na="<?= $na ?>" data-pct="<?= $pct ?>">
                 <td><strong><?= esc($ng['id']) ?></strong></td>
@@ -196,13 +202,14 @@ if (!$csvExists): ?>
             </thead>
             <tbody id="late-body">
 <?php foreach ($latePatterns as $lp):
+    if (count($lp['data']) < SUMMARY_MIN_SAMPLE) continue;
     $total = count($lp['data']);
     $lateHits = count(array_filter($lp['data'], fn($m) => $m['has_late']));
     $pct = $total > 0 ? round($lateHits / $total * 100) : 0;
     $cls = $pct >= 80 ? 'pct-high' : ($pct >= 70 ? 'pct-mid' : 'pct-low');
     $badge = $pct >= 80 ? 'badge-green' : ($pct >= 70 ? 'badge-yellow' : 'badge-red');
     $status = $pct >= 80 ? 'STRONG' : ($pct >= 70 ? 'GOOD' : 'WATCH');
-    $delta = buildDelta($lp['id'], $total, $lateHits, $oldSnapData);
+    $delta = buildRangeDelta($lp['data'], fn($m) => $m['has_late'], $oldSnapTime, $currentSnapTime);
 ?>
             <tr data-total="<?= $total ?>" data-hits="<?= $lateHits ?>" data-pct="<?= $pct ?>">
                 <td><strong><?= esc($lp['id']) ?></strong></td>
@@ -221,7 +228,7 @@ if (!$csvExists): ?>
     <p class="last-update" id="last-update">
         CSV last modified: <?= $csvTime ? date('d/m/Y H:i:s', $csvTime) : '-' ?> |
         Total <?= $totalMatches ?> matches |
-        Auto-refresh: 30s via AJAX
+        Auto-refresh: 5s via AJAX
     </p>
 
 <?php
@@ -238,6 +245,9 @@ echo json_encode([
     'latePatterns' => $latePatterns,
     'teamConfig' => $teamConfig,
     'patternDefs' => $patternDefs,
+    'csvTime' => $csvTime,
+    'generatedAt' => $data['generated_at'] ?? time(),
+    'fromCache' => $data['from_cache'] ?? false,
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 echo '</script>' . "\n";
 ?>

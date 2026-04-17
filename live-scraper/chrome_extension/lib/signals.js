@@ -702,14 +702,18 @@ async function trackP28Signal(matches) {
         const homeScore = parseInt(match?.homeScore ?? '0', 10);
         const awayScore = parseInt(match?.awayScore ?? '0', 10);
         const goalMins = all1HGoalMinsByMatchKey.get(key) || [];
-        if (!goalMins.length) continue;
+        const scorers = all1HScorersByMatchKey.get(key) || [];
+        if (!goalMins.length || !scorers.length) continue;
 
         const firstGoalMin = goalMins[0];
         const lastGoalMin = goalMins[goalMins.length - 1];
         const span = lastGoalMin - firstGoalMin;
-        const diff = Math.abs(homeScore - awayScore);
+        let switches = 0;
+        for (let i = 1; i < scorers.length; i += 1) {
+            if (scorers[i] !== scorers[i - 1]) switches += 1;
+        }
 
-        if (lastGoalMin < 3 || span < 3 || diff > 1) continue;
+        if (lastGoalMin < 3 || span < 3 || switches < 1) continue;
 
         const targetOdd = getPatternTelegramOdd(match);
         if (!targetOdd) continue;
@@ -733,7 +737,7 @@ async function trackP28Signal(matches) {
             `• Croatia atau France bermain\n` +
             `• Last goal 1H menit <b>${lastGoalMin}'</b>\n` +
             `• Span gol <b>${span}</b> menit\n` +
-            `• Selisih HT <b>${diff}</b>\n` +
+            `• Ada balas gol 1H <b>${switches}x</b>\n` +
             `• Urutan menit gol 1H: <b>${escapeHtml(minuteText)}</b>\n\n` +
             `🔥 <i>P28 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
 

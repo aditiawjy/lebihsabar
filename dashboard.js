@@ -11,10 +11,14 @@
     var prevStateMemory = {};
     var liveGoalMemory = {};
     var liveScorerMemory = {};
-    var SUMMARY_REFRESH_SECONDS = 30;
+    var SUMMARY_MIN_SAMPLE = 5;
+    var SUMMARY_REFRESH_SECONDS = 5;
     var LIVE_FETCH_INTERVAL_MS = 2000;
     var refreshCountdown = SUMMARY_REFRESH_SECONDS;
     var countdownEl = document.getElementById('countdown');
+    var summarySyncStateEl = document.getElementById('summary-sync-state');
+    var latestCsvTime = INITIAL_DATA.csvTime || null;
+    var latestGeneratedAt = INITIAL_DATA.generatedAt || null;
 
     var summarySortState = { col: null, dir: 'desc' };
     var nextSortState = { col: null, dir: 'desc' };
@@ -24,6 +28,13 @@
     var liveCandidateCounts = {};
     var nextLiveCandidateCounts = {};
     var lateLiveCandidateCounts = {};
+    var liveCandidateDetails = {};
+    var nextLiveCandidateDetails = {};
+    var lateLiveCandidateDetails = {};
+    var LIVE_CANDIDATE_STORAGE_KEY = 'liveCandidateState';
+    var LIVE_CANDIDATE_CACHE_TTL_MS = 30000;
+    var restoredLiveCandidateState = false;
+    var liveCandidateExpiryTimer = null;
 
     function getPatternLabelById(id) {
         for (var i = 0; i < PATTERN_DEFS.length; i++) {
@@ -77,7 +88,7 @@
                     + '<td>' + has2hBadge + '</td></tr>';
             });
             var table = '<table class="detail-table"><thead><tr><th>Tanggal</th><th>Match</th><th>League</th><th>HT</th><th>FT</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Sequence</th><th>2H?</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>';
-            PATTERN_DATA[p.id] = { label: p.label, record: has2h + '/' + total, pct: pct + '%', html: table };
+            PATTERN_DATA[p.id] = { label: p.label, record: has2h + '/' + total, pct: pct + '%', baseHtml: table, html: table };
         });
 
         INITIAL_DATA.nextPatterns.forEach(function(ng) {
@@ -112,7 +123,7 @@
                     + '<td>' + nextBadge + '</td></tr>';
             });
             var table = '<table class="detail-table"><thead><tr><th>Tanggal</th><th>Match</th><th>League</th><th>HT</th><th>Sequence 1H</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Next Goal</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>';
-            PATTERN_DATA[ng.id] = { label: ng.label, record: hits + '/' + total, pct: pct + '%', html: table };
+            PATTERN_DATA[ng.id] = { label: ng.label, record: hits + '/' + total, pct: pct + '%', baseHtml: table, html: table };
         });
 
         (INITIAL_DATA.latePatterns || []).forEach(function(lp) {
@@ -144,8 +155,216 @@
                     + '<td>' + lateBadge + '</td></tr>';
             });
             var table = '<table class="detail-table"><thead><tr><th>Tanggal</th><th>Match</th><th>League</th><th>HT</th><th>FT</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Sequence</th><th>Late Timeline</th><th>Late?</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>';
-            PATTERN_DATA[lp.id] = { label: lp.label, record: lateHits + '/' + total, pct: pct + '%', html: table };
+            PATTERN_DATA[lp.id] = { label: lp.label, record: lateHits + '/' + total, pct: pct + '%', baseHtml: table, html: table };
         });
+    }
+
+    function buildLiveTimeline(state) {
+        var goalMins = Array.isArray(state && state.goal_mins) ? state.goal_mins : [];
+        var scorers = Array.isArray(state && state.h1s) ? state.h1s : [];
+        if (!goalMins.length || goalMins.length !== scorers.length) return '<span class="delta-zero">-</span>';
+
+        var home = 0;
+        var away = 0;
+        return goalMins.map(function(min, idx) {
+            if (scorers[idx] === 'H') home += 1;
+            if (scorers[idx] === 'A') away += 1;
+            return min + '’ (' + home + '-' + away + ')';
+        }).join('  ');
+    }
+
+    function buildSummaryLiveCandidateRows(candidates) {
+        return candidates.map(function(entry) {
+            var match = entry.match || {};
+            var state = entry.state || {};
+            var score = getMatchScores(match);
+            var seq = (state.h1s || []).map(function(s) {
+                return s === 'H' ? '<span class="scorer-h">H</span>' : '<span class="scorer-a">A</span>';
+            }).join(' → ');
+
+            return '<tr>'
+                + '<td class="record-sub"><span class="badge badge-yellow">LIVE</span> ' + escHtml(getMatchStatusText(match) || '') + '</td>'
+                + '<td>' + escHtml(getMatchHomeTeam(match)) + ' vs ' + escHtml(getMatchAwayTeam(match)) + '</td>'
+                + '<td>' + escHtml(getMatchLeague(match)) + '</td>'
+                + '<td>' + score.home + '-' + score.away + '</td>'
+                + '<td><span class="delta-zero">-</span></td>'
+                + '<td class="goal-seq">' + buildLiveTimeline(state) + '</td>'
+                + '<td class="goal-seq"><span class="delta-zero">-</span></td>'
+                + '<td class="goal-seq">' + (seq || '<span class="delta-zero">-</span>') + '</td>'
+                + '<td><span class="badge badge-yellow">' + getLiveCandidateBadgeText() + '</span></td>'
+                + '</tr>';
+        }).join('');
+    }
+
+    function buildNextLiveCandidateRows(candidates) {
+        return candidates.map(function(entry) {
+            var match = entry.match || {};
+            var state = entry.state || {};
+            var score = getMatchScores(match);
+            var seq = (state.h1s || []).map(function(s) {
+                return s === 'H' ? '<span class="scorer-h">H</span>' : '<span class="scorer-a">A</span>';
+            }).join(' → ');
+
+            return '<tr>'
+                + '<td class="record-sub"><span class="badge badge-yellow">LIVE</span> ' + escHtml(getMatchStatusText(match) || '') + '</td>'
+                + '<td>' + escHtml(getMatchHomeTeam(match)) + ' vs ' + escHtml(getMatchAwayTeam(match)) + '</td>'
+                + '<td>' + escHtml(getMatchLeague(match)) + '</td>'
+                + '<td>' + score.home + '-' + score.away + '</td>'
+                + '<td class="goal-seq">' + (seq || '<span class="delta-zero">-</span>') + '</td>'
+                + '<td class="goal-seq">' + buildLiveTimeline(state) + '</td>'
+                + '<td class="goal-seq"><span class="delta-zero">-</span></td>'
+                + '<td><span class="badge badge-yellow">' + getLiveCandidateBadgeText() + '</span></td>'
+                + '</tr>';
+        }).join('');
+    }
+
+    function buildLateLiveCandidateRows(candidates) {
+        return candidates.map(function(entry) {
+            var match = entry.match || {};
+            var state = entry.state || {};
+            var score = getMatchScores(match);
+            var seq = (state.h1s || []).map(function(s) {
+                return s === 'H' ? '<span class="scorer-h">H</span>' : '<span class="scorer-a">A</span>';
+            }).join(' → ');
+
+            return '<tr>'
+                + '<td class="record-sub"><span class="badge badge-yellow">LIVE</span> ' + escHtml(getMatchStatusText(match) || '') + '</td>'
+                + '<td>' + escHtml(getMatchHomeTeam(match)) + ' vs ' + escHtml(getMatchAwayTeam(match)) + '</td>'
+                + '<td>' + escHtml(getMatchLeague(match)) + '</td>'
+                + '<td>' + score.home + '-' + score.away + '</td>'
+                + '<td><span class="delta-zero">-</span></td>'
+                + '<td class="goal-seq">' + buildLiveTimeline(state) + '</td>'
+                + '<td class="goal-seq"><span class="delta-zero">-</span></td>'
+                + '<td class="goal-seq">' + (seq || '<span class="delta-zero">-</span>') + '</td>'
+                + '<td class="goal-seq"><span class="delta-zero">-</span></td>'
+                + '<td><span class="badge badge-yellow">' + getLiveCandidateBadgeText() + '</span></td>'
+                + '</tr>';
+        }).join('');
+    }
+
+    function buildLiveCandidateSection(id) {
+        var candidates = liveCandidateDetails[id] || nextLiveCandidateDetails[id] || lateLiveCandidateDetails[id] || [];
+        if (!candidates.length) return '';
+        if (candidates[0].kind === 'next') return buildNextLiveCandidateRows(candidates);
+        if (candidates[0].kind === 'late') return buildLateLiveCandidateRows(candidates);
+        return buildSummaryLiveCandidateRows(candidates);
+    }
+
+    function prependLiveCandidateRows(html, liveRows) {
+        if (!liveRows || !html) return html;
+        return html.replace('<tbody>', '<tbody>' + liveRows);
+    }
+
+    function hasAnyLiveCandidateState() {
+        return Object.keys(liveCandidateCounts).length > 0
+            || Object.keys(nextLiveCandidateCounts).length > 0
+            || Object.keys(lateLiveCandidateCounts).length > 0;
+    }
+
+    function getLiveCandidateBadgeText() {
+        return restoredLiveCandidateState ? 'candidate (cached)' : 'candidate';
+    }
+
+    function clearLiveCandidateState(clearStorage) {
+        liveCandidateCounts = {};
+        nextLiveCandidateCounts = {};
+        lateLiveCandidateCounts = {};
+        liveCandidateDetails = {};
+        nextLiveCandidateDetails = {};
+        lateLiveCandidateDetails = {};
+        restoredLiveCandidateState = false;
+
+        if (liveCandidateExpiryTimer) {
+            clearTimeout(liveCandidateExpiryTimer);
+            liveCandidateExpiryTimer = null;
+        }
+
+        if (clearStorage) {
+            try {
+                sessionStorage.removeItem(LIVE_CANDIDATE_STORAGE_KEY);
+            } catch (e) {
+                // ignore storage failures
+            }
+        }
+    }
+
+    function applyLiveCandidateStateToUi() {
+        applyLiveCandidateIndicators();
+        applyNextLiveCandidateIndicators();
+        applyLateLiveCandidateIndicators();
+        refreshActivePanelContent();
+    }
+
+    function scheduleLiveCandidateExpiry(delayMs) {
+        if (liveCandidateExpiryTimer) {
+            clearTimeout(liveCandidateExpiryTimer);
+            liveCandidateExpiryTimer = null;
+        }
+
+        if (!restoredLiveCandidateState || !hasAnyLiveCandidateState()) return;
+
+        liveCandidateExpiryTimer = setTimeout(function() {
+            clearLiveCandidateState(true);
+            applyLiveCandidateStateToUi();
+        }, Math.max(0, delayMs || 0));
+    }
+
+    function saveLiveCandidateState() {
+        try {
+            sessionStorage.setItem(LIVE_CANDIDATE_STORAGE_KEY, JSON.stringify({
+                savedAt: Date.now(),
+                summaryCounts: liveCandidateCounts,
+                nextCounts: nextLiveCandidateCounts,
+                lateCounts: lateLiveCandidateCounts,
+                summaryDetails: liveCandidateDetails,
+                nextDetails: nextLiveCandidateDetails,
+                lateDetails: lateLiveCandidateDetails
+            }));
+        } catch (e) {
+            // ignore storage failures
+        }
+    }
+
+    function restoreLiveCandidateState() {
+        try {
+            var raw = sessionStorage.getItem(LIVE_CANDIDATE_STORAGE_KEY);
+            if (!raw) return;
+            var parsed = JSON.parse(raw);
+            var savedAt = parseInt(parsed.savedAt, 10);
+            if (!Number.isFinite(savedAt)) {
+                clearLiveCandidateState(true);
+                return;
+            }
+            var ageMs = Date.now() - savedAt;
+            if (ageMs >= LIVE_CANDIDATE_CACHE_TTL_MS) {
+                clearLiveCandidateState(true);
+                return;
+            }
+            liveCandidateCounts = parsed.summaryCounts || {};
+            nextLiveCandidateCounts = parsed.nextCounts || {};
+            lateLiveCandidateCounts = parsed.lateCounts || {};
+            liveCandidateDetails = parsed.summaryDetails || {};
+            nextLiveCandidateDetails = parsed.nextDetails || {};
+            lateLiveCandidateDetails = parsed.lateDetails || {};
+            restoredLiveCandidateState = hasAnyLiveCandidateState();
+            scheduleLiveCandidateExpiry(LIVE_CANDIDATE_CACHE_TTL_MS - ageMs);
+        } catch (e) {
+            clearLiveCandidateState(true);
+        }
+    }
+
+    function buildPanelHtml(id, data) {
+        if (!data) return '';
+        return prependLiveCandidateRows(data.baseHtml || data.html || '', buildLiveCandidateSection(id));
+    }
+
+    function refreshActivePanelContent() {
+        if (!activePanel || !PATTERN_DATA[activePanel]) return;
+        var d = PATTERN_DATA[activePanel];
+        document.getElementById('slide-title').innerHTML = '<strong>' + activePanel + '</strong>: ' + d.label + ' <span style="color:var(--text-secondary);font-size:0.85rem;">' + d.record + ' = ' + d.pct + '</span>';
+        document.getElementById('slide-body').innerHTML = buildPanelHtml(activePanel, d);
+        var panel = document.getElementById('slide-panel');
+        if (panel) panel.scrollTop = 0;
     }
 
     function toggle(id) {
@@ -153,9 +372,10 @@
         var d = PATTERN_DATA[id];
         if (!d) return;
         document.getElementById('slide-title').innerHTML = '<strong>' + id + '</strong>: ' + d.label + ' <span style="color:var(--text-secondary);font-size:0.85rem;">' + d.record + ' = ' + d.pct + '</span>';
-        document.getElementById('slide-body').innerHTML = d.html;
+        document.getElementById('slide-body').innerHTML = buildPanelHtml(id, d);
         document.getElementById('slide-overlay').style.display = 'block';
         document.getElementById('slide-panel').classList.add('open');
+        document.getElementById('slide-panel').scrollTop = 0;
         activePanel = id;
         sessionStorage.setItem('openPanel', id);
     }
@@ -177,6 +397,29 @@
             refreshDashboard();
             refreshCountdown = SUMMARY_REFRESH_SECONDS;
         }
+    }
+
+    function updateSummarySyncState(apiData) {
+        if (!summarySyncStateEl) return;
+
+        var nextCsvTime = apiData && apiData.csv_time ? apiData.csv_time : null;
+        var nextGeneratedAt = apiData && apiData.generated_at ? apiData.generated_at : null;
+        var csvChanged = nextCsvTime !== null && latestCsvTime !== null && nextCsvTime !== latestCsvTime;
+        var rebuilt = apiData && apiData.from_cache === false;
+
+        if (csvChanged && rebuilt) {
+            summarySyncStateEl.textContent = 'CSV changed, summary rebuilt';
+            summarySyncStateEl.style.color = '#3fb950';
+        } else if (rebuilt && nextGeneratedAt !== latestGeneratedAt) {
+            summarySyncStateEl.textContent = 'Summary recalculated';
+            summarySyncStateEl.style.color = '#58a6ff';
+        } else {
+            summarySyncStateEl.textContent = 'Summary in sync';
+            summarySyncStateEl.style.color = '#8b949e';
+        }
+
+        latestCsvTime = nextCsvTime;
+        latestGeneratedAt = nextGeneratedAt;
     }
 
     async function refreshDashboard() {
@@ -211,14 +454,13 @@
             renderLateTable(apiData.late_patterns || []);
 
             document.getElementById('update-time').textContent = 'Last: ' + new Date().toLocaleTimeString();
+            updateSummarySyncState(apiData);
             document.getElementById('last-update').textContent =
                 'CSV last modified: ' + (apiData.csv_time ? new Date(apiData.csv_time * 1000).toLocaleString() : '-')
                 + ' | Total ' + apiData.total_matches + ' matches | Auto-refresh: ' + SUMMARY_REFRESH_SECONDS + 's via AJAX';
 
             if (activePanel && PATTERN_DATA[activePanel]) {
-                var d = PATTERN_DATA[activePanel];
-                document.getElementById('slide-title').innerHTML = '<strong>' + activePanel + '</strong>: ' + d.label + ' <span style="color:var(--text-secondary);font-size:0.85rem;">' + d.record + ' = ' + d.pct + '</span>';
-                document.getElementById('slide-body').innerHTML = d.html;
+                refreshActivePanelContent();
             }
         } catch(e) {
             // silent — keep current data
@@ -240,8 +482,11 @@
     }
 
     function renderSummaryTable(patterns) {
-        currentSummaryData = patterns;
-        var sorted = applySummarySort(patterns);
+        var visiblePatterns = patterns.filter(function(p) {
+            return (p.total || 0) >= SUMMARY_MIN_SAMPLE;
+        });
+        currentSummaryData = visiblePatterns;
+        var sorted = applySummarySort(visiblePatterns);
         var tbody = document.getElementById('summary-body');
         tbody.innerHTML = sorted.map(function(p) {
             return '<tr data-pid="' + p.id + '" data-total="' + p.total + '" data-hits="' + p.has2h + '" data-pct="' + p.pct + '">'
@@ -259,8 +504,11 @@
     }
 
     function renderNextTable(nextPatterns) {
-        currentNextData = nextPatterns;
-        var sorted = applyNextSort(nextPatterns);
+        var visibleNextPatterns = nextPatterns.filter(function(ng) {
+            return (ng.total || 0) >= SUMMARY_MIN_SAMPLE;
+        });
+        currentNextData = visibleNextPatterns;
+        var sorted = applyNextSort(visibleNextPatterns);
         var tbody = document.getElementById('next-body');
         tbody.innerHTML = sorted.map(function(ng) {
             var nextBadge = ng.next === 'HOME'
@@ -282,10 +530,13 @@
     }
 
     function renderLateTable(latePatterns) {
-        currentLateData = latePatterns;
+        var visibleLatePatterns = latePatterns.filter(function(lp) {
+            return (lp.total || 0) >= SUMMARY_MIN_SAMPLE;
+        });
+        currentLateData = visibleLatePatterns;
         var tbody = document.getElementById('late-body');
         if (!tbody) return;
-        tbody.innerHTML = latePatterns.map(function(lp) {
+        tbody.innerHTML = visibleLatePatterns.map(function(lp) {
             return '<tr data-pid="' + lp.id + '" data-total="' + lp.total + '" data-hits="' + lp.late_hits + '" data-pct="' + lp.pct + '">'
                 + '<td><strong>' + lp.id + '</strong></td>'
                 + '<td>' + escHtml(lp.label) + '</td>'
@@ -516,8 +767,8 @@
                 scorers = [];
             }
 
-            var payloadGoalMins = getLiveGoalMinutes(livePayload, key);
-            var payloadScorers = getLiveGoalScorers(livePayload, key);
+            var payloadGoalMins = getLiveGoalMinutes(livePayload, key, match);
+            var payloadScorers = getLiveGoalScorers(livePayload, key, match);
             if (payloadGoalMins.length && payloadGoalMins.length === payloadScorers.length) {
                 var storedCount = goalMins.length;
                 var payloadCount = payloadGoalMins.length;
@@ -592,8 +843,8 @@
 
     function buildLivePatternState(match, livePayload) {
         var key = matchKey(match);
-        var payloadGoalMins = getLiveGoalMinutes(livePayload, key);
-        var payloadScorers = getLiveGoalScorers(livePayload, key);
+        var payloadGoalMins = getLiveGoalMinutes(livePayload, key, match);
+        var payloadScorers = getLiveGoalScorers(livePayload, key, match);
         var storedGoalMins = getStoredGoalMinutes(key);
         var storedScorers = getStoredGoalScorers(key);
 
@@ -636,7 +887,8 @@
             max_gap: getMaxGap(goalMins),
             min_gap: minGapJS(goalMins),
             max_run: maxRunJS(scorers),
-            all_gaps_ge3: allGapsGeJS(goalMins, 3)
+            all_gaps_ge3: allGapsGeJS(goalMins, 3),
+            goal_mins: goalMins.slice()
         };
     }
 
@@ -660,17 +912,18 @@
             case 'P13': return s.h1c >= 2 && [0, 2].indexOf(s.h1_first) !== -1 && s.h1_last === 7 && diff <= 2 && s.min_gap >= 3 && s.switches >= 1;
             case 'P14': return s.h1c >= 2 && s.sc_h === s.sc_a && s.sc_h > 0 && s.max_gap >= 4 && span >= 5 && s.h1_first >= 3 && s.min_gap >= 2;
             case 'P15': return s.sc_h === 2 && s.sc_a === 2 && s.max_gap <= 2;
-            case 'P17': return s.h1c >= 2 && s.h1_first >= 1 && s.h1_first <= 2 && s.h1_last === 7 && s.max_gap >= 2 && s.min_gap >= 2 && s.switches >= 1 && firstScorer === 'A';
-            case 'P18': return s.h1c >= 3 && span >= 6 && diff <= 2 && s.max_run <= 2 && s.switches >= 3 && s.min_gap >= 1 && s.h1_first >= 1;
+            case 'P17': return s.h1c >= 2 && s.h1_first >= 1 && s.h1_first <= 2 && s.h1_last === 7 && s.max_gap >= 2 && s.min_gap >= 2 && s.switches >= 1 && firstScorer === 'A' && (s.league === '20min' || (s.league === '15min' && s.h1_first === 1));
             case 'P19': return s.league === '20min' && s.h1c >= 2 && [3, 4].indexOf(s.h1_last) !== -1 && lastScorer === 'H' && s.max_gap >= 2;
             case 'P20': return s.league === '16min' && s.h1_last === 3 && lastScorer === 'A';
+            case 'P24': return s.league === '15min' && inTeamConfig('p24_teams', s.home) && s.h1c >= 1 && s.h1_last >= 4 && diff <= 1 && s.sc_h >= 1 && s.h1_first >= 4 && firstScorer === 'H';
+            case 'P25': return inTeamConfig('p25_teams', s.away) && s.h1_last >= 2 && diff <= 1 && span >= 3 && s.min_gap >= 2;
             case 'P26': return s.league === '16min' && ((s.sc_h + s.sc_a) % 2 === 1) && s.h1_last >= 6 && s.h1c >= 2 && s.sc_a > s.sc_h;
             case 'P27': return s.league === '16min' && lastScorer === 'A' && s.max_gap >= 3 && s.h1_first !== 1 && span >= 6;
-            case 'P28': return (inTeamConfig('p28_teams', s.home) || inTeamConfig('p28_teams', s.away)) && s.h1_last >= 3 && span >= 3 && diff <= 1;
+            case 'P28': return (inTeamConfig('p28_teams', s.home) || inTeamConfig('p28_teams', s.away)) && s.h1_last >= 3 && span >= 3 && s.switches >= 1 && (inTeamConfig('p28_teams', s.away) || s.h1_first >= 2);
             case 'P32': return s.league === '20min' && s.h1c >= 2 && span >= 9 && s.sc_h === s.sc_a && s.min_gap >= 3 && s.switches >= 1 && s.h1_first !== 1;
             case 'P33': return s.league === '15min' && s.h1c >= 4 && diff <= 1 && s.min_gap >= 1;
             case 'P34': return s.league === '15min' && firstScorer === 'A' && lastScorer === 'H' && span >= 6 && s.h1c >= 4;
-            case 'P35': return inTeamConfig('p35_teams', s.away) && s.h1_last >= 4 && diff <= 1 && s.h1_first >= 3 && s.switches >= 1;
+            case 'P35': return inTeamConfig('p35_teams', s.away) && s.h1c >= 2 && s.h1_first >= 3 && s.max_run <= 2;
             case 'P37': return s.league === '16min' && s.h1c >= 2 && s.h1_first <= 1 && s.h1_last <= 4 && firstScorer === 'A' && lastScorer === 'A' && s.switches === 0;
             case 'P39': return s.league === '20min' && s.h1c >= 3 && span >= 7 && diff <= 3 && s.min_gap >= 3 && s.h1_first >= 1;
             case 'P40': return s.league === '16min' && diff === 2 && s.h1_first <= 1 && span >= 5;
@@ -682,15 +935,18 @@
             case 'P46': return s.league === '16min' && span >= 6 && s.min_gap >= 2;
             case 'P47': return s.sc_h === s.sc_a && s.h1_first !== 1 && s.switches >= 2;
             case 'P48': return s.sc_h === s.sc_a && span >= 7 && s.switches >= 2;
-            case 'P49': return s.league === '16min' && diff >= 2 && span >= 6;
+            case 'P49': return s.league === '16min' && diff >= 2 && span >= 6 && s.h1_first >= 1;
             case 'P50': return s.league === '16min' && s.sc_a > s.sc_h && span >= 6;
             case 'P51': return s.league === '16min' && s.switches >= 2 && s.h1_first !== 1;
             case 'P52': return s.league === '16min' && span >= 6 && s.min_gap >= 3 && diff >= 2;
-            case 'P53': return s.league === '20min' && s.h1_last === 3 && lastScorer === 'H';
+            case 'P53': return s.league === '20min' && s.h1_last === 3 && (lastScorer === 'H' || s.h1_first <= 1);
             case 'P54': return s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && span >= 4;
             case 'P55': return s.league === '16min' && s.h1_last === 8 && s.sc_a > s.sc_h;
             case 'P56': return s.league === '16min' && s.max_gap >= 6;
             case 'P57': return s.h1_first === 0 && s.h1_last === 6 && firstScorer === 'A';
+            case 'P58': return s.h1_first >= 3 && span >= 5 && s.min_gap >= 3;
+            case 'P59': return s.h1_last === 9 && s.switches >= 2 && lastScorer === 'A';
+            case 'P60': return s.league === '20min' && s.h1_first === 3 && s.sc_h === s.sc_a;
             default: return false;
         }
     }
@@ -724,7 +980,7 @@
             case 'NG8':
                 return s.h1_first === 3 && span >= 6 && s.min_gap >= 3;
             case 'NG9':
-                return s.league === '20min' && s.min_gap >= 1 && s.switches >= 3;
+                return s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && Math.abs(s.sc_h - s.sc_a) <= 1 && s.switches >= 2;
             case 'NG10':
                 return s.league === '20min' && s.h1_first === 4 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'H']);
             default:
@@ -739,15 +995,15 @@
         if (isHalftime) return true;
 
         var key = matchKey(match);
-        if (getLiveSecondHalfGoalMinutes(livePayload, key).length > 0) return false;
+        if (getLiveSecondHalfGoalMinutes(livePayload, key, match).length > 0) return false;
 
         if (parsedStatus.half === '1H') return true;
         if (parsedStatus.half === '2H' && parsedStatus.min >= 0) return true;
         return false;
     }
 
-    function hasLateSecondHalfGoal(livePayload, key) {
-        return getLiveSecondHalfGoalMinutes(livePayload, key).some(function(min) { return min >= 7; });
+    function hasLateSecondHalfGoal(livePayload, key, match) {
+        return getLiveSecondHalfGoalMinutes(livePayload, key, match).some(function(min) { return min >= 7; });
     }
 
     function isLatePatternSignalWindow(match, livePayload) {
@@ -757,7 +1013,7 @@
         if (isHalftime) return true;
 
         var key = matchKey(match);
-        if (hasLateSecondHalfGoal(livePayload, key)) return false;
+        if (hasLateSecondHalfGoal(livePayload, key, match)) return false;
 
         if (parsedStatus.half === '1H') return true;
         if (parsedStatus.half === '2H' && parsedStatus.min >= 0 && parsedStatus.min < 7) return true;
@@ -766,6 +1022,25 @@
 
     function matchKey(m) {
         return getMatchHomeTeam(m) + '|' + getMatchAwayTeam(m) + '|' + getMatchLeague(m);
+    }
+
+    function extensionMatchKey(m) {
+        return JSON.stringify({
+            league: getMatchLeague(m) || 'N/A',
+            teams: getMatchHomeTeam(m) + ' vs ' + getMatchAwayTeam(m)
+        });
+    }
+
+    function getPayloadKeyCandidates(match, key) {
+        var keys = [];
+        if (key) keys.push(key);
+        if (match) {
+            var extKey = extensionMatchKey(match);
+            if (keys.indexOf(extKey) === -1) keys.push(extKey);
+            var simpleKey = matchKey(match);
+            if (keys.indexOf(simpleKey) === -1) keys.push(simpleKey);
+        }
+        return keys;
     }
 
     function updateHtMemory(matches) {
@@ -788,23 +1063,38 @@
         }
     }
 
-    function getLiveGoalMinutes(livePayload, key) {
+    function getLiveGoalMinutes(livePayload, key, match) {
         var allGoalMinutes = livePayload && livePayload.allGoalMinutes ? livePayload.allGoalMinutes : {};
-        return Array.isArray(allGoalMinutes[key])
-            ? allGoalMinutes[key].map(function(min) { return parseInt(min, 10); }).filter(function(min) { return !Number.isNaN(min); })
-            : [];
+        var candidates = getPayloadKeyCandidates(match, key);
+        for (var i = 0; i < candidates.length; i++) {
+            var value = allGoalMinutes[candidates[i]];
+            if (Array.isArray(value)) {
+                return value.map(function(min) { return parseInt(min, 10); }).filter(function(min) { return !Number.isNaN(min); });
+            }
+        }
+        return [];
     }
 
-    function getLiveGoalScorers(livePayload, key) {
+    function getLiveGoalScorers(livePayload, key, match) {
         var allGoalScorers = livePayload && livePayload.allGoalScorers ? livePayload.allGoalScorers : {};
-        return Array.isArray(allGoalScorers[key]) ? allGoalScorers[key] : [];
+        var candidates = getPayloadKeyCandidates(match, key);
+        for (var i = 0; i < candidates.length; i++) {
+            var value = allGoalScorers[candidates[i]];
+            if (Array.isArray(value)) return value;
+        }
+        return [];
     }
 
-    function getLiveSecondHalfGoalMinutes(livePayload, key) {
+    function getLiveSecondHalfGoalMinutes(livePayload, key, match) {
         var all2HGoalMinutes = livePayload && livePayload.all2HGoalMinutes ? livePayload.all2HGoalMinutes : {};
-        return Array.isArray(all2HGoalMinutes[key])
-            ? all2HGoalMinutes[key].map(function(min) { return parseInt(min, 10); }).filter(function(min) { return !Number.isNaN(min); })
-            : [];
+        var candidates = getPayloadKeyCandidates(match, key);
+        for (var i = 0; i < candidates.length; i++) {
+            var value = all2HGoalMinutes[candidates[i]];
+            if (Array.isArray(value)) {
+                return value.map(function(min) { return parseInt(min, 10); }).filter(function(min) { return !Number.isNaN(min); });
+            }
+        }
+        return [];
     }
 
     function getMaxGap(goalMins) {
@@ -847,7 +1137,7 @@
             return false;
         }
 
-        var goalMins = getLiveGoalMinutes(livePayload, key);
+        var goalMins = getLiveGoalMinutes(livePayload, key, match);
         if (!goalMins.length) return false;
 
         var lastGoalMin = goalMins[goalMins.length - 1];
@@ -855,7 +1145,7 @@
 
         if (goalMins.length < 2 || getMaxGap(goalMins) < 2) return false;
 
-        return isLastScorerHome(goalMins, getLiveGoalScorers(livePayload, key), htH, htA);
+        return isLastScorerHome(goalMins, getLiveGoalScorers(livePayload, key, match), htH, htA);
     }
 
     function buildLiveSignals(match, livePayload, lg, htH, htA, h, a, curMin, phase) {
@@ -915,7 +1205,7 @@
             var baseHtml = deltaCell.dataset.baseHtml;
             var liveCount = liveCandidateCounts[pid] || 0;
             if (liveCount > 0) {
-                deltaCell.innerHTML = baseHtml + '<br><span style="color:#58a6ff;font-weight:600;">live ' + liveCount + ' candidate' + (liveCount > 1 ? 's' : '') + '</span>';
+                deltaCell.innerHTML = baseHtml + '<br><span style="color:#58a6ff;font-weight:600;">live ' + liveCount + ' candidate' + (liveCount > 1 ? 's' : '') + (restoredLiveCandidateState ? ' (cached)' : '') + '</span>';
             } else {
                 deltaCell.innerHTML = baseHtml;
             }
@@ -935,7 +1225,7 @@
             var baseHtml = deltaCell.dataset.baseHtml;
             var liveCount = nextLiveCandidateCounts[pid] || 0;
             if (liveCount > 0) {
-                deltaCell.innerHTML = baseHtml + '<br><span style="color:#58a6ff;font-weight:600;">live ' + liveCount + ' candidate' + (liveCount > 1 ? 's' : '') + '</span>';
+                deltaCell.innerHTML = baseHtml + '<br><span style="color:#58a6ff;font-weight:600;">live ' + liveCount + ' candidate' + (liveCount > 1 ? 's' : '') + (restoredLiveCandidateState ? ' (cached)' : '') + '</span>';
             } else {
                 deltaCell.innerHTML = baseHtml;
             }
@@ -955,7 +1245,7 @@
             var baseHtml = deltaCell.dataset.baseHtml;
             var liveCount = lateLiveCandidateCounts[pid] || 0;
             if (liveCount > 0) {
-                deltaCell.innerHTML = baseHtml + '<br><span style="color:#58a6ff;font-weight:600;">live ' + liveCount + ' candidate' + (liveCount > 1 ? 's' : '') + '</span>';
+                deltaCell.innerHTML = baseHtml + '<br><span style="color:#58a6ff;font-weight:600;">live ' + liveCount + ' candidate' + (liveCount > 1 ? 's' : '') + (restoredLiveCandidateState ? ' (cached)' : '') + '</span>';
             } else {
                 deltaCell.innerHTML = baseHtml;
             }
@@ -964,12 +1254,13 @@
 
     function collectLiveCandidateCounts(matches, livePayload) {
         var counts = {};
+        var details = {};
         (matches || []).forEach(function(match) {
             var statusText = getMatchStatusText(match);
             var s = parseStatus(statusText);
             var isHalftime = /^H\.?Time$/i.test(statusText);
             var key = matchKey(match);
-            var hasSecondHalfGoal = getLiveSecondHalfGoalMinutes(livePayload, key).length > 0;
+            var hasSecondHalfGoal = getLiveSecondHalfGoalMinutes(livePayload, key, match).length > 0;
             var isFirstHalf = s.half === '1H';
             var isPreSecondHalfGoalWindow = s.half === '2H' && !hasSecondHalfGoal;
             if (!isFirstHalf && !isHalftime && !isPreSecondHalfGoalWindow) return;
@@ -980,51 +1271,91 @@
             PATTERN_DEFS.forEach(function(pattern) {
                 if (matchesSummaryPatternLive(pattern.id, state)) {
                     counts[pattern.id] = (counts[pattern.id] || 0) + 1;
+                    if (!details[pattern.id]) details[pattern.id] = {};
+                    details[pattern.id][key] = { match: match, state: state, kind: 'summary' };
                 }
             });
         });
 
         liveCandidateCounts = counts;
+        restoredLiveCandidateState = false;
+        if (liveCandidateExpiryTimer) {
+            clearTimeout(liveCandidateExpiryTimer);
+            liveCandidateExpiryTimer = null;
+        }
+        Object.keys(details).forEach(function(pid) {
+            details[pid] = Object.values(details[pid]);
+        });
+        liveCandidateDetails = details;
+        saveLiveCandidateState();
         applyLiveCandidateIndicators();
     }
 
     function collectNextLiveCandidateCounts(matches, livePayload) {
         var counts = {};
+        var details = {};
         (matches || []).forEach(function(match) {
             if (!isNextPatternSignalWindow(match, livePayload)) return;
 
             var state = buildLivePatternState(match, livePayload);
             if (!state) return;
+            var key = matchKey(match);
 
             (INITIAL_DATA.nextPatterns || []).forEach(function(pattern) {
                 if (!pattern || !pattern.id) return;
                 if (matchesNextPatternLive(pattern.id, state)) {
                     counts[pattern.id] = (counts[pattern.id] || 0) + 1;
+                    if (!details[pattern.id]) details[pattern.id] = {};
+                    details[pattern.id][key] = { match: match, state: state, kind: 'next' };
                 }
             });
         });
 
         nextLiveCandidateCounts = counts;
+        restoredLiveCandidateState = false;
+        if (liveCandidateExpiryTimer) {
+            clearTimeout(liveCandidateExpiryTimer);
+            liveCandidateExpiryTimer = null;
+        }
+        Object.keys(details).forEach(function(pid) {
+            details[pid] = Object.values(details[pid]);
+        });
+        nextLiveCandidateDetails = details;
+        saveLiveCandidateState();
         applyNextLiveCandidateIndicators();
     }
 
     function collectLateLiveCandidateCounts(matches, livePayload) {
         var counts = {};
+        var details = {};
         (matches || []).forEach(function(match) {
             if (!isLatePatternSignalWindow(match, livePayload)) return;
 
             var state = buildLivePatternState(match, livePayload);
             if (!state) return;
+            var key = matchKey(match);
 
             (INITIAL_DATA.latePatterns || []).forEach(function(pattern) {
                 if (!pattern || !pattern.id) return;
                 if (matchesLatePatternLive(pattern.id, state)) {
                     counts[pattern.id] = (counts[pattern.id] || 0) + 1;
+                    if (!details[pattern.id]) details[pattern.id] = {};
+                    details[pattern.id][key] = { match: match, state: state, kind: 'late' };
                 }
             });
         });
 
         lateLiveCandidateCounts = counts;
+        restoredLiveCandidateState = false;
+        if (liveCandidateExpiryTimer) {
+            clearTimeout(liveCandidateExpiryTimer);
+            liveCandidateExpiryTimer = null;
+        }
+        Object.keys(details).forEach(function(pid) {
+            details[pid] = Object.values(details[pid]);
+        });
+        lateLiveCandidateDetails = details;
+        saveLiveCandidateState();
         applyLateLiveCandidateIndicators();
     }
 
@@ -1170,6 +1501,7 @@
             collectLiveCandidateCounts(livePayload.matches || [], livePayload);
             collectNextLiveCandidateCounts(livePayload.matches || [], livePayload);
             collectLateLiveCandidateCounts(livePayload.matches || [], livePayload);
+            refreshActivePanelContent();
         } catch(e) {
             document.getElementById('live-api-badge').textContent = 'API Offline';
             document.getElementById('live-api-badge').className = 'api-offline';
@@ -1177,12 +1509,10 @@
             document.getElementById('btn-stop-api').style.display = 'none';
             document.getElementById('live-last-update').textContent = '';
             document.getElementById('live-cards').innerHTML = '<div class="live-empty">API tidak aktif \u2014 klik \u25B6 Jalankan API</div>';
-            liveCandidateCounts = {};
-            nextLiveCandidateCounts = {};
-            lateLiveCandidateCounts = {};
             applyLiveCandidateIndicators();
             applyNextLiveCandidateIndicators();
             applyLateLiveCandidateIndicators();
+            refreshActivePanelContent();
             renderLiveAlerts([]);
         }
     }
@@ -1410,6 +1740,10 @@
     initSortFromDom();
 
     buildPatternData();
+    restoreLiveCandidateState();
+    applyLiveCandidateIndicators();
+    applyNextLiveCandidateIndicators();
+    applyLateLiveCandidateIndicators();
 
     document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePanel(); });
     bindExpandButtons(document);

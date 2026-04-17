@@ -230,11 +230,11 @@ function computePatterns(array $matches): array {
     return [
         ['id'=>'P2',  'label'=>'Selisih 2+ & last mnt 7\' & gap >=3 & max_run<=2 + fm<=1, 16min', 'data'=>array_values(array_filter($matches, fn($m) => $m['league']==='16min' && $m['h1c'] >= 2 && abs($m['sc_h']-$m['sc_a']) >= 2 && $m['h1_last'] == 7 && $m['all_gaps_ge3'] && $m['max_run'] <= 2 && $m['h1_first'] <= 1))],
         ['id'=>'P6',  'label'=>'Seri 1-1 + gol penyama mnt 7\' + span>=5 + first!=1', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']==2 && $m['sc_h']==1 && $m['sc_a']==1 && $m['h1_last']==7 && ($m['h1_last']-$m['h1_first'])>=5 && $m['h1_first']!=1))],
-        ['id'=>'P7',  'label'=>'Seri 1-1 + gap >= 5 mnt + first goal != mnt 1', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']==2 && $m['sc_h']==1 && $m['sc_a']==1 && $m['max_gap']>=5 && $m['h1_first']!==1))],
-        ['id'=>'P9',  'label'=>'AH seri 1-1 + gap >= 5 mnt + first goal != mnt 1', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']==2 && $m['sc_h']==1 && $m['sc_a']==1 && $m['h1s']==['A','H'] && $m['max_gap']>=5 && $m['h1_first']!==1))],
+        ['id'=>'P7',  'label'=>'Seri 1-1 + gap >= 5 mnt + first goal >=3', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']==2 && $m['sc_h']==1 && $m['sc_a']==1 && $m['max_gap']>=5 && $m['h1_first']>=3))],
+        ['id'=>'P9',  'label'=>'AH seri 1-1 + gap >= 5 mnt + first goal >=3', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']==2 && $m['sc_h']==1 && $m['sc_a']==1 && $m['h1s']==['A','H'] && $m['max_gap']>=5 && $m['h1_first']>=3))],
         ['id'=>'P12', 'label'=>'Total gol 1H >= 4 + span >= 6 mnt + min_gap>=1 + lm<=9 + fm>=1 + first!=1 + max_run<=2', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c'] >= 4 && ($m['h1_last']-$m['h1_first']) >= 6 && $m['min_gap'] >= 1 && $m['h1_last'] <= 9 && $m['h1_first'] >= 1 && $m['h1_first'] != 1 && $m['max_run'] <= 2))],
         ['id'=>'P13', 'label'=>'First 2\' + last 7\' + selisih <=2 + min_gap>=3 + switches>=1', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']>=2 && $m['h1_first']===2 && $m['h1_last']===7 && abs($m['sc_h']-$m['sc_a'])<=2 && $m['min_gap']>=3 && $m['switches']>=1))],
-        ['id'=>'P14', 'label'=>'Seri + gap >= 4 mnt + span >= 5 mnt + first goal != mnt 1 + min_gap>=2', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']>=2 && $m['sc_h']==$m['sc_a'] && $m['sc_h']>0 && $m['max_gap']>=4 && ($m['h1_last']-$m['h1_first'])>=5 && $m['h1_first']!==1 && $m['min_gap']>=2))],
+        ['id'=>'P14', 'label'=>'Seri + gap >= 4 mnt + span >= 5 mnt + first goal >=3 + min_gap>=2', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']>=2 && $m['sc_h']==$m['sc_a'] && $m['sc_h']>0 && $m['max_gap']>=4 && ($m['h1_last']-$m['h1_first'])>=5 && $m['h1_first']>=3 && $m['min_gap']>=2))],
         ['id'=>'P15', 'label'=>'HT 2-2 + max_gap<=2', 'data'=>array_values(array_filter($matches, fn($m) => $m['sc_h']==2 && $m['sc_a']==2 && $m['max_gap']<=2))],
         ['id'=>'P17', 'label'=>'First 1H mnt 1-2 + last mnt 7 + min_gap>=2 + switches>=1 + first scorer AWAY', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']>=2 && $m['h1_first']>=1 && $m['h1_first']<=2 && $m['h1_last']==7 && $m['max_gap']>=2 && $m['min_gap']>=2 && $m['switches']>=1 && count($m['h1s'])>0 && $m['h1s'][0]==='A'))],
         ['id'=>'P18', 'label'=>'Span 1H >= 6 mnt + gol 1H >= 3 + selisih <=2 + sw>=3 + min_gap>=1, fm>=1', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']>=3 && ($m['h1_last']-$m['h1_first'])>=6 && abs($m['sc_h']-$m['sc_a'])<=2 && $m['max_run']<=2 && $m['switches']>=3 && $m['min_gap']>=1 && $m['h1_first']>=1))],
@@ -273,11 +273,11 @@ function computePatterns(array $matches): array {
 
 function computeNextPatterns(array $matches): array {
     return [
-        ['id'=>'NG6','label'=>'20min + seri 1-1 + last gol 1H mnt 7 + span>=5','next'=>'AWAY','data'=>array_values(array_filter($matches, fn($m) => $m['league']==='20min' && $m['sc_h']==1 && $m['sc_a']==1 && $m['h1_last']==7 && ($m['h1_last']-$m['h1_first'])>=5))],
+        ['id'=>'NG6','label'=>'20min + seri 1-1 + scorer AH + last gol 1H mnt 7 + span>=5','next'=>'AWAY','data'=>array_values(array_filter($matches, fn($m) => $m['league']==='20min' && $m['sc_h']==1 && $m['sc_a']==1 && $m['h1_last']==7 && ($m['h1_last']-$m['h1_first'])>=5 && $m['h1s']==['A','H']))],
         ['id'=>'NG7','label'=>'Gol 1H >=3 + max_gap>=5 + selisih HT tepat 2','next'=>'AWAY','data'=>array_values(array_filter($matches, fn($m) => $m['h1c']>=3 && $m['max_gap']>=5 && abs($m['sc_h']-$m['sc_a'])===2))],
-        ['id'=>'NG8','label'=>'First goal 1H mnt 3 + span>=5 + min_gap>=3','next'=>'AWAY','data'=>array_values(array_filter($matches, fn($m) => $m['h1_first']===3 && ($m['h1_last']-$m['h1_first'])>=5 && $m['min_gap']>=3))],
+        ['id'=>'NG8','label'=>'First goal 1H mnt 3 + span>=6 + min_gap>=3','next'=>'AWAY','data'=>array_values(array_filter($matches, fn($m) => $m['h1_first']===3 && ($m['h1_last']-$m['h1_first'])>=6 && $m['min_gap']>=3))],
         ['id'=>'NG9','label'=>'20min + min_gap>=1 + switches>=3','next'=>'HOME','data'=>array_values(array_filter($matches, fn($m) => $m['league']==='20min' && $m['min_gap']>=1 && $m['switches']>=3))],
-        ['id'=>'NG10','label'=>'20min + first goal 1H mnt 4 + last gol 1H mnt 9 + switches>=1','next'=>'HOME','data'=>array_values(array_filter($matches, fn($m) => $m['league']==='20min' && $m['h1_first']===4 && $m['h1_last']===9 && $m['switches']>=1))],
+        ['id'=>'NG10','label'=>'20min + scorer AH + first goal 1H mnt 4 + last gol 1H mnt 9','next'=>'HOME','data'=>array_values(array_filter($matches, fn($m) => $m['league']==='20min' && $m['h1_first']===4 && $m['h1_last']===9 && $m['h1s']==['A','H']))],
     ];
 }
 
@@ -290,8 +290,8 @@ function computeLatePatterns(array $matches): array {
         ],
         [
             'id' => 'LG2',
-            'label' => 'Last gol 1H mnt 9 + span>=7 + AWAY unggul HT',
-            'data' => array_values(array_filter($matches, fn($m) => $m['h1_last'] === 9 && ($m['h1_last'] - $m['h1_first']) >= 7 && $m['sc_a'] > $m['sc_h'])),
+            'label' => 'Last gol 1H mnt 9 + span>=7 + AWAY unggul HT + first goal<=1',
+            'data' => array_values(array_filter($matches, fn($m) => $m['h1_last'] === 9 && ($m['h1_last'] - $m['h1_first']) >= 7 && $m['sc_a'] > $m['sc_h'] && $m['h1_first'] <= 1)),
         ],
         [
             'id' => 'LG3',

@@ -185,6 +185,21 @@
             if (!resp.ok) throw new Error('HTTP ' + resp.status);
             var apiData = await resp.json();
 
+            if (Array.isArray(apiData.pattern_details)) {
+                INITIAL_DATA.patterns = apiData.pattern_details;
+            }
+            if (Array.isArray(apiData.next_pattern_details)) {
+                INITIAL_DATA.nextPatterns = apiData.next_pattern_details;
+            }
+            if (Array.isArray(apiData.late_pattern_details)) {
+                INITIAL_DATA.latePatterns = apiData.late_pattern_details;
+            }
+            if (Array.isArray(apiData.pattern_defs)) {
+                PATTERN_DEFS = apiData.pattern_defs;
+            }
+            PATTERN_DATA = {};
+            buildPatternData();
+
             document.getElementById('stat-total').textContent = apiData.total_matches;
             document.getElementById('stat-patterns').textContent = apiData.pattern_count;
             if (apiData.csv_time_str) {
@@ -199,6 +214,12 @@
             document.getElementById('last-update').textContent =
                 'CSV last modified: ' + (apiData.csv_time ? new Date(apiData.csv_time * 1000).toLocaleString() : '-')
                 + ' | Total ' + apiData.total_matches + ' matches | Auto-refresh: ' + SUMMARY_REFRESH_SECONDS + 's via AJAX';
+
+            if (activePanel && PATTERN_DATA[activePanel]) {
+                var d = PATTERN_DATA[activePanel];
+                document.getElementById('slide-title').innerHTML = '<strong>' + activePanel + '</strong>: ' + d.label + ' <span style="color:var(--text-secondary);font-size:0.85rem;">' + d.record + ' = ' + d.pct + '</span>';
+                document.getElementById('slide-body').innerHTML = d.html;
+            }
         } catch(e) {
             // silent — keep current data
         }
@@ -657,14 +678,14 @@
             case 'P42': return s.h1_first >= 2 && span >= 6 && s.min_gap >= 3;
             case 'P43': return s.sc_a > s.sc_h && span >= 6 && lastScorer === 'H';
             case 'P44': return s.league === '20min' && diff >= 2 && s.h1_first >= 2 && s.switches >= 1 && s.h1_last <= 9;
-            case 'P45': return s.league === '16min' && s.h1_first !== 1 && span >= 6;
+            case 'P45': return s.league === '16min' && s.h1_first === 0 && span >= 6 && s.max_gap >= 6;
             case 'P46': return s.league === '16min' && span >= 6 && s.min_gap >= 2;
             case 'P47': return s.sc_h === s.sc_a && s.h1_first !== 1 && s.switches >= 2;
             case 'P48': return s.sc_h === s.sc_a && span >= 7 && s.switches >= 2;
             case 'P49': return s.league === '16min' && diff >= 2 && span >= 6;
             case 'P50': return s.league === '16min' && s.sc_a > s.sc_h && span >= 6;
             case 'P51': return s.league === '16min' && s.switches >= 2 && s.h1_first !== 1;
-            case 'P52': return s.league === '16min' && span >= 6 && s.min_gap >= 3;
+            case 'P52': return s.league === '16min' && span >= 6 && s.min_gap >= 3 && diff >= 2;
             case 'P53': return s.league === '20min' && s.h1_last === 3 && lastScorer === 'H';
             case 'P54': return s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && span >= 4;
             case 'P55': return s.league === '16min' && s.h1_last === 8 && s.sc_a > s.sc_h;

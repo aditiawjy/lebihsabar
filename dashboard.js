@@ -654,11 +654,11 @@
         switch (pid) {
             case 'P2': return s.league === '16min' && s.h1c >= 2 && diff >= 2 && s.h1_last === 7 && s.all_gaps_ge3 && s.max_run <= 2 && s.h1_first <= 1;
             case 'P6': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 5 && s.h1_first !== 1;
-            case 'P7': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.max_gap >= 5 && s.h1_first !== 1;
-            case 'P9': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.max_gap >= 5 && s.h1_first !== 1;
+            case 'P7': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.max_gap >= 5 && s.h1_first >= 3;
+            case 'P9': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.max_gap >= 5 && s.h1_first >= 3;
             case 'P12': return s.h1c >= 4 && span >= 6 && s.min_gap >= 1 && s.h1_last <= 9 && s.h1_first >= 1 && s.h1_first !== 1 && s.max_run <= 2;
             case 'P13': return s.h1c >= 2 && [0, 2].indexOf(s.h1_first) !== -1 && s.h1_last === 7 && diff <= 2 && s.min_gap >= 3 && s.switches >= 1;
-            case 'P14': return s.h1c >= 2 && s.sc_h === s.sc_a && s.sc_h > 0 && s.max_gap >= 4 && span >= 5 && s.h1_first !== 1 && s.min_gap >= 2;
+            case 'P14': return s.h1c >= 2 && s.sc_h === s.sc_a && s.sc_h > 0 && s.max_gap >= 4 && span >= 5 && s.h1_first >= 3 && s.min_gap >= 2;
             case 'P15': return s.sc_h === 2 && s.sc_a === 2 && s.max_gap <= 2;
             case 'P17': return s.h1c >= 2 && s.h1_first >= 1 && s.h1_first <= 2 && s.h1_last === 7 && s.max_gap >= 2 && s.min_gap >= 2 && s.switches >= 1 && firstScorer === 'A';
             case 'P18': return s.h1c >= 3 && span >= 6 && diff <= 2 && s.max_run <= 2 && s.switches >= 3 && s.min_gap >= 1 && s.h1_first >= 1;
@@ -704,7 +704,7 @@
             case 'LG1':
                 return s.h1_last === 9 && s.h1_first <= 1 && s.sc_a > s.sc_h;
             case 'LG2':
-                return s.h1_last === 9 && span >= 7 && s.sc_a > s.sc_h;
+                return s.h1_last === 9 && span >= 7 && s.sc_a > s.sc_h && s.h1_first <= 1;
             case 'LG3':
                 return s.league === '16min' && s.h1c >= 3 && firstScorer === 'A' && s.h1_last === 6;
             default:
@@ -718,15 +718,15 @@
 
         switch (pid) {
             case 'NG6':
-                return s.league === '20min' && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 5;
+                return s.league === '20min' && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 5 && arrayEqualsJS(s.h1s, ['A', 'H']);
             case 'NG7':
                 return s.h1c >= 3 && s.max_gap >= 5 && Math.abs(s.sc_h - s.sc_a) === 2;
             case 'NG8':
-                return s.h1_first === 3 && span >= 5 && s.min_gap >= 3;
+                return s.h1_first === 3 && span >= 6 && s.min_gap >= 3;
             case 'NG9':
                 return s.league === '20min' && s.min_gap >= 1 && s.switches >= 3;
             case 'NG10':
-                return s.league === '20min' && s.h1_first === 4 && s.h1_last === 9 && s.switches >= 1;
+                return s.league === '20min' && s.h1_first === 4 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'H']);
             default:
                 return false;
         }

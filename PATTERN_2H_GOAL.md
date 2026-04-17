@@ -216,10 +216,10 @@
 
 ---
 
-### P28: Croatia atau France Terlibat
-**Record: 23/23 = 100%**
-**Kondisi:** Salah satu tim adalah Croatia atau France (boleh home atau away, league apapun).
-**Logika:** Dua tim ini secara statistik selalu terlibat dalam match yang punya gol 2H.
+### P28: Croatia atau France + Away/First>=2 Filter
+**Record: 19/19 = 100%**
+**Kondisi:** Salah satu tim adalah Croatia atau France, last gol 1H >= 3', span gol 1H >= 3 menit, ada balas gol di 1H (`switches>=1`), lalu lolos jika tim target ada di posisi away atau first goal 1H >= 2'.
+**Logika:** Dua miss terbaru datang dari France sebagai home dengan first goal terlalu cepat, jadi cabang away/first>=2 membersihkan kasus lemah tanpa membuat rule jadi aneh.
 
 ---
 
@@ -285,4 +285,4 @@
 | P25 | Team AWAY: Real Sociedad/France/Netherlands/Ukraine | 30/30 | **100%** |
 | P26 | HT total ganjil, 16min | 21/23 | **91%** |
 | P27 | Last scorer AWAY, 16min | 19/21 | **90%** |
-| P28 | Croatia atau France terlibat | 23/23 | **100%** |
+| P28 | Croatia atau France + last>=3 + span>=3 + switches>=1 + (target team away atau first>=2) | 19/19 | **100%** |

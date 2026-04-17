@@ -8,14 +8,17 @@ header('X-Frame-Options: DENY');
 require_once __DIR__ . '/dashboard_cache.php';
 require_once __DIR__ . '/pattern_snapshot.php';
 
+const SUMMARY_MIN_SAMPLE = 5;
+
 $csvFile = __DIR__ . '/goal_log.csv';
 $data = getCachedDashboardData($csvFile, __DIR__ . '/dashboard_cache.json');
 
+$currentSnapTime = time();
 $currentSnap = computeSnapshotData($data['patterns'], $data['next_patterns'], $data['late_patterns'] ?? []);
-$oldSnap = getSnapshotHourAgo();
+$oldSnap = getSnapshotHourAgo($currentSnapTime);
 $oldSnapData = $oldSnap ? $oldSnap['data'] : [];
 $oldSnapTime = $oldSnap ? $oldSnap['time'] : null;
-saveSnapshot($currentSnap);
+saveSnapshot($currentSnap, $currentSnapTime);
 
 $patternDefs = array_map(fn($p) => [
     'id' => $p['id'],
@@ -26,16 +29,17 @@ $patternDefs = array_map(fn($p) => [
 $response = [
     'ok' => true,
     'from_cache' => $data['from_cache'] ?? false,
+    'generated_at' => $data['generated_at'] ?? $currentSnapTime,
     'csv_exists' => $data['csv_exists'],
     'csv_time' => $data['csv_time'],
     'csv_time_str' => $data['csv_time'] ? date('d/m H:i', $data['csv_time']) : null,
     'total_matches' => $data['total_matches'],
-    'pattern_count' => count($data['patterns']),
+    'pattern_count' => count(array_filter($data['patterns'], fn($p) => count($p['data']) >= SUMMARY_MIN_SAMPLE)),
     'snapshot_time' => $oldSnapTime,
     'snapshot_label' => $oldSnapTime ? buildSnapshotLabel($oldSnapTime) : null,
-    'patterns' => buildPatternSummary($data['patterns'], $oldSnapData),
-    'next_patterns' => buildNextPatternSummary($data['next_patterns'], $oldSnapData),
-    'late_patterns' => buildLatePatternSummary($data['late_patterns'] ?? [], $oldSnapData),
+    'patterns' => buildPatternSummary($data['patterns'], $oldSnapData, $oldSnapTime, $currentSnapTime),
+    'next_patterns' => buildNextPatternSummary($data['next_patterns'], $oldSnapData, $oldSnapTime, $currentSnapTime),
+    'late_patterns' => buildLatePatternSummary($data['late_patterns'] ?? [], $oldSnapData, $oldSnapTime, $currentSnapTime),
     'pattern_defs' => $patternDefs,
     'pattern_details' => $data['patterns'],
     'next_pattern_details' => $data['next_patterns'],
@@ -44,7 +48,9 @@ $response = [
 
 echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-function buildPatternSummary(array $patterns, array $oldSnapData): array {
+function buildPatternSummary(array $patterns, array $oldSnapData, ?int $rangeStart, ?int $rangeEnd): array {
+    $patterns = array_values(array_filter($patterns, fn($p) => count($p['data']) >= SUMMARY_MIN_SAMPLE));
+
     usort($patterns, function($a, $b) {
         $ta = count($a['data']); $tb = count($b['data']);
         if ($tb != $ta) return $tb <=> $ta;
@@ -53,14 +59,14 @@ function buildPatternSummary(array $patterns, array $oldSnapData): array {
         return $pb <=> $pa;
     });
 
-    return array_map(function($p) use ($oldSnapData) {
+    return array_map(function($p) use ($oldSnapData, $rangeStart, $rangeEnd) {
         $total = count($p['data']);
         $has2h = count(array_filter($p['data'], fn($m) => $m['h2c'] > 0));
         $pct = $total > 0 ? round($has2h/$total*100) : 0;
         $cls = $pct >= 95 ? 'pct-high' : ($pct >= 85 ? 'pct-mid' : 'pct-low');
         $badge = $pct >= 95 ? 'badge-green' : ($pct >= 85 ? 'badge-yellow' : 'badge-red');
         $status = $pct >= 95 ? 'EXCELLENT' : ($pct >= 85 ? 'GOOD' : 'WARNING');
-        $delta = buildDelta($p['id'], $total, $has2h, $oldSnapData);
+        $delta = buildRangeDelta($p['data'], fn($m) => $m['h2c'] > 0, $rangeStart, $rangeEnd);
         return [
             'id' => $p['id'],
             'label' => $p['label'],
@@ -75,7 +81,9 @@ function buildPatternSummary(array $patterns, array $oldSnapData): array {
     }, $patterns);
 }
 
-function buildNextPatternSummary(array $nextPatterns, array $oldSnapData): array {
+function buildNextPatternSummary(array $nextPatterns, array $oldSnapData, ?int $rangeStart, ?int $rangeEnd): array {
+    $nextPatterns = array_values(array_filter($nextPatterns, fn($ng) => count($ng['data']) >= SUMMARY_MIN_SAMPLE));
+
     usort($nextPatterns, function($a, $b) {
         if ($a['next'] !== $b['next']) {
             return $a['next'] === 'HOME' ? -1 : 1;
@@ -90,7 +98,7 @@ function buildNextPatternSummary(array $nextPatterns, array $oldSnapData): array
         if ($pb != $pa) return $pb <=> $pa;
         return $tb <=> $ta;
     });
-    return array_map(function($ng) use ($oldSnapData) {
+    return array_map(function($ng) use ($oldSnapData, $rangeStart, $rangeEnd) {
         $total = count($ng['data']);
         $nh = count(array_filter($ng['data'], fn($m) => $m['next_goal']==='H'));
         $na = count(array_filter($ng['data'], fn($m) => $m['next_goal']==='A'));
@@ -100,7 +108,7 @@ function buildNextPatternSummary(array $nextPatterns, array $oldSnapData): array
         $cls = $pct >= 85 ? 'pct-high' : ($pct >= 75 ? 'pct-mid' : 'pct-low');
         $badge = $pct >= 85 ? 'badge-green' : ($pct >= 75 ? 'badge-yellow' : 'badge-red');
         $status = $pct >= 85 ? 'STRONG' : ($pct >= 75 ? 'GOOD' : 'WEAK');
-        $delta = buildDelta($ng['id'], $total, $hits, $oldSnapData);
+        $delta = buildRangeDelta($ng['data'], fn($m) => ($tgt === 'HOME' ? $m['next_goal'] === 'H' : $m['next_goal'] === 'A'), $rangeStart, $rangeEnd);
         return [
             'id' => $ng['id'],
             'label' => $ng['label'],
@@ -118,15 +126,17 @@ function buildNextPatternSummary(array $nextPatterns, array $oldSnapData): array
     }, $nextPatterns);
 }
 
-function buildLatePatternSummary(array $latePatterns, array $oldSnapData): array {
-    return array_map(function($lp) use ($oldSnapData) {
+function buildLatePatternSummary(array $latePatterns, array $oldSnapData, ?int $rangeStart, ?int $rangeEnd): array {
+    $latePatterns = array_values(array_filter($latePatterns, fn($lp) => count($lp['data']) >= SUMMARY_MIN_SAMPLE));
+
+    return array_map(function($lp) use ($oldSnapData, $rangeStart, $rangeEnd) {
         $total = count($lp['data']);
         $lateHits = count(array_filter($lp['data'], fn($m) => $m['has_late']));
         $pct = $total > 0 ? round($lateHits / $total * 100) : 0;
         $cls = $pct >= 80 ? 'pct-high' : ($pct >= 70 ? 'pct-mid' : 'pct-low');
         $badge = $pct >= 80 ? 'badge-green' : ($pct >= 70 ? 'badge-yellow' : 'badge-red');
         $status = $pct >= 80 ? 'STRONG' : ($pct >= 70 ? 'GOOD' : 'WATCH');
-        $delta = buildDelta($lp['id'], $total, $lateHits, $oldSnapData);
+        $delta = buildRangeDelta($lp['data'], fn($m) => $m['has_late'], $rangeStart, $rangeEnd);
         return [
             'id' => $lp['id'],
             'label' => $lp['label'],

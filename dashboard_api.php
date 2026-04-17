@@ -37,6 +37,9 @@ $response = [
     'next_patterns' => buildNextPatternSummary($data['next_patterns'], $oldSnapData),
     'late_patterns' => buildLatePatternSummary($data['late_patterns'] ?? [], $oldSnapData),
     'pattern_defs' => $patternDefs,
+    'pattern_details' => $data['patterns'],
+    'next_pattern_details' => $data['next_patterns'],
+    'late_pattern_details' => $data['late_patterns'] ?? [],
 ];
 
 echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

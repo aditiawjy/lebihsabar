@@ -33,7 +33,9 @@
 require_once __DIR__ . '/dashboard_cache.php';
 require_once __DIR__ . '/pattern_snapshot.php';
 
-const SUMMARY_MIN_SAMPLE = 5;
+const SUMMARY_MIN_SAMPLE = 10;
+const NEXT_MIN_SAMPLE = 0;
+const LATE_MIN_SAMPLE = 9;
 
 $teamConfig = require __DIR__ . '/dashboard_config.php';
 
@@ -160,7 +162,7 @@ if (!$csvExists): ?>
             </thead>
             <tbody id="next-body">
 <?php foreach ($nextPatterns as $ng):
-    if (count($ng['data']) < SUMMARY_MIN_SAMPLE) continue;
+    if (count($ng['data']) < NEXT_MIN_SAMPLE) continue;
     $total = count($ng['data']);
     $nh = count(array_filter($ng['data'], fn($m) => $m['next_goal']==='H'));
     $na = count(array_filter($ng['data'], fn($m) => $m['next_goal']==='A'));
@@ -202,7 +204,7 @@ if (!$csvExists): ?>
             </thead>
             <tbody id="late-body">
 <?php foreach ($latePatterns as $lp):
-    if (count($lp['data']) < SUMMARY_MIN_SAMPLE) continue;
+    if (count($lp['data']) < LATE_MIN_SAMPLE) continue;
     $total = count($lp['data']);
     $lateHits = count(array_filter($lp['data'], fn($m) => $m['has_late']));
     $pct = $total > 0 ? round($lateHits / $total * 100) : 0;

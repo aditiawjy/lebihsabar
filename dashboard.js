@@ -11,7 +11,9 @@
     var prevStateMemory = {};
     var liveGoalMemory = {};
     var liveScorerMemory = {};
-    var SUMMARY_MIN_SAMPLE = 5;
+    var SUMMARY_MIN_SAMPLE = 10;
+    var NEXT_MIN_SAMPLE = 0;
+    var LATE_MIN_SAMPLE = 9;
     var SUMMARY_REFRESH_SECONDS = 5;
     var LIVE_FETCH_INTERVAL_MS = 2000;
     var refreshCountdown = SUMMARY_REFRESH_SECONDS;
@@ -31,8 +33,11 @@
     var liveCandidateDetails = {};
     var nextLiveCandidateDetails = {};
     var lateLiveCandidateDetails = {};
+    var settledSummaryResults = [];
     var LIVE_CANDIDATE_STORAGE_KEY = 'liveCandidateState';
+    var LIVE_SETTLED_STORAGE_KEY = 'liveSettledState';
     var LIVE_CANDIDATE_CACHE_TTL_MS = 30000;
+    var LIVE_SETTLED_CACHE_TTL_MS = 3 * 60 * 60 * 1000;
     var restoredLiveCandidateState = false;
     var liveCandidateExpiryTimer = null;
 
@@ -325,6 +330,25 @@
         }
     }
 
+    function pruneSettledSummaryResults() {
+        var cutoff = Date.now() - LIVE_SETTLED_CACHE_TTL_MS;
+        settledSummaryResults = settledSummaryResults.filter(function(result) {
+            return result && Number.isFinite(result.settledAt) && result.settledAt >= cutoff;
+        });
+    }
+
+    function saveSettledSummaryState() {
+        pruneSettledSummaryResults();
+        try {
+            sessionStorage.setItem(LIVE_SETTLED_STORAGE_KEY, JSON.stringify({
+                savedAt: Date.now(),
+                results: settledSummaryResults
+            }));
+        } catch (e) {
+            // ignore storage failures
+        }
+    }
+
     function restoreLiveCandidateState() {
         try {
             var raw = sessionStorage.getItem(LIVE_CANDIDATE_STORAGE_KEY);
@@ -353,9 +377,171 @@
         }
     }
 
+    function restoreSettledSummaryState() {
+        try {
+            var raw = sessionStorage.getItem(LIVE_SETTLED_STORAGE_KEY);
+            if (!raw) return;
+            var parsed = JSON.parse(raw);
+            var savedAt = parseInt(parsed.savedAt, 10);
+            if (!Number.isFinite(savedAt) || (Date.now() - savedAt) >= LIVE_SETTLED_CACHE_TTL_MS) {
+                settledSummaryResults = [];
+                sessionStorage.removeItem(LIVE_SETTLED_STORAGE_KEY);
+                return;
+            }
+            settledSummaryResults = Array.isArray(parsed.results) ? parsed.results : [];
+            pruneSettledSummaryResults();
+        } catch (e) {
+            settledSummaryResults = [];
+            try {
+                sessionStorage.removeItem(LIVE_SETTLED_STORAGE_KEY);
+            } catch (storageError) {
+                // ignore storage failures
+            }
+        }
+    }
+
+    function upsertSettledSummaryResult(result) {
+        if (!result || !result.pid || !result.key || !result.outcome) return;
+        pruneSettledSummaryResults();
+        var id = result.pid + '|' + result.key;
+        var nextResults = [result];
+        settledSummaryResults.forEach(function(existing) {
+            if (!existing) return;
+            var existingId = existing.pid + '|' + existing.key;
+            if (existingId !== id) nextResults.push(existing);
+        });
+        settledSummaryResults = nextResults.slice(0, 100);
+        saveSettledSummaryState();
+    }
+
+    function getSettledSummaryStats(pid) {
+        pruneSettledSummaryResults();
+        return settledSummaryResults.reduce(function(stats, result) {
+            if (!result || result.pid !== pid) return stats;
+            if (result.outcome === 'win') stats.win += 1;
+            if (result.outcome === 'lose') stats.lose += 1;
+            return stats;
+        }, { win: 0, lose: 0 });
+    }
+
+    function getRecentSettledSummaryResults(limit) {
+        pruneSettledSummaryResults();
+        return settledSummaryResults.slice(0, limit || 10);
+    }
+
+    function buildSettledSummaryResult(pid, entry, currentMatch, livePayload) {
+        var key = entry && entry.key ? entry.key : (entry && entry.match ? matchKey(entry.match) : '');
+        if (!pid || !key) return null;
+
+        var hasSecondHalfGoal = false;
+        if (currentMatch) {
+            hasSecondHalfGoal = getLiveSecondHalfGoalMinutes(livePayload, key, currentMatch).length > 0;
+        }
+
+        var outcome = null;
+        var statusText = currentMatch ? getMatchStatusText(currentMatch) : String((entry && entry.status) || '').trim();
+        if (hasSecondHalfGoal) {
+            outcome = 'win';
+        } else if (!currentMatch) {
+            outcome = 'lose';
+        } else {
+            var parsedStatus = parseStatus(statusText);
+            var isHalftime = /^H\.?Time$/i.test(statusText);
+            var stillLiveWindow = parsedStatus.half === '1H' || isHalftime || (parsedStatus.half === '2H' && !hasSecondHalfGoal);
+            if (!stillLiveWindow) {
+                outcome = 'lose';
+            }
+        }
+
+        if (!outcome) return null;
+
+        var match = currentMatch || (entry ? entry.match : null) || {};
+        var score = currentMatch ? getMatchScores(currentMatch) : (entry && entry.score ? entry.score : { home: 0, away: 0 });
+        return {
+            pid: pid,
+            key: key,
+            label: getPatternLabelById(pid),
+            home: getMatchHomeTeam(match),
+            away: getMatchAwayTeam(match),
+            league: getLeagueTypeJS(getMatchLeague(match)) || getMatchLeague(match),
+            score: score.home + ' - ' + score.away,
+            scoreObj: { home: score.home, away: score.away },
+            status: statusText || 'Finished',
+            state: entry && entry.state ? JSON.parse(JSON.stringify(entry.state)) : null,
+            outcome: outcome,
+            settledAt: Date.now()
+        };
+    }
+
+    function getSettledSummaryResultsByPid(pid) {
+        pruneSettledSummaryResults();
+        return settledSummaryResults.filter(function(result) {
+            return result && result.pid === pid;
+        });
+    }
+
+    function buildSettledSummarySection(pid) {
+        var results = getSettledSummaryResultsByPid(pid);
+        if (!results.length) return '';
+
+        var rowsHtml = results.map(function(item) {
+            var state = item.state || {};
+            var seq = Array.isArray(state.h1s) ? state.h1s.map(function(s) {
+                return s === 'H' ? '<span class="scorer-h">H</span>' : '<span class="scorer-a">A</span>';
+            }).join(' → ') : '';
+            var timeline = buildLiveTimeline(state);
+            var outcomeBadge = item.outcome === 'win'
+                ? '<span class="badge badge-green">WIN</span>'
+                : '<span class="badge badge-red">LOSE</span>';
+            var settledTime = new Date(item.settledAt || Date.now()).toLocaleTimeString();
+            return '<tr>'
+                + '<td class="record-sub">' + escHtml(settledTime) + '</td>'
+                + '<td>' + escHtml(item.home) + ' vs ' + escHtml(item.away) + '</td>'
+                + '<td>' + escHtml(item.league || '-') + '</td>'
+                + '<td>' + escHtml(item.status || '-') + '</td>'
+                + '<td>' + escHtml(item.score || '-') + '</td>'
+                + '<td class="goal-seq">' + timeline + '</td>'
+                + '<td class="goal-seq">' + (seq || '<span class="delta-zero">-</span>') + '</td>'
+                + '<td>' + outcomeBadge + '</td>'
+                + '</tr>';
+        }).join('');
+
+        return '<div style="margin-top:16px;">'
+            + '<h4 style="margin:0 0 8px 0; font-size:0.95rem; color:var(--text-primary);">Settled Live Results</h4>'
+            + '<table class="detail-table"><thead><tr><th>Jam</th><th>Match</th><th>League</th><th>Status Terakhir</th><th>Skor</th><th>Timeline 1H</th><th>Sequence</th><th>Hasil</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>'
+            + '</div>';
+    }
+
+    function settleRemovedSummaryCandidates(previousDetails, nextDetails, matches, livePayload) {
+        var currentMatchesByKey = {};
+        (matches || []).forEach(function(match) {
+            currentMatchesByKey[matchKey(match)] = match;
+        });
+
+        var nextKeysByPattern = {};
+        Object.keys(nextDetails || {}).forEach(function(pid) {
+            nextKeysByPattern[pid] = {};
+            (nextDetails[pid] || []).forEach(function(entry) {
+                var key = entry.key || (entry.match ? matchKey(entry.match) : '');
+                if (key) nextKeysByPattern[pid][key] = true;
+            });
+        });
+
+        Object.keys(previousDetails || {}).forEach(function(pid) {
+            (previousDetails[pid] || []).forEach(function(entry) {
+                var key = entry.key || (entry.match ? matchKey(entry.match) : '');
+                if (!key) return;
+                if (nextKeysByPattern[pid] && nextKeysByPattern[pid][key]) return;
+                var settled = buildSettledSummaryResult(pid, entry, currentMatchesByKey[key], livePayload);
+                if (settled) upsertSettledSummaryResult(settled);
+            });
+        });
+    }
+
     function buildPanelHtml(id, data) {
         if (!data) return '';
-        return prependLiveCandidateRows(data.baseHtml || data.html || '', buildLiveCandidateSection(id));
+        var html = prependLiveCandidateRows(data.baseHtml || data.html || '', buildLiveCandidateSection(id));
+        return html + buildSettledSummarySection(id);
     }
 
     function refreshActivePanelContent() {
@@ -505,7 +691,7 @@
 
     function renderNextTable(nextPatterns) {
         var visibleNextPatterns = nextPatterns.filter(function(ng) {
-            return (ng.total || 0) >= SUMMARY_MIN_SAMPLE;
+            return (ng.total || 0) >= NEXT_MIN_SAMPLE;
         });
         currentNextData = visibleNextPatterns;
         var sorted = applyNextSort(visibleNextPatterns);
@@ -531,7 +717,7 @@
 
     function renderLateTable(latePatterns) {
         var visibleLatePatterns = latePatterns.filter(function(lp) {
-            return (lp.total || 0) >= SUMMARY_MIN_SAMPLE;
+            return (lp.total || 0) >= LATE_MIN_SAMPLE;
         });
         currentLateData = visibleLatePatterns;
         var tbody = document.getElementById('late-body');
@@ -913,11 +1099,11 @@
             case 'P14': return s.h1c >= 2 && s.sc_h === s.sc_a && s.sc_h > 0 && s.max_gap >= 4 && span >= 5 && s.h1_first >= 3 && s.min_gap >= 2;
             case 'P15': return s.sc_h === 2 && s.sc_a === 2 && s.max_gap <= 2;
             case 'P17': return s.h1c >= 2 && s.h1_first >= 1 && s.h1_first <= 2 && s.h1_last === 7 && s.max_gap >= 2 && s.min_gap >= 2 && s.switches >= 1 && firstScorer === 'A' && (s.league === '20min' || (s.league === '15min' && s.h1_first === 1));
-            case 'P19': return s.league === '20min' && s.h1c >= 2 && [3, 4].indexOf(s.h1_last) !== -1 && lastScorer === 'H' && s.max_gap >= 2;
-            case 'P20': return s.league === '16min' && s.h1_last === 3 && lastScorer === 'A';
+            case 'P19': return s.league === '20min' && s.h1c >= 2 && lastScorer === 'H' && (s.h1_last === 3 || (s.h1_last === 4 && (s.sc_a > s.sc_h || s.switches >= 2)));
+            case 'P20': return s.league === '16min' && s.h1_last === 3 && lastScorer === 'A' && (s.h1_first <= 1 || s.h1c >= 2);
             case 'P24': return s.league === '15min' && inTeamConfig('p24_teams', s.home) && s.h1c >= 1 && s.h1_last >= 4 && diff <= 1 && s.sc_h >= 1 && s.h1_first >= 4 && firstScorer === 'H';
-            case 'P25': return inTeamConfig('p25_teams', s.away) && s.h1_last >= 2 && diff <= 1 && span >= 3 && s.min_gap >= 2;
-            case 'P26': return s.league === '16min' && ((s.sc_h + s.sc_a) % 2 === 1) && s.h1_last >= 6 && s.h1c >= 2 && s.sc_a > s.sc_h;
+            case 'P25': return inTeamConfig('p25_teams', s.away) && s.h1_last >= 2 && diff <= 1 && span >= 3 && s.min_gap >= 2 && lastScorer === 'A';
+            case 'P26': return s.league === '16min' && ((s.sc_h + s.sc_a) % 2 === 1) && s.h1_last >= 6 && s.h1c >= 2 && s.sc_a > s.sc_h && s.max_run <= 2 && (s.h1_first !== 1 || s.max_gap >= 4);
             case 'P27': return s.league === '16min' && lastScorer === 'A' && s.max_gap >= 3 && s.h1_first !== 1 && span >= 6;
             case 'P28': return (inTeamConfig('p28_teams', s.home) || inTeamConfig('p28_teams', s.away)) && s.h1_last >= 3 && span >= 3 && s.switches >= 1 && (inTeamConfig('p28_teams', s.away) || s.h1_first >= 2);
             case 'P32': return s.league === '20min' && s.h1c >= 2 && span >= 9 && s.sc_h === s.sc_a && s.min_gap >= 3 && s.switches >= 1 && s.h1_first !== 1;
@@ -928,25 +1114,29 @@
             case 'P39': return s.league === '20min' && s.h1c >= 3 && span >= 7 && diff <= 3 && s.min_gap >= 3 && s.h1_first >= 1;
             case 'P40': return s.league === '16min' && diff === 2 && s.h1_first <= 1 && span >= 5;
             case 'P41': return diff >= 2 && s.h1_first >= 2 && span >= 6 && s.max_gap >= 5;
-            case 'P42': return s.h1_first >= 2 && span >= 6 && s.min_gap >= 3;
+            case 'P42': return s.league === '20min' && s.h1_first >= 2 && span >= 6 && s.min_gap >= 3;
             case 'P43': return s.sc_a > s.sc_h && span >= 6 && lastScorer === 'H';
             case 'P44': return s.league === '20min' && diff >= 2 && s.h1_first >= 2 && s.switches >= 1 && s.h1_last <= 9;
             case 'P45': return s.league === '16min' && s.h1_first === 0 && span >= 6 && s.max_gap >= 6;
             case 'P46': return s.league === '16min' && span >= 6 && s.min_gap >= 2;
-            case 'P47': return s.sc_h === s.sc_a && s.h1_first !== 1 && s.switches >= 2;
-            case 'P48': return s.sc_h === s.sc_a && span >= 7 && s.switches >= 2;
+            case 'P47': return s.sc_h === s.sc_a && s.h1_first !== 1 && s.switches >= 2 && s.h1_last >= 6;
+            case 'P48': return s.sc_h === s.sc_a && span >= 7 && s.switches >= 2 && (s.h1_first === 0 || span === 7 || lastScorer === 'H');
             case 'P49': return s.league === '16min' && diff >= 2 && span >= 6 && s.h1_first >= 1;
-            case 'P50': return s.league === '16min' && s.sc_a > s.sc_h && span >= 6;
+            case 'P50': return s.league === '16min' && s.sc_a > s.sc_h && span >= 6 && s.max_run <= 2;
             case 'P51': return s.league === '16min' && s.switches >= 2 && s.h1_first !== 1;
             case 'P52': return s.league === '16min' && span >= 6 && s.min_gap >= 3 && diff >= 2;
             case 'P53': return s.league === '20min' && s.h1_last === 3 && (lastScorer === 'H' || s.h1_first <= 1);
             case 'P54': return s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && span >= 4;
             case 'P55': return s.league === '16min' && s.h1_last === 8 && s.sc_a > s.sc_h;
-            case 'P56': return s.league === '16min' && s.max_gap >= 6;
-            case 'P57': return s.h1_first === 0 && s.h1_last === 6 && firstScorer === 'A';
+            case 'P56': return s.league === '16min' && s.max_gap >= 6 && (s.h1_first <= 1 || lastScorer === 'A');
+            case 'P57': return s.h1_first === 0 && s.h1_last === 6 && firstScorer === 'A' && ((s.league === '15min' || s.league === '16min') || s.h1c >= 3);
             case 'P58': return s.h1_first >= 3 && span >= 5 && s.min_gap >= 3;
             case 'P59': return s.h1_last === 9 && s.switches >= 2 && lastScorer === 'A';
             case 'P60': return s.league === '20min' && s.h1_first === 3 && s.sc_h === s.sc_a;
+            case 'P61': return s.league === '15min' && inTeamConfig('p61_teams', s.away) && s.h1_last >= 5 && diff <= 1;
+            case 'P62': return s.league === '15min' && inTeamConfig('p62_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 4;
+            case 'P63': return s.league === '16min' && inTeamConfig('p63_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 6;
+            case 'P64': return s.league === '15min' && inTeamConfig('p64_teams', s.away) && s.h1_first <= 1 && s.h1_last >= 4;
             default: return false;
         }
     }
@@ -963,6 +1153,14 @@
                 return s.h1_last === 9 && span >= 7 && s.sc_a > s.sc_h && s.h1_first <= 1;
             case 'LG3':
                 return s.league === '16min' && s.h1c >= 3 && firstScorer === 'A' && s.h1_last === 6;
+            case 'LG4':
+                return s.league === '20min' && inTeamConfig('lg4_teams', s.away) && s.sc_a > s.sc_h && s.h1_last === 9;
+            case 'LG5':
+                return inTeamConfig('lg5_teams', s.home) && s.sc_a > s.sc_h && s.h1_last >= 6;
+            case 'LG6':
+                return s.league === '20min' && inTeamConfig('lg6_teams', s.away) && s.h1_first <= 1 && s.h1_last >= 8;
+            case 'LG7':
+                return inTeamConfig('lg7_teams', s.away) && s.sc_a > s.sc_h && s.h1_last >= 6;
             default:
                 return false;
         }
@@ -1204,10 +1402,18 @@
 
             var baseHtml = deltaCell.dataset.baseHtml;
             var liveCount = liveCandidateCounts[pid] || 0;
+            var settledStats = getSettledSummaryStats(pid);
+            var settledHtml = '';
+            if (settledStats.win || settledStats.lose) {
+                var parts = [];
+                if (settledStats.win) parts.push('W ' + settledStats.win);
+                if (settledStats.lose) parts.push('L ' + settledStats.lose);
+                settledHtml = '<br><span style="color:#8b949e;font-weight:600;">settled ' + parts.join(' / ') + '</span>';
+            }
             if (liveCount > 0) {
-                deltaCell.innerHTML = baseHtml + '<br><span style="color:#58a6ff;font-weight:600;">live ' + liveCount + ' candidate' + (liveCount > 1 ? 's' : '') + (restoredLiveCandidateState ? ' (cached)' : '') + '</span>';
+                deltaCell.innerHTML = baseHtml + '<br><span style="color:#58a6ff;font-weight:600;">live ' + liveCount + ' candidate' + (liveCount > 1 ? 's' : '') + (restoredLiveCandidateState ? ' (cached)' : '') + '</span>' + settledHtml;
             } else {
-                deltaCell.innerHTML = baseHtml;
+                deltaCell.innerHTML = baseHtml + settledHtml;
             }
         });
     }
@@ -1272,10 +1478,23 @@
                 if (matchesSummaryPatternLive(pattern.id, state)) {
                     counts[pattern.id] = (counts[pattern.id] || 0) + 1;
                     if (!details[pattern.id]) details[pattern.id] = {};
-                    details[pattern.id][key] = { match: match, state: state, kind: 'summary' };
+                    details[pattern.id][key] = {
+                        match: match,
+                        state: state,
+                        kind: 'summary',
+                        key: key,
+                        status: getMatchStatusText(match),
+                        score: getMatchScores(match)
+                    };
                 }
             });
         });
+
+        Object.keys(details).forEach(function(pid) {
+            details[pid] = Object.values(details[pid]);
+        });
+
+        settleRemovedSummaryCandidates(liveCandidateDetails, details, matches, livePayload);
 
         liveCandidateCounts = counts;
         restoredLiveCandidateState = false;
@@ -1283,9 +1502,6 @@
             clearTimeout(liveCandidateExpiryTimer);
             liveCandidateExpiryTimer = null;
         }
-        Object.keys(details).forEach(function(pid) {
-            details[pid] = Object.values(details[pid]);
-        });
         liveCandidateDetails = details;
         saveLiveCandidateState();
         applyLiveCandidateIndicators();
@@ -1445,7 +1661,9 @@
         var updateStatus = document.getElementById('update-status');
         if (!alertBox || !updateStatus) return;
 
-        if (!signalMatches || !signalMatches.length) {
+        var settledResults = getRecentSettledSummaryResults(10);
+
+        if ((!signalMatches || !signalMatches.length) && !settledResults.length) {
             alertBox.className = 'live-alerts-empty';
             alertBox.textContent = 'Belum ada alert pattern live.';
             updateStatus.textContent = '\u25CF LIVE';
@@ -1454,6 +1672,7 @@
             return;
         }
 
+        signalMatches = signalMatches || [];
         var totalSignals = signalMatches.reduce(function(sum, item) {
             return sum + item.signals.length;
         }, 0);
@@ -1461,7 +1680,7 @@
         var itemsHtml = signalMatches.map(function(item) {
             var patternsHtml = item.signals.map(function(sig) {
                 return '<span class="live-alert-pattern"><span class="pid">' + sig.id + '</span>' + escHtml(sig.label) + '</span>';
-            }).join('');
+            }).join(' ');
 
             return '<div class="live-alert-item">'
                 + '<div class="live-alert-match">' + escHtml(item.home) + ' vs ' + escHtml(item.away) + '</div>'
@@ -1470,17 +1689,50 @@
                 + '</div>';
         }).join('');
 
-        alertBox.className = 'live-alerts-active';
-        alertBox.innerHTML = '<div class="live-alerts-head">'
-            + '<span class="live-alert-badge">ALERT ' + signalMatches.length + ' MATCH</span>'
-            + '<span class="live-alerts-title">Ada indikasi pattern live</span>'
-            + '<span class="live-alert-sub">' + totalSignals + ' signal aktif terdeteksi dari live scraper.</span>'
-            + '</div>'
-            + '<div class="live-alert-list">' + itemsHtml + '</div>';
+        var settledItemsHtml = settledResults.map(function(item) {
+            var outcomeBadge = item.outcome === 'win'
+                ? '<span class="badge badge-green">WIN</span>'
+                : '<span class="badge badge-red">LOSE</span>';
+            var settledTime = new Date(item.settledAt || Date.now()).toLocaleTimeString();
+            return '<div class="live-alert-item">'
+                + '<div class="live-alert-match">' + escHtml(item.home) + ' vs ' + escHtml(item.away) + ' ' + outcomeBadge + '</div>'
+                + '<div class="live-alert-meta">[' + escHtml(item.league || 'league?') + '] ' + escHtml(item.status || 'Finished') + ' | Skor ' + escHtml(item.score || '-') + ' | ' + escHtml(settledTime) + '</div>'
+                + '<div class="live-alert-patterns"><span class="live-alert-pattern"><span class="pid">' + escHtml(item.pid) + '</span>' + escHtml(item.label || item.pid) + '</span></div>'
+                + '</div>';
+        }).join('');
 
-        updateStatus.textContent = '\u25CF ALERT ' + signalMatches.length;
-        updateStatus.className = 'badge badge-red';
-        document.title = '(' + signalMatches.length + ') Pattern Alert';
+        var activeSection = '';
+        if (signalMatches.length) {
+            activeSection = '<div class="live-alerts-head">'
+                + '<span class="live-alert-badge">ALERT ' + signalMatches.length + ' MATCH</span>'
+                + '<span class="live-alerts-title">Ada indikasi pattern live</span>'
+                + '<span class="live-alert-sub">' + totalSignals + ' signal aktif terdeteksi dari live scraper.</span>'
+                + '</div>'
+                + '<div class="live-alert-list">' + itemsHtml + '</div>';
+        }
+
+        var settledSection = '';
+        if (settledResults.length) {
+            settledSection = '<div class="live-alerts-head" style="margin-top:' + (activeSection ? '12px' : '0') + ';">'
+                + '<span class="live-alert-badge" style="background:#1f6feb;">RESULT ' + settledResults.length + '</span>'
+                + '<span class="live-alerts-title">Candidate yang sudah selesai</span>'
+                + '<span class="live-alert-sub">Yang menang maupun kalah tetap disimpan sementara.</span>'
+                + '</div>'
+                + '<div class="live-alert-list">' + settledItemsHtml + '</div>';
+        }
+
+        alertBox.className = 'live-alerts-active';
+        alertBox.innerHTML = activeSection + settledSection;
+
+        if (signalMatches.length) {
+            updateStatus.textContent = '\u25CF ALERT ' + signalMatches.length;
+            updateStatus.className = 'badge badge-red';
+            document.title = '(' + signalMatches.length + ') Pattern Alert';
+        } else {
+            updateStatus.textContent = '\u25CF RESULT ' + settledResults.length;
+            updateStatus.className = 'badge badge-yellow';
+            document.title = '(' + settledResults.length + ') Pattern Results';
+        }
     }
 
     async function fetchLiveData() {
@@ -1741,6 +1993,7 @@
 
     buildPatternData();
     restoreLiveCandidateState();
+    restoreSettledSummaryState();
     applyLiveCandidateIndicators();
     applyNextLiveCandidateIndicators();
     applyLateLiveCandidateIndicators();

@@ -8,7 +8,9 @@ header('X-Frame-Options: DENY');
 require_once __DIR__ . '/dashboard_cache.php';
 require_once __DIR__ . '/pattern_snapshot.php';
 
-const SUMMARY_MIN_SAMPLE = 5;
+const SUMMARY_MIN_SAMPLE = 10;
+const NEXT_MIN_SAMPLE = 0;
+const LATE_MIN_SAMPLE = 9;
 
 $csvFile = __DIR__ . '/goal_log.csv';
 $data = getCachedDashboardData($csvFile, __DIR__ . '/dashboard_cache.json');
@@ -82,7 +84,7 @@ function buildPatternSummary(array $patterns, array $oldSnapData, ?int $rangeSta
 }
 
 function buildNextPatternSummary(array $nextPatterns, array $oldSnapData, ?int $rangeStart, ?int $rangeEnd): array {
-    $nextPatterns = array_values(array_filter($nextPatterns, fn($ng) => count($ng['data']) >= SUMMARY_MIN_SAMPLE));
+    $nextPatterns = array_values(array_filter($nextPatterns, fn($ng) => count($ng['data']) >= NEXT_MIN_SAMPLE));
 
     usort($nextPatterns, function($a, $b) {
         if ($a['next'] !== $b['next']) {
@@ -127,7 +129,7 @@ function buildNextPatternSummary(array $nextPatterns, array $oldSnapData, ?int $
 }
 
 function buildLatePatternSummary(array $latePatterns, array $oldSnapData, ?int $rangeStart, ?int $rangeEnd): array {
-    $latePatterns = array_values(array_filter($latePatterns, fn($lp) => count($lp['data']) >= SUMMARY_MIN_SAMPLE));
+    $latePatterns = array_values(array_filter($latePatterns, fn($lp) => count($lp['data']) >= LATE_MIN_SAMPLE));
 
     return array_map(function($lp) use ($oldSnapData, $rangeStart, $rangeEnd) {
         $total = count($lp['data']);

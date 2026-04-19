@@ -1164,24 +1164,30 @@
             case 'P44': return s.league === '20min' && diff >= 2 && s.h1_first >= 2 && s.switches >= 1 && s.h1_last <= 9;
             case 'P45': return s.league === '16min' && s.h1_first === 0 && span >= 6 && s.max_gap >= 6;
             case 'P46': return s.league === '16min' && span >= 6 && s.min_gap >= 2;
-            case 'P47': return s.sc_h === s.sc_a && s.h1_first !== 1 && s.switches >= 2 && s.h1_last >= 6;
+            case 'P47': return s.sc_h === s.sc_a && s.h1_first !== 1 && s.switches >= 2 && s.h1_last >= 6 && s.min_gap >= 1;
             case 'P48': return s.sc_h === s.sc_a && span >= 7 && s.switches >= 2 && (s.h1_first === 0 || span === 7 || lastScorer === 'H');
             case 'P49': return s.league === '16min' && diff >= 2 && span >= 6 && s.h1_first >= 1;
             case 'P50': return s.league === '16min' && s.sc_a > s.sc_h && span >= 6 && s.max_run <= 2;
             case 'P51': return s.league === '16min' && s.switches >= 2 && s.h1_first !== 1;
             case 'P52': return s.league === '16min' && span >= 6 && s.min_gap >= 3 && diff >= 2;
-            case 'P53': return s.league === '20min' && s.h1_last === 3 && (lastScorer === 'H' || s.h1_first <= 1);
+            case 'P53': return s.league === '20min' && s.h1_last === 3 && (lastScorer === 'H' || s.h1_first <= 1) && s.min_gap >= 1 && s.h1c <= 2;
             case 'P54': return s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && span >= 4 && s.h1_first !== 1;
             case 'P55': return s.league === '16min' && s.h1_last === 8 && s.sc_a > s.sc_h;
             case 'P56': return s.league === '16min' && s.max_gap >= 6 && (s.h1_first <= 1 || lastScorer === 'A');
             case 'P57': return s.h1_first === 0 && s.h1_last === 6 && firstScorer === 'A' && ((s.league === '15min' || s.league === '16min') || s.h1c >= 3);
             case 'P58': return s.h1_first >= 3 && span >= 5 && s.min_gap >= 3;
             case 'P59': return s.h1_last === 9 && s.switches >= 2 && lastScorer === 'A' && (firstScorer === 'A' || s.max_gap >= 6) && !(s.home === 'Spain (V)' && s.away === 'Uruguay (V)');
-            case 'P60': return s.league === '20min' && s.h1_first === 3 && s.sc_h === s.sc_a;
+            case 'P60': return s.league === '20min' && s.h1_first === 3 && s.sc_h === s.sc_a && s.h1_last >= 5 && !(s.home === 'Sweden (V)' && s.away === 'Russia (V)');
             case 'P61': return s.league === '15min' && inTeamConfig('p61_teams', s.away) && s.h1_last >= 5 && diff <= 1;
             case 'P62': return s.league === '15min' && inTeamConfig('p62_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 4;
             case 'P63': return s.league === '16min' && inTeamConfig('p63_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 6;
             case 'P64': return s.league === '15min' && inTeamConfig('p64_teams', s.away) && s.h1_first <= 1 && s.h1_last >= 4;
+            case 'P67': return s.league === '20min' && inTeamConfig('p67_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 5;
+            case 'P68': return s.league === '15min' && s.home === 'Leicester City (V)' && s.h1_first <= 1;
+            case 'P69': return s.league === '20min' && s.home === 'Denmark (V)' && s.h1_first <= 1 && s.h1_last >= 5;
+            case 'P70': return s.league === '15min' && s.away === 'Liverpool (V)' && s.h1_first <= 1 && s.h1_last >= 5;
+            case 'P71': return s.league === '20min' && s.away === 'Germany (V)' && s.sc_a > s.sc_h && s.h1_last >= 6;
+            case 'P66': return s.league === '15min' && inTeamConfig('p66_teams', s.away) && s.h1_first <= 1 && s.h1_last >= 5;
             default: return false;
         }
     }
@@ -1206,6 +1212,8 @@
                 return s.league === '20min' && inTeamConfig('lg6_teams', s.away) && s.h1_first <= 1 && s.h1_last >= 8;
             case 'LG7':
                 return inTeamConfig('lg7_teams', s.away) && s.sc_a > s.sc_h && s.h1_last >= 6;
+            case 'LG8':
+                return s.league === '20min' && inTeamConfig('lg8_teams', s.away) && s.sc_a > s.sc_h && s.h1_last >= 6 && s.h1c >= 2;
             default:
                 return false;
         }
@@ -1217,7 +1225,7 @@
 
         switch (pid) {
             case 'NG6':
-                return s.league === '20min' && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 5 && arrayEqualsJS(s.h1s, ['A', 'H']);
+                return s.league === '20min' && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 5 && arrayEqualsJS(s.h1s, ['A', 'H']) && !(s.home === 'Mexico (V)' && s.away === 'Tunisia (V)');
             case 'NG7':
                 return s.h1c >= 3 && s.max_gap >= 5 && Math.abs(s.sc_h - s.sc_a) === 2 && s.h1_last >= 8;
             case 'NG8':

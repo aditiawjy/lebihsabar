@@ -163,10 +163,10 @@ if (!$csvExists): ?>
             <tbody id="next-body">
 <?php foreach ($nextPatterns as $ng):
     if (count($ng['data']) < NEXT_MIN_SAMPLE) continue;
+    $tgt = $ng['next'];
     $total = count($ng['data']);
     $nh = count(array_filter($ng['data'], fn($m) => $m['next_goal']==='H'));
     $na = count(array_filter($ng['data'], fn($m) => $m['next_goal']==='A'));
-    $tgt = $ng['next'];
     $hits = $tgt === 'HOME' ? $nh : $na;
     $pct = $total > 0 ? round($hits/$total*100) : 0;
     $cls = $pct >= 85 ? 'pct-high' : ($pct >= 75 ? 'pct-mid' : 'pct-low');

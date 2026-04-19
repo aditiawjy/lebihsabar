@@ -43,6 +43,7 @@ $response = [
     'next_patterns' => buildNextPatternSummary($data['next_patterns'], $oldSnapData, $oldSnapTime, $currentSnapTime),
     'late_patterns' => buildLatePatternSummary($data['late_patterns'] ?? [], $oldSnapData, $oldSnapTime, $currentSnapTime),
     'pattern_defs' => $patternDefs,
+    'all_matches' => $data['all_matches'],
     'pattern_details' => $data['patterns'],
     'next_pattern_details' => $data['next_patterns'],
     'late_pattern_details' => $data['late_patterns'] ?? [],
@@ -101,10 +102,10 @@ function buildNextPatternSummary(array $nextPatterns, array $oldSnapData, ?int $
         return $tb <=> $ta;
     });
     return array_map(function($ng) use ($oldSnapData, $rangeStart, $rangeEnd) {
+        $tgt = $ng['next'];
         $total = count($ng['data']);
         $nh = count(array_filter($ng['data'], fn($m) => $m['next_goal']==='H'));
         $na = count(array_filter($ng['data'], fn($m) => $m['next_goal']==='A'));
-        $tgt = $ng['next'];
         $hits = $tgt === 'HOME' ? $nh : $na;
         $pct = $total > 0 ? round($hits/$total*100) : 0;
         $cls = $pct >= 85 ? 'pct-high' : ($pct >= 75 ? 'pct-mid' : 'pct-low');

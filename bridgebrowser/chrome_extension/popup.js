@@ -402,6 +402,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             setTimeout(extractPageData, 1000);
         }
     }
-    
-    return true;
+
+    return false;
 });

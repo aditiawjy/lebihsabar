@@ -290,6 +290,46 @@ tr:hover td {
 #slide-body td { padding: 6px 8px; }
 #slide-body th { padding: 8px; }
 
+.detail-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-header);
+}
+
+.detail-page-info {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    flex: 1;
+    text-align: center;
+}
+
+.detail-page-btn {
+    background: var(--bg-deep);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.detail-page-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.detail-page-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
 #live-section { margin-bottom: 28px; }
 
 #live-section h2 {

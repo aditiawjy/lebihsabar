@@ -38,6 +38,8 @@
     var LIVE_SETTLED_STORAGE_KEY = 'liveSettledState';
     var LIVE_CANDIDATE_CACHE_TTL_MS = 30000;
     var LIVE_SETTLED_CACHE_TTL_MS = 3 * 60 * 60 * 1000;
+    var DETAIL_ROWS_PER_PAGE = 10;
+    var detailPageState = {};
     var restoredLiveCandidateState = false;
     var liveCandidateExpiryTimer = null;
 
@@ -66,17 +68,44 @@
         return getLeagueTypeJS(value) || String(value || '').trim();
     }
 
-    function findHistoricalMatch(home, away, league) {
+    function matchesHistoricalStateSignature(match, state) {
+        if (!match || !state) return false;
+        var matchSeq = Array.isArray(match.h1s) ? match.h1s : [];
+        var stateSeq = Array.isArray(state.h1s) ? state.h1s : [];
+        return match.h1c === state.h1c
+            && match.h1_first === state.h1_first
+            && match.h1_last === state.h1_last
+            && match.sc_h === state.sc_h
+            && match.sc_a === state.sc_a
+            && arrayEqualsJS(matchSeq, stateSeq);
+    }
+
+    function findHistoricalMatch(home, away, league, state) {
         var leagueType = getHistoricalLeagueType(league);
         var allMatches = Array.isArray(INITIAL_DATA.all_matches) ? INITIAL_DATA.all_matches : [];
+        var candidates = [];
         for (var i = 0; i < allMatches.length; i++) {
             var match = allMatches[i] || {};
             if (String(match.home || '').trim() !== String(home || '').trim()) continue;
             if (String(match.away || '').trim() !== String(away || '').trim()) continue;
             if (getHistoricalLeagueType(match.league) !== leagueType) continue;
-            return match;
+            candidates.push(match);
         }
-        return null;
+
+        if (!candidates.length) {
+            return null;
+        }
+
+        if (state) {
+            var exact = candidates.filter(function(match) {
+                return matchesHistoricalStateSignature(match, state);
+            });
+            if (exact.length) {
+                return exact[exact.length - 1];
+            }
+        }
+
+        return candidates[candidates.length - 1];
     }
 
     function escHtml(s) {
@@ -88,7 +117,7 @@
             var total = p.data.length;
             var has2h = p.data.filter(function(m) { return m.h2c > 0; }).length;
             var pct = total > 0 ? Math.round(has2h / total * 100) : 0;
-            var rowsHtml = '';
+            var rows = [];
             p.data.forEach(function(m) {
                 var seq = m.h1s.map(function(s) {
                     return s === 'H' ? '<span class="scorer-h">H</span>' : '<span class="scorer-a">A</span>';
@@ -98,7 +127,7 @@
                 var has2hBadge = m.h2c > 0
                     ? '<span class="badge badge-green">\u2713 2H</span>'
                     : '<span class="badge badge-red">\u2717 No 2H</span>';
-                rowsHtml += '<tr>'
+                rows.push('<tr>'
                     + '<td class="record-sub">' + escHtml(m.datetime || '') + '</td>'
                     + '<td>' + escHtml(m.home) + ' vs ' + escHtml(m.away) + '</td>'
                     + '<td>' + escHtml(m.league) + '</td>'
@@ -107,10 +136,11 @@
                     + '<td class="goal-seq">' + tl1h + '</td>'
                     + '<td class="goal-seq">' + (tl2h || '<span class="delta-zero">-</span>') + '</td>'
                     + '<td class="goal-seq">' + seq + '</td>'
-                    + '<td>' + has2hBadge + '</td></tr>';
+                    + '<td>' + has2hBadge + '</td></tr>');
             });
-            var table = '<table class="detail-table"><thead><tr><th>Tanggal</th><th>Match</th><th>League</th><th>HT</th><th>FT</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Sequence</th><th>2H?</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>';
-            PATTERN_DATA[p.id] = { label: p.label, record: has2h + '/' + total, pct: pct + '%', baseHtml: table, html: table };
+            var tableHead = '<tr><th>Tanggal</th><th>Match</th><th>League</th><th>HT</th><th>FT</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Sequence</th><th>2H?</th></tr>';
+            var table = '<table class="detail-table"><thead>' + tableHead + '</thead><tbody>' + rows.join('') + '</tbody></table>';
+            PATTERN_DATA[p.id] = { label: p.label, record: has2h + '/' + total, pct: pct + '%', baseHtml: table, html: table, tableHead: tableHead, rows: rows };
         });
 
         INITIAL_DATA.nextPatterns.forEach(function(ng) {
@@ -120,7 +150,7 @@
             var tgt = ng.next;
             var hits = tgt === 'HOME' ? nh : na;
             var pct = total > 0 ? Math.round(hits / total * 100) : 0;
-            var rowsHtml = '';
+            var rows = [];
             ng.data.forEach(function(m) {
                 var seq = m.h1s.map(function(s) {
                     return s === 'H' ? '<span class="scorer-h">H</span>' : '<span class="scorer-a">A</span>';
@@ -134,7 +164,7 @@
                 else nextBadge = '<span class="delta-zero">-</span>';
                 var isHit = (tgt === 'HOME' && ngVal === 'H') || (tgt === 'AWAY' && ngVal === 'A');
                 var rowAttr = isHit ? '' : ' style="opacity:0.5"';
-                rowsHtml += '<tr' + rowAttr + '>'
+                rows.push('<tr' + rowAttr + '>'
                     + '<td class="record-sub">' + escHtml(m.datetime || '') + '</td>'
                     + '<td>' + escHtml(m.home) + ' vs ' + escHtml(m.away) + '</td>'
                     + '<td>' + escHtml(m.league) + '</td>'
@@ -142,17 +172,18 @@
                     + '<td>' + seq + '</td>'
                     + '<td class="goal-seq">' + tl1h + '</td>'
                     + '<td class="goal-seq">' + (tl2h || '<span class="delta-zero">-</span>') + '</td>'
-                    + '<td>' + nextBadge + '</td></tr>';
+                    + '<td>' + nextBadge + '</td></tr>');
             });
-            var table = '<table class="detail-table"><thead><tr><th>Tanggal</th><th>Match</th><th>League</th><th>HT</th><th>Sequence 1H</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Next Goal</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>';
-            PATTERN_DATA[ng.id] = { label: ng.label, record: hits + '/' + total, pct: pct + '%', baseHtml: table, html: table };
+            var nextTableHead = '<tr><th>Tanggal</th><th>Match</th><th>League</th><th>HT</th><th>Sequence 1H</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Next Goal</th></tr>';
+            var table = '<table class="detail-table"><thead>' + nextTableHead + '</thead><tbody>' + rows.join('') + '</tbody></table>';
+            PATTERN_DATA[ng.id] = { label: ng.label, record: hits + '/' + total, pct: pct + '%', baseHtml: table, html: table, tableHead: nextTableHead, rows: rows };
         });
 
         (INITIAL_DATA.latePatterns || []).forEach(function(lp) {
             var total = lp.data.length;
             var lateHits = lp.data.filter(function(m) { return m.has_late; }).length;
             var pct = total > 0 ? Math.round(lateHits / total * 100) : 0;
-            var rowsHtml = '';
+            var rows = [];
             lp.data.forEach(function(m) {
                 var seq = m.h1s.map(function(s) {
                     return s === 'H' ? '<span class="scorer-h">H</span>' : '<span class="scorer-a">A</span>';
@@ -164,7 +195,7 @@
                 var lateBadge = m.has_late
                     ? '<span class="badge badge-green">\u2713 Late Goal</span>'
                     : '<span class="badge badge-red">\u2717 No Late Goal</span>';
-                rowsHtml += '<tr>'
+                rows.push('<tr>'
                     + '<td class="record-sub">' + escHtml(m.datetime || '') + '</td>'
                     + '<td>' + escHtml(m.home) + ' vs ' + escHtml(m.away) + '</td>'
                     + '<td>' + escHtml(m.league) + '</td>'
@@ -174,10 +205,11 @@
                     + '<td class="goal-seq">' + (tl2h || '<span class="delta-zero">-</span>') + '</td>'
                     + '<td class="goal-seq">' + seq + '</td>'
                     + '<td class="goal-seq">' + (lateTimeline || '<span class="delta-zero">-</span>') + '</td>'
-                    + '<td>' + lateBadge + '</td></tr>';
+                    + '<td>' + lateBadge + '</td></tr>');
             });
-            var table = '<table class="detail-table"><thead><tr><th>Tanggal</th><th>Match</th><th>League</th><th>HT</th><th>FT</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Sequence</th><th>Late Timeline</th><th>Late?</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>';
-            PATTERN_DATA[lp.id] = { label: lp.label, record: lateHits + '/' + total, pct: pct + '%', baseHtml: table, html: table };
+            var lateTableHead = '<tr><th>Tanggal</th><th>Match</th><th>League</th><th>HT</th><th>FT</th><th>Timeline 1H</th><th>Timeline 2H</th><th>Sequence</th><th>Late Timeline</th><th>Late?</th></tr>';
+            var table = '<table class="detail-table"><thead>' + lateTableHead + '</thead><tbody>' + rows.join('') + '</tbody></table>';
+            PATTERN_DATA[lp.id] = { label: lp.label, record: lateHits + '/' + total, pct: pct + '%', baseHtml: table, html: table, tableHead: lateTableHead, rows: rows };
         });
     }
 
@@ -272,6 +304,61 @@
         return buildSummaryLiveCandidateRows(candidates);
     }
 
+    function buildDetailPagination(id, page, totalPages, totalRows) {
+        if (totalPages <= 1) return '';
+        var prevDisabled = page <= 1 ? ' disabled' : '';
+        var nextDisabled = page >= totalPages ? ' disabled' : '';
+        var prevPage = Math.max(1, page - 1);
+        var nextPage = Math.min(totalPages, page + 1);
+        var startRow = ((page - 1) * DETAIL_ROWS_PER_PAGE) + 1;
+        var endRow = Math.min(totalRows, page * DETAIL_ROWS_PER_PAGE);
+
+        return '<div class="detail-pagination">'
+            + '<button class="detail-page-btn" data-pid="' + escHtml(id) + '" data-page="' + prevPage + '"' + prevDisabled + '>Prev</button>'
+            + '<span class="detail-page-info">Page ' + page + ' / ' + totalPages + ' • ' + startRow + '-' + endRow + ' dari ' + totalRows + '</span>'
+            + '<button class="detail-page-btn" data-pid="' + escHtml(id) + '" data-page="' + nextPage + '"' + nextDisabled + '>Next</button>'
+            + '</div>';
+    }
+
+    function buildPaginatedDetailTable(id, data) {
+        if (!data || !Array.isArray(data.rows) || !data.tableHead) {
+            return data && (data.baseHtml || data.html) ? (data.baseHtml || data.html) : '';
+        }
+
+        var rows = data.rows;
+        var totalRows = rows.length;
+        var totalPages = Math.max(1, Math.ceil(totalRows / DETAIL_ROWS_PER_PAGE));
+        var page = detailPageState[id] || 1;
+        if (page > totalPages) page = totalPages;
+        if (page < 1) page = 1;
+        detailPageState[id] = page;
+
+        var start = (page - 1) * DETAIL_ROWS_PER_PAGE;
+        var end = start + DETAIL_ROWS_PER_PAGE;
+        var pageRows = rows.slice(start, end).join('');
+        var liveRows = page === 1 ? buildLiveCandidateSection(id) : '';
+        var table = '<table class="detail-table"><thead>' + data.tableHead + '</thead><tbody>' + liveRows + pageRows + '</tbody></table>';
+        return table + buildDetailPagination(id, page, totalPages, totalRows);
+    }
+
+    function changeDetailPage(id, page) {
+        detailPageState[id] = page;
+        if (activePanel === id) {
+            refreshActivePanelContent();
+        }
+    }
+
+    function bindDetailPaginationButtons(root) {
+        if (!root) return;
+        root.querySelectorAll('.detail-page-btn[data-pid][data-page]').forEach(function(btn) {
+            btn.onclick = function(e) {
+                if (e) e.preventDefault();
+                if (this.disabled) return;
+                changeDetailPage(this.dataset.pid, parseInt(this.dataset.page, 10) || 1);
+            };
+        });
+    }
+
     function prependLiveCandidateRows(html, liveRows) {
         if (!liveRows || !html) return html;
         return html.replace('<tbody>', '<tbody>' + liveRows);
@@ -357,13 +444,52 @@
         });
     }
 
+    function isFinalishSettledStatus(statusText) {
+        var status = String(statusText || '').trim();
+        if (!status) return false;
+        if (/^H\.?Time$/i.test(status)) return false;
+        var parsed = parseStatus(status);
+        return parsed.half === '2H';
+    }
+
+    function pruneSettledSummaryResultsForLiveMatches(matches) {
+        var liveKeys = {};
+        (matches || []).forEach(function(match) {
+            var statusText = getMatchStatusText(match);
+            var parsedStatus = parseStatus(statusText);
+            var isHalftime = /^H\.?Time$/i.test(statusText);
+            if (!(parsedStatus.half === '1H' || parsedStatus.half === '2H' || isHalftime)) {
+                return;
+            }
+            var liveKey = [getMatchHomeTeam(match), getMatchAwayTeam(match), getHistoricalLeagueType(getMatchLeague(match))].join('|');
+            liveKeys[liveKey] = true;
+        });
+
+        if (!Object.keys(liveKeys).length) {
+            return;
+        }
+
+        settledSummaryResults = settledSummaryResults.filter(function(result) {
+            var settledKey = [result.home || '', result.away || '', getHistoricalLeagueType(result.league)].join('|');
+            return !liveKeys[settledKey];
+        });
+        saveSettledSummaryState();
+    }
+
     function isSettledSummaryResultValid(result) {
         if (!result || !result.pid) return false;
-        if (!result.state) return true;
-        var historical = findHistoricalMatch(result.home, result.away, result.league);
+        if (!result.state) {
+            return isFinalishSettledStatus(result.status);
+        }
+        var historical = findHistoricalMatch(result.home, result.away, result.league, result.state);
         if (historical) {
             var historicalOutcome = historical.h2c > 0 ? 'win' : 'lose';
             if (result.outcome !== historicalOutcome) return false;
+        } else {
+            if (!isFinalishSettledStatus(result.status)) return false;
+            if (result.scoreObj && (result.scoreObj.home !== result.state.sc_h || result.scoreObj.away !== result.state.sc_a) && !/^2H/i.test(String(result.status || '').trim())) {
+                return false;
+            }
         }
         return matchesSummaryPatternLive(result.pid, result.state);
     }
@@ -473,7 +599,8 @@
         var historical = findHistoricalMatch(
             currentMatch ? getMatchHomeTeam(currentMatch) : getMatchHomeTeam(fallbackMatch),
             currentMatch ? getMatchAwayTeam(currentMatch) : getMatchAwayTeam(fallbackMatch),
-            currentMatch ? getMatchLeague(currentMatch) : getMatchLeague(fallbackMatch)
+            currentMatch ? getMatchLeague(currentMatch) : getMatchLeague(fallbackMatch),
+            entry && entry.state ? entry.state : null
         );
 
         var outcome = null;
@@ -582,7 +709,7 @@
 
     function buildPanelHtml(id, data) {
         if (!data) return '';
-        var html = prependLiveCandidateRows(data.baseHtml || data.html || '', buildLiveCandidateSection(id));
+        var html = buildPaginatedDetailTable(id, data);
         return html + buildSettledSummarySection(id);
     }
 
@@ -591,6 +718,7 @@
         var d = PATTERN_DATA[activePanel];
         document.getElementById('slide-title').innerHTML = '<strong>' + activePanel + '</strong>: ' + d.label + ' <span style="color:var(--text-secondary);font-size:0.85rem;">' + d.record + ' = ' + d.pct + '</span>';
         document.getElementById('slide-body').innerHTML = buildPanelHtml(activePanel, d);
+        bindDetailPaginationButtons(document.getElementById('slide-body'));
         var panel = document.getElementById('slide-panel');
         if (panel) panel.scrollTop = 0;
     }
@@ -599,8 +727,10 @@
         if (activePanel === id) { closePanel(); return; }
         var d = PATTERN_DATA[id];
         if (!d) return;
+        detailPageState[id] = 1;
         document.getElementById('slide-title').innerHTML = '<strong>' + id + '</strong>: ' + d.label + ' <span style="color:var(--text-secondary);font-size:0.85rem;">' + d.record + ' = ' + d.pct + '</span>';
         document.getElementById('slide-body').innerHTML = buildPanelHtml(id, d);
+        bindDetailPaginationButtons(document.getElementById('slide-body'));
         document.getElementById('slide-overlay').style.display = 'block';
         document.getElementById('slide-panel').classList.add('open');
         document.getElementById('slide-panel').scrollTop = 0;
@@ -1164,14 +1294,14 @@
             case 'P44': return s.league === '20min' && diff >= 2 && s.h1_first >= 2 && s.switches >= 1 && s.h1_last <= 9;
             case 'P45': return s.league === '16min' && s.h1_first === 0 && span >= 6 && s.max_gap >= 6;
             case 'P46': return s.league === '16min' && span >= 6 && s.min_gap >= 2;
-            case 'P47': return s.sc_h === s.sc_a && s.h1_first !== 1 && s.switches >= 2 && s.h1_last >= 6 && s.min_gap >= 1;
+            case 'P47': return s.sc_h === s.sc_a && s.h1_first !== 1 && s.switches >= 2 && s.h1_last >= 6 && s.min_gap >= 1 && s.max_gap >= 3;
             case 'P48': return s.sc_h === s.sc_a && span >= 7 && s.switches >= 2 && (s.h1_first === 0 || span === 7 || lastScorer === 'H');
             case 'P49': return s.league === '16min' && diff >= 2 && span >= 6 && s.h1_first >= 1;
             case 'P50': return s.league === '16min' && s.sc_a > s.sc_h && span >= 6 && s.max_run <= 2;
             case 'P51': return s.league === '16min' && s.switches >= 2 && s.h1_first !== 1;
             case 'P52': return s.league === '16min' && span >= 6 && s.min_gap >= 3 && diff >= 2;
             case 'P53': return s.league === '20min' && s.h1_last === 3 && (lastScorer === 'H' || s.h1_first <= 1) && s.min_gap >= 1 && s.h1c <= 2 && (s.h1_first === 0 || s.sc_a === 0);
-            case 'P54': return s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && span >= 4 && s.h1_first !== 1;
+            case 'P54': return s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && span >= 4 && s.h1_first >= 2;
             case 'P55': return s.league === '16min' && s.h1_last === 8 && s.sc_a > s.sc_h;
             case 'P56': return s.league === '16min' && s.max_gap >= 6 && (s.h1_first <= 1 || lastScorer === 'A');
             case 'P57': return s.h1_first === 0 && s.h1_last === 6 && firstScorer === 'A' && ((s.league === '15min' || s.league === '16min') || s.h1c >= 3);
@@ -1182,6 +1312,7 @@
             case 'P62': return s.league === '15min' && inTeamConfig('p62_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 4;
             case 'P63': return s.league === '16min' && inTeamConfig('p63_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 6;
             case 'P64': return s.league === '15min' && inTeamConfig('p64_teams', s.away) && s.h1_first <= 1 && s.h1_last >= 4;
+            case 'P65': return s.league === '15min' && inTeamConfig('p65_teams', s.home) && s.h1_first <= 1;
             case 'P67': return s.league === '20min' && inTeamConfig('p67_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 5;
             case 'P68': return s.league === '15min' && s.home === 'Leicester City (V)' && s.h1_first <= 1;
             case 'P69': return s.league === '20min' && s.home === 'Denmark (V)' && s.h1_first <= 1 && s.h1_last >= 5;
@@ -1199,15 +1330,15 @@
 
         switch (pid) {
             case 'LG1':
-                return s.h1_last === 9 && s.h1_first <= 1 && s.sc_a > s.sc_h && s.h1c >= 3 && !(s.home === 'New Zealand (V)' && s.away === 'South Africa (V)') && !(s.home === 'Spain (V)' && s.away === 'Uruguay (V)');
+                return s.h1_last === 9 && s.h1_first <= 1 && (s.sc_a - s.sc_h) >= 2 && s.h1c >= 3;
             case 'LG2':
-                return s.h1_last === 9 && span >= 7 && s.sc_a > s.sc_h && s.h1_first <= 1 && s.h1c >= 3 && !(s.home === 'New Zealand (V)' && s.away === 'South Africa (V)') && !(s.home === 'Spain (V)' && s.away === 'Uruguay (V)');
+                return s.h1_last === 9 && span >= 7 && (s.sc_a - s.sc_h) >= 2 && s.h1_first <= 1 && s.h1c >= 3;
             case 'LG3':
                 return s.league === '16min' && s.h1c >= 3 && firstScorer === 'A' && s.h1_last === 6;
             case 'LG4':
                 return s.league === '20min' && inTeamConfig('lg4_teams', s.away) && s.sc_a > s.sc_h && s.h1_last === 9;
             case 'LG5':
-                return inTeamConfig('lg5_teams', s.home) && s.sc_a > s.sc_h && s.h1_last >= 6 && !(s.home === 'France (V)' && s.league === '16min') && s.h1_first >= 2;
+                return inTeamConfig('lg5_teams', s.home) && (s.sc_a - s.sc_h) === 1 && s.h1_last >= 6 && s.h1_first >= 2;
             case 'LG6':
                 return s.league === '20min' && inTeamConfig('lg6_teams', s.away) && s.h1_first <= 1 && s.h1_last >= 8;
             case 'LG7':
@@ -1245,16 +1376,53 @@
         var isHalftime = /^H\.?Time$/i.test(statusText);
         if (isHalftime) return true;
 
-        var key = matchKey(match);
-        if (getLiveSecondHalfGoalMinutes(livePayload, key, match).length > 0) return false;
+        if (hasAnySecondHalfGoal(match, livePayload)) return false;
 
         if (parsedStatus.half === '1H') return true;
         if (parsedStatus.half === '2H' && parsedStatus.min >= 0) return true;
         return false;
     }
 
+    function isSummaryPatternSignalWindow(match, livePayload) {
+        var statusText = getMatchStatusText(match);
+        var parsedStatus = parseStatus(statusText);
+        var isHalftime = /^H\.?Time$/i.test(statusText);
+        if (isHalftime) return true;
+
+        var hasSecondHalfGoal = hasAnySecondHalfGoal(match, livePayload);
+
+        if (parsedStatus.half === '1H') return true;
+        if (parsedStatus.half === '2H' && parsedStatus.min >= 0 && !hasSecondHalfGoal) return true;
+        return false;
+    }
+
+    function hasAnySecondHalfGoal(match, livePayload, liveState) {
+        var key = matchKey(match);
+        if (getLiveSecondHalfGoalMinutes(livePayload, key, match).length > 0) {
+            return true;
+        }
+
+        var score = getMatchScores(match);
+        if (liveState && (score.home !== liveState.sc_h || score.away !== liveState.sc_a)) {
+            return true;
+        }
+
+        var ht = htMemory[key];
+        if (!ht) return false;
+
+        return score.home !== ht.h || score.away !== ht.a;
+    }
+
     function hasLateSecondHalfGoal(livePayload, key, match) {
-        return getLiveSecondHalfGoalMinutes(livePayload, key, match).some(function(min) { return min >= 7; });
+        if (getLiveSecondHalfGoalMinutes(livePayload, key, match).some(function(min) { return min >= 7; })) {
+            return true;
+        }
+
+        var ht = htMemory[key];
+        if (!ht) return false;
+
+        var score = getMatchScores(match);
+        return score.home !== ht.h || score.away !== ht.a;
     }
 
     function isLatePatternSignalWindow(match, livePayload) {
@@ -1404,7 +1572,11 @@
         var signals = [];
         var seen = {};
 
-        if (liveState) {
+        if (liveState && hasAnySecondHalfGoal(match, livePayload, liveState)) {
+            return signals;
+        }
+
+        if (liveState && isSummaryPatternSignalWindow(match, livePayload)) {
             PATTERN_DEFS.forEach(function(pattern) {
                 if (!pattern || !pattern.id) return;
                 if (matchesSummaryPatternLive(pattern.id, liveState)) {
@@ -1519,7 +1691,7 @@
             var s = parseStatus(statusText);
             var isHalftime = /^H\.?Time$/i.test(statusText);
             var key = matchKey(match);
-            var hasSecondHalfGoal = getLiveSecondHalfGoalMinutes(livePayload, key, match).length > 0;
+            var hasSecondHalfGoal = hasAnySecondHalfGoal(match, livePayload, state);
             var isFirstHalf = s.half === '1H';
             var isPreSecondHalfGoalWindow = s.half === '2H' && !hasSecondHalfGoal;
             if (!isFirstHalf && !isHalftime && !isPreSecondHalfGoalWindow) return;
@@ -1790,23 +1962,29 @@
 
     async function fetchLiveData() {
         try {
-            var resp = await fetch('live_api_proxy.php', { signal: AbortSignal.timeout(3000) });
+            var resp = await fetch('live_api_proxy.php', { signal: AbortSignal.timeout(6000) });
             if (!resp.ok) throw new Error('HTTP ' + resp.status);
             var data = await resp.json();
             if (data && data.online === false) throw new Error(data.error || 'API offline');
-            var livePayload = normalizeLivePayload(data);
-            syncLiveGoalMemory(livePayload.matches || [], livePayload);
             document.getElementById('live-api-badge').textContent = 'API Online';
             document.getElementById('live-api-badge').className = 'api-online';
             document.getElementById('btn-start-api').style.display = 'none';
             document.getElementById('btn-stop-api').style.display = 'inline-block';
             document.getElementById('live-last-update').textContent = 'Update: ' + new Date().toLocaleTimeString();
-            updateHtMemory(livePayload.matches || []);
-            renderLiveCards(livePayload.matches || [], livePayload);
-            collectLiveCandidateCounts(livePayload.matches || [], livePayload);
-            collectNextLiveCandidateCounts(livePayload.matches || [], livePayload);
-            collectLateLiveCandidateCounts(livePayload.matches || [], livePayload);
-            refreshActivePanelContent();
+            try {
+                var livePayload = normalizeLivePayload(data);
+                syncLiveGoalMemory(livePayload.matches || [], livePayload);
+                pruneSettledSummaryResultsForLiveMatches(livePayload.matches || []);
+                updateHtMemory(livePayload.matches || []);
+                renderLiveCards(livePayload.matches || [], livePayload);
+                collectLiveCandidateCounts(livePayload.matches || [], livePayload);
+                collectNextLiveCandidateCounts(livePayload.matches || [], livePayload);
+                collectLateLiveCandidateCounts(livePayload.matches || [], livePayload);
+                refreshActivePanelContent();
+            } catch (renderError) {
+                console.error('Live payload render error:', renderError);
+                document.getElementById('live-last-update').textContent = 'API Online, tetapi render live gagal: ' + renderError.message;
+            }
         } catch(e) {
             document.getElementById('live-api-badge').textContent = 'API Offline';
             document.getElementById('live-api-badge').className = 'api-offline';
@@ -1830,12 +2008,32 @@
             var resp = await fetch('stop_api_server.php');
             var result = await resp.json();
             document.getElementById('live-last-update').textContent = result.message || 'API dihentikan';
+            if (result && result.success) {
+                document.getElementById('live-api-badge').textContent = 'API Offline';
+                document.getElementById('live-api-badge').className = 'api-offline';
+                document.getElementById('btn-start-api').style.display = 'inline-block';
+                document.getElementById('btn-stop-api').style.display = 'none';
+                document.getElementById('live-cards').innerHTML = '<div class="live-empty">API tidak aktif \u2014 klik \u25B6 Jalankan API</div>';
+            }
             setTimeout(fetchLiveData, 2000);
         } catch(e) {
             document.getElementById('live-last-update').textContent = 'Gagal stop: ' + e.message;
         }
         btn.textContent = '\u25A0 Stop API';
         btn.disabled = false;
+    }
+
+    async function waitForApiOnline(attemptsLeft) {
+        await fetchLiveData();
+        if (document.getElementById('live-api-badge').textContent === 'API Online') {
+            return;
+        }
+        if (attemptsLeft <= 1) {
+            return;
+        }
+        setTimeout(function() {
+            waitForApiOnline(attemptsLeft - 1);
+        }, LIVE_FETCH_INTERVAL_MS);
     }
 
     async function startApiServer() {
@@ -1846,9 +2044,22 @@
             var resp = await fetch('start_api_server.php');
             var result = await resp.json();
             document.getElementById('live-last-update').textContent = result.message || 'Menunggu API...';
-            setTimeout(fetchLiveData, LIVE_FETCH_INTERVAL_MS);
+            if (result && result.success) {
+                document.getElementById('live-api-badge').textContent = result.already_running ? 'API Online' : 'Memulai API...';
+                document.getElementById('live-api-badge').className = result.already_running ? 'api-online' : 'api-offline';
+                document.getElementById('btn-start-api').style.display = 'none';
+                document.getElementById('btn-stop-api').style.display = 'inline-block';
+                if (!result.already_running) {
+                    document.getElementById('live-cards').innerHTML = '<div class="live-empty">API sedang dijalankan, tunggu beberapa detik...</div>';
+                }
+                waitForApiOnline(4);
+            }
         } catch(e) {
             document.getElementById('live-last-update').textContent = 'Gagal: ' + e.message;
+            document.getElementById('live-api-badge').textContent = 'API Offline';
+            document.getElementById('live-api-badge').className = 'api-offline';
+            document.getElementById('btn-start-api').style.display = 'inline-block';
+            document.getElementById('btn-stop-api').style.display = 'none';
         }
         btn.textContent = '\u25B6 Jalankan API';
         btn.disabled = false;

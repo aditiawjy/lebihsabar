@@ -7,7 +7,7 @@ $apiUrl = 'http://127.0.0.1:5000/api/live-data';
 $context = stream_context_create([
     'http' => [
         'method' => 'GET',
-        'timeout' => 2,
+        'timeout' => 5,
         'ignore_errors' => true,
     ],
 ]);

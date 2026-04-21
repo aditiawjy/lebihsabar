@@ -11,7 +11,7 @@
     var prevStateMemory = {};
     var liveGoalMemory = {};
     var liveScorerMemory = {};
-    var SUMMARY_MIN_SAMPLE = 10;
+    var SUMMARY_MIN_SAMPLE = 8;
     var NEXT_MIN_SAMPLE = 0;
     var LATE_MIN_SAMPLE = 9;
     var SUMMARY_REFRESH_SECONDS = 5;

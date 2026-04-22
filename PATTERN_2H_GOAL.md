@@ -189,8 +189,8 @@
 
 ### P24: Team HOME Tertentu di 15min
 **Record: 40/40 = 100%**
-**Kondisi:** Team berikut bermain sebagai HOME di league 15min: Arminia Bielefeld, CA Osasuna, FC Koln, Leicester City, Manchester United, Borussia Dortmund, Liverpool.
-**Logika:** Team-team ini secara konsisten terlibat dalam match yang selalu punya gol 2H saat jadi tuan rumah.
+**Kondisi:** Team berikut bermain sebagai HOME di league 15min: Arminia Bielefeld, CA Osasuna, Arsenal, Leicester City, Borussia Dortmund, Liverpool, AS Monaco, Olympique de Marseille, Atalanta, Tottenham Hotspur, Everton. Tambahan filter: last gol 1H >= 4, selisih HT <= 1, HOME cetak >= 1, first gol >= 4, first scorer HOME.
+**Logika:** Saat shortlist HOME ini mulai aktif agak telat di 1H dan tetap menjaga skor ketat, match cenderung lanjut menghasilkan gol di 2H.
 
 ---
 

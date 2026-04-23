@@ -462,8 +462,8 @@ function computeLatePatterns(array $matches): array {
         ],
         [
             'id' => 'LG7',
-            'label' => 'AWAY shortlist: Nigeria / Qatar / Slovenia (away lead HT, gol 1H<=3, dan gol 1H>=2 atau last gol 1H>=7, bukan h1c=2 first=0)',
-            'data' => array_values(array_filter($matches, fn($m) => in_array(trim($m['away']), $lg7_teams, true) && $m['sc_a'] > $m['sc_h'] && $m['h1_last'] >= 6 && $m['h1c'] <= 3 && ($m['h1c'] >= 2 || $m['h1_last'] >= 7) && !($m['h1c'] === 2 && $m['h1_first'] === 0))),
+            'label' => 'AWAY shortlist: Nigeria / Qatar / Slovenia (away lead HT, gol 1H<=3, dan gol 1H>=2 atau last gol 1H>=7, bukan h1c=2 first=0, bukan single goal 2H mnt <7)',
+            'data' => array_values(array_filter($matches, fn($m) => in_array(trim($m['away']), $lg7_teams, true) && $m['sc_a'] > $m['sc_h'] && $m['h1_last'] >= 6 && $m['h1c'] <= 3 && ($m['h1c'] >= 2 || $m['h1_last'] >= 7) && !($m['h1c'] === 2 && $m['h1_first'] === 0) && !($m['h2c'] === 1 && $m['h2_first_min'] < 7))),
         ],
         [
             'id' => 'LG8',

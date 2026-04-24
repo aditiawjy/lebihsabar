@@ -11,7 +11,7 @@ return [
     'p64_teams' => ['Liverpool (V)','Napoli (V)','Bayern Munchen (V)','FC Koln (V)','FSV Mainz 05 (V)','Lille OSC (V)'],
     'p65_teams' => ['Leicester City (V)','Napoli (V)','Udinese (V)','Olympique Lyonnais (V)'],
     'p66_teams' => ['FSV Mainz 05 (V)','Getafe CF (V)','Lille OSC (V)','Liverpool (V)','Olympique Lyonnais (V)','Juventus (V)','Borussia Dortmund (V)','Napoli (V)','Bayern Munchen (V)','FC Koln (V)','Chelsea (V)'],
-    'p67_teams' => ['Argentina (V)','Denmark (V)','Germany (V)','Russia (V)','Korea Republic (V)','Croatia (V)','Brazil (V)','Nigeria (V)','Serbia (V)'],
+    'p67_teams' => ['Argentina (V)','Denmark (V)','Germany (V)','Russia (V)','Korea Republic (V)','Croatia (V)','Brazil (V)','Nigeria (V)','Serbia (V)','USA (V)','South Africa (V)','Portugal (V)','Oman (V)','New Zealand (V)','Philippines (V)','Iran (V)','Iraq (V)'],
     'lg4_teams' => ['Norway (V)','Uruguay (V)','Algeria (V)','Nigeria (V)','Romania (V)'],
     'lg5_teams' => ['France (V)','Spain (V)','Israel (V)','Morocco (V)'],
     'lg6_teams' => ['Indonesia (V)','Algeria (V)','Slovakia (V)','Slovenia (V)','Argentina (V)'],

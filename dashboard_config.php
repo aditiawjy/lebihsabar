@@ -14,7 +14,7 @@ return [
     'p67_teams' => ['Argentina (V)','Denmark (V)','Germany (V)','Russia (V)','Korea Republic (V)','Croatia (V)','Brazil (V)','Nigeria (V)','Serbia (V)'],
     'lg4_teams' => ['Norway (V)','Uruguay (V)','Algeria (V)','Nigeria (V)','Romania (V)'],
     'lg5_teams' => ['France (V)','Spain (V)','Israel (V)','Morocco (V)'],
-    'lg6_teams' => ['Indonesia (V)','Algeria (V)','Slovakia (V)','Slovenia (V)'],
+    'lg6_teams' => ['Indonesia (V)','Algeria (V)','Slovakia (V)','Slovenia (V)','Argentina (V)'],
     'lg7_teams' => ['Nigeria (V)','Qatar (V)','Slovenia (V)'],
     'lg8_teams' => ['Norway (V)','Nigeria (V)','Poland (V)','Slovenia (V)'],
 ];

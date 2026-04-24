@@ -193,7 +193,7 @@ if (!$csvExists): ?>
     </div>
 
     <div class="section" id="late-section">
-        <h2>Late Goal Pattern (Gol Menit Akhir 2H)</h2>
+        <h2>Late / 2H&gt;4 Goal Pattern</h2>
         <table id="late-table">
             <thead>
             <tr>
@@ -206,12 +206,13 @@ if (!$csvExists): ?>
 <?php foreach ($latePatterns as $lp):
     if (count($lp['data']) < LATE_MIN_SAMPLE) continue;
     $total = count($lp['data']);
-    $lateHits = count(array_filter($lp['data'], fn($m) => $m['has_late']));
+    $lateTarget = $lp['target'] ?? 'has_late';
+    $lateHits = count(array_filter($lp['data'], fn($m) => $m[$lateTarget] ?? false));
     $pct = $total > 0 ? round($lateHits / $total * 100) : 0;
     $cls = $pct >= 80 ? 'pct-high' : ($pct >= 70 ? 'pct-mid' : 'pct-low');
     $badge = $pct >= 80 ? 'badge-green' : ($pct >= 70 ? 'badge-yellow' : 'badge-red');
     $status = $pct >= 80 ? 'STRONG' : ($pct >= 70 ? 'GOOD' : 'WATCH');
-    $delta = buildRangeDelta($lp['data'], fn($m) => $m['has_late'], $oldSnapTime, $currentSnapTime);
+    $delta = buildRangeDelta($lp['data'], fn($m) => $m[$lateTarget] ?? false, $oldSnapTime, $currentSnapTime);
 ?>
             <tr data-total="<?= $total ?>" data-hits="<?= $lateHits ?>" data-pct="<?= $pct ?>">
                 <td><strong><?= esc($lp['id']) ?></strong></td>

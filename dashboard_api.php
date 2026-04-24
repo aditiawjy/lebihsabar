@@ -134,15 +134,17 @@ function buildLatePatternSummary(array $latePatterns, array $oldSnapData, ?int $
 
     return array_map(function($lp) use ($oldSnapData, $rangeStart, $rangeEnd) {
         $total = count($lp['data']);
-        $lateHits = count(array_filter($lp['data'], fn($m) => $m['has_late']));
+        $lateTarget = $lp['target'] ?? 'has_late';
+        $lateHits = count(array_filter($lp['data'], fn($m) => $m[$lateTarget] ?? false));
         $pct = $total > 0 ? round($lateHits / $total * 100) : 0;
         $cls = $pct >= 80 ? 'pct-high' : ($pct >= 70 ? 'pct-mid' : 'pct-low');
         $badge = $pct >= 80 ? 'badge-green' : ($pct >= 70 ? 'badge-yellow' : 'badge-red');
         $status = $pct >= 80 ? 'STRONG' : ($pct >= 70 ? 'GOOD' : 'WATCH');
-        $delta = buildRangeDelta($lp['data'], fn($m) => $m['has_late'], $rangeStart, $rangeEnd);
+        $delta = buildRangeDelta($lp['data'], fn($m) => $m[$lateTarget] ?? false, $rangeStart, $rangeEnd);
         return [
             'id' => $lp['id'],
             'label' => $lp['label'],
+            'target' => $lateTarget,
             'total' => $total,
             'late_hits' => $lateHits,
             'pct' => $pct,

@@ -31,7 +31,7 @@ function parseMinute(string $minute): array {
     return ['half' => '', 'min' => -1];
 }
 
-// Parse datetime stored as "d/m/Y H:i" → Y-m-d and H for key
+// Parse datetime stored as "d/m/Y H:i" -> Y-m-d and H for key
 function parseCsvDatetime(string $val): array {
     $dt = DateTime::createFromFormat('d/m/Y H:i', $val);
     if (!$dt) $dt = new DateTime($val); // fallback
@@ -173,7 +173,7 @@ if ($hasMatches) {
     }
 }
 
-// Find existing row key for same teams on same date (within ±15 min window)
+// Find existing row key for same teams on same date (within +/-15 min window)
 // Used to merge goals/milestones into a row that was registered at a slightly different minute
 function findExistingKey(array $rows, string $dateOnly, string $homeTeam, string $awayTeam, \DateTime $dt): ?string {
     $tsIncoming = $dt->getTimestamp();
@@ -202,7 +202,7 @@ foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
     $dateOnly   = $dt->format('Y-m-d');
     $hourOnly   = $dt->format('H');
     $minuteOnly = $dt->format('i');
-    $datetime   = $dt->format('d/m/Y H:i'); // stored format — parseable by createFromFormat
+    $datetime   = $dt->format('d/m/Y H:i'); // stored format - parseable by createFromFormat
 
     $homeTeam   = trim($goal['home_team']    ?? '');
     $awayTeam   = trim($goal['away_team']    ?? '');
@@ -250,10 +250,10 @@ foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
 
     // Auto-derive milestone flags from goal minute
     $pm = parseMinute($minute);
-    if ($pm['half'] === '1H' && $pm['min'] >= 3) $rows[$key]['1h3'] = '✓';
-    if ($pm['half'] === '2H') $rows[$key]['1h3'] = '✓'; // 2H means 1H fully passed
-    if ($pm['half'] === '2H' && $pm['min'] >= 1) $rows[$key]['2h1'] = '✓';
-    if ($pm['half'] === '2H' && $pm['min'] >= 7) $rows[$key]['2h7'] = '✓';
+    if ($pm['half'] === '1H' && $pm['min'] >= 3) $rows[$key]['1h3'] = 'OK';
+    if ($pm['half'] === '2H') $rows[$key]['1h3'] = 'OK'; // 2H means 1H fully passed
+    if ($pm['half'] === '2H' && $pm['min'] >= 1) $rows[$key]['2h1'] = 'OK';
+    if ($pm['half'] === '2H' && $pm['min'] >= 7) $rows[$key]['2h7'] = 'OK';
 }
 
 // Apply milestone events
@@ -288,10 +288,10 @@ if ($hasMilestones) {
             ];
         }
 
-        $rows[$key][$msId] = '✓';
+        $rows[$key][$msId] = 'OK';
         // 2H milestones imply 1H 3' was also reached.
-        if ($msId === '2h1' || $msId === '2h7') $rows[$key]['1h3'] = '✓';
-        if ($msId === '2h7') $rows[$key]['2h1'] = '✓';
+        if ($msId === '2h1' || $msId === '2h7') $rows[$key]['1h3'] = 'OK';
+        if ($msId === '2h7') $rows[$key]['2h1'] = 'OK';
         // Update final score from milestone if still empty (handles 0-0 matches).
         $hscore = trim($ms['home_score'] ?? '');
         $ascore = trim($ms['away_score'] ?? '');

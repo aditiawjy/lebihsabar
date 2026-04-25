@@ -341,10 +341,22 @@ function renderTable(matches, oddInsights = {}, allGoalMinutes = {}, htScores = 
             const watchBadge = watchContext.isWatchedTeam
                 ? ' <span style="background:#fff3cd;color:#856404;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;">WATCH TEAM</span>'
                 : '';
+            const nextGoal = m.nextGoalOdds || {};
+            const nextGoalHtml = Object.keys(nextGoal).length
+                ? `<div class="next-goal-odds">
+                    <div class="next-goal-odds__title">Next Goal</div>
+                    ${nextGoal.home ? `<div class="next-goal-odds__row"><span>Home</span><span class="next-goal-odds__value">${nextGoal.home}</span></div>` : ''}
+                    ${nextGoal.away ? `<div class="next-goal-odds__row"><span>Away</span><span class="next-goal-odds__value">${nextGoal.away}</span></div>` : ''}
+                    ${nextGoal.none ? `<div class="next-goal-odds__row"><span>None</span><span class="next-goal-odds__value">${nextGoal.none}</span></div>` : ''}
+                </div>`
+                : '-';
 
             let oddsHtml = '-';
             if (m.odds?.length) {
-                oddsHtml = m.odds.slice(0, 3).map((betTypeStr) => {
+                const oddsToShow = m.odds
+                    .filter((betTypeStr) => !String(betTypeStr || '').toLowerCase().startsWith('next goal:'))
+                    .slice(0, 3);
+                oddsHtml = oddsToShow.length ? oddsToShow.map((betTypeStr) => {
                     const parts = betTypeStr.split(': ');
                     if (parts.length >= 2) {
                         const betType = parts[0];
@@ -379,11 +391,11 @@ function renderTable(matches, oddInsights = {}, allGoalMinutes = {}, htScores = 
                     }
 
                     return `<span class="odds-normal">${betTypeStr}</span>`;
-                }).join('');
+                }).join('') : '-';
             }
 
             const goalBadge = allGoalMins?.length
-                ? `<div style="margin-top:3px;font-size:9px;color:#856404;background:#fff3cd;border-radius:10px;padding:1px 6px;display:inline-block;">⚽ 1H: ${allGoalMins.map((min) => `${min}'`).join(', ')}</div>`
+                ? `<div style="margin-top:3px;font-size:9px;color:#856404;background:#fff3cd;border-radius:10px;padding:1px 6px;display:inline-block;">Goal 1H: ${allGoalMins.map((min) => `${min}'`).join(', ')}</div>`
                 : '';
 
             return `<tr>
@@ -391,9 +403,10 @@ function renderTable(matches, oddInsights = {}, allGoalMinutes = {}, htScores = 
                 <td class="team-name">${m.awayTeam || '-'}${watchBadge}</td>
                 <td><span class="${timeClass}">${m.status || '-'}</span></td>
                 <td class="score">${m.score || '-'}${goalBadge}</td>
-                <td class="score">${htScore || '-'}${all2HGoalMins?.length ? `<div style="margin-top:3px;font-size:9px;color:#155724;background:#d4edda;border-radius:10px;padding:1px 6px;display:inline-block;">⚽ 2H: ${all2HGoalMins.map((min) => `${min}'`).join(', ')}</div>` : ''}</td>
+                <td class="score">${htScore || '-'}${all2HGoalMins?.length ? `<div style="margin-top:3px;font-size:9px;color:#155724;background:#d4edda;border-radius:10px;padding:1px 6px;display:inline-block;">Goal 2H: ${all2HGoalMins.map((min) => `${min}'`).join(', ')}</div>` : ''}</td>
                 <td class="odds-focus">${insight ? `${formatOdd(insight.currentOdd)} <span class="delta-text">(${formatDelta(insight.deltaFromPrevious)})</span><div class="pattern-meta">${formatComparisonOdds(insight.comparisonOdds)}</div>` : '-'}</td>
-                <td>${insight ? `<span class="${getPatternBadgeClass(insight)}"><span class="pattern-icon">${getPatternIcon(insight)}</span>${insight.pattern}</span><div class="pattern-meta">${getWatchRuleText(insight)} • Above ${formatDuration(insight.aboveThresholdDurationMs)}</div>` : '<span class="pattern-badge pattern-muted"><span class="pattern-icon">--</span>No 2H data</span>'}</td>
+                <td>${nextGoalHtml}</td>
+                <td>${insight ? `<span class="${getPatternBadgeClass(insight)}"><span class="pattern-icon">${getPatternIcon(insight)}</span>${insight.pattern}</span><div class="pattern-meta">${getWatchRuleText(insight)} - Above ${formatDuration(insight.aboveThresholdDurationMs)}</div>` : '<span class="pattern-badge pattern-muted"><span class="pattern-icon">--</span>No 2H data</span>'}</td>
                 <td class="odds-text">${oddsHtml}</td>
             </tr>`;
         }).join('');
@@ -409,8 +422,9 @@ function renderTable(matches, oddInsights = {}, allGoalMinutes = {}, htScores = 
                         <th style="width: 9%;">Score</th>
                         <th style="width: 8%;">HT</th>
                         <th style="width: 11%;">Watch O</th>
-                        <th style="width: 15%;">Pattern</th>
-                        <th style="width: 14%;">Odd</th>
+                        <th style="width: 11%;">Next Goal</th>
+                        <th style="width: 13%;">Pattern</th>
+                        <th style="width: 12%;">Odd</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -519,7 +533,7 @@ function applyPopupState(state) {
     document.getElementById('lastRefresh').textContent = `Refresh: ${liveStatus.lastRefresh || '-'}`;
     document.getElementById('lastExtractStatus').textContent = `Extract: ${liveStatus.lastExtractStatus || '-'}`;
 
-    document.getElementById('pageStatus').style.color = (liveStatus.pageStatus || '').includes('✗') ? '#dc3545' : '#28a745';
+    document.getElementById('pageStatus').style.color = (liveStatus.pageStatus || '').includes('X') ? '#dc3545' : '#28a745';
     document.getElementById('serverStatus').style.color = (liveStatus.serverStatus || '').includes('failed') || (liveStatus.serverStatus || '').includes('Failed')
         ? '#dc3545'
         : (liveStatus.serverStatus || '').includes('Retry')
@@ -665,7 +679,7 @@ async function checkPageStatus() {
     const isTarget = currentTab && currentTab.url && currentTab.url.includes('g943gp.bpvmr7u6.com');
 
     if (!isTarget) {
-        document.getElementById('pageStatus').textContent = '✗ Not on target page';
+        document.getElementById('pageStatus').textContent = 'X Not on target page';
         document.getElementById('pageStatus').style.color = '#dc3545';
     }
 }

@@ -439,13 +439,13 @@ async function trackNG1Signal(matches) {
         const away = escapeHtml(match?.awayTeam || '?');
 
         const msg =
-            `🎯 <b>NG1 SIGNAL — BABAK 2 MULAI!</b>\n` +
-            `⚽ <b>${home} vs ${away}</b>\n` +
-            `📊 Skor HT: <b>1-0</b> | Gol terakhir 1H: menit <b>3'</b>\n` +
-            `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
-            `🎯 Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n\n` +
-            `📈 Pola NG1: HT 1-0 + gol mnt 3 → <b>HOME 83%</b>\n` +
-            `🔥 <i>Notif dikirim saat FT O/U O0.75 sudah > 1.95.</i>`;
+            `[TARGET] <b>NG1 SIGNAL - BABAK 2 MULAI!</b>\n` +
+            `Goal <b>${home} vs ${away}</b>\n` +
+            `[SCORE] Skor HT: <b>1-0</b> | Gol terakhir 1H: menit <b>3'</b>\n` +
+            `[TIME] Status: <b>${escapeHtml(status)}</b>\n\n` +
+            `[TARGET] Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n\n` +
+            `[TREND] Pola NG1: HT 1-0 + gol mnt 3 -> <b>HOME 83%</b>\n` +
+            `[HOT] <i>Notif dikirim saat FT O/U O0.75 sudah > 1.95.</i>`;
 
         await sendTelegramText(msg);
     }
@@ -490,14 +490,14 @@ async function trackHT22Signal(matches) {
         const minuteText = goalMins.map((min) => `${min}'`).join(', ');
 
         const msg =
-            `🚨 <b>P15 SIGNAL — HT 2-2 + MAX GAP <= 2</b>\n` +
-            `⚽ <b>${home} vs ${away}</b>\n` +
-            `🏆 League: ${league}\n` +
-            `📊 Skor HT: <b>2-2</b> | Skor sekarang: <b>${currentScore}</b>\n` +
-            `⏰ Status: <b>${escapeHtml(status)}</b>\n` +
-            `🎯 Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n` +
-            `📌 Gol 1H: <b>${escapeHtml(minuteText)}</b> | Max gap: <b>${maxGap}</b> menit\n\n` +
-            `🔥 <i>P15 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
+            `[ALERT] <b>P15 SIGNAL - HT 2-2 + MAX GAP <= 2</b>\n` +
+            `Goal <b>${home} vs ${away}</b>\n` +
+            `[LEAGUE] League: ${league}\n` +
+            `[SCORE] Skor HT: <b>2-2</b> | Skor sekarang: <b>${currentScore}</b>\n` +
+            `[TIME] Status: <b>${escapeHtml(status)}</b>\n` +
+            `[TARGET] Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n` +
+            `[NOTE] Gol 1H: <b>${escapeHtml(minuteText)}</b> | Max gap: <b>${maxGap}</b> menit\n\n` +
+            `[HOT] <i>P15 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
 
         await sendTelegramText(msg);
     }
@@ -549,20 +549,20 @@ async function trackP14Signal(matches) {
         const minuteText = goalMins.map((min) => `${min}'`).join(', ');
 
         const msg =
-            `🚨 <b>P14 SIGNAL — POTENSI GOL BABAK 2</b>\n` +
-            `⚽ <b>${home} vs ${away}</b>\n` +
-            `🏆 League: ${league}\n` +
-            `📊 Skor: <b>${score}</b>\n` +
-            `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
-            `🎯 Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n\n` +
-            `📌 Pola P14 terpenuhi:\n` +
-            `• Seri di babak pertama\n` +
-            `• Gap gol max <b>${maxGap}</b> menit\n` +
-            `• Gap gol min <b>${minGap}</b> menit\n` +
-            `• Span gol <b>${span}</b> menit\n` +
-            `• First goal menit <b>${firstGoalMin}'</b>\n` +
-            `• Urutan menit gol: <b>${escapeHtml(minuteText)}</b>\n\n` +
-            `🔥 <i>P14 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
+            `[ALERT] <b>P14 SIGNAL - POTENSI GOL BABAK 2</b>\n` +
+            `Goal <b>${home} vs ${away}</b>\n` +
+            `[LEAGUE] League: ${league}\n` +
+            `[SCORE] Skor: <b>${score}</b>\n` +
+            `[TIME] Status: <b>${escapeHtml(status)}</b>\n\n` +
+            `[TARGET] Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n\n` +
+            `[NOTE] Pola P14 terpenuhi:\n` +
+            `- Seri di babak pertama\n` +
+            `- Gap gol max <b>${maxGap}</b> menit\n` +
+            `- Gap gol min <b>${minGap}</b> menit\n` +
+            `- Span gol <b>${span}</b> menit\n` +
+            `- First goal menit <b>${firstGoalMin}'</b>\n` +
+            `- Urutan menit gol: <b>${escapeHtml(minuteText)}</b>\n\n` +
+            `[HOT] <i>P14 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
 
         await sendTelegramText(msg);
     }
@@ -603,18 +603,18 @@ async function trackP7Signal(matches) {
         const minuteText = goalMins.map((min) => `${min}'`).join(', ');
 
         const msg =
-            `🚨 <b>P7 SIGNAL — POTENSI GOL BABAK 2</b>\n` +
-            `⚽ <b>${home} vs ${away}</b>\n` +
-            `🏆 League: ${league}\n` +
-            `📊 Skor: <b>1-1</b>\n` +
-            `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
-            `🎯 Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n\n` +
-            `📌 Pola P7 terpenuhi:\n` +
-            `• Seri <b>1-1</b>\n` +
-            `• Gap antar gol >= <b>5</b> menit (aktual <b>${maxGap}</b>)\n` +
-            `• First goal != menit <b>1</b> (aktual <b>${firstGoalMin}'</b>)\n` +
-            `• Urutan menit gol 1H: <b>${escapeHtml(minuteText)}</b>\n\n` +
-            `🔥 <i>P7 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
+            `[ALERT] <b>P7 SIGNAL - POTENSI GOL BABAK 2</b>\n` +
+            `Goal <b>${home} vs ${away}</b>\n` +
+            `[LEAGUE] League: ${league}\n` +
+            `[SCORE] Skor: <b>1-1</b>\n` +
+            `[TIME] Status: <b>${escapeHtml(status)}</b>\n\n` +
+            `[TARGET] Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n\n` +
+            `[NOTE] Pola P7 terpenuhi:\n` +
+            `- Seri <b>1-1</b>\n` +
+            `- Gap antar gol >= <b>5</b> menit (aktual <b>${maxGap}</b>)\n` +
+            `- First goal != menit <b>1</b> (aktual <b>${firstGoalMin}'</b>)\n` +
+            `- Urutan menit gol 1H: <b>${escapeHtml(minuteText)}</b>\n\n` +
+            `[HOT] <i>P7 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
 
         await sendTelegramText(msg);
     }
@@ -665,18 +665,18 @@ async function trackP19Signal(matches) {
         const gapText = `Gap max <b>${maxGap}</b> menit`;
 
         const msg =
-            `🚨 <b>P19 SIGNAL — POTENSI GOL BABAK 2</b>\n` +
-            `⚽ <b>${home} vs ${away}</b>\n` +
-            `🏆 League: ${league}\n` +
-            `📊 Skor: <b>${score}</b>\n` +
-            `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
-            `🎯 Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n\n` +
-            `📌 Pola P19 terpenuhi:\n` +
-            `• Last goal 1H menit <b>${lastGoalMin}'</b>\n` +
-            `• Last scorer <b>HOME</b>\n` +
-            `• ${gapText}\n` +
-            `• Urutan menit gol 1H: <b>${escapeHtml(minuteText)}</b>\n\n` +
-            `🔥 <i>P19 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
+            `[ALERT] <b>P19 SIGNAL - POTENSI GOL BABAK 2</b>\n` +
+            `Goal <b>${home} vs ${away}</b>\n` +
+            `[LEAGUE] League: ${league}\n` +
+            `[SCORE] Skor: <b>${score}</b>\n` +
+            `[TIME] Status: <b>${escapeHtml(status)}</b>\n\n` +
+            `[TARGET] Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n\n` +
+            `[NOTE] Pola P19 terpenuhi:\n` +
+            `- Last goal 1H menit <b>${lastGoalMin}'</b>\n` +
+            `- Last scorer <b>HOME</b>\n` +
+            `- ${gapText}\n` +
+            `- Urutan menit gol 1H: <b>${escapeHtml(minuteText)}</b>\n\n` +
+            `[HOT] <i>P19 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
 
         await sendTelegramText(msg);
     }
@@ -727,19 +727,19 @@ async function trackP28Signal(matches) {
         const minuteText = goalMins.map((min) => `${min}'`).join(', ');
 
         const msg =
-            `🚨 <b>P28 SIGNAL — POTENSI GOL BABAK 2</b>\n` +
-            `⚽ <b>${home} vs ${away}</b>\n` +
-            `🏆 League: ${league}\n` +
-            `📊 Skor: <b>${score}</b>\n` +
-            `⏰ Status: <b>${escapeHtml(status)}</b>\n\n` +
-            `🎯 Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n\n` +
-            `📌 Pola P28 terpenuhi:\n` +
-            `• Croatia atau France bermain\n` +
-            `• Last goal 1H menit <b>${lastGoalMin}'</b>\n` +
-            `• Span gol <b>${span}</b> menit\n` +
-            `• Ada balas gol 1H <b>${switches}x</b>\n` +
-            `• Urutan menit gol 1H: <b>${escapeHtml(minuteText)}</b>\n\n` +
-            `🔥 <i>P28 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
+            `[ALERT] <b>P28 SIGNAL - POTENSI GOL BABAK 2</b>\n` +
+            `Goal <b>${home} vs ${away}</b>\n` +
+            `[LEAGUE] League: ${league}\n` +
+            `[SCORE] Skor: <b>${score}</b>\n` +
+            `[TIME] Status: <b>${escapeHtml(status)}</b>\n\n` +
+            `[TARGET] Market: <b>${escapeHtml(targetOdd.marketName)}: ${escapeHtml(targetOdd.label)} @ ${escapeHtml(targetOdd.oddValue.toFixed(2))}</b>\n\n` +
+            `[NOTE] Pola P28 terpenuhi:\n` +
+            `- Croatia atau France bermain\n` +
+            `- Last goal 1H menit <b>${lastGoalMin}'</b>\n` +
+            `- Span gol <b>${span}</b> menit\n` +
+            `- Ada balas gol 1H <b>${switches}x</b>\n` +
+            `- Urutan menit gol 1H: <b>${escapeHtml(minuteText)}</b>\n\n` +
+            `[HOT] <i>P28 lolos dan FT O/U O0.75 sudah > 1.95.</i>`;
 
         await sendTelegramText(msg);
     }

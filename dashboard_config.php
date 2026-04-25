@@ -16,5 +16,5 @@ return [
     'lg5_teams' => ['France (V)','Spain (V)','Israel (V)','Morocco (V)'],
     'lg6_teams' => ['Indonesia (V)','Algeria (V)','Slovakia (V)','Slovenia (V)','Argentina (V)'],
     'lg7_teams' => ['Nigeria (V)','Qatar (V)','Slovenia (V)'],
-    'lg8_teams' => ['Norway (V)','Nigeria (V)','Poland (V)','Slovenia (V)'],
+    'lg8_teams' => ['Norway (V)','Nigeria (V)','Poland (V)','Slovenia (V)','Romania (V)','Argentina (V)','India (V)','Belgium (V)'],
 ];

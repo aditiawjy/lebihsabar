@@ -26,7 +26,79 @@ let all2HGoalMinsByMatchKey = new Map();
 let all2HScorersByMatchKey = new Map();
 let lastSeenAtByMatchKey = new Map();
 let lastStatusByMatchKey = new Map();
+let lastTargetTabReloadAt = 0;
 
+function getLiveStateRetentionMs() {
+    return typeof MATCH_STATE_RETENTION_MS === 'number' ? MATCH_STATE_RETENTION_MS : 2 * 60 * 60 * 1000;
+}
+
+function getLiveStateMaxKeys() {
+    return typeof MATCH_STATE_MAX_KEYS === 'number' ? MATCH_STATE_MAX_KEYS : 250;
+}
+
+function pruneSetByKnownMatches(sourceSet) {
+    return new Set(Array.from(sourceSet || []).filter((key) => registeredMatchKeys.has(key)));
+}
+
+function pruneMilestoneSetByKnownMatches(sourceSet) {
+    return new Set(Array.from(sourceSet || []).filter((key) => {
+        const text = String(key);
+        const matchKey = text.slice(0, text.lastIndexOf('|'));
+        return matchKey && registeredMatchKeys.has(matchKey);
+    }));
+}
+
+function pruneLongRunningMatchState(activeMatches = [], nowMs = Date.now()) {
+    const activeKeys = new Set((Array.isArray(activeMatches) ? activeMatches : []).map((match) => createMatchKey(match)));
+    const retentionMs = getLiveStateRetentionMs();
+    const staleKeys = [];
+
+    for (const key of registeredMatchKeys) {
+        const lastSeenAt = lastSeenAtByMatchKey.get(key) || 0;
+        if (!activeKeys.has(key) && lastSeenAt && nowMs - lastSeenAt > retentionMs) {
+            staleKeys.push(key);
+        }
+    }
+
+    const maxKeys = getLiveStateMaxKeys();
+    if (registeredMatchKeys.size - staleKeys.length > maxKeys) {
+        const keep = new Set(staleKeys);
+        Array.from(registeredMatchKeys)
+            .filter((key) => !activeKeys.has(key) && !keep.has(key))
+            .sort((a, b) => (lastSeenAtByMatchKey.get(a) || 0) - (lastSeenAtByMatchKey.get(b) || 0))
+            .slice(0, registeredMatchKeys.size - staleKeys.length - maxKeys)
+            .forEach((key) => staleKeys.push(key));
+    }
+
+    staleKeys.forEach((key) => resetMatchTrackingState(key));
+
+    sentNG1Signals = pruneSetByKnownMatches(sentNG1Signals);
+    sentHT22Signals = pruneSetByKnownMatches(sentHT22Signals);
+    sentP7Signals = pruneSetByKnownMatches(sentP7Signals);
+    sentP14Signals = pruneSetByKnownMatches(sentP14Signals);
+    sentP19Signals = pruneSetByKnownMatches(sentP19Signals);
+    sentP28Signals = pruneSetByKnownMatches(sentP28Signals);
+    sentMilestones = pruneMilestoneSetByKnownMatches(sentMilestones);
+
+    return staleKeys.length;
+}
+
+function objectFromMapForActiveMatches(map, activeKeys) {
+    return Object.fromEntries(Array.from(map.entries()).filter(([key]) => activeKeys.has(key)));
+}
+
+function buildActiveMatchStatePayload(matches = []) {
+    const activeKeys = new Set((Array.isArray(matches) ? matches : []).map((match) => createMatchKey(match)));
+
+    return {
+        activeKeys,
+        allGoalMinutes: objectFromMapForActiveMatches(all1HGoalMinsByMatchKey, activeKeys),
+        allGoalScorers: objectFromMapForActiveMatches(all1HScorersByMatchKey, activeKeys),
+        all2HGoalMinutes: objectFromMapForActiveMatches(all2HGoalMinsByMatchKey, activeKeys),
+        all2HScorers: objectFromMapForActiveMatches(all2HScorersByMatchKey, activeKeys),
+        htScores: objectFromMapForActiveMatches(shScoreByMatchKey, activeKeys)
+    };
+}
 
 async function saveRuntimeState(partialState = {}) {
     const state = {
@@ -127,7 +199,9 @@ async function restoreRuntimeState() {
     }
 }
 
-async function persistMatchState() {
+async function persistMatchState(activeMatches = []) {
+    pruneLongRunningMatchState(activeMatches);
+
     await Promise.all([
         chrome.storage.session.set({
             kickoffTimes: Object.fromEntries(kickoffTimeByMatchKey),

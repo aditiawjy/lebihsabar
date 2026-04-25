@@ -37,7 +37,7 @@
     var settledSummaryResults = [];
     var LIVE_CANDIDATE_STORAGE_KEY = 'liveCandidateState';
     var LIVE_SETTLED_STORAGE_KEY = 'liveSettledState';
-    var LIVE_STATE_SCHEMA_VERSION = '2026-04-24-rules-v16';
+    var LIVE_STATE_SCHEMA_VERSION = '2026-04-24-rules-v49';
     var LIVE_CANDIDATE_CACHE_TTL_MS = 30000;
     var LIVE_SETTLED_CACHE_TTL_MS = 3 * 60 * 60 * 1000;
     var DETAIL_ROWS_PER_PAGE = 10;
@@ -1297,9 +1297,9 @@
         return [
             '3|7|HH|2-0', '2|4|HH|2-0', '6|7|AH|1-1', '5|6|HA|1-1',
             '1|4|HAA|1-2', '4|7|HA|1-1', '5|7|AHA|1-2', '2|6|AA|0-2',
-            '0|6|AH|1-1', '1|5|HHH|3-0', '3|5|AA|0-2', '6|7|AA|0-2',
+            '3|5|AA|0-2', '6|7|AA|0-2',
             '2|7|AAA|0-3', '1|7|AHA|1-2', '4|5|AA|0-2', '2|7|HH|2-0',
-            '0|1|AA|0-2'
+            '0|1|AA|0-2', '1|3|HA|1-1'
         ].indexOf(key) !== -1;
     }
 
@@ -1311,14 +1311,15 @@
             '4|9|AH|1-1', '6|8|AA|0-2', '0|3|HH|2-0',
             '4|9|HA|1-1', '6|7|HA|1-1', '1|9|AAH|1-2', '6|8|HH|2-0',
             '4|8|HAA|1-2', '1|7|AH|1-1', '2|7|AH|1-1', '2|8|HH|2-0',
-            '0|3|AH|1-1', '0|8|HAA|1-2', '1|8|HAHA|2-2'
+            '0|3|AH|1-1', '0|8|HAA|1-2', '1|8|HAHA|2-2', '3|6|HA|1-1',
+            '3|5|AH|1-1', '3|4|AA|0-2', '7|8|HA|1-1'
         ].indexOf(key) !== -1;
     }
 
     function matchesLG4StrongGroup(s) {
         if (!s || s.league !== '20min') return false;
         var key = s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
-        return ['1|9|AAH|1-2', '2|9|AHA|1-2', '4|9|AA|0-2'].indexOf(key) !== -1;
+        return ['1|9|AAH|1-2', '2|9|AHA|1-2', '4|9|AA|0-2', '2|8|AA|0-2', '5|8|HAA|1-2', '1|6|AHA|1-2'].indexOf(key) !== -1;
     }
 
     function matchesP62StrongGroup(s) {
@@ -1344,20 +1345,141 @@
         ].indexOf(key) !== -1;
     }
 
-    function matchesP66StrongGroup(s) {
+    function matchesP57StrongGroup(s) {
         return matchesP58StrongGroup(s);
+    }
+
+    function matchesP66StrongGroup(s) {
+        if (!s) return false;
+        var key = s.league + '|' + s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
+        return [
+            '15min|5|6|HA|1-1', '15min|3|7|HH|2-0', '20min|1|4|HH|2-0',
+            '15min|2|4|HH|2-0', '15min|6|7|AH|1-1', '15min|1|4|HAA|1-2',
+            '15min|0|7|HAH|2-1', '20min|3|5|AA|0-2', '20min|7|9|AA|0-2',
+            '15min|4|7|HA|1-1', '15min|2|7|AAA|0-3'
+        ].indexOf(key) !== -1;
     }
 
     function matchesP35StrongGroup(s) {
         return matchesP58StrongGroup(s);
     }
 
+    function matchesP33StrongGroup(s) {
+        return matchesP54StrongGroup(s);
+    }
+
+    function matchesP65StrongGroup(s) {
+        if (!s) return false;
+        var key = s.league + '|' + s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
+        return [
+            '15min|5|6|HA|1-1', '15min|3|7|HH|2-0', '20min|3|5|AA|0-2',
+            '20min|1|4|HH|2-0', '15min|2|4|HH|2-0', '15min|6|7|AH|1-1',
+            '15min|0|7|HAH|2-1', '20min|7|9|AA|0-2', '15min|4|7|HA|1-1'
+        ].indexOf(key) !== -1;
+    }
+
     function matchesP25StrongGroup(s) {
         return matchesP58StrongGroup(s);
     }
 
+    function matchesP24StrongGroup(s) {
+        if (!s) return false;
+        var key = s.league + '|' + s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
+        return [
+            '15min|3|7|HH|2-0', '20min|3|5|AA|0-2', '20min|1|4|HH|2-0',
+            '15min|2|4|HH|2-0', '15min|6|7|AH|1-1', '15min|1|4|HAA|1-2',
+            '15min|0|7|HAH|2-1', '20min|7|9|AA|0-2'
+        ].indexOf(key) !== -1;
+    }
+
     function matchesP59StrongGroup(s) {
         return matchesP58StrongGroup(s);
+    }
+
+    function matchesP54StrongGroup(s) {
+        return matchesP58StrongGroup(s);
+    }
+
+    function matchesP6StrongGroup(s) {
+        return matchesP58StrongGroup(s);
+    }
+
+    function matchesLG8StrongGroup(s) {
+        if (!s || s.league !== '20min') return false;
+        var key = s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
+        return [
+            '0|8|HA|1-1', '1|9|AAH|1-2', '6|6|AH|1-1', '0|4|HH|2-0',
+            '2|9|AHA|1-2', '7|10|HH|2-0', '0|8|HH|2-0', '4|9|AA|0-2',
+            '2|8|AA|0-2', '5|6|AH|1-1', '5|8|HAA|1-2', '1|6|AHA|1-2'
+        ].indexOf(key) !== -1;
+    }
+
+    function matchesLG7StrongGroup(s) {
+        if (!s) return false;
+        var key = s.league + '|' + s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
+        return ['20min|0|8|HA|1-1', '15min|1|5|AHA|1-2', '20min|1|9|AAH|1-2'].indexOf(key) !== -1;
+    }
+
+    function matchesLG5StrongGroup(s) {
+        return matchesLG7StrongGroup(s);
+    }
+
+    function matchesLG6StrongGroup(s) {
+        return matchesLG7StrongGroup(s);
+    }
+
+    function matchesG24StrongGroup(s) {
+        if (!s) return false;
+        var key = s.league + '|' + s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
+        return [
+            '20min|3|6|HA|1-1', '20min|6|8|AA|0-2', '20min|4|9|HA|1-1',
+            '16min|1|3|AA|0-2', '20min|6|7|HA|1-1', '20min|6|8|HH|2-0',
+            '20min|0|8|HA|1-1', '15min|1|5|AHA|1-2', '20min|1|9|AAH|1-2'
+        ].indexOf(key) !== -1;
+    }
+
+    function matchesNG9StrongGroup(s) {
+        if (!s) return false;
+        var key = s.league + '|' + s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
+        return ['20min|4|9|AH|1-1', '20min|1|9|AAH|1-2', '15min|2|7|AAA|0-3', '16min|2|4|AA|0-2'].indexOf(key) !== -1;
+    }
+
+    function matchesP72StrongGroup(s) {
+        if (!s) return false;
+        var key = s.league + '|' + s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
+        return [
+            '15min|3|7|HH|2-0', '15min|5|6|HA|1-1', '20min|3|5|AA|0-2',
+            '15min|0|7|HAH|2-1', '15min|1|4|HAA|1-2', '15min|2|4|HH|2-0',
+            '15min|2|7|AAA|0-3', '15min|4|7|HA|1-1', '15min|6|7|AH|1-1',
+            '20min|1|4|HH|2-0', '20min|7|9|AA|0-2', '15min|0|1|AA|0-2',
+            '15min|0|6|AHA|1-2', '15min|0|6|AH|1-1', '15min|1|3|HA|1-1',
+            '15min|1|5|AHA|1-2', '15min|1|6|HA|1-1', '15min|1|7|AHA|1-2',
+            '15min|2|6|AA|0-2', '15min|2|7|HH|2-0', '15min|3|5|AA|0-2',
+            '15min|4|5|AA|0-2', '15min|5|7|AHA|1-2', '15min|6|7|AA|0-2',
+            '16min|1|3|AA|0-2', '16min|1|3|HH|2-0', '16min|2|4|AA|0-2',
+            '16min|6|7|HA|1-1', '20min|0|3|AH|1-1', '20min|0|3|HH|2-0',
+            '20min|0|8|HAA|1-2', '20min|0|8|HA|1-1', '20min|1|7|AH|1-1',
+            '20min|1|8|HAHA|2-2', '20min|1|9|AAH|1-2', '20min|2|7|AH|1-1',
+            '20min|2|8|HH|2-0', '20min|3|4|AA|0-2', '20min|3|5|AH|1-1',
+            '20min|3|6|HA|1-1', '20min|4|8|HAA|1-2', '20min|4|9|AH|1-1',
+            '20min|4|9|HA|1-1', '20min|6|7|HA|1-1', '20min|6|8|AA|0-2',
+            '20min|6|8|HH|2-0', '20min|7|8|HA|1-1'
+        ].indexOf(key) !== -1;
+    }
+
+    function matchesP48StrongGroup(s) {
+        if (!s) return false;
+        var key = s.league + '|' + s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
+        return [
+            '15min|5|6|HA|1-1', '15min|3|7|HH|2-0', '20min|3|5|AA|0-2',
+            '20min|1|4|HH|2-0', '15min|2|4|HH|2-0', '15min|6|7|AH|1-1',
+            '15min|2|7|AAA|0-3', '15min|1|4|HAA|1-2', '15min|0|7|HAH|2-1',
+            '20min|7|9|AA|0-2', '15min|4|7|HA|1-1'
+        ].indexOf(key) !== -1;
+    }
+
+    function matchesP67StrongGroup(s) {
+        return matchesP48StrongGroup(s);
     }
 
     function matchesSummaryPatternLive(pid, s) {
@@ -1369,7 +1491,7 @@
 
         switch (pid) {
             case 'P2': return s.league === '16min' && s.h1c >= 2 && diff >= 2 && s.h1_last === 7 && s.all_gaps_ge3 && s.max_run <= 2 && s.h1_first <= 1;
-            case 'P6': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 5 && s.h1_first !== 1 && ['Manchester City (V)', 'Atletico de Madrid (V)', 'England (V)'].indexOf(s.home) === -1 && !(s.h1_first === 0 && arrayEqualsJS(s.h1s, ['A', 'H']));
+            case 'P6': return (s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 5 && s.h1_first !== 1 && ['Manchester City (V)', 'Atletico de Madrid (V)', 'England (V)'].indexOf(s.home) === -1 && !(s.h1_first === 0 && arrayEqualsJS(s.h1s, ['A', 'H']))) || matchesP6StrongGroup(s);
             case 'P7': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.max_gap >= 5 && s.h1_first >= 3;
             case 'P9': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.max_gap >= 5 && s.h1_first >= 3;
             case 'P12': return s.h1c >= 4 && span >= 6 && s.min_gap >= 1 && s.h1_last <= 9 && s.h1_first >= 1 && s.h1_first !== 1 && s.max_run <= 2;
@@ -1379,15 +1501,15 @@
             case 'P17': return s.h1c >= 2 && s.h1_first >= 1 && s.h1_first <= 2 && s.h1_last === 7 && s.max_gap >= 2 && s.min_gap >= 2 && s.switches >= 1 && firstScorer === 'A' && ((s.league === '15min' && s.h1_first === 1) || (s.league === '20min' && (s.h1_first === 2 || s.sc_a > s.sc_h)));
             case 'P19': return s.league === '20min' && s.h1c >= 2 && lastScorer === 'H' && (((s.h1_last === 3) && (s.h1_first === 0 || s.h1c >= 3)) || (s.h1_last === 4 && (s.sc_a > s.sc_h || s.switches >= 2)));
             case 'P20': return s.league === '16min' && s.h1_last === 3 && lastScorer === 'A' && (s.h1_first <= 1 || s.h1c >= 2);
-            case 'P24': return s.league === '15min' && inTeamConfig('p24_teams', s.home) && s.h1c >= 1 && s.h1_last >= 4 && diff <= 1 && s.sc_h >= 1 && s.h1_first >= 4 && firstScorer === 'H' && (s.home !== 'Everton (V)' || s.h1_last <= 5) && (s.home !== 'Arminia Bielefeld (V)' || !(s.h1c === 1 && s.h1_first >= 5 && s.h1_last <= 6)) && !(s.h1c === 1 && s.h1_last === 5) && (s.home !== 'Leicester City (V)' || !(s.h1c === 1 && s.h1_first === 4 && s.h1_last === 4)) && !(s.home === 'Olympique de Marseille (V)' && s.away === 'Liverpool (V)');
+            case 'P24': return (s.league === '15min' && inTeamConfig('p24_teams', s.home) && s.h1c >= 1 && s.h1_last >= 4 && diff <= 1 && s.sc_h >= 1 && s.h1_first >= 4 && firstScorer === 'H' && (s.home !== 'Everton (V)' || s.h1_last <= 5) && (s.home !== 'Arminia Bielefeld (V)' || !(s.h1c === 1 && s.h1_first >= 5 && s.h1_last <= 6)) && !(s.h1c === 1 && s.h1_last === 5) && (s.home !== 'Leicester City (V)' || !(s.h1c === 1 && s.h1_first === 4 && s.h1_last === 4)) && !(s.h1_first === 5 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.home === 'Olympique de Marseille (V)' && s.away === 'Liverpool (V)')) || matchesP24StrongGroup(s);
             case 'P25': return (inTeamConfig('p25_teams', s.away) && s.h1_last >= 2 && diff <= 1 && span >= 3 && s.min_gap >= 2 && lastScorer === 'A' && !(s.h1c === 2 && span === 3 && s.h1_first === 4) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'A']) && s.sc_h === 1 && s.sc_a === 1)) || matchesP25StrongGroup(s);
             case 'P26': return s.league === '16min' && ((s.sc_h + s.sc_a) % 2 === 1) && s.h1_last >= 6 && s.h1c >= 2 && s.sc_a > s.sc_h && s.max_run <= 2 && (s.h1_first !== 1 || s.max_gap >= 4);
             case 'P27': return s.league === '16min' && lastScorer === 'A' && s.max_gap >= 3 && s.h1_first !== 1 && span >= 6;
             case 'P28': return (inTeamConfig('p28_teams', s.home) || inTeamConfig('p28_teams', s.away)) && s.h1_last >= 3 && span >= 3 && s.switches >= 1 && (inTeamConfig('p28_teams', s.away) || s.h1_first >= 2);
             case 'P32': return s.league === '20min' && s.h1c >= 2 && span >= 9 && s.sc_h === s.sc_a && s.min_gap >= 3 && s.switches >= 1 && s.h1_first !== 1;
-            case 'P33': return s.league === '15min' && s.h1c >= 4 && diff <= 1 && s.min_gap >= 1 && s.h1_last >= 6 && (s.switches >= 2 || s.h1_first >= 1) && !(arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A']) && s.max_gap === 2 && (s.h1_last >= 8 || s.h1_first <= 1));
+            case 'P33': return (s.league === '15min' && s.h1c >= 4 && diff <= 1 && s.min_gap >= 1 && s.h1_last >= 6 && (s.switches >= 2 || s.h1_first >= 1) && !(arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A']) && s.max_gap === 2 && (s.h1_last >= 8 || s.h1_first <= 1)) && !(s.h1_first === 3 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'H']) && s.sc_h === 2 && s.sc_a === 2 && s.max_gap === 2)) || matchesP33StrongGroup(s);
             case 'P34': return s.league === '15min' && firstScorer === 'A' && lastScorer === 'H' && span >= 6 && s.h1c >= 4;
-            case 'P35': return (inTeamConfig('p35_teams', s.away) && s.h1c >= 2 && s.h1_first >= 3 && s.max_run <= 2 && s.h1_last >= 5 && s.min_gap >= 2 && !(s.h1s.length === 2 && s.h1s[0] === 'H' && s.h1s[1] === 'H' && s.h1_first === 3 && s.h1_last === 5) && !(s.h1_first === 3 && s.h1_last === 5 && s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['H', 'A'])) && !(s.h1_first === 3 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A'])) && !(s.league === '20min' && s.h1_first === 4 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1)) || (s.league === '16min' && inTeamConfig('p35_teams', s.away) && s.h1c >= 3 && s.h1_first === 1 && s.max_run <= 2 && s.h1_last >= 5 && s.min_gap >= 2) || (inTeamConfig('p35_teams', s.away) && s.h1c >= 3 && s.h1_first === 0 && s.max_run <= 2 && s.h1_last >= 6 && s.min_gap >= 2 && lastScorer === 'A') || (s.away === 'Portugal (V)' && s.h1c === 1 && arrayEqualsJS(s.h1s, ['A'])) || (inTeamConfig('p35_teams', s.away) && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'H', 'A']) && s.min_gap === 1) || matchesP35StrongGroup(s);
+            case 'P35': return (inTeamConfig('p35_teams', s.away) && s.h1c >= 2 && s.h1_first >= 3 && s.max_run <= 2 && s.h1_last >= 5 && s.min_gap >= 2 && !(s.h1s.length === 2 && s.h1s[0] === 'H' && s.h1s[1] === 'H' && s.h1_first === 3 && s.h1_last === 5) && !(s.h1_first === 3 && s.h1_last === 5 && s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['H', 'A'])) && !(s.h1_first === 3 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A'])) && !(s.league === '20min' && s.h1_first === 4 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1)) || (s.league === '16min' && inTeamConfig('p35_teams', s.away) && s.h1c >= 3 && s.h1_first === 1 && s.max_run <= 2 && s.h1_last >= 5 && s.min_gap >= 2) || (inTeamConfig('p35_teams', s.away) && s.h1c >= 3 && s.h1_first === 0 && s.max_run <= 2 && s.h1_last >= 6 && s.min_gap >= 2 && lastScorer === 'A' && !(s.league === '20min' && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['A', 'H', 'A']) && s.sc_h === 1 && s.sc_a === 2)) || (s.away === 'Portugal (V)' && s.h1c === 1 && arrayEqualsJS(s.h1s, ['A']) && !(s.h1_first === 0 && s.h1_last === 0 && s.sc_h === 0 && s.sc_a === 1)) || (inTeamConfig('p35_teams', s.away) && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'H', 'A']) && s.min_gap === 1) || matchesP35StrongGroup(s);
             case 'P37': return s.league === '16min' && s.h1c >= 2 && s.h1_first <= 1 && s.h1_last <= 4 && firstScorer === 'A' && lastScorer === 'A' && s.switches === 0;
             case 'P39': return s.league === '20min' && s.h1c >= 3 && span >= 7 && diff <= 3 && s.min_gap >= 3 && s.h1_first >= 1;
             case 'P40': return s.league === '16min' && diff === 2 && s.h1_first <= 1 && span >= 5 && !(s.home === 'Germany (V)' && s.sc_h === 2 && s.sc_a === 0 && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H']));
@@ -1398,30 +1520,31 @@
             case 'P45': return s.league === '16min' && s.h1_first === 0 && span >= 6 && s.max_gap >= 6;
             case 'P46': return s.league === '16min' && span >= 6 && s.min_gap >= 2 && s.h1c === 2 && (s.h1_first === 0 || s.switches === 0);
             case 'P47': return s.sc_h === s.sc_a && s.h1_first !== 1 && s.switches >= 2 && s.h1_last >= 6 && s.min_gap >= 1 && s.max_gap >= 3;
-            case 'P48': return s.sc_h === s.sc_a && span >= 7 && s.switches >= 2 && (s.h1_first === 0 || span === 7 || lastScorer === 'H') && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 7 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A']));
+            case 'P48': return (s.sc_h === s.sc_a && span >= 7 && s.switches >= 2 && (s.h1_first === 0 || span === 7 || lastScorer === 'H') && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 7 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 9 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'A']))) || matchesP48StrongGroup(s);
             case 'P49': return s.league === '16min' && diff >= 2 && span >= 6 && s.h1_first >= 1;
             case 'P50': return s.league === '16min' && s.sc_a > s.sc_h && span >= 6 && s.max_run <= 2 && (s.h1_first === 0 || s.max_gap >= 6);
             case 'P51': return s.league === '16min' && s.switches >= 2 && s.h1_first !== 1;
             case 'P52': return s.league === '16min' && span >= 6 && s.min_gap >= 3 && diff >= 2;
             case 'P53': return (s.league === '20min' && s.h1_last === 3 && lastScorer === 'H' && s.min_gap >= 1 && s.h1c <= 2 && (s.h1_first === 0 || s.sc_a === 0)) || (s.league === '20min' && s.h1_first === 1 && s.h1_last === 3 && s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['A', 'H']) && !(s.home === 'Paraguay (V)' && s.away === 'Bosnia-Herzegovina (V)'));
-            case 'P54': return s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && span >= 4 && s.h1_first >= 2 && s.h1c <= 4 && !(s.h1_first === 2 && arrayEqualsJS(s.h1s, ['A', 'A', 'H']));
+            case 'P54': return (s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && span >= 4 && s.h1_first >= 2 && s.h1c <= 4 && !(s.h1_first === 2 && arrayEqualsJS(s.h1s, ['A', 'A', 'H'])) && !(s.h1_first === 2 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2)) || matchesP54StrongGroup(s);
             case 'P55': return s.league === '16min' && s.h1_last === 8 && s.sc_a > s.sc_h && !(s.h1_first === 3 && s.sc_h === 1 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['H', 'A', 'A'])) && !(s.h1c === 1 && s.h1_first === 8 && arrayEqualsJS(s.h1s, ['A']) && s.sc_h === 0 && s.sc_a === 1);
             case 'P56': return s.league === '16min' && s.max_gap >= 6 && lastScorer === 'A';
-            case 'P57': return s.h1_first === 0 && s.h1_last === 6 && firstScorer === 'A' && (s.league === '15min' || s.h1c >= 3) && (s.switches >= 2 || s.max_gap >= 4) && !arrayEqualsJS(s.h1s, ['A', 'H', 'H']) && !arrayEqualsJS(s.h1s, ['A', 'A', 'A']);
+            case 'P57': return (s.h1_first === 0 && s.h1_last === 6 && firstScorer === 'A' && (s.league === '15min' || s.league === '16min' || s.h1c >= 3) && (s.switches >= 2 || s.max_gap >= 4) && !arrayEqualsJS(s.h1s, ['A', 'H', 'H']) && !arrayEqualsJS(s.h1s, ['A', 'A', 'A']) && !(s.league === '15min' && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2)) || matchesP57StrongGroup(s);
             case 'P58': return (((s.h1_first >= 3 && span >= 5 && s.min_gap >= 3 && !(s.h1_first === 4 && span === 5 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.switches === 0)) || (s.league === '20min' && s.h1_first === 2 && span >= 5 && s.min_gap >= 3 && (lastScorer === 'H' || s.h1c >= 3)) || (s.league === '20min' && s.h1_first === 4 && s.h1_last === 6 && s.min_gap === 2 && lastScorer === 'H' && !(arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1)) || (s.league === '16min' && s.h1_first === 1 && span >= 5 && s.min_gap >= 3 && s.max_gap >= 4) || (s.league === '16min' && s.h1_first === 0 && span >= 5 && s.min_gap >= 3 && diff >= 2 && !(s.home === 'Germany (V)' && s.sc_h === 2 && s.sc_a === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H']))) || (s.league === '15min' && s.h1c === 3 && s.h1_first === 2 && span === 5 && s.min_gap === 1) || (s.league === '15min' && s.h1_first === 0 && s.h1_last === 6 && span === 6 && s.min_gap === 2) || matchesP58StrongGroup(s)) && !(s.league === '16min' && s.h1c === 1 && s.sc_h === 0 && s.sc_a === 1 && [1, 8].indexOf(s.h1_first) !== -1));
-            case 'P59': return (s.h1_last === 9 && s.switches >= 2 && lastScorer === 'A' && (firstScorer === 'A' || s.max_gap >= 6) && !(s.h1_first === 1 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.h1c === 5 && s.h1_first === 2)) || matchesP59StrongGroup(s);
-            case 'P60': return (s.league === '20min' && s.h1_first === 3 && s.sc_h === s.sc_a && s.h1_last >= 5 && !(s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A']))) || matchesP60StrongGroup(s);
-            case 'P61': return (s.league === '15min' && inTeamConfig('p61_teams', s.away) && s.h1_last >= 5 && diff <= 1 && !(s.home === 'Girondins de Bordeaux (V)' && s.away === 'Lille OSC (V)') && !(s.away === 'AS Monaco (V)' && s.h1_first === 3 && s.h1_last === 5 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['H', 'A'])) && !(s.h1c === 1 && s.h1_last === 5) && !(s.h1_first === 4 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1)) || (s.league === '15min' && s.h1_first <= 1 && s.h1_last >= 6 && diff <= 1 && firstScorer === 'H' && lastScorer === 'H') || matchesP61StrongGroup(s);
+            case 'P59': return (s.h1_last === 9 && s.switches >= 2 && lastScorer === 'A' && (firstScorer === 'A' || s.max_gap >= 6) && !(s.h1_first === 1 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.h1c === 5 && s.h1_first === 2) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 9 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'A']))) || matchesP59StrongGroup(s);
+            case 'P60': return (s.league === '20min' && s.h1_first === 3 && s.sc_h === s.sc_a && s.h1_last >= 5 && !(s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A'])) && !(s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1)) || matchesP60StrongGroup(s);
+            case 'P61': return (s.league === '15min' && inTeamConfig('p61_teams', s.away) && s.h1_last >= 5 && diff <= 1 && !(s.home === 'Girondins de Bordeaux (V)' && s.away === 'Lille OSC (V)') && !(s.away === 'AS Monaco (V)' && s.h1_first === 3 && s.h1_last === 5 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['H', 'A'])) && !(s.h1c === 1 && s.h1_last === 5) && !(s.h1_first === 4 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1) && !(s.h1_first === 5 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 1 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H', 'H']) && s.sc_h === 3 && s.sc_a === 0) && !(s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H', 'H']) && s.sc_h === 2 && s.sc_a === 1) && !(s.away === 'Lille OSC (V)' && s.h1_first === 0 && s.h1_last === 6 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2)) || (s.league === '15min' && s.h1_first <= 1 && s.h1_last >= 6 && diff <= 1 && firstScorer === 'H' && lastScorer === 'H') || matchesP61StrongGroup(s);
             case 'P62': return (((s.league === '15min' && inTeamConfig('p62_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 4 && (s.h1_first === 0 || s.home !== 'FC Koln (V)') && (s.switches >= 1 || s.h1c <= 3 || s.h1_last >= 7) && !(s.h1_first === 1 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ['A', 'A', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 1 && s.h1_last === 5 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2)) || (s.league === '15min' && s.h1_first <= 1 && s.h1_last >= 6 && s.switches >= 2 && diff <= 2 && lastScorer === 'H' && !arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'H']) && !arrayEqualsJS(s.h1s, ['H', 'H', 'A', 'H'])) || (s.league === '15min' && s.h1_first === 3 && s.h1_last === 7 && diff === 2 && lastScorer === 'H') || (s.league === '15min' && s.h1_first === 2 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H'])) || (s.league === '16min' && s.h1_first <= 1 && s.h1_last >= 7 && diff <= 2 && lastScorer === 'H') || (s.league === '20min' && s.h1_first <= 1 && s.h1_last >= 3 && s.switches >= 2 && s.sc_h === s.sc_a && lastScorer === 'H') || (s.league === '20min' && s.h1_first === 1 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H'])) || matchesP62StrongGroup(s)) && !(s.away === 'Getafe CF (V)' && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])));
             case 'P63': return s.league === '16min' && inTeamConfig('p63_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 6;
-            case 'P64': return (s.league === '15min' && inTeamConfig('p64_teams', s.away) && s.h1_first <= 1 && s.h1_last >= 4 && (s.away !== 'Napoli (V)' || s.max_run <= 2) && !(s.away === 'Napoli (V)' && arrayEqualsJS(s.h1s, ['A', 'A', 'H'])) && !(s.away === 'Lille OSC (V)' && s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'A', 'A'])) && !(s.h1_first === 1 && s.h1_last === 4 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'H'])) && !(s.away === 'FC Koln (V)' && s.h1c === 2 && s.sc_h === 2 && s.sc_a === 0 && s.h1_first === 0 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ['H', 'H']))) || (s.league === '15min' && s.h1_first === 1 && s.h1_last >= 7 && firstScorer === 'A' && lastScorer === 'H' && !(s.h1c === 2 && s.h1_last === 7 && s.h1_first === 1));
-            case 'P65': return s.league === '15min' && inTeamConfig('p65_teams', s.home) && s.h1c >= 1 && s.h1_first <= 1 && !(s.home === 'Leicester City (V)' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 1 && s.h1_last === 5 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A']));
-            case 'P67': return s.league === '20min' && inTeamConfig('p67_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 5 && !(s.h1_first === 1 && s.h1_last === 7 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.h1_first === 1 && s.h1_last === 10 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'A', 'A'])) && !(s.h1_first === 0 && s.h1_last === 8 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A']));
+            case 'P64': return (s.league === '15min' && inTeamConfig('p64_teams', s.away) && s.h1_first <= 1 && s.h1_last >= 4 && (s.away !== 'Napoli (V)' || s.max_run <= 2) && !(s.away === 'Napoli (V)' && arrayEqualsJS(s.h1s, ['A', 'A', 'H'])) && !(s.away === 'Lille OSC (V)' && s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'A', 'A'])) && !(s.away === 'Lille OSC (V)' && s.h1_first === 0 && s.h1_last === 6 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 1 && s.h1_last === 4 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'H'])) && !(s.away === 'FC Koln (V)' && s.h1c === 2 && s.sc_h === 2 && s.sc_a === 0 && s.h1_first === 0 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ['H', 'H']))) || (s.league === '15min' && s.h1_first === 1 && s.h1_last >= 7 && firstScorer === 'A' && lastScorer === 'H' && !(s.h1c === 2 && s.h1_last === 7 && s.h1_first === 1));
+            case 'P65': return (s.league === '15min' && inTeamConfig('p65_teams', s.home) && s.h1c >= 1 && s.h1_first <= 1 && !(s.home === 'Leicester City (V)' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 1 && s.h1_last === 5 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1_first === 1 && s.h1_last === 3 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.h1_first === 1 && s.h1_last === 3 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2)) || matchesP65StrongGroup(s);
+            case 'P67': return (s.league === '20min' && inTeamConfig('p67_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 5 && !(s.h1_first === 1 && s.h1_last === 7 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.h1_first === 1 && s.h1_last === 10 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'A', 'A'])) && !(s.h1_first === 0 && s.h1_last === 8 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.h1_first === 0 && s.h1_last === 5 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'A', 'H']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 0 && s.h1_last === 7 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 0 && s.h1_last === 6 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2)) || matchesP67StrongGroup(s);
             case 'P68': return s.league === '15min' && s.home === 'Leicester City (V)' && s.h1c >= 1 && s.h1_first <= 1;
             case 'P69': return s.league === '20min' && s.home === 'Denmark (V)' && s.h1_first <= 1 && s.h1_last >= 5;
             case 'P70': return s.league === '15min' && s.away === 'Liverpool (V)' && s.h1_first <= 1 && s.h1_last >= 5;
             case 'P71': return s.league === '20min' && s.away === 'Germany (V)' && s.sc_a > s.sc_h && s.h1_last >= 6;
-            case 'P66': return (((s.league === '15min' && inTeamConfig('p66_teams', s.away) && s.h1_first <= 1 && s.h1_last >= 5 && (s.away !== 'Napoli (V)' || s.max_run <= 2) && (s.away !== 'Chelsea (V)' || firstScorer === 'A') && !(s.h1_first === 0 && s.h1_last === 7 && s.h1c === 2 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'H']) && span >= 6) && !(s.away === 'Lille OSC (V)' && s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'A', 'A']))) || (s.league === '15min' && s.h1_first === 1 && s.h1_last === 4 && s.h1c === 3 && diff === 1 && lastScorer === 'A') || (s.league === '16min' && s.h1_first === 0 && s.h1_last >= 6 && diff <= 2 && lastScorer === 'A') || (s.league === '20min' && s.h1_first === 0 && s.h1_last >= 7 && s.switches >= 2 && diff <= 2 && lastScorer === 'A') || matchesP66StrongGroup(s)) && !(s.away === 'Getafe CF (V)' && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 7 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 8 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])));
+            case 'P72': return matchesP72StrongGroup(s);
+            case 'P66': return (((s.league === '15min' && inTeamConfig('p66_teams', s.away) && s.h1_first <= 1 && s.h1_last >= 5 && (s.away !== 'Napoli (V)' || s.max_run <= 2) && (s.away !== 'Chelsea (V)' || firstScorer === 'A') && !(s.h1_first === 0 && s.h1_last === 7 && s.h1c === 2 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'H']) && span >= 6) && !(s.away === 'Lille OSC (V)' && s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'A', 'A']))) || (s.league === '15min' && s.h1_first === 1 && s.h1_last === 4 && s.h1c === 3 && diff === 1 && lastScorer === 'A') || (s.league === '16min' && s.h1_first === 0 && s.h1_last >= 6 && diff <= 2 && lastScorer === 'A') || (s.league === '20min' && s.h1_first === 0 && s.h1_last >= 7 && s.switches >= 2 && diff <= 2 && lastScorer === 'A') || matchesP66StrongGroup(s)) && !(s.away === 'Getafe CF (V)' && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 7 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 8 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 9 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 7 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.league === '15min' && s.away === 'Lille OSC (V)' && s.h1_first === 0 && s.h1_last === 6 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2));
             default: return false;
         }
     }
@@ -1441,13 +1564,15 @@
             case 'LG4':
                 return (s.league === '20min' && inTeamConfig('lg4_teams', s.away) && s.sc_a > s.sc_h && s.h1_last === 9 && !(s.h1c === 3 && s.h1_first === 1) && !(s.h1c === 1 && s.h1_first === 9)) || matchesLG4StrongGroup(s);
             case 'LG5':
-                return inTeamConfig('lg5_teams', s.home) && (s.sc_a - s.sc_h) === 1 && s.h1_last >= 6 && s.h1_first >= 2;
+                return (inTeamConfig('lg5_teams', s.home) && (s.sc_a - s.sc_h) === 1 && s.h1_last >= 6 && s.h1_first >= 2 && !(s.h1_first === 4 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'H', 'A']) && s.sc_h === 2 && s.sc_a === 3)) || matchesLG5StrongGroup(s);
             case 'LG6':
-                return s.league === '20min' && ((inTeamConfig('lg6_teams', s.away) && s.away !== 'Argentina (V)' && s.h1_first <= 1 && s.h1_last >= 8 && (s.h1_first === 0 || s.sc_a > s.sc_h) && !(s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1c === 3 && s.h1_first === 0 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H', 'A']))) || (s.away === 'Argentina (V)' && s.h1_first === 0 && s.h1_last >= 7 && s.h1c >= 3 && Math.abs(s.sc_h - s.sc_a) <= 1));
+                return (s.league === '20min' && ((inTeamConfig('lg6_teams', s.away) && s.away !== 'Argentina (V)' && s.h1_first <= 1 && s.h1_last >= 8 && (s.h1_first === 0 || s.sc_a > s.sc_h) && !(s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1c === 3 && s.h1_first === 0 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.h1_first === 0 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A', 'A', 'A']) && s.sc_h === 0 && s.sc_a === 4)) || (s.away === 'Argentina (V)' && s.h1_first === 0 && s.h1_last >= 7 && s.h1c >= 3 && Math.abs(s.sc_h - s.sc_a) <= 1))) || matchesLG6StrongGroup(s);
             case 'LG7':
-                return inTeamConfig('lg7_teams', s.away) && s.sc_a > s.sc_h && s.h1_last >= 6 && s.h1c <= 3 && (s.h1c >= 2 || s.h1_last >= 7) && !(s.h1c === 2 && s.h1_first === 0);
+                return (inTeamConfig('lg7_teams', s.away) && s.sc_a > s.sc_h && s.h1_last >= 6 && s.h1c <= 3 && (s.h1c >= 2 || s.h1_last >= 7) && !(s.h1c === 2 && s.h1_first === 0) && !(s.h1_first === 2 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2)) || matchesLG7StrongGroup(s);
             case 'LG8':
-                return s.league === '20min' && inTeamConfig('lg8_teams', s.away) && s.sc_a > s.sc_h && s.h1_last >= 6 && s.h1c >= 2 && !(s.h1c === 2 && s.h1_first === 0) && !(s.h1_first === 1 && s.h1_last === 10 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'A', 'A']));
+                return (s.league === '20min' && inTeamConfig('lg8_teams', s.away) && s.sc_a > s.sc_h && s.h1_last >= 6 && s.h1c >= 2 && !(s.h1c === 2 && s.h1_first === 0) && !(s.h1_first === 1 && s.h1_last === 10 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'A', 'A'])) && !(s.h1_first === 0 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A', 'A', 'A']) && s.sc_h === 0 && s.sc_a === 4)) || matchesLG8StrongGroup(s);
+            case 'G24':
+                return (s.league === '20min' && s.h1c === 3 && span === 8 && Math.abs(s.sc_h - s.sc_a) === 1 && s.switches === 1 && firstScorer !== null && s.h1s[s.h1s.length - 1] === 'H') || (s.league === '20min' && s.h1_first === 0 && span === 8 && s.sc_h === s.sc_a && firstScorer !== null && s.h1s[s.h1s.length - 1] === 'A') || (s.league === '15min' && s.h1c === 3 && span === 4 && Math.abs(s.sc_h - s.sc_a) === 1 && s.switches === 2 && firstScorer !== null && s.h1s[s.h1s.length - 1] === 'A') || (s.league === '20min' && s.h1_first === 3 && s.h1_last === 5 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) || matchesG24StrongGroup(s);
             default:
                 return false;
         }
@@ -1461,11 +1586,11 @@
             case 'NG6':
                 return s.league === '20min' && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 5 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.h1_first !== 1 && !(s.home === 'Colombia (V)' && s.away === 'Greece (V)');
             case 'NG7':
-                return s.h1c >= 3 && s.max_gap >= 5 && Math.abs(s.sc_h - s.sc_a) === 2 && s.h1_last >= 8 && s.h1_last <= 9;
+                return s.h1c >= 3 && s.max_gap >= 5 && Math.abs(s.sc_h - s.sc_a) === 2 && s.h1_last >= 8 && s.h1_last <= 9 && !(s.league === '20min' && s.h1_first === 1 && s.h1_last === 9 && s.h1c === 4 && arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'H']) && s.sc_h === 3 && s.sc_a === 1);
             case 'NG8':
                 return s.h1_first === 3 && span >= 6 && s.min_gap >= 3;
             case 'NG9':
-                return s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && Math.abs(s.sc_h - s.sc_a) <= 1 && s.switches >= 2 && !(s.home === 'Spain (V)' && s.away === 'Uruguay (V)');
+                return (s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && Math.abs(s.sc_h - s.sc_a) <= 1 && s.switches >= 2 && !(s.home === 'Spain (V)' && s.away === 'Uruguay (V)') && !(s.h1_first === 2 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'A', 'H']) && s.sc_h === 2 && s.sc_a === 3)) || matchesNG9StrongGroup(s);
             case 'NG10':
                 return s.league === '20min' && s.h1_first === 4 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'H']);
             default:

@@ -96,6 +96,31 @@ async function clickPageRefresh(tabId) {
     }
 }
 
+async function reloadTargetTabIfNeeded(tabId) {
+    const intervalMs = typeof TARGET_TAB_RELOAD_INTERVAL_MS === 'number'
+        ? TARGET_TAB_RELOAD_INTERVAL_MS
+        : 30 * 60 * 1000;
+    const now = Date.now();
+
+    if (lastTargetTabReloadAt && now - lastTargetTabReloadAt < intervalMs) {
+        return false;
+    }
+
+    lastTargetTabReloadAt = now;
+    try {
+        await chrome.tabs.reload(tabId);
+        await delay(REFRESH_SETTLE_MS + 2500);
+        await setStatus({
+            lastRefresh: `Tab reload ${new Date().toLocaleTimeString()}`,
+            error: ''
+        });
+        return true;
+    } catch (error) {
+        await setStatus({ error: error.message || 'Scheduled tab reload failed' });
+        return false;
+    }
+}
+
 async function extractDataFromTab(tabId) {
     const response = await requestContentAction(tabId, 'extractData');
     if (!response?.ok || !response.data) {
@@ -103,6 +128,179 @@ async function extractDataFromTab(tabId) {
     }
 
     return response.data;
+}
+
+function mergeDetailIntoMatch(match, detailMatch) {
+    if (!match || !detailMatch) return match;
+
+    if (detailMatch.nextGoalOdds && !match.nextGoalOdds) {
+        match.nextGoalOdds = detailMatch.nextGoalOdds;
+    }
+
+    if (Array.isArray(detailMatch.odds) && detailMatch.odds.length) {
+        const existing = new Set(Array.isArray(match.odds) ? match.odds : []);
+        match.odds = Array.from(existing);
+        detailMatch.odds.forEach((odd) => {
+            if (!existing.has(odd)) {
+                existing.add(odd);
+                match.odds.push(odd);
+            }
+        });
+    }
+
+    return match;
+}
+
+function replaceGroupedMatch(groupedMatches, targetMatch, mergedMatch) {
+    if (!Array.isArray(groupedMatches) || !targetMatch || !mergedMatch) return groupedMatches;
+
+    return groupedMatches.map((group) => ({
+        ...group,
+        matches: (group.matches || []).map((match) => (
+            match === targetMatch || (match.detailUrl && match.detailUrl === targetMatch.detailUrl)
+                ? mergedMatch
+                : match
+        ))
+    }));
+}
+
+async function waitForTabLoad(tabId, timeoutMs) {
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < timeoutMs) {
+        try {
+            const tab = await chrome.tabs.get(tabId);
+            if (tab.status === 'complete') {
+                return true;
+            }
+        } catch (_) {
+            return false;
+        }
+        await delay(250);
+    }
+
+    return false;
+}
+
+async function scrapeDetailPage(detailUrl) {
+    let tab = null;
+    try {
+        tab = await chrome.tabs.create({ url: detailUrl, active: false });
+        const loadWaitMs = typeof DETAIL_PAGE_LOAD_WAIT_MS === 'number' ? DETAIL_PAGE_LOAD_WAIT_MS : 2200;
+        await waitForTabLoad(tab.id, Math.max(loadWaitMs, 1000));
+        await delay(loadWaitMs);
+        const detailData = await extractDataFromTab(tab.id);
+        return Array.isArray(detailData?.matches) ? detailData.matches[0] || null : null;
+    } catch (error) {
+        await setStatus({ error: `Detail scrape failed: ${error.message || detailUrl}` });
+        return null;
+    } finally {
+        if (tab?.id) {
+            try {
+                await chrome.tabs.remove(tab.id);
+            } catch (_) {}
+        }
+    }
+}
+
+async function scrapeDetailByClickFromList(listUrl, listIndex) {
+    let tab = null;
+    try {
+        tab = await chrome.tabs.create({ url: listUrl, active: false });
+        const loadWaitMs = typeof DETAIL_PAGE_LOAD_WAIT_MS === 'number' ? DETAIL_PAGE_LOAD_WAIT_MS : 2200;
+        await waitForTabLoad(tab.id, Math.max(loadWaitMs, 1000));
+        await delay(loadWaitMs);
+
+        await ensureContentScript(tab.id);
+        const openResp = await chrome.tabs.sendMessage(tab.id, { action: 'openMatchDetailByIndex', index: listIndex });
+        if (!openResp?.ok || !openResp?.data?.opened) {
+            throw new Error(openResp?.data?.error || openResp?.error || 'Unable to open detail by index');
+        }
+
+        const settleMs = typeof DETAIL_CLICK_SETTLE_MS === 'number' ? DETAIL_CLICK_SETTLE_MS : 2500;
+        await delay(settleMs);
+        await waitForTabLoad(tab.id, Math.max(settleMs, 1000));
+        await delay(500);
+
+        const detailData = await extractDataFromTab(tab.id);
+        return Array.isArray(detailData?.matches) ? detailData.matches[0] || null : null;
+    } catch (error) {
+        await setStatus({ error: `Detail click scrape failed: ${error.message || listIndex}` });
+        return null;
+    } finally {
+        if (tab?.id) {
+            try {
+                await chrome.tabs.remove(tab.id);
+            } catch (_) {}
+        }
+    }
+}
+
+async function enrichMatchesFromDetailPages(data) {
+    if (typeof DETAIL_PAGE_ENRICH_ENABLED === 'boolean' && !DETAIL_PAGE_ENRICH_ENABLED) {
+        return data;
+    }
+
+    const matches = Array.isArray(data?.matches) ? data.matches : [];
+    const maxMatches = typeof DETAIL_PAGE_ENRICH_MAX_MATCHES === 'number' ? DETAIL_PAGE_ENRICH_MAX_MATCHES : 8;
+    const candidates = matches
+        .filter((match) => match.detailUrl && !match.nextGoalOdds)
+        .slice(0, maxMatches);
+
+    if (!candidates.length) {
+        return data;
+    }
+
+    let enrichedCount = 0;
+    for (const match of candidates) {
+        const detailMatch = await scrapeDetailPage(match.detailUrl);
+        if (detailMatch?.nextGoalOdds || detailMatch?.odds?.length) {
+            mergeDetailIntoMatch(match, detailMatch);
+            data.groupedMatches = replaceGroupedMatch(data.groupedMatches, match, match);
+            enrichedCount += 1;
+        }
+    }
+
+    await setStatus({
+        lastExtractStatus: `Detail NG ${enrichedCount}/${candidates.length} @ ${new Date().toLocaleTimeString()}`
+    });
+    return data;
+}
+
+async function enrichMatchesByClickingDetails(data, listUrl) {
+    if (typeof DETAIL_CLICK_ENRICH_ENABLED === 'boolean' && !DETAIL_CLICK_ENRICH_ENABLED) {
+        return data;
+    }
+
+    const matches = Array.isArray(data?.matches) ? data.matches : [];
+    const maxMatches = typeof DETAIL_CLICK_ENRICH_MAX_MATCHES === 'number' ? DETAIL_CLICK_ENRICH_MAX_MATCHES : 5;
+    const candidates = matches
+        .filter((match) => !match.nextGoalOdds && Number.isInteger(match.listIndex))
+        .slice(0, maxMatches);
+
+    if (!candidates.length || !listUrl) {
+        return data;
+    }
+
+    let enrichedCount = 0;
+    for (const match of candidates) {
+        const detailMatch = await scrapeDetailByClickFromList(listUrl, match.listIndex);
+        if (detailMatch?.nextGoalOdds || detailMatch?.odds?.length) {
+            mergeDetailIntoMatch(match, detailMatch);
+            data.groupedMatches = replaceGroupedMatch(data.groupedMatches, match, match);
+            enrichedCount += 1;
+        }
+    }
+
+    await setStatus({
+        lastExtractStatus: `Click NG ${enrichedCount}/${candidates.length} @ ${new Date().toLocaleTimeString()}`
+    });
+    return data;
+}
+
+async function enrichMatchesWithNextGoal(data, listUrl) {
+    await enrichMatchesFromDetailPages(data);
+    return enrichMatchesByClickingDetails(data, listUrl);
 }
 
 function createDataSignature(data) {
@@ -226,7 +424,7 @@ async function sendToServer(data, isAutoSend = false) {
 
         const sentAt = new Date().toLocaleTimeString();
         await setStatus({
-            serverStatus: isAutoSend ? `Telegram: Auto-sent ${sentCount} alert ✓` : `Telegram: Sent ${sentCount} alert ✓`,
+            serverStatus: isAutoSend ? `Telegram: Auto-sent ${sentCount} alert OK` : `Telegram: Sent ${sentCount} alert OK`,
             lastSent: sentAt,
             lastRetry: isAutoSend ? undefined : 'manual',
             error: ''
@@ -234,7 +432,7 @@ async function sendToServer(data, isAutoSend = false) {
         return true;
     } catch (error) {
         await setStatus({
-            serverStatus: isAutoSend ? 'Telegram: Auto-send failed ✗' : 'Telegram: Failed ✗',
+            serverStatus: isAutoSend ? 'Telegram: Auto-send failed X' : 'Telegram: Failed X',
             error: error.message || 'Telegram send failed'
         });
     }
@@ -245,6 +443,7 @@ async function sendToServer(data, isAutoSend = false) {
 async function sendDashboardLiveData(data) {
     const matches = Array.isArray(data?.matches) ? data.matches : [];
     if (!matches.length) return false;
+    const activeState = buildActiveMatchStatePayload(matches);
 
     try {
         await fetch(DASHBOARD_API_URL, {
@@ -252,11 +451,11 @@ async function sendDashboardLiveData(data) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 matches,
-                allGoalMinutes: Object.fromEntries(all1HGoalMinsByMatchKey),
-                allGoalScorers: Object.fromEntries(all1HScorersByMatchKey),
-                all2HGoalMinutes: Object.fromEntries(all2HGoalMinsByMatchKey),
-                all2HScorers: Object.fromEntries(all2HScorersByMatchKey),
-                htScores: Object.fromEntries(shScoreByMatchKey),
+                allGoalMinutes: activeState.allGoalMinutes,
+                allGoalScorers: activeState.allGoalScorers,
+                all2HGoalMinutes: activeState.all2HGoalMinutes,
+                all2HScorers: activeState.all2HScorers,
+                htScores: activeState.htScores,
                 timestamp: new Date().toISOString()
             })
         });
@@ -289,7 +488,7 @@ async function sendToServerWithRetry(data) {
     }
 
     await setStatus({
-        serverStatus: 'Telegram: Auto-send failed after retry ✗',
+        serverStatus: 'Telegram: Auto-send failed after retry X',
         lastRetry: String(AUTO_SEND_RETRY_COUNT)
     });
     return false;
@@ -305,11 +504,11 @@ async function handleFreshData(data) {
     await trackP14Signal(Array.isArray(data?.matches) ? data.matches : []);
     await trackP19Signal(Array.isArray(data?.matches) ? data.matches : []);
     await trackP28Signal(Array.isArray(data?.matches) ? data.matches : []);
-    await persistMatchState();
+    await persistMatchState(Array.isArray(data?.matches) ? data.matches : []);
     await sendDashboardLiveData(data);
     await updateOddTracking(Array.isArray(data?.matches) ? data.matches : []);
     await setStatus({
-        pageStatus: '✓ Target page detected',
+        pageStatus: 'OK Target page detected',
         lastUpdate: data.time,
         error: ''
     });
@@ -343,7 +542,7 @@ async function runLiveCycle() {
         const targetTab = await ensureTargetTabReady(foundTab);
         if (!targetTab?.id || !isTargetUrl(targetTab.url)) {
             await setStatus({
-                pageStatus: '✗ Not on target page',
+                pageStatus: 'X Not on target page',
                 error: 'Target tab not found. Will retry next cycle.'
             });
             return;
@@ -352,26 +551,29 @@ async function runLiveCycle() {
         currentTabId = targetTab.id;
         await saveRuntimeState();
         await setStatus({
-            pageStatus: '✓ Target page detected',
+            pageStatus: 'OK Target page detected',
             lastCycle: new Date().toLocaleTimeString(),
             error: foundTab?.discarded ? 'Target tab was discarded and has been reloaded.' : ''
         });
 
-        const refreshResult = await clickPageRefresh(targetTab.id);
-        await setStatus({
-            lastRefresh: refreshResult.clicked
-                ? `Clicked ${new Date().toLocaleTimeString()}`
-                : `Not found ${new Date().toLocaleTimeString()}`,
-            error: refreshResult.error || ''
-        });
+        const didReload = await reloadTargetTabIfNeeded(targetTab.id);
+        if (!didReload) {
+            const refreshResult = await clickPageRefresh(targetTab.id);
+            await setStatus({
+                lastRefresh: refreshResult.clicked
+                    ? `Clicked ${new Date().toLocaleTimeString()}`
+                    : `Not found ${new Date().toLocaleTimeString()}`,
+                error: refreshResult.error || ''
+            });
 
-        await delay(REFRESH_SETTLE_MS);
+            await delay(REFRESH_SETTLE_MS);
+        }
 
         if (!isLiveRunning) {
             return;
         }
 
-        const data = await extractDataFromTab(targetTab.id);
+        const data = await enrichMatchesWithNextGoal(await extractDataFromTab(targetTab.id), targetTab.url);
         const firstMatchStatus = data.matches?.[0]?.status || '-';
         await setStatus({
             lastExtractStatus: `${firstMatchStatus} @ ${new Date().toLocaleTimeString()}`
@@ -380,7 +582,7 @@ async function runLiveCycle() {
     } catch (error) {
         await setStatus({
             error: error.message || 'Live cycle failed',
-            serverStatus: 'Server: Failed ✗'
+            serverStatus: 'Server: Failed X'
         });
     } finally {
         isLiveCycleRunning = false;
@@ -394,7 +596,7 @@ async function startLive() {
     if (!targetTab?.id || !isTargetUrl(targetTab.url)) {
         await updateLiveState(false);
         await setStatus({
-            pageStatus: '✗ Not on target page',
+            pageStatus: 'X Not on target page',
             error: 'Open the BPVM target page first.'
         });
         return { ok: false, error: 'Not on target page' };
@@ -402,9 +604,10 @@ async function startLive() {
 
     currentTabId = targetTab.id;
     lastAutoSentSignature = null;
+    lastTargetTabReloadAt = Date.now();
     await updateLiveState(true);
     await setStatus({
-        pageStatus: '✓ Target page detected',
+        pageStatus: 'OK Target page detected',
         error: ''
     });
 
@@ -537,7 +740,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     break;
                 }
 
-                const data = await extractDataFromTab(targetTab.id);
+                const data = await enrichMatchesWithNextGoal(await extractDataFromTab(targetTab.id), targetTab.url);
                 await handleFreshData(data);
                 sendResponse({ ok: true, data });
                 break;

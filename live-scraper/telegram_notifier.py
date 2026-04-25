@@ -110,12 +110,12 @@ class TelegramNotifier:
 
     def send_test_message(self):
         """Kirim pesan test"""
-        test_message = f"🤖 <b>Live Scraper Bot Test</b>\n\n"
-        test_message += f"✅ Bot is working!\n"
+        test_message = f"[BOT] <b>Live Scraper Bot Test</b>\n\n"
+        test_message += f"[OK] Bot is working!\n"
         test_message += (
-            f"📅 Test time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            f"[TIME] Test time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
         )
-        test_message += f"🔔 Live scraper is active."
+        test_message += f"[LIVE] Live scraper is active."
 
         return self.send_message(test_message)
 

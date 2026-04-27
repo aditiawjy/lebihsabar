@@ -18,6 +18,7 @@ let sentP14Signals = new Set();
 let sentP19Signals = new Set();
 let sentP28Signals = new Set();
 let sentP727374Signals = new Set();
+let p727374SignalsByMatchKey = new Map();
 let last1HGoalMinByMatchKey = new Map();
 let first1HGoalMinByMatchKey = new Map();
 let all1HGoalMinsByMatchKey = new Map();
@@ -106,6 +107,7 @@ function buildActiveMatchStatePayload(matches = []) {
         allGoalScorers: objectFromMapForActiveMatches(all1HScorersByMatchKey, activeKeys),
         all2HGoalMinutes: objectFromMapForActiveMatches(all2HGoalMinsByMatchKey, activeKeys),
         all2HScorers: objectFromMapForActiveMatches(all2HScorersByMatchKey, activeKeys),
+        patternSignals: objectFromMapForActiveMatches(p727374SignalsByMatchKey, activeKeys),
         htScores: objectFromMapForActiveMatches(shScoreByMatchKey, activeKeys)
     };
 }
@@ -137,7 +139,7 @@ async function updateLiveState(isRunning, extraState = {}) {
 async function restoreRuntimeState() {
     const [localData, sessionData] = await Promise.all([
         chrome.storage.local.get(['liveRuntimeState', 'sentNG1Keys', 'sentP7Keys', 'sentP14Keys', 'sentP19Keys', 'sentP28Keys', 'sentP727374Keys']),
-        chrome.storage.session.get(['kickoffTimes', 'registeredKeys', 'sentMilestoneKeys', 'lastScores', 'shScores', 'last1HGoalMins', 'first1HGoalMins', 'all1HGoalMins', 'all1HScorers', 'has2HGoals', 'all2HGoalMins', 'all2HScorers', 'lastSeenAt', 'lastStatuses'])
+        chrome.storage.session.get(['kickoffTimes', 'registeredKeys', 'sentMilestoneKeys', 'lastScores', 'shScores', 'last1HGoalMins', 'first1HGoalMins', 'all1HGoalMins', 'all1HScorers', 'has2HGoals', 'all2HGoalMins', 'all2HScorers', 'p727374Signals', 'lastSeenAt', 'lastStatuses'])
     ]);
     const runtimeState = localData.liveRuntimeState || {};
 
@@ -204,6 +206,9 @@ async function restoreRuntimeState() {
     if (sessionData.lastStatuses) {
         lastStatusByMatchKey = new Map(Object.entries(sessionData.lastStatuses));
     }
+    if (sessionData.p727374Signals) {
+        p727374SignalsByMatchKey = new Map(Object.entries(sessionData.p727374Signals));
+    }
 
     if (isLiveRunning) {
         await chrome.alarms.create(LIVE_ALARM_NAME, {
@@ -229,6 +234,7 @@ async function persistMatchState(activeMatches = []) {
             has2HGoals: Object.fromEntries(has2HGoalByMatchKey),
             all2HGoalMins: Object.fromEntries(all2HGoalMinsByMatchKey),
             all2HScorers: Object.fromEntries(all2HScorersByMatchKey),
+            p727374Signals: Object.fromEntries(p727374SignalsByMatchKey),
             lastSeenAt: Object.fromEntries(lastSeenAtByMatchKey),
             lastStatuses: Object.fromEntries(lastStatusByMatchKey),
         }),

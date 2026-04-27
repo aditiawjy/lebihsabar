@@ -17,6 +17,7 @@ let sentP7Signals = new Set();
 let sentP14Signals = new Set();
 let sentP19Signals = new Set();
 let sentP28Signals = new Set();
+let sentP727374Signals = new Set();
 let last1HGoalMinByMatchKey = new Map();
 let first1HGoalMinByMatchKey = new Map();
 let all1HGoalMinsByMatchKey = new Map();
@@ -44,6 +45,14 @@ function pruneMilestoneSetByKnownMatches(sourceSet) {
     return new Set(Array.from(sourceSet || []).filter((key) => {
         const text = String(key);
         const matchKey = text.slice(0, text.lastIndexOf('|'));
+        return matchKey && registeredMatchKeys.has(matchKey);
+    }));
+}
+
+function prunePatternSignalSetByKnownMatches(sourceSet) {
+    return new Set(Array.from(sourceSet || []).filter((key) => {
+        const text = String(key);
+        const matchKey = text.slice(0, text.indexOf('|'));
         return matchKey && registeredMatchKeys.has(matchKey);
     }));
 }
@@ -78,6 +87,7 @@ function pruneLongRunningMatchState(activeMatches = [], nowMs = Date.now()) {
     sentP14Signals = pruneSetByKnownMatches(sentP14Signals);
     sentP19Signals = pruneSetByKnownMatches(sentP19Signals);
     sentP28Signals = pruneSetByKnownMatches(sentP28Signals);
+    sentP727374Signals = prunePatternSignalSetByKnownMatches(sentP727374Signals);
     sentMilestones = pruneMilestoneSetByKnownMatches(sentMilestones);
 
     return staleKeys.length;
@@ -126,7 +136,7 @@ async function updateLiveState(isRunning, extraState = {}) {
 
 async function restoreRuntimeState() {
     const [localData, sessionData] = await Promise.all([
-        chrome.storage.local.get(['liveRuntimeState', 'sentNG1Keys', 'sentP7Keys', 'sentP14Keys', 'sentP19Keys', 'sentP28Keys']),
+        chrome.storage.local.get(['liveRuntimeState', 'sentNG1Keys', 'sentP7Keys', 'sentP14Keys', 'sentP19Keys', 'sentP28Keys', 'sentP727374Keys']),
         chrome.storage.session.get(['kickoffTimes', 'registeredKeys', 'sentMilestoneKeys', 'lastScores', 'shScores', 'last1HGoalMins', 'first1HGoalMins', 'all1HGoalMins', 'all1HScorers', 'has2HGoals', 'all2HGoalMins', 'all2HScorers', 'lastSeenAt', 'lastStatuses'])
     ]);
     const runtimeState = localData.liveRuntimeState || {};
@@ -157,6 +167,9 @@ async function restoreRuntimeState() {
     }
     if (Array.isArray(localData.sentP28Keys)) {
         sentP28Signals = new Set(localData.sentP28Keys);
+    }
+    if (Array.isArray(localData.sentP727374Keys)) {
+        sentP727374Signals = new Set(localData.sentP727374Keys);
     }
     if (sessionData.lastScores) {
         lastScoreByMatchKey = new Map(Object.entries(sessionData.lastScores));
@@ -225,6 +238,7 @@ async function persistMatchState(activeMatches = []) {
             sentP14Keys: [...sentP14Signals],
             sentP19Keys: [...sentP19Signals],
             sentP28Keys: [...sentP28Signals],
+            sentP727374Keys: [...sentP727374Signals],
         }),
     ]);
 }

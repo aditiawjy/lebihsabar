@@ -24,6 +24,11 @@ function resetMatchTrackingState(key) {
     sentP7Signals.delete(key);
     sentP14Signals.delete(key);
     sentP19Signals.delete(key);
+    for (const signalKey of Array.from(sentP727374Signals)) {
+        if (String(signalKey).startsWith(`${key}|`)) {
+            sentP727374Signals.delete(signalKey);
+        }
+    }
     last1HGoalMinByMatchKey.delete(key);
     first1HGoalMinByMatchKey.delete(key);
     all1HGoalMinsByMatchKey.delete(key);
@@ -407,7 +412,136 @@ function isPatternNotificationWindow(status) {
         return true;
     }
 
-    return getShMinute(status) >= 0;
+    const parsed = parseMatchMinute(status);
+    return parsed.half === '2H' && parsed.min >= 0;
+}
+
+let p727374SignatureCache = null;
+let p727374SignatureFetchedAt = 0;
+
+function getLivePatternLeague(match) {
+    const text = String(match?.league || '');
+    if (/15/.test(text)) return '15min';
+    if (/16/.test(text)) return '16min';
+    if (/20/.test(text)) return '20min';
+    return text.trim();
+}
+
+function getMinGapFromMins(mins) {
+    if (!Array.isArray(mins) || mins.length < 2) return 0;
+    let minGap = Number.POSITIVE_INFINITY;
+    for (let i = 1; i < mins.length; i += 1) {
+        minGap = Math.min(minGap, mins[i] - mins[i - 1]);
+    }
+    return Number.isFinite(minGap) ? minGap : 0;
+}
+
+function getMaxGapFromMins(mins) {
+    if (!Array.isArray(mins) || mins.length < 2) return 0;
+    let maxGap = 0;
+    for (let i = 1; i < mins.length; i += 1) {
+        maxGap = Math.max(maxGap, mins[i] - mins[i - 1]);
+    }
+    return maxGap;
+}
+
+function countSwitchesFromScorers(scorers) {
+    if (!Array.isArray(scorers) || scorers.length < 2) return 0;
+    let switches = 0;
+    for (let i = 1; i < scorers.length; i += 1) {
+        if (scorers[i] !== scorers[i - 1]) switches += 1;
+    }
+    return switches;
+}
+
+function buildP727374State(match) {
+    const key = createMatchKey(match);
+    const status = String(match?.status || '').trim();
+    if (!isPatternNotificationWindow(status)) return null;
+    if (has2HGoalByMatchKey.get(key)) return null;
+
+    const mins = all1HGoalMinsByMatchKey.get(key) || [];
+    const scorers = all1HScorersByMatchKey.get(key) || [];
+    if (!mins.length || mins.length !== scorers.length) return null;
+
+    const currentScore = parseScoreTuple(match?.score || '0-0');
+    const htScoreText = shScoreByMatchKey.get(key) || '';
+    const score = parseScoreTuple(htScoreText || match?.score || '0-0');
+    const parsedStatus = parseMatchMinute(status);
+    if (parsedStatus.half === '2H' && htScoreText && (currentScore.home !== score.home || currentScore.away !== score.away)) {
+        return null;
+    }
+
+    const league = getLivePatternLeague(match);
+    const first = mins[0];
+    const last = mins[mins.length - 1];
+    const sequence = scorers.join('');
+    const signature = `${league}|${first}|${last}|${sequence}|${score.home}-${score.away}`;
+    const shape = `${league}|${mins.length}|${first}|${last}|${score.home}-${score.away}|${countSwitchesFromScorers(scorers)}|${getMinGapFromMins(mins)}|${getMaxGapFromMins(mins)}`;
+
+    return { key, status, score, league, mins, sequence, signature, shape };
+}
+
+async function getP727374SignatureConfig() {
+    const now = Date.now();
+    if (p727374SignatureCache && now - p727374SignatureFetchedAt < 60000) {
+        return p727374SignatureCache;
+    }
+
+    const response = await fetch('http://localhost/lebihsabar/pattern-live-signatures.php', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`pattern signatures HTTP ${response.status}`);
+    const payload = await response.json();
+    const patterns = payload?.patterns || {};
+    p727374SignatureCache = {
+        P72: new Set(Array.isArray(patterns.P72) ? patterns.P72 : []),
+        P73: new Set(Array.isArray(patterns.P73) ? patterns.P73 : []),
+        P74: new Set(Array.isArray(patterns.P74) ? patterns.P74 : []),
+    };
+    p727374SignatureFetchedAt = now;
+    return p727374SignatureCache;
+}
+
+async function trackP727374GoalSignal(matches) {
+    if (!Array.isArray(matches) || !matches.length) return;
+
+    let config;
+    try {
+        config = await getP727374SignatureConfig();
+    } catch (error) {
+        await setStatus({ error: `P72/P73/P74 signatures failed: ${error.message || error}` });
+        return;
+    }
+
+    for (const match of matches) {
+        const state = buildP727374State(match);
+        if (!state) continue;
+
+        const matched = [];
+        if (config.P72.has(state.signature)) matched.push('P72');
+        if (config.P73.has(state.signature)) matched.push('P73');
+        if (config.P74.has(state.shape)) matched.push('P74');
+        if (!matched.length) continue;
+
+        const signalKey = `${state.key}|${matched.join('+')}|${state.signature}|${state.shape}`;
+        if (sentP727374Signals.has(signalKey)) continue;
+
+        sentP727374Signals.add(signalKey);
+
+        const home = escapeHtml(match?.homeTeam || '?');
+        const away = escapeHtml(match?.awayTeam || '?');
+        const minuteText = state.mins.map((min) => `${min}'`).join(', ');
+        const msg =
+            `[ALERT] <b>${escapeHtml(matched.join(' + '))} SIGNAL - AKAN ADA GOAL 2H</b>\n` +
+            `Goal <b>${home} vs ${away}</b>\n` +
+            `[LEAGUE] League: ${escapeHtml(match?.league || state.league || '?')}\n` +
+            `[SCORE] HT/Current: <b>${state.score.home}-${state.score.away}</b>\n` +
+            `[TIME] Status: <b>${escapeHtml(state.status)}</b>\n` +
+            `[NOTE] Final 1H signature cocok sebelum gol 2H. Target: <b>akan ada goal babak kedua</b>.\n` +
+            `Signature: <code>${escapeHtml(state.signature)}</code>\n` +
+            `Gol 1H: <b>${escapeHtml(minuteText)}</b> | Sequence: <b>${escapeHtml(state.sequence)}</b>`;
+
+        await sendTelegramText(msg);
+    }
 }
 
 async function trackNG1Signal(matches) {

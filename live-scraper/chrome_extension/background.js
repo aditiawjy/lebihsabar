@@ -498,12 +498,7 @@ async function handleFreshData(data) {
     await setSavedMatchData(data);
     await syncLiveDataToApi(data);
     await trackGoalEvents(Array.isArray(data?.matches) ? data.matches : []);
-    await trackNG1Signal(Array.isArray(data?.matches) ? data.matches : []);
-    await trackHT22Signal(Array.isArray(data?.matches) ? data.matches : []);
-    await trackP7Signal(Array.isArray(data?.matches) ? data.matches : []);
-    await trackP14Signal(Array.isArray(data?.matches) ? data.matches : []);
-    await trackP19Signal(Array.isArray(data?.matches) ? data.matches : []);
-    await trackP28Signal(Array.isArray(data?.matches) ? data.matches : []);
+    await trackP727374GoalSignal(Array.isArray(data?.matches) ? data.matches : []);
     await persistMatchState(Array.isArray(data?.matches) ? data.matches : []);
     await sendDashboardLiveData(data);
     await updateOddTracking(Array.isArray(data?.matches) ? data.matches : []);

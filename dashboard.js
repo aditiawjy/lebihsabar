@@ -12,6 +12,7 @@
     var prevStateMemory = {};
     var liveGoalMemory = {};
     var liveScorerMemory = {};
+    var livePatternStateMemory = {};
     var SUMMARY_MIN_SAMPLE = 8;
     var NEXT_MIN_SAMPLE = 0;
     var LATE_MIN_SAMPLE = 9;
@@ -28,6 +29,7 @@
     var currentSummaryData = [];
     var currentNextData = [];
     var currentLateData = [];
+    var exactPatternSignatureCache = {};
     var liveCandidateCounts = {};
     var nextLiveCandidateCounts = {};
     var lateLiveCandidateCounts = {};
@@ -35,10 +37,16 @@
     var nextLiveCandidateDetails = {};
     var lateLiveCandidateDetails = {};
     var settledSummaryResults = [];
+    var settledLateResults = [];
     var LIVE_CANDIDATE_STORAGE_KEY = 'liveCandidateState';
+    var LIVE_PATTERN_STATE_STORAGE_KEY = 'livePatternStateMemory';
     var LIVE_SETTLED_STORAGE_KEY = 'liveSettledState';
-    var LIVE_STATE_SCHEMA_VERSION = '2026-04-24-rules-v49';
+    var LIVE_LATE_SETTLED_STORAGE_KEY = 'liveLateSettledState';
+    var LIVE_STATE_SCHEMA_VERSION = '2026-04-24-rules-v102';
     var LIVE_CANDIDATE_CACHE_TTL_MS = 30000;
+    var LIVE_CANDIDATE_GRACE_MS = 15000;
+    var LIVE_SUMMARY_PRE_GOAL_CARRY_MS = 12 * 60 * 1000;
+    var LIVE_PATTERN_STATE_TTL_MS = 15 * 60 * 1000;
     var LIVE_SETTLED_CACHE_TTL_MS = 3 * 60 * 60 * 1000;
     var DETAIL_ROWS_PER_PAGE = 10;
     var detailPageState = {};
@@ -64,6 +72,131 @@
             }
         }
         return id;
+    }
+
+    function getStateSignature(s) {
+        if (!s) return '';
+        return s.league + '|' + s.h1_first + '|' + s.h1_last + '|' + (s.h1s || []).join('') + '|' + s.sc_h + '-' + s.sc_a;
+    }
+
+    function getMatchSignature(m) {
+        if (!m) return '';
+        return m.league + '|' + m.h1_first + '|' + m.h1_last + '|' + (m.h1s || []).join('') + '|' + m.sc_h + '-' + m.sc_a;
+    }
+
+    function getStateNoLeagueSignature(s) {
+        if (!s) return '';
+        return s.h1_first + '|' + s.h1_last + '|' + (s.h1s || []).join('') + '|' + s.sc_h + '-' + s.sc_a;
+    }
+
+    function getMatchNoLeagueSignature(m) {
+        if (!m) return '';
+        return m.h1_first + '|' + m.h1_last + '|' + (m.h1s || []).join('') + '|' + m.sc_h + '-' + m.sc_a;
+    }
+
+    function getStateShapeStatsSignature(s) {
+        if (!s) return '';
+        return s.league + '|' + s.h1c + '|' + s.h1_first + '|' + s.h1_last + '|' + s.sc_h + '-' + s.sc_a + '|' + s.switches + '|' + s.min_gap + '|' + s.max_gap;
+    }
+
+    function getMatchShapeStatsSignature(m) {
+        if (!m) return '';
+        return m.league + '|' + m.h1c + '|' + m.h1_first + '|' + m.h1_last + '|' + m.sc_h + '-' + m.sc_a + '|' + m.switches + '|' + m.min_gap + '|' + m.max_gap;
+    }
+
+    function getStateFullMinsSignature(s) {
+        if (!s) return '';
+        return s.league + '|' + (s.goal_mins || []).join(',') + '|' + (s.h1s || []).join('') + '|' + s.sc_h + '-' + s.sc_a;
+    }
+
+    function getMatchFullMinsSignature(m) {
+        if (!m) return '';
+        var mins = Array.isArray(m.h1) ? m.h1.map(function(g) { return g.min; }).join(',') : '';
+        return m.league + '|' + mins + '|' + (m.h1s || []).join('') + '|' + m.sc_h + '-' + m.sc_a;
+    }
+
+    function matchesExactPatternFromData(pid, s) {
+        if (!s) return false;
+        if (!exactPatternSignatureCache[pid]) {
+            var pattern = (INITIAL_DATA.patterns || []).find(function(item) { return item && item.id === pid; });
+            var signatures = {};
+            if (pattern && Array.isArray(pattern.data)) {
+                pattern.data.forEach(function(match) {
+                    var signature = getMatchSignature(match);
+                    if (signature) signatures[signature] = true;
+                });
+            }
+            exactPatternSignatureCache[pid] = signatures;
+        }
+        return !!exactPatternSignatureCache[pid][getStateSignature(s)];
+    }
+
+    function matchesNoLeagueExactPatternFromData(pid, s) {
+        if (!s) return false;
+        var cacheKey = pid + ':noLeague';
+        if (!exactPatternSignatureCache[cacheKey]) {
+            var pattern = (INITIAL_DATA.patterns || []).find(function(item) { return item && item.id === pid; });
+            var signatures = {};
+            if (pattern && Array.isArray(pattern.data)) {
+                pattern.data.forEach(function(match) {
+                    var signature = getMatchNoLeagueSignature(match);
+                    if (signature) signatures[signature] = true;
+                });
+            }
+            exactPatternSignatureCache[cacheKey] = signatures;
+        }
+        return !!exactPatternSignatureCache[cacheKey][getStateNoLeagueSignature(s)];
+    }
+
+    function matchesShapeStatsPatternFromData(pid, s) {
+        if (!s) return false;
+        var cacheKey = pid + ':shapeStats';
+        if (!exactPatternSignatureCache[cacheKey]) {
+            var pattern = (INITIAL_DATA.patterns || []).find(function(item) { return item && item.id === pid; });
+            var signatures = {};
+            if (pattern && Array.isArray(pattern.data)) {
+                pattern.data.forEach(function(match) {
+                    var signature = getMatchShapeStatsSignature(match);
+                    if (signature) signatures[signature] = true;
+                });
+            }
+            exactPatternSignatureCache[cacheKey] = signatures;
+        }
+        return !!exactPatternSignatureCache[cacheKey][getStateShapeStatsSignature(s)];
+    }
+
+    function matchesNextShapeStatsPatternFromData(pid, s) {
+        if (!s) return false;
+        var cacheKey = pid + ':nextShapeStats';
+        if (!exactPatternSignatureCache[cacheKey]) {
+            var pattern = (INITIAL_DATA.nextPatterns || []).find(function(item) { return item && item.id === pid; });
+            var signatures = {};
+            if (pattern && Array.isArray(pattern.data)) {
+                pattern.data.forEach(function(match) {
+                    var signature = getMatchShapeStatsSignature(match);
+                    if (signature) signatures[signature] = true;
+                });
+            }
+            exactPatternSignatureCache[cacheKey] = signatures;
+        }
+        return !!exactPatternSignatureCache[cacheKey][getStateShapeStatsSignature(s)];
+    }
+
+    function matchesFullMinsPatternFromData(pid, s) {
+        if (!s) return false;
+        var cacheKey = pid + ':fullMins';
+        if (!exactPatternSignatureCache[cacheKey]) {
+            var pattern = (INITIAL_DATA.nextPatterns || []).find(function(item) { return item && item.id === pid; });
+            var signatures = {};
+            if (pattern && Array.isArray(pattern.data)) {
+                pattern.data.forEach(function(match) {
+                    var signature = getMatchFullMinsSignature(match);
+                    if (signature) signatures[signature] = true;
+                });
+            }
+            exactPatternSignatureCache[cacheKey] = signatures;
+        }
+        return !!exactPatternSignatureCache[cacheKey][getStateFullMinsSignature(s)];
     }
 
     function getHistoricalLeagueType(value) {
@@ -268,7 +401,38 @@
                 + '<td class="goal-seq">' + buildLiveTimeline(state) + '</td>'
                 + '<td class="goal-seq"><span class="delta-zero">-</span></td>'
                 + '<td class="goal-seq">' + (seq || '<span class="delta-zero">-</span>') + '</td>'
-                + '<td><span class="badge badge-yellow">' + getLiveCandidateBadgeText() + '</span></td>'
+                + '<td><span class="badge badge-yellow">' + getLiveCandidateBadgeText(entry) + '</span></td>'
+                + '</tr>';
+        }).join('');
+    }
+
+    function buildSummarySettledSampleRows(id) {
+        var results = getSettledSummaryResultsByPid(id);
+        if (!results.length) return '';
+
+        return results.map(function(item) {
+            var state = item.state || {};
+            var seq = Array.isArray(state.h1s) ? state.h1s.map(function(s) {
+                return s === 'H' ? '<span class="scorer-h">H</span>' : '<span class="scorer-a">A</span>';
+            }).join(' → ') : '';
+            var score = item.scoreObj || { home: state.sc_h || 0, away: state.sc_a || 0 };
+            var outcomeBadge = item.outcome === 'win'
+                ? '<span class="badge badge-green">LIVE WIN</span>'
+                : '<span class="badge badge-red">LIVE LOSE</span>';
+            var settledTime = new Date(item.settledAt || Date.now()).toLocaleTimeString();
+
+            var rowClass = item.outcome === 'win' ? 'live-settled-row live-settled-win' : 'live-settled-row live-settled-lose';
+
+            return '<tr class="' + rowClass + '">'
+                + '<td class="record-sub">' + outcomeBadge + ' ' + escHtml(settledTime) + '</td>'
+                + '<td>' + escHtml(item.home || '-') + ' vs ' + escHtml(item.away || '-') + '</td>'
+                + '<td>' + escHtml(item.league || '-') + '</td>'
+                + '<td>' + escHtml(score.home + '-' + score.away) + '</td>'
+                + '<td><span class="delta-zero">-</span></td>'
+                + '<td class="goal-seq">' + buildLiveTimeline(state) + '</td>'
+                + '<td class="goal-seq"><span class="delta-zero">live result</span></td>'
+                + '<td class="goal-seq">' + (seq || '<span class="delta-zero">-</span>') + '</td>'
+                + '<td>' + outcomeBadge + '</td>'
                 + '</tr>';
         }).join('');
     }
@@ -327,6 +491,10 @@
         return buildSummaryLiveCandidateRows(candidates);
     }
 
+    function buildSummaryLiveSampleRows(id) {
+        return buildSummarySettledSampleRows(id) + buildLiveCandidateSection(id);
+    }
+
     function buildDetailPagination(id, page, totalPages, totalRows) {
         if (totalPages <= 1) return '';
         var prevDisabled = page <= 1 ? ' disabled' : '';
@@ -359,7 +527,7 @@
         var start = (page - 1) * DETAIL_ROWS_PER_PAGE;
         var end = start + DETAIL_ROWS_PER_PAGE;
         var pageRows = rows.slice(start, end).join('');
-        var liveRows = page === 1 ? buildLiveCandidateSection(id) : '';
+        var liveRows = page === 1 ? buildSummaryLiveSampleRows(id) : '';
         var table = '<table class="detail-table"><thead>' + data.tableHead + '</thead><tbody>' + liveRows + pageRows + '</tbody></table>';
         return table + buildDetailPagination(id, page, totalPages, totalRows);
     }
@@ -393,7 +561,8 @@
             || Object.keys(lateLiveCandidateCounts).length > 0;
     }
 
-    function getLiveCandidateBadgeText() {
+    function getLiveCandidateBadgeText(entry) {
+        if (entry && entry.provisional) return restoredLiveCandidateState ? 'provisional (cached)' : 'provisional';
         return restoredLiveCandidateState ? 'candidate (cached)' : 'candidate';
     }
 
@@ -451,7 +620,8 @@
                 lateCounts: lateLiveCandidateCounts,
                 summaryDetails: liveCandidateDetails,
                 nextDetails: nextLiveCandidateDetails,
-                lateDetails: lateLiveCandidateDetails
+                lateDetails: lateLiveCandidateDetails,
+                patternStateMemory: livePatternStateMemory
             }));
         } catch (e) {
             // ignore storage failures
@@ -531,6 +701,34 @@
         }
     }
 
+    function pruneSettledLateResults() {
+        var cutoff = Date.now() - LIVE_SETTLED_CACHE_TTL_MS;
+        settledLateResults = settledLateResults.filter(function(result) {
+            var pattern = result && result.pid ? getLatePatternById(result.pid) : null;
+            var historical = result && pattern ? findHistoricalMatch(result.home, result.away, result.league, result.state || null) : null;
+            if (historical) return false;
+            return result
+                && Number.isFinite(result.settledAt)
+                && result.settledAt >= cutoff
+                && result.pid
+                && result.key
+                && result.outcome;
+        });
+    }
+
+    function saveSettledLateState() {
+        pruneSettledLateResults();
+        try {
+            sessionStorage.setItem(LIVE_LATE_SETTLED_STORAGE_KEY, JSON.stringify({
+                schemaVersion: LIVE_STATE_SCHEMA_VERSION,
+                savedAt: Date.now(),
+                results: settledLateResults
+            }));
+        } catch (e) {
+            // ignore storage failures
+        }
+    }
+
     function restoreLiveCandidateState() {
         try {
             var raw = sessionStorage.getItem(LIVE_CANDIDATE_STORAGE_KEY);
@@ -556,6 +754,7 @@
             liveCandidateDetails = parsed.summaryDetails || {};
             nextLiveCandidateDetails = parsed.nextDetails || {};
             lateLiveCandidateDetails = parsed.lateDetails || {};
+            livePatternStateMemory = parsed.patternStateMemory || {};
             restoredLiveCandidateState = hasAnyLiveCandidateState();
             scheduleLiveCandidateExpiry(LIVE_CANDIDATE_CACHE_TTL_MS - ageMs);
         } catch (e) {
@@ -591,6 +790,34 @@
         }
     }
 
+    function restoreSettledLateState() {
+        try {
+            var raw = sessionStorage.getItem(LIVE_LATE_SETTLED_STORAGE_KEY);
+            if (!raw) return;
+            var parsed = JSON.parse(raw);
+            if (parsed.schemaVersion !== LIVE_STATE_SCHEMA_VERSION) {
+                settledLateResults = [];
+                sessionStorage.removeItem(LIVE_LATE_SETTLED_STORAGE_KEY);
+                return;
+            }
+            var savedAt = parseInt(parsed.savedAt, 10);
+            if (!Number.isFinite(savedAt) || (Date.now() - savedAt) >= LIVE_SETTLED_CACHE_TTL_MS) {
+                settledLateResults = [];
+                sessionStorage.removeItem(LIVE_LATE_SETTLED_STORAGE_KEY);
+                return;
+            }
+            settledLateResults = Array.isArray(parsed.results) ? parsed.results : [];
+            pruneSettledLateResults();
+        } catch (e) {
+            settledLateResults = [];
+            try {
+                sessionStorage.removeItem(LIVE_LATE_SETTLED_STORAGE_KEY);
+            } catch (storageError) {
+                // ignore storage failures
+            }
+        }
+    }
+
     function upsertSettledSummaryResult(result) {
         if (!result || !result.pid || !result.key || !result.outcome) return;
         pruneSettledSummaryResults();
@@ -603,6 +830,39 @@
         });
         settledSummaryResults = nextResults.slice(0, 100);
         saveSettledSummaryState();
+    }
+
+    function hasSettledSummaryResult(pid, key) {
+        if (!pid || !key) return false;
+        pruneSettledSummaryResults();
+        return settledSummaryResults.some(function(result) {
+            return result && result.pid === pid && result.key === key;
+        });
+    }
+
+    function hasPriorSummaryCandidate(pid, key, state) {
+        if (!pid || !key) return false;
+        var now = Date.now();
+        var signature = state ? getStateSignature(state) : '';
+        return (liveCandidateDetails[pid] || []).some(function(entry) {
+            var entryKey = entry && (entry.key || (entry.match ? matchKey(entry.match) : ''));
+            if (entryKey !== key) return false;
+            if (signature && entry.state && getStateSignature(entry.state) !== signature) return false;
+            var lastSeen = Number(entry.lastSeen || entry.seenAt || 0);
+            return Number.isFinite(lastSeen) && now - lastSeen <= LIVE_SUMMARY_PRE_GOAL_CARRY_MS;
+        });
+    }
+
+    function requiresPriorCandidateForSettled(pid) {
+        return pid === 'P73';
+    }
+
+    function supportsProvisionalSummaryCandidate(pid) {
+        return pid === 'P72' || pid === 'P73' || pid === 'P74';
+    }
+
+    function isProvisionalSummaryCandidate(pid, statusText) {
+        return supportsProvisionalSummaryCandidate(pid) && parseStatus(statusText).half === '1H';
     }
 
     function getSettledSummaryStats(pid) {
@@ -618,6 +878,37 @@
     function getRecentSettledSummaryResults(limit) {
         pruneSettledSummaryResults();
         return settledSummaryResults.slice(0, limit || 10);
+    }
+
+    function upsertSettledLateResult(result) {
+        if (!result || !result.pid || !result.key || !result.outcome) return;
+        pruneSettledLateResults();
+        var id = result.pid + '|' + result.key;
+        var nextResults = [result];
+        settledLateResults.forEach(function(existing) {
+            if (!existing) return;
+            var existingId = existing.pid + '|' + existing.key;
+            if (existingId !== id) nextResults.push(existing);
+        });
+        settledLateResults = nextResults.slice(0, 100);
+        saveSettledLateState();
+    }
+
+    function getSettledLateStats(pid) {
+        pruneSettledLateResults();
+        return settledLateResults.reduce(function(stats, result) {
+            if (!result || result.pid !== pid) return stats;
+            if (result.outcome === 'win') stats.win += 1;
+            if (result.outcome === 'lose') stats.lose += 1;
+            return stats;
+        }, { win: 0, lose: 0 });
+    }
+
+    function getSettledLateResultsByPid(pid) {
+        pruneSettledLateResults();
+        return settledLateResults.filter(function(result) {
+            return result && result.pid === pid;
+        });
     }
 
     function buildSettledSummaryResult(pid, entry, currentMatch, livePayload) {
@@ -715,6 +1006,84 @@
             + '</div>';
     }
 
+    function buildSettledLateResult(pid, entry, currentMatch, livePayload) {
+        var key = entry && entry.key ? entry.key : (entry && entry.match ? matchKey(entry.match) : '');
+        if (!pid || !key) return null;
+
+        var pattern = getLatePatternById(pid);
+        if (!pattern) return null;
+
+        var fallbackMatch = entry && entry.match ? entry.match : null;
+        var match = currentMatch || fallbackMatch || {};
+        var state = entry && entry.state ? entry.state : null;
+        var statusText = currentMatch ? getMatchStatusText(currentMatch) : String((entry && entry.status) || getMatchStatusText(fallbackMatch) || '').trim();
+        var targetReached = currentMatch && hasLateTargetGoal(pattern, currentMatch, livePayload, state);
+        var outcome = null;
+
+        if (targetReached) {
+            outcome = 'win';
+        } else if (!currentMatch) {
+            var historical = findHistoricalMatch(getMatchHomeTeam(fallbackMatch), getMatchAwayTeam(fallbackMatch), getMatchLeague(fallbackMatch), state);
+            if (historical) {
+                outcome = (historical[getLatePatternTarget(pattern)] ? 'win' : 'lose');
+            } else if (isFinalishSettledStatus(statusText)) {
+                outcome = 'lose';
+            }
+        }
+
+        if (!outcome) return null;
+
+        var score = currentMatch ? getMatchScores(currentMatch) : (entry && entry.score ? entry.score : getMatchScores(fallbackMatch));
+        return {
+            pid: pid,
+            key: key,
+            label: getPatternLabelById(pid),
+            home: getMatchHomeTeam(match),
+            away: getMatchAwayTeam(match),
+            league: getLeagueTypeJS(getMatchLeague(match)) || getMatchLeague(match),
+            score: score.home + ' - ' + score.away,
+            status: statusText || (outcome === 'win' ? 'Target reached' : 'Finished'),
+            state: state ? JSON.parse(JSON.stringify(state)) : null,
+            outcome: outcome,
+            target: getLatePatternTarget(pattern),
+            settledAt: Date.now()
+        };
+    }
+
+    function buildSettledLateSection(pid) {
+        var results = getSettledLateResultsByPid(pid);
+        if (!results.length) return '';
+
+        var rowsHtml = results.map(function(item) {
+            var state = item.state || {};
+            var seq = Array.isArray(state.h1s) ? state.h1s.map(function(s) {
+                return s === 'H' ? '<span class="scorer-h">H</span>' : '<span class="scorer-a">A</span>';
+            }).join(' → ') : '';
+            var outcomeBadge = item.outcome === 'win'
+                ? '<span class="badge badge-green">WIN</span>'
+                : '<span class="badge badge-red">LOSE</span>';
+            var targetLabel = item.target === 'has_after_2h4' ? '2H >4' : 'Late';
+            var settledTime = new Date(item.settledAt || Date.now()).toLocaleTimeString();
+            var rowClass = entry.provisional ? ' class="live-provisional-row"' : '';
+
+            return '<tr' + rowClass + '>'
+                + '<td class="record-sub">' + escHtml(settledTime) + '</td>'
+                + '<td>' + escHtml(item.home) + ' vs ' + escHtml(item.away) + '</td>'
+                + '<td>' + escHtml(item.league || '-') + '</td>'
+                + '<td>' + escHtml(item.status || '-') + '</td>'
+                + '<td>' + escHtml(item.score || '-') + '</td>'
+                + '<td>' + escHtml(targetLabel) + '</td>'
+                + '<td class="goal-seq">' + (seq || '<span class="delta-zero">-</span>') + '</td>'
+                + '<td>' + outcomeBadge + '</td>'
+                + '</tr>';
+        }).join('');
+
+        return '<div style="margin-top:16px;">'
+            + '<h4 style="margin:0 0 8px 0; font-size:0.95rem; color:var(--text-primary);">Settled Live Late Results</h4>'
+            + '<table class="detail-table"><thead><tr><th>Jam</th><th>Match</th><th>League</th><th>Status Terakhir</th><th>Skor</th><th>Target</th><th>Sequence</th><th>Hasil</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>'
+            + '</div>';
+    }
+
     function settleRemovedSummaryCandidates(previousDetails, nextDetails, matches, livePayload) {
         var currentMatchesByKey = {};
         (matches || []).forEach(function(match) {
@@ -741,10 +1110,36 @@
         });
     }
 
+    function settleRemovedLateCandidates(previousDetails, nextDetails, matches, livePayload) {
+        var currentMatchesByKey = {};
+        (matches || []).forEach(function(match) {
+            currentMatchesByKey[matchKey(match)] = match;
+        });
+
+        var nextKeysByPattern = {};
+        Object.keys(nextDetails || {}).forEach(function(pid) {
+            nextKeysByPattern[pid] = {};
+            (nextDetails[pid] || []).forEach(function(entry) {
+                var key = entry.key || (entry.match ? matchKey(entry.match) : '');
+                if (key) nextKeysByPattern[pid][key] = true;
+            });
+        });
+
+        Object.keys(previousDetails || {}).forEach(function(pid) {
+            (previousDetails[pid] || []).forEach(function(entry) {
+                var key = entry.key || (entry.match ? matchKey(entry.match) : '');
+                if (!key) return;
+                if (nextKeysByPattern[pid] && nextKeysByPattern[pid][key]) return;
+                var settled = buildSettledLateResult(pid, entry, currentMatchesByKey[key], livePayload);
+                if (settled) upsertSettledLateResult(settled);
+            });
+        });
+    }
+
     function buildPanelHtml(id, data) {
         if (!data) return '';
         var html = buildPaginatedDetailTable(id, data);
-        return html + buildSettledSummarySection(id);
+        return html + buildSettledSummarySection(id) + buildSettledLateSection(id);
     }
 
     function refreshActivePanelContent() {
@@ -822,9 +1217,11 @@
 
             if (Array.isArray(apiData.pattern_details)) {
                 INITIAL_DATA.patterns = apiData.pattern_details;
+                exactPatternSignatureCache = {};
             }
             if (Array.isArray(apiData.next_pattern_details)) {
                 INITIAL_DATA.nextPatterns = apiData.next_pattern_details;
+                exactPatternSignatureCache = {};
             }
             if (Array.isArray(apiData.late_pattern_details)) {
                 INITIAL_DATA.latePatterns = apiData.late_pattern_details;
@@ -1095,6 +1492,61 @@
     function clearLiveGoalMemory(key) {
         delete liveGoalMemory[key];
         delete liveScorerMemory[key];
+        delete livePatternStateMemory[key];
+        savePatternStateMemory();
+    }
+
+    function savePatternStateMemory() {
+        try {
+            sessionStorage.setItem(LIVE_PATTERN_STATE_STORAGE_KEY, JSON.stringify({
+                schemaVersion: LIVE_STATE_SCHEMA_VERSION,
+                savedAt: Date.now(),
+                memory: livePatternStateMemory
+            }));
+        } catch (e) {
+            // ignore storage failures
+        }
+    }
+
+    function restorePatternStateMemory() {
+        try {
+            var raw = sessionStorage.getItem(LIVE_PATTERN_STATE_STORAGE_KEY);
+            if (!raw) return;
+            var parsed = JSON.parse(raw);
+            if (parsed.schemaVersion !== LIVE_STATE_SCHEMA_VERSION) {
+                sessionStorage.removeItem(LIVE_PATTERN_STATE_STORAGE_KEY);
+                return;
+            }
+            var savedAt = parseInt(parsed.savedAt, 10);
+            if (!Number.isFinite(savedAt) || Date.now() - savedAt > LIVE_PATTERN_STATE_TTL_MS) {
+                sessionStorage.removeItem(LIVE_PATTERN_STATE_STORAGE_KEY);
+                return;
+            }
+            livePatternStateMemory = parsed.memory || {};
+        } catch (e) {
+            sessionStorage.removeItem(LIVE_PATTERN_STATE_STORAGE_KEY);
+        }
+    }
+
+    function getStoredPatternState(key, match, livePayload) {
+        var entry = livePatternStateMemory[key];
+        if (!entry || !entry.state || !Number.isFinite(entry.savedAt)) return null;
+        if (Date.now() - entry.savedAt > LIVE_PATTERN_STATE_TTL_MS) return null;
+        if (getLiveSecondHalfGoalMinutes(livePayload, key, match).length > 0) return null;
+
+        var score = getMatchScores(match);
+        if (score.home !== entry.state.sc_h || score.away !== entry.state.sc_a) return null;
+
+        return JSON.parse(JSON.stringify(entry.state));
+    }
+
+    function persistPatternState(key, state) {
+        if (!key || !state || !Array.isArray(state.h1s) || !state.h1s.length) return;
+        livePatternStateMemory[key] = {
+            savedAt: Date.now(),
+            state: JSON.parse(JSON.stringify(state))
+        };
+        savePatternStateMemory();
     }
 
     function getStoredGoalMinutes(key) {
@@ -1252,6 +1704,10 @@
             scorers = storedScorers;
         }
         if (!goalMins.length) {
+            var storedState = getStoredPatternState(key, match, livePayload);
+            if (storedState) return storedState;
+        }
+        if (!goalMins.length) {
             goalMins = deriveFallbackGoalMinutes(match);
         }
         if (!scorers.length && goalMins.length) {
@@ -1264,11 +1720,13 @@
             scorers = deriveFallbackScorers(goalMins, match);
         }
         if (goalMins.length !== scorers.length) {
+            var fallbackState = getStoredPatternState(key, match, livePayload);
+            if (fallbackState) return fallbackState;
             return null;
         }
 
         var counts = scorerCountsJS(scorers);
-        return {
+        var state = {
             home: getMatchHomeTeam(match),
             away: getMatchAwayTeam(match),
             league: getLeagueTypeJS(getMatchLeague(match)),
@@ -1285,53 +1743,12 @@
             all_gaps_ge3: allGapsGeJS(goalMins, 3),
             goal_mins: goalMins.slice()
         };
+        persistPatternState(key, state);
+        return state;
     }
 
     function inTeamConfig(listName, team) {
         return Array.isArray(TEAM_CONFIG[listName]) && TEAM_CONFIG[listName].indexOf(team) !== -1;
-    }
-
-    function matchesP61StrongGroup(s) {
-        if (!s || s.league !== '15min') return false;
-        var key = s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
-        return [
-            '3|7|HH|2-0', '2|4|HH|2-0', '6|7|AH|1-1', '5|6|HA|1-1',
-            '1|4|HAA|1-2', '4|7|HA|1-1', '5|7|AHA|1-2', '2|6|AA|0-2',
-            '3|5|AA|0-2', '6|7|AA|0-2',
-            '2|7|AAA|0-3', '1|7|AHA|1-2', '4|5|AA|0-2', '2|7|HH|2-0',
-            '0|1|AA|0-2', '1|3|HA|1-1'
-        ].indexOf(key) !== -1;
-    }
-
-    function matchesP60StrongGroup(s) {
-        if (!s || s.league !== '20min') return false;
-        var key = s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
-        return [
-            '1|4|HH|2-0', '3|5|AA|0-2', '7|9|AA|0-2', '0|8|HA|1-1',
-            '4|9|AH|1-1', '6|8|AA|0-2', '0|3|HH|2-0',
-            '4|9|HA|1-1', '6|7|HA|1-1', '1|9|AAH|1-2', '6|8|HH|2-0',
-            '4|8|HAA|1-2', '1|7|AH|1-1', '2|7|AH|1-1', '2|8|HH|2-0',
-            '0|3|AH|1-1', '0|8|HAA|1-2', '1|8|HAHA|2-2', '3|6|HA|1-1',
-            '3|5|AH|1-1', '3|4|AA|0-2', '7|8|HA|1-1'
-        ].indexOf(key) !== -1;
-    }
-
-    function matchesLG4StrongGroup(s) {
-        if (!s || s.league !== '20min') return false;
-        var key = s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
-        return ['1|9|AAH|1-2', '2|9|AHA|1-2', '4|9|AA|0-2', '2|8|AA|0-2', '5|8|HAA|1-2', '1|6|AHA|1-2'].indexOf(key) !== -1;
-    }
-
-    function matchesP62StrongGroup(s) {
-        if (!s || s.league !== '20min') return false;
-        var key = s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
-        return [
-            '1|4|HH|2-0', '3|5|AA|0-2', '7|9|AA|0-2', '0|8|HA|1-1',
-            '4|9|AH|1-1', '3|6|HA|1-1', '6|8|AA|0-2', '0|3|HH|2-0',
-            '4|9|HA|1-1', '6|7|HA|1-1', '1|9|AAH|1-2', '6|8|HH|2-0',
-            '4|8|HAA|1-2', '1|7|AH|1-1', '2|7|AH|1-1', '2|8|HH|2-0',
-            '3|5|AH|1-1', '0|3|AH|1-1', '0|8|HAA|1-2', '1|8|HAHA|2-2'
-        ].indexOf(key) !== -1;
     }
 
     function matchesP58StrongGroup(s) {
@@ -1345,73 +1762,10 @@
         ].indexOf(key) !== -1;
     }
 
-    function matchesP57StrongGroup(s) {
-        return matchesP58StrongGroup(s);
-    }
-
-    function matchesP66StrongGroup(s) {
+    function matchesP26StrongGroup(s) {
         if (!s) return false;
         var key = s.league + '|' + s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
-        return [
-            '15min|5|6|HA|1-1', '15min|3|7|HH|2-0', '20min|1|4|HH|2-0',
-            '15min|2|4|HH|2-0', '15min|6|7|AH|1-1', '15min|1|4|HAA|1-2',
-            '15min|0|7|HAH|2-1', '20min|3|5|AA|0-2', '20min|7|9|AA|0-2',
-            '15min|4|7|HA|1-1', '15min|2|7|AAA|0-3'
-        ].indexOf(key) !== -1;
-    }
-
-    function matchesP35StrongGroup(s) {
-        return matchesP58StrongGroup(s);
-    }
-
-    function matchesP33StrongGroup(s) {
-        return matchesP54StrongGroup(s);
-    }
-
-    function matchesP65StrongGroup(s) {
-        if (!s) return false;
-        var key = s.league + '|' + s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
-        return [
-            '15min|5|6|HA|1-1', '15min|3|7|HH|2-0', '20min|3|5|AA|0-2',
-            '20min|1|4|HH|2-0', '15min|2|4|HH|2-0', '15min|6|7|AH|1-1',
-            '15min|0|7|HAH|2-1', '20min|7|9|AA|0-2', '15min|4|7|HA|1-1'
-        ].indexOf(key) !== -1;
-    }
-
-    function matchesP25StrongGroup(s) {
-        return matchesP58StrongGroup(s);
-    }
-
-    function matchesP24StrongGroup(s) {
-        if (!s) return false;
-        var key = s.league + '|' + s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
-        return [
-            '15min|3|7|HH|2-0', '20min|3|5|AA|0-2', '20min|1|4|HH|2-0',
-            '15min|2|4|HH|2-0', '15min|6|7|AH|1-1', '15min|1|4|HAA|1-2',
-            '15min|0|7|HAH|2-1', '20min|7|9|AA|0-2'
-        ].indexOf(key) !== -1;
-    }
-
-    function matchesP59StrongGroup(s) {
-        return matchesP58StrongGroup(s);
-    }
-
-    function matchesP54StrongGroup(s) {
-        return matchesP58StrongGroup(s);
-    }
-
-    function matchesP6StrongGroup(s) {
-        return matchesP58StrongGroup(s);
-    }
-
-    function matchesLG8StrongGroup(s) {
-        if (!s || s.league !== '20min') return false;
-        var key = s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
-        return [
-            '0|8|HA|1-1', '1|9|AAH|1-2', '6|6|AH|1-1', '0|4|HH|2-0',
-            '2|9|AHA|1-2', '7|10|HH|2-0', '0|8|HH|2-0', '4|9|AA|0-2',
-            '2|8|AA|0-2', '5|6|AH|1-1', '5|8|HAA|1-2', '1|6|AHA|1-2'
-        ].indexOf(key) !== -1;
+        return ['16min|0|6|HAA|1-2', '16min|3|7|AAA|0-3'].indexOf(key) !== -1;
     }
 
     function matchesLG7StrongGroup(s) {
@@ -1428,22 +1782,6 @@
         return matchesLG7StrongGroup(s);
     }
 
-    function matchesG24StrongGroup(s) {
-        if (!s) return false;
-        var key = s.league + '|' + s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
-        return [
-            '20min|3|6|HA|1-1', '20min|6|8|AA|0-2', '20min|4|9|HA|1-1',
-            '16min|1|3|AA|0-2', '20min|6|7|HA|1-1', '20min|6|8|HH|2-0',
-            '20min|0|8|HA|1-1', '15min|1|5|AHA|1-2', '20min|1|9|AAH|1-2'
-        ].indexOf(key) !== -1;
-    }
-
-    function matchesNG9StrongGroup(s) {
-        if (!s) return false;
-        var key = s.league + '|' + s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
-        return ['20min|4|9|AH|1-1', '20min|1|9|AAH|1-2', '15min|2|7|AAA|0-3', '16min|2|4|AA|0-2'].indexOf(key) !== -1;
-    }
-
     function matchesP72StrongGroup(s) {
         if (!s) return false;
         var key = s.league + '|' + s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
@@ -1454,7 +1792,7 @@
             '20min|1|4|HH|2-0', '20min|7|9|AA|0-2', '15min|0|1|AA|0-2',
             '15min|0|6|AHA|1-2', '15min|0|6|AH|1-1', '15min|1|3|HA|1-1',
             '15min|1|5|AHA|1-2', '15min|1|6|HA|1-1', '15min|1|7|AHA|1-2',
-            '15min|2|6|AA|0-2', '15min|2|7|HH|2-0', '15min|3|5|AA|0-2',
+            '15min|2|6|AA|0-2', '15min|3|5|AA|0-2',
             '15min|4|5|AA|0-2', '15min|5|7|AHA|1-2', '15min|6|7|AA|0-2',
             '16min|1|3|AA|0-2', '16min|1|3|HH|2-0', '16min|2|4|AA|0-2',
             '16min|6|7|HA|1-1', '20min|0|3|AH|1-1', '20min|0|3|HH|2-0',
@@ -1467,21 +1805,6 @@
         ].indexOf(key) !== -1;
     }
 
-    function matchesP48StrongGroup(s) {
-        if (!s) return false;
-        var key = s.league + '|' + s.h1_first + '|' + s.h1_last + '|' + s.h1s.join('') + '|' + s.sc_h + '-' + s.sc_a;
-        return [
-            '15min|5|6|HA|1-1', '15min|3|7|HH|2-0', '20min|3|5|AA|0-2',
-            '20min|1|4|HH|2-0', '15min|2|4|HH|2-0', '15min|6|7|AH|1-1',
-            '15min|2|7|AAA|0-3', '15min|1|4|HAA|1-2', '15min|0|7|HAH|2-1',
-            '20min|7|9|AA|0-2', '15min|4|7|HA|1-1'
-        ].indexOf(key) !== -1;
-    }
-
-    function matchesP67StrongGroup(s) {
-        return matchesP48StrongGroup(s);
-    }
-
     function matchesSummaryPatternLive(pid, s) {
         if (!s) return false;
         var span = s.h1c >= 2 ? (s.h1_last - s.h1_first) : 0;
@@ -1491,60 +1814,62 @@
 
         switch (pid) {
             case 'P2': return s.league === '16min' && s.h1c >= 2 && diff >= 2 && s.h1_last === 7 && s.all_gaps_ge3 && s.max_run <= 2 && s.h1_first <= 1;
-            case 'P6': return (s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 5 && s.h1_first !== 1 && ['Manchester City (V)', 'Atletico de Madrid (V)', 'England (V)'].indexOf(s.home) === -1 && !(s.h1_first === 0 && arrayEqualsJS(s.h1s, ['A', 'H']))) || matchesP6StrongGroup(s);
-            case 'P7': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.max_gap >= 5 && s.h1_first >= 3;
+            case 'P6': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 5 && s.h1_first !== 1 && ['Manchester City (V)', 'Atletico de Madrid (V)', 'England (V)'].indexOf(s.home) === -1 && !(s.h1_first === 0 && arrayEqualsJS(s.h1s, ['A', 'H']));
+            case 'P7': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.max_gap >= 5 && s.h1_first >= 3 && !(s.league === '16min' && s.h1_first === 3 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H']));
             case 'P9': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.max_gap >= 5 && s.h1_first >= 3;
             case 'P12': return s.h1c >= 4 && span >= 6 && s.min_gap >= 1 && s.h1_last <= 9 && s.h1_first >= 1 && s.h1_first !== 1 && s.max_run <= 2;
             case 'P13': return s.h1c >= 2 && s.h1_first === 2 && s.h1_last === 7 && diff <= 2 && s.min_gap >= 3 && s.switches >= 1 && !(s.home === 'Manchester City (V)' && s.away === 'Liverpool (V)');
-            case 'P14': return s.h1c >= 2 && s.sc_h === s.sc_a && s.sc_h > 0 && s.max_gap >= 4 && span >= 5 && s.h1_first >= 3 && s.min_gap >= 2;
-            case 'P15': return s.sc_h === 2 && s.sc_a === 2 && s.max_gap <= 2 && !(s.league === '15min' && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A']) && s.h1.length === 4 && s.h1[0].min === 1 && s.h1[1].min === 2 && s.h1[2].min === 4 && s.h1[3].min === 6);
+            case 'P14': return s.h1c >= 2 && s.sc_h === s.sc_a && s.sc_h > 0 && s.max_gap >= 4 && span >= 5 && s.h1_first >= 3 && s.min_gap >= 2 && !(s.league === '16min' && s.h1_first === 3 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H']));
+            case 'P15': return (((s.sc_h === 2 && s.sc_a === 2 && s.max_gap <= 2 && s.h1_last !== 8 && !(s.h1_first === 0 && s.h1_last === 5)) || (s.league === '20min' && s.sc_h === 2 && s.sc_a === 2 && s.max_gap === 3 && s.h1_first === 0 && s.h1_last <= 7) || (s.league === '16min' && s.sc_h === 2 && s.sc_a === 2 && s.max_gap === 3 && s.h1_first >= 2) || (s.league === '15min' && s.sc_h === 2 && s.sc_a === 2 && s.max_gap === 3 && s.h1_first === 1 && s.h1_last <= 6)) && !(s.league === '15min' && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A']) && arrayEqualsJS(s.goal_mins, [1, 2, 4, 6])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'A', 'A', 'H']) && s.sc_h === 2 && s.sc_a === 2));
             case 'P17': return s.h1c >= 2 && s.h1_first >= 1 && s.h1_first <= 2 && s.h1_last === 7 && s.max_gap >= 2 && s.min_gap >= 2 && s.switches >= 1 && firstScorer === 'A' && ((s.league === '15min' && s.h1_first === 1) || (s.league === '20min' && (s.h1_first === 2 || s.sc_a > s.sc_h)));
             case 'P19': return s.league === '20min' && s.h1c >= 2 && lastScorer === 'H' && (((s.h1_last === 3) && (s.h1_first === 0 || s.h1c >= 3)) || (s.h1_last === 4 && (s.sc_a > s.sc_h || s.switches >= 2)));
             case 'P20': return s.league === '16min' && s.h1_last === 3 && lastScorer === 'A' && (s.h1_first <= 1 || s.h1c >= 2);
-            case 'P24': return (s.league === '15min' && inTeamConfig('p24_teams', s.home) && s.h1c >= 1 && s.h1_last >= 4 && diff <= 1 && s.sc_h >= 1 && s.h1_first >= 4 && firstScorer === 'H' && (s.home !== 'Everton (V)' || s.h1_last <= 5) && (s.home !== 'Arminia Bielefeld (V)' || !(s.h1c === 1 && s.h1_first >= 5 && s.h1_last <= 6)) && !(s.h1c === 1 && s.h1_last === 5) && (s.home !== 'Leicester City (V)' || !(s.h1c === 1 && s.h1_first === 4 && s.h1_last === 4)) && !(s.h1_first === 5 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.home === 'Olympique de Marseille (V)' && s.away === 'Liverpool (V)')) || matchesP24StrongGroup(s);
-            case 'P25': return (inTeamConfig('p25_teams', s.away) && s.h1_last >= 2 && diff <= 1 && span >= 3 && s.min_gap >= 2 && lastScorer === 'A' && !(s.h1c === 2 && span === 3 && s.h1_first === 4) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'A']) && s.sc_h === 1 && s.sc_a === 1)) || matchesP25StrongGroup(s);
-            case 'P26': return s.league === '16min' && ((s.sc_h + s.sc_a) % 2 === 1) && s.h1_last >= 6 && s.h1c >= 2 && s.sc_a > s.sc_h && s.max_run <= 2 && (s.h1_first !== 1 || s.max_gap >= 4);
+            case 'P24': return s.league === '15min' && inTeamConfig('p24_teams', s.home) && s.h1c >= 1 && s.h1_last >= 4 && diff <= 1 && s.sc_h >= 1 && s.h1_first >= 4 && firstScorer === 'H' && (s.home !== 'Everton (V)' || s.h1_last <= 5) && (s.home !== 'Arminia Bielefeld (V)' || !(s.h1c === 1 && s.h1_first >= 5 && s.h1_last <= 6)) && !(s.h1c === 1 && s.h1_last === 5) && (s.home !== 'Leicester City (V)' || !(s.h1c === 1 && s.h1_first === 4 && s.h1_last === 4)) && !(s.h1_first === 5 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.home === 'Olympique de Marseille (V)' && s.away === 'Liverpool (V)');
+            case 'P25': return inTeamConfig('p25_teams', s.away) && s.h1_last >= 2 && diff <= 1 && span >= 3 && s.min_gap >= 2 && lastScorer === 'A' && !(s.h1c === 2 && span === 3 && s.h1_first === 4) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'A']) && s.sc_h === 1 && s.sc_a === 1);
+            case 'P26': return (s.league === '16min' && ((s.sc_h + s.sc_a) % 2 === 1) && s.h1_last >= 6 && s.h1c >= 2 && s.sc_a > s.sc_h && s.max_run <= 2 && (s.h1_first !== 1 || s.max_gap >= 4) && !(s.h1_last === 8 && [3, 5].indexOf(s.h1_first) !== -1 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2)) || matchesP26StrongGroup(s);
             case 'P27': return s.league === '16min' && lastScorer === 'A' && s.max_gap >= 3 && s.h1_first !== 1 && span >= 6;
-            case 'P28': return (inTeamConfig('p28_teams', s.home) || inTeamConfig('p28_teams', s.away)) && s.h1_last >= 3 && span >= 3 && s.switches >= 1 && (inTeamConfig('p28_teams', s.away) || s.h1_first >= 2);
+            case 'P28': return (inTeamConfig('p28_teams', s.home) || inTeamConfig('p28_teams', s.away)) && s.h1_last >= 3 && span >= 3 && s.switches >= 1 && (inTeamConfig('p28_teams', s.away) || s.h1_first >= 2) && !(s.league === '16min' && s.h1_first === 5 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2);
             case 'P32': return s.league === '20min' && s.h1c >= 2 && span >= 9 && s.sc_h === s.sc_a && s.min_gap >= 3 && s.switches >= 1 && s.h1_first !== 1;
-            case 'P33': return (s.league === '15min' && s.h1c >= 4 && diff <= 1 && s.min_gap >= 1 && s.h1_last >= 6 && (s.switches >= 2 || s.h1_first >= 1) && !(arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A']) && s.max_gap === 2 && (s.h1_last >= 8 || s.h1_first <= 1)) && !(s.h1_first === 3 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'H']) && s.sc_h === 2 && s.sc_a === 2 && s.max_gap === 2)) || matchesP33StrongGroup(s);
+            case 'P33': return s.league === '15min' && s.h1c >= 4 && diff <= 1 && s.min_gap >= 1 && s.h1_last >= 6 && (s.switches >= 2 || s.h1_first >= 1) && !(arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A']) && s.max_gap === 2 && (s.h1_last >= 8 || s.h1_first <= 1)) && !(s.h1_first === 3 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'H']) && s.sc_h === 2 && s.sc_a === 2 && s.max_gap === 2);
             case 'P34': return s.league === '15min' && firstScorer === 'A' && lastScorer === 'H' && span >= 6 && s.h1c >= 4;
-            case 'P35': return (inTeamConfig('p35_teams', s.away) && s.h1c >= 2 && s.h1_first >= 3 && s.max_run <= 2 && s.h1_last >= 5 && s.min_gap >= 2 && !(s.h1s.length === 2 && s.h1s[0] === 'H' && s.h1s[1] === 'H' && s.h1_first === 3 && s.h1_last === 5) && !(s.h1_first === 3 && s.h1_last === 5 && s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['H', 'A'])) && !(s.h1_first === 3 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A'])) && !(s.league === '20min' && s.h1_first === 4 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1)) || (s.league === '16min' && inTeamConfig('p35_teams', s.away) && s.h1c >= 3 && s.h1_first === 1 && s.max_run <= 2 && s.h1_last >= 5 && s.min_gap >= 2) || (inTeamConfig('p35_teams', s.away) && s.h1c >= 3 && s.h1_first === 0 && s.max_run <= 2 && s.h1_last >= 6 && s.min_gap >= 2 && lastScorer === 'A' && !(s.league === '20min' && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['A', 'H', 'A']) && s.sc_h === 1 && s.sc_a === 2)) || (s.away === 'Portugal (V)' && s.h1c === 1 && arrayEqualsJS(s.h1s, ['A']) && !(s.h1_first === 0 && s.h1_last === 0 && s.sc_h === 0 && s.sc_a === 1)) || (inTeamConfig('p35_teams', s.away) && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'H', 'A']) && s.min_gap === 1) || matchesP35StrongGroup(s);
+            case 'P35': return (inTeamConfig('p35_teams', s.away) && s.h1c >= 2 && s.h1_first >= 3 && s.max_run <= 2 && s.h1_last >= 5 && s.min_gap >= 2 && !(s.h1s.length === 2 && s.h1s[0] === 'H' && s.h1s[1] === 'H' && s.h1_first === 3 && s.h1_last === 5) && !(s.h1_first === 3 && s.h1_last === 5 && s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['H', 'A'])) && !(s.h1_first === 3 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A'])) && !(s.league === '20min' && s.h1_first === 4 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1)) || (s.league === '16min' && inTeamConfig('p35_teams', s.away) && s.h1c >= 3 && s.h1_first === 1 && s.max_run <= 2 && s.h1_last >= 5 && s.min_gap >= 2) || (inTeamConfig('p35_teams', s.away) && s.h1c >= 3 && s.h1_first === 0 && s.max_run <= 2 && s.h1_last >= 6 && s.min_gap >= 2 && lastScorer === 'A' && !(s.league === '20min' && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['A', 'H', 'A']) && s.sc_h === 1 && s.sc_a === 2)) || (s.away === 'Portugal (V)' && s.h1c === 1 && arrayEqualsJS(s.h1s, ['A']) && !(s.h1_first === 0 && s.h1_last === 0 && s.sc_h === 0 && s.sc_a === 1)) || (inTeamConfig('p35_teams', s.away) && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'H', 'A']) && s.min_gap === 1);
             case 'P37': return s.league === '16min' && s.h1c >= 2 && s.h1_first <= 1 && s.h1_last <= 4 && firstScorer === 'A' && lastScorer === 'A' && s.switches === 0;
             case 'P39': return s.league === '20min' && s.h1c >= 3 && span >= 7 && diff <= 3 && s.min_gap >= 3 && s.h1_first >= 1;
-            case 'P40': return s.league === '16min' && diff === 2 && s.h1_first <= 1 && span >= 5 && !(s.home === 'Germany (V)' && s.sc_h === 2 && s.sc_a === 0 && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H']));
+            case 'P40': return s.league === '16min' && diff === 2 && s.h1_first <= 1 && span >= 5 && (s.min_gap >= 1 || s.max_gap >= 4) && !((s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) || (s.h1_first === 1 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0));
             case 'P41': return diff >= 2 && s.h1_first >= 2 && span >= 6 && s.max_gap >= 5 && !(s.h1c === 2 && s.max_gap >= 7 && s.sc_a > s.sc_h) && !(s.league === '20min' && s.h1c === 2 && s.sc_h === 2 && s.sc_a === 0 && s.h1_first === 2 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['H', 'H']));
             case 'P42': return s.league === '20min' && s.h1_first >= 2 && span >= 6 && s.min_gap >= 3 && !arrayEqualsJS(s.h1s, ['H', 'A']) && !(s.max_gap >= 7 && s.h1c === 2 && s.sc_a > s.sc_h) && !(s.h1c === 2 && s.sc_h === 2 && s.sc_a === 0 && s.h1_first === 2 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['H', 'H']));
             case 'P43': return s.sc_a > s.sc_h && span >= 6 && lastScorer === 'H' && (s.sc_a - s.sc_h) === 1 && s.h1c <= 3 && !(s.league === '20min' && s.h1_first === 2 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A', 'H']));
             case 'P44': return diff >= 2 && s.h1_first >= 2 && s.switches >= 1 && s.max_run <= 2 && (s.league === '20min' || s.h1_last >= 8 || (s.sc_h === 3 && s.sc_a === 1));
             case 'P45': return s.league === '16min' && s.h1_first === 0 && span >= 6 && s.max_gap >= 6;
-            case 'P46': return s.league === '16min' && span >= 6 && s.min_gap >= 2 && s.h1c === 2 && (s.h1_first === 0 || s.switches === 0);
+            case 'P46': return s.league === '16min' && span >= 6 && s.min_gap >= 2 && s.h1c === 2 && (s.h1_first === 0 || s.switches === 0) && !(s.h1_first === 1 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0);
             case 'P47': return s.sc_h === s.sc_a && s.h1_first !== 1 && s.switches >= 2 && s.h1_last >= 6 && s.min_gap >= 1 && s.max_gap >= 3;
-            case 'P48': return (s.sc_h === s.sc_a && span >= 7 && s.switches >= 2 && (s.h1_first === 0 || span === 7 || lastScorer === 'H') && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 7 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 9 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'A']))) || matchesP48StrongGroup(s);
-            case 'P49': return s.league === '16min' && diff >= 2 && span >= 6 && s.h1_first >= 1;
+            case 'P48': return s.sc_h === s.sc_a && span >= 7 && s.switches >= 2 && (s.h1_first === 0 || span === 7 || lastScorer === 'H') && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 7 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 9 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'A']));
+            case 'P49': return s.league === '16min' && diff >= 2 && span >= 6 && s.h1_first >= 1 && !(s.h1_first === 1 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0);
             case 'P50': return s.league === '16min' && s.sc_a > s.sc_h && span >= 6 && s.max_run <= 2 && (s.h1_first === 0 || s.max_gap >= 6);
             case 'P51': return s.league === '16min' && s.switches >= 2 && s.h1_first !== 1;
-            case 'P52': return s.league === '16min' && span >= 6 && s.min_gap >= 3 && diff >= 2;
+            case 'P52': return s.league === '16min' && span >= 6 && s.min_gap >= 3 && diff >= 2 && !(s.h1_first === 1 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0);
             case 'P53': return (s.league === '20min' && s.h1_last === 3 && lastScorer === 'H' && s.min_gap >= 1 && s.h1c <= 2 && (s.h1_first === 0 || s.sc_a === 0)) || (s.league === '20min' && s.h1_first === 1 && s.h1_last === 3 && s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['A', 'H']) && !(s.home === 'Paraguay (V)' && s.away === 'Bosnia-Herzegovina (V)'));
-            case 'P54': return (s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && span >= 4 && s.h1_first >= 2 && s.h1c <= 4 && !(s.h1_first === 2 && arrayEqualsJS(s.h1s, ['A', 'A', 'H'])) && !(s.h1_first === 2 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2)) || matchesP54StrongGroup(s);
+            case 'P54': return s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && span >= 4 && s.h1_first >= 2 && s.h1c <= 4 && !(s.h1_first === 2 && arrayEqualsJS(s.h1s, ['A', 'A', 'H'])) && !(s.h1_first === 2 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2);
             case 'P55': return s.league === '16min' && s.h1_last === 8 && s.sc_a > s.sc_h && !(s.h1_first === 3 && s.sc_h === 1 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['H', 'A', 'A'])) && !(s.h1c === 1 && s.h1_first === 8 && arrayEqualsJS(s.h1s, ['A']) && s.sc_h === 0 && s.sc_a === 1);
             case 'P56': return s.league === '16min' && s.max_gap >= 6 && lastScorer === 'A';
-            case 'P57': return (s.h1_first === 0 && s.h1_last === 6 && firstScorer === 'A' && (s.league === '15min' || s.league === '16min' || s.h1c >= 3) && (s.switches >= 2 || s.max_gap >= 4) && !arrayEqualsJS(s.h1s, ['A', 'H', 'H']) && !arrayEqualsJS(s.h1s, ['A', 'A', 'A']) && !(s.league === '15min' && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2)) || matchesP57StrongGroup(s);
-            case 'P58': return (((s.h1_first >= 3 && span >= 5 && s.min_gap >= 3 && !(s.h1_first === 4 && span === 5 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.switches === 0)) || (s.league === '20min' && s.h1_first === 2 && span >= 5 && s.min_gap >= 3 && (lastScorer === 'H' || s.h1c >= 3)) || (s.league === '20min' && s.h1_first === 4 && s.h1_last === 6 && s.min_gap === 2 && lastScorer === 'H' && !(arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1)) || (s.league === '16min' && s.h1_first === 1 && span >= 5 && s.min_gap >= 3 && s.max_gap >= 4) || (s.league === '16min' && s.h1_first === 0 && span >= 5 && s.min_gap >= 3 && diff >= 2 && !(s.home === 'Germany (V)' && s.sc_h === 2 && s.sc_a === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H']))) || (s.league === '15min' && s.h1c === 3 && s.h1_first === 2 && span === 5 && s.min_gap === 1) || (s.league === '15min' && s.h1_first === 0 && s.h1_last === 6 && span === 6 && s.min_gap === 2) || matchesP58StrongGroup(s)) && !(s.league === '16min' && s.h1c === 1 && s.sc_h === 0 && s.sc_a === 1 && [1, 8].indexOf(s.h1_first) !== -1));
-            case 'P59': return (s.h1_last === 9 && s.switches >= 2 && lastScorer === 'A' && (firstScorer === 'A' || s.max_gap >= 6) && !(s.h1_first === 1 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.h1c === 5 && s.h1_first === 2) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 9 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'A']))) || matchesP59StrongGroup(s);
-            case 'P60': return (s.league === '20min' && s.h1_first === 3 && s.sc_h === s.sc_a && s.h1_last >= 5 && !(s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A'])) && !(s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1)) || matchesP60StrongGroup(s);
-            case 'P61': return (s.league === '15min' && inTeamConfig('p61_teams', s.away) && s.h1_last >= 5 && diff <= 1 && !(s.home === 'Girondins de Bordeaux (V)' && s.away === 'Lille OSC (V)') && !(s.away === 'AS Monaco (V)' && s.h1_first === 3 && s.h1_last === 5 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['H', 'A'])) && !(s.h1c === 1 && s.h1_last === 5) && !(s.h1_first === 4 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1) && !(s.h1_first === 5 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 1 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H', 'H']) && s.sc_h === 3 && s.sc_a === 0) && !(s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H', 'H']) && s.sc_h === 2 && s.sc_a === 1) && !(s.away === 'Lille OSC (V)' && s.h1_first === 0 && s.h1_last === 6 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2)) || (s.league === '15min' && s.h1_first <= 1 && s.h1_last >= 6 && diff <= 1 && firstScorer === 'H' && lastScorer === 'H') || matchesP61StrongGroup(s);
-            case 'P62': return (((s.league === '15min' && inTeamConfig('p62_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 4 && (s.h1_first === 0 || s.home !== 'FC Koln (V)') && (s.switches >= 1 || s.h1c <= 3 || s.h1_last >= 7) && !(s.h1_first === 1 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ['A', 'A', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 1 && s.h1_last === 5 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2)) || (s.league === '15min' && s.h1_first <= 1 && s.h1_last >= 6 && s.switches >= 2 && diff <= 2 && lastScorer === 'H' && !arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'H']) && !arrayEqualsJS(s.h1s, ['H', 'H', 'A', 'H'])) || (s.league === '15min' && s.h1_first === 3 && s.h1_last === 7 && diff === 2 && lastScorer === 'H') || (s.league === '15min' && s.h1_first === 2 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H'])) || (s.league === '16min' && s.h1_first <= 1 && s.h1_last >= 7 && diff <= 2 && lastScorer === 'H') || (s.league === '20min' && s.h1_first <= 1 && s.h1_last >= 3 && s.switches >= 2 && s.sc_h === s.sc_a && lastScorer === 'H') || (s.league === '20min' && s.h1_first === 1 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H'])) || matchesP62StrongGroup(s)) && !(s.away === 'Getafe CF (V)' && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])));
-            case 'P63': return s.league === '16min' && inTeamConfig('p63_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 6;
+            case 'P57': return s.h1_first === 0 && s.h1_last === 6 && firstScorer === 'A' && (s.league === '15min' || s.league === '16min' || s.h1c >= 3) && (s.switches >= 2 || s.max_gap >= 4) && !arrayEqualsJS(s.h1s, ['A', 'H', 'H']) && !arrayEqualsJS(s.h1s, ['A', 'A', 'A']) && !(s.league === '15min' && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2);
+            case 'P58': return ((s.h1_first >= 3 && span >= 5 && s.min_gap >= 3 && !(s.h1_first === 4 && span === 5 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.switches === 0)) || (s.league === '20min' && s.h1_first === 2 && span >= 5 && s.min_gap >= 3 && (lastScorer === 'H' || s.h1c >= 3)) || (s.league === '20min' && s.h1_first === 4 && s.h1_last === 6 && s.min_gap === 2 && lastScorer === 'H' && !(arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1)) || (s.league === '16min' && s.h1_first === 1 && span >= 5 && s.min_gap >= 3 && s.max_gap >= 4) || (s.league === '16min' && s.h1_first === 0 && span >= 5 && s.min_gap >= 3 && diff >= 2 && !(s.sc_h === 2 && s.sc_a === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H']))) || (s.league === '15min' && s.h1c === 3 && s.h1_first === 2 && span === 5 && s.min_gap === 1) || (s.league === '15min' && s.h1_first === 0 && s.h1_last === 6 && span === 6 && s.min_gap === 2)) && !(s.league === '16min' && s.h1c === 1 && s.sc_h === 0 && s.sc_a === 1 && [1, 8].indexOf(s.h1_first) !== -1) && !(s.league === '16min' && s.h1_first === 1 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.league === '15min' && s.h1_first === 2 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.league === '16min' && s.h1_first === 3 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1);
+            case 'P59': return s.h1_last === 9 && s.switches >= 2 && lastScorer === 'A' && (firstScorer === 'A' || s.max_gap >= 6) && !(s.h1_first === 1 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.h1c === 5 && s.h1_first === 2) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 9 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'A']));
+            case 'P60': return s.league === '20min' && s.h1_first === 3 && s.sc_h === s.sc_a && s.h1_last >= 5 && !(s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A'])) && !(s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1);
+            case 'P61': return (s.league === '15min' && inTeamConfig('p61_teams', s.away) && s.h1_last >= 5 && diff <= 1 && !(s.home === 'Girondins de Bordeaux (V)' && s.away === 'Lille OSC (V)') && !(s.away === 'AS Monaco (V)' && s.h1_first === 3 && s.h1_last === 5 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['H', 'A'])) && !(s.h1c === 1 && s.h1_last === 5) && !(s.h1_first === 4 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1) && !(s.h1_first === 5 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 1 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H', 'H']) && s.sc_h === 3 && s.sc_a === 0) && !(s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H', 'H']) && s.sc_h === 2 && s.sc_a === 1) && !(s.away === 'Lille OSC (V)' && s.h1_first === 0 && s.h1_last === 6 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 2 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2)) || (s.league === '15min' && s.h1_first <= 1 && s.h1_last >= 6 && diff <= 1 && firstScorer === 'H' && lastScorer === 'H');
+            case 'P62': return (((s.league === '15min' && inTeamConfig('p62_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 4 && (s.h1_first === 0 || s.home !== 'FC Koln (V)') && (s.switches >= 1 || s.h1c <= 3 || s.h1_last >= 7) && !(s.h1_first === 1 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ['A', 'A', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 1 && s.h1_last === 5 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2)) || (s.league === '15min' && s.h1_first <= 1 && s.h1_last >= 6 && s.switches >= 2 && diff <= 2 && lastScorer === 'H' && !arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'H']) && !arrayEqualsJS(s.h1s, ['H', 'H', 'A', 'H'])) || (s.league === '15min' && s.h1_first === 3 && s.h1_last === 7 && diff === 2 && lastScorer === 'H') || (s.league === '15min' && s.h1_first === 2 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H'])) || (s.league === '16min' && s.h1_first <= 1 && s.h1_last >= 7 && diff <= 2 && lastScorer === 'H') || (s.league === '20min' && s.h1_first <= 1 && s.h1_last >= 3 && s.switches >= 2 && s.sc_h === s.sc_a && lastScorer === 'H') || (s.league === '20min' && s.h1_first === 1 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H']))) && !(s.away === 'Getafe CF (V)' && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.league === '16min' && s.h1_first === 1 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.league === '16min' && s.h1_first === 0 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A', 'H']) && s.sc_h === 3 && s.sc_a === 2) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'A', 'A', 'H']) && s.sc_h === 2 && s.sc_a === 2));
+            case 'P63': return s.league === '16min' && inTeamConfig('p63_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 6 && !(s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['H', 'H', 'A']) && s.sc_h === 2 && s.sc_a === 1) && !(s.h1_first === 0 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A', 'H']) && s.sc_h === 3 && s.sc_a === 2);
             case 'P64': return (s.league === '15min' && inTeamConfig('p64_teams', s.away) && s.h1_first <= 1 && s.h1_last >= 4 && (s.away !== 'Napoli (V)' || s.max_run <= 2) && !(s.away === 'Napoli (V)' && arrayEqualsJS(s.h1s, ['A', 'A', 'H'])) && !(s.away === 'Lille OSC (V)' && s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'A', 'A'])) && !(s.away === 'Lille OSC (V)' && s.h1_first === 0 && s.h1_last === 6 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 1 && s.h1_last === 4 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'H'])) && !(s.away === 'FC Koln (V)' && s.h1c === 2 && s.sc_h === 2 && s.sc_a === 0 && s.h1_first === 0 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ['H', 'H']))) || (s.league === '15min' && s.h1_first === 1 && s.h1_last >= 7 && firstScorer === 'A' && lastScorer === 'H' && !(s.h1c === 2 && s.h1_last === 7 && s.h1_first === 1));
-            case 'P65': return (s.league === '15min' && inTeamConfig('p65_teams', s.home) && s.h1c >= 1 && s.h1_first <= 1 && !(s.home === 'Leicester City (V)' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 1 && s.h1_last === 5 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1_first === 1 && s.h1_last === 3 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.h1_first === 1 && s.h1_last === 3 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2)) || matchesP65StrongGroup(s);
-            case 'P67': return (s.league === '20min' && inTeamConfig('p67_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 5 && !(s.h1_first === 1 && s.h1_last === 7 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.h1_first === 1 && s.h1_last === 10 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'A', 'A'])) && !(s.h1_first === 0 && s.h1_last === 8 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.h1_first === 0 && s.h1_last === 5 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'A', 'H']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 0 && s.h1_last === 7 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 0 && s.h1_last === 6 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2)) || matchesP67StrongGroup(s);
+            case 'P65': return s.league === '15min' && inTeamConfig('p65_teams', s.home) && s.h1c >= 1 && s.h1_first <= 1 && !(s.home === 'Leicester City (V)' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 1 && s.h1_last === 5 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1_first === 1 && s.h1_last === 3 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.h1_first === 1 && s.h1_last === 3 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2);
+            case 'P67': return s.league === '20min' && inTeamConfig('p67_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 5 && !(s.h1_first === 1 && s.h1_last === 7 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.h1_first === 1 && s.h1_last === 10 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'A', 'A'])) && !(s.h1_first === 0 && s.h1_last === 8 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.h1_first === 0 && s.h1_last === 5 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'A', 'H']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 0 && s.h1_last === 7 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 0 && s.h1_last === 6 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2) && !(s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'A', 'A', 'H']) && s.sc_h === 2 && s.sc_a === 2);
             case 'P68': return s.league === '15min' && s.home === 'Leicester City (V)' && s.h1c >= 1 && s.h1_first <= 1;
             case 'P69': return s.league === '20min' && s.home === 'Denmark (V)' && s.h1_first <= 1 && s.h1_last >= 5;
             case 'P70': return s.league === '15min' && s.away === 'Liverpool (V)' && s.h1_first <= 1 && s.h1_last >= 5;
             case 'P71': return s.league === '20min' && s.away === 'Germany (V)' && s.sc_a > s.sc_h && s.h1_last >= 6;
             case 'P72': return matchesP72StrongGroup(s);
-            case 'P66': return (((s.league === '15min' && inTeamConfig('p66_teams', s.away) && s.h1_first <= 1 && s.h1_last >= 5 && (s.away !== 'Napoli (V)' || s.max_run <= 2) && (s.away !== 'Chelsea (V)' || firstScorer === 'A') && !(s.h1_first === 0 && s.h1_last === 7 && s.h1c === 2 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'H']) && span >= 6) && !(s.away === 'Lille OSC (V)' && s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'A', 'A']))) || (s.league === '15min' && s.h1_first === 1 && s.h1_last === 4 && s.h1c === 3 && diff === 1 && lastScorer === 'A') || (s.league === '16min' && s.h1_first === 0 && s.h1_last >= 6 && diff <= 2 && lastScorer === 'A') || (s.league === '20min' && s.h1_first === 0 && s.h1_last >= 7 && s.switches >= 2 && diff <= 2 && lastScorer === 'A') || matchesP66StrongGroup(s)) && !(s.away === 'Getafe CF (V)' && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 7 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 8 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 9 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 7 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.league === '15min' && s.away === 'Lille OSC (V)' && s.h1_first === 0 && s.h1_last === 6 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2));
+            case 'P73': return matchesExactPatternFromData('P73', s);
+            case 'P74': return matchesShapeStatsPatternFromData('P74', s);
+            case 'P66': return (((s.league === '15min' && inTeamConfig('p66_teams', s.away) && s.h1_first <= 1 && s.h1_last >= 5 && (s.away !== 'Napoli (V)' || s.max_run <= 2) && (s.away !== 'Chelsea (V)' || firstScorer === 'A') && !(s.h1_first === 0 && s.h1_last === 7 && s.h1c === 2 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'H']) && span >= 6) && !(s.away === 'Lille OSC (V)' && s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'A', 'A']))) || (s.league === '15min' && s.h1_first === 1 && s.h1_last === 4 && s.h1c === 3 && diff === 1 && lastScorer === 'A') || (s.league === '16min' && s.h1_first === 0 && s.h1_last >= 6 && diff <= 2 && lastScorer === 'A') || (s.league === '20min' && s.h1_first === 0 && s.h1_last >= 7 && s.switches >= 2 && diff <= 2 && lastScorer === 'A')) && !(s.away === 'Getafe CF (V)' && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 7 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 8 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 9 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 7 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.league === '15min' && s.away === 'Lille OSC (V)' && s.h1_first === 0 && s.h1_last === 6 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['H', 'A', 'A', 'H', 'A']) && s.sc_h === 2 && s.sc_a === 3));
             default: return false;
         }
     }
@@ -1562,17 +1887,17 @@
             case 'LG3':
                 return s.league === '16min' && s.h1c >= 3 && firstScorer === 'A' && s.h1_last === 6 && s.max_gap !== 3;
             case 'LG4':
-                return (s.league === '20min' && inTeamConfig('lg4_teams', s.away) && s.sc_a > s.sc_h && s.h1_last === 9 && !(s.h1c === 3 && s.h1_first === 1) && !(s.h1c === 1 && s.h1_first === 9)) || matchesLG4StrongGroup(s);
+                return s.league === '20min' && inTeamConfig('lg4_teams', s.away) && s.sc_a > s.sc_h && s.h1_last === 9 && !(s.h1c === 3 && s.h1_first === 1) && !(s.h1c === 1 && s.h1_first === 9);
             case 'LG5':
-                return (inTeamConfig('lg5_teams', s.home) && (s.sc_a - s.sc_h) === 1 && s.h1_last >= 6 && s.h1_first >= 2 && !(s.h1_first === 4 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'H', 'A']) && s.sc_h === 2 && s.sc_a === 3)) || matchesLG5StrongGroup(s);
+                return inTeamConfig('lg5_teams', s.home) && (s.sc_a - s.sc_h) === 1 && s.h1_last >= 6 && s.h1_first >= 2 && !(s.h1_first === 4 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'H', 'A']) && s.sc_h === 2 && s.sc_a === 3);
             case 'LG6':
-                return (s.league === '20min' && ((inTeamConfig('lg6_teams', s.away) && s.away !== 'Argentina (V)' && s.h1_first <= 1 && s.h1_last >= 8 && (s.h1_first === 0 || s.sc_a > s.sc_h) && !(s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1c === 3 && s.h1_first === 0 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.h1_first === 0 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A', 'A', 'A']) && s.sc_h === 0 && s.sc_a === 4)) || (s.away === 'Argentina (V)' && s.h1_first === 0 && s.h1_last >= 7 && s.h1c >= 3 && Math.abs(s.sc_h - s.sc_a) <= 1))) || matchesLG6StrongGroup(s);
+                return s.league === '20min' && ((inTeamConfig('lg6_teams', s.away) && s.away !== 'Argentina (V)' && s.h1_first <= 1 && s.h1_last >= 8 && (s.h1_first === 0 || s.sc_a > s.sc_h) && !(s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1c === 3 && s.h1_first === 0 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.h1_first === 0 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A', 'A', 'A']) && s.sc_h === 0 && s.sc_a === 4)) || (s.away === 'Argentina (V)' && s.h1_first === 0 && s.h1_last >= 7 && s.h1c >= 3 && Math.abs(s.sc_h - s.sc_a) <= 1));
             case 'LG7':
-                return (inTeamConfig('lg7_teams', s.away) && s.sc_a > s.sc_h && s.h1_last >= 6 && s.h1c <= 3 && (s.h1c >= 2 || s.h1_last >= 7) && !(s.h1c === 2 && s.h1_first === 0) && !(s.h1_first === 2 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2)) || matchesLG7StrongGroup(s);
+                return inTeamConfig('lg7_teams', s.away) && s.sc_a > s.sc_h && s.h1_last >= 6 && s.h1c <= 3 && (s.h1c >= 2 || s.h1_last >= 7) && !(s.h1c === 2 && s.h1_first === 0) && !(s.h1c === 1 && s.h1_first === 8 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A']) && s.sc_h === 0 && s.sc_a === 1) && !(s.h1_first === 2 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2);
             case 'LG8':
-                return (s.league === '20min' && inTeamConfig('lg8_teams', s.away) && s.sc_a > s.sc_h && s.h1_last >= 6 && s.h1c >= 2 && !(s.h1c === 2 && s.h1_first === 0) && !(s.h1_first === 1 && s.h1_last === 10 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'A', 'A'])) && !(s.h1_first === 0 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A', 'A', 'A']) && s.sc_h === 0 && s.sc_a === 4)) || matchesLG8StrongGroup(s);
+                return s.league === '20min' && inTeamConfig('lg8_teams', s.away) && s.sc_a > s.sc_h && s.h1_last >= 6 && s.h1c >= 2 && !(s.h1c === 2 && s.h1_first === 0) && !(s.h1_first === 1 && s.h1_last === 10 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'A', 'A'])) && !(s.h1_first === 0 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A', 'A', 'A']) && s.sc_h === 0 && s.sc_a === 4) && !(s.h1_first === 4 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2);
             case 'G24':
-                return (s.league === '20min' && s.h1c === 3 && span === 8 && Math.abs(s.sc_h - s.sc_a) === 1 && s.switches === 1 && firstScorer !== null && s.h1s[s.h1s.length - 1] === 'H') || (s.league === '20min' && s.h1_first === 0 && span === 8 && s.sc_h === s.sc_a && firstScorer !== null && s.h1s[s.h1s.length - 1] === 'A') || (s.league === '15min' && s.h1c === 3 && span === 4 && Math.abs(s.sc_h - s.sc_a) === 1 && s.switches === 2 && firstScorer !== null && s.h1s[s.h1s.length - 1] === 'A') || (s.league === '20min' && s.h1_first === 3 && s.h1_last === 5 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) || matchesG24StrongGroup(s);
+                return ((s.league === '20min' && s.h1c === 3 && span === 8 && Math.abs(s.sc_h - s.sc_a) === 1 && s.switches === 1 && firstScorer !== null && s.h1s[s.h1s.length - 1] === 'H') || (s.league === '20min' && s.h1_first === 0 && span === 8 && s.sc_h === s.sc_a && firstScorer !== null && s.h1s[s.h1s.length - 1] === 'A') || (s.league === '15min' && s.h1c === 3 && span === 4 && Math.abs(s.sc_h - s.sc_a) === 1 && s.switches === 2 && firstScorer !== null && s.h1s[s.h1s.length - 1] === 'A') || (s.league === '20min' && s.h1_first === 3 && s.h1_last === 5 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'A']))) && !(s.league === '15min' && s.h1_first === 2 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H', 'A']) && s.sc_h === 1 && s.sc_a === 2);
             default:
                 return false;
         }
@@ -1584,15 +1909,17 @@
 
         switch (pid) {
             case 'NG6':
-                return s.league === '20min' && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 5 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.h1_first !== 1 && !(s.home === 'Colombia (V)' && s.away === 'Greece (V)');
+                return s.league === '20min' && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['A', 'H']) && ((s.h1_last === 7 && span >= 5 && s.h1_first !== 1) || (s.h1_first === 0 && s.h1_last >= 7)) && !(s.home === 'Colombia (V)' && s.away === 'Greece (V)');
             case 'NG7':
                 return s.h1c >= 3 && s.max_gap >= 5 && Math.abs(s.sc_h - s.sc_a) === 2 && s.h1_last >= 8 && s.h1_last <= 9 && !(s.league === '20min' && s.h1_first === 1 && s.h1_last === 9 && s.h1c === 4 && arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'H']) && s.sc_h === 3 && s.sc_a === 1);
             case 'NG8':
-                return s.h1_first === 3 && span >= 6 && s.min_gap >= 3;
+                return s.h1_first === 3 && span >= 6 && s.min_gap >= 3 && !(s.league === '20min' && s.h1_last === 10 && arrayEqualsJS(s.h1s, ['H', 'A']) && s.sc_h === 1 && s.sc_a === 1);
             case 'NG9':
-                return (s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && Math.abs(s.sc_h - s.sc_a) <= 1 && s.switches >= 2 && !(s.home === 'Spain (V)' && s.away === 'Uruguay (V)') && !(s.h1_first === 2 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'A', 'H']) && s.sc_h === 2 && s.sc_a === 3)) || matchesNG9StrongGroup(s);
+                return s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && Math.abs(s.sc_h - s.sc_a) <= 1 && s.switches >= 2 && !(s.home === 'Spain (V)' && s.away === 'Uruguay (V)') && !(s.h1_first === 2 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'A', 'H']) && s.sc_h === 2 && s.sc_a === 3) && !(s.h1_first === 0 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['H', 'A', 'A', 'H', 'A']) && s.sc_h === 2 && s.sc_a === 3);
             case 'NG10':
                 return s.league === '20min' && s.h1_first === 4 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'H']);
+            case 'NG11':
+                return matchesNextShapeStatsPatternFromData('NG11', s);
             default:
                 return false;
         }
@@ -1641,29 +1968,40 @@
         return score.home !== ht.h || score.away !== ht.a;
     }
 
-    function hasLateSecondHalfGoal(livePayload, key, match) {
-        if (getLiveSecondHalfGoalMinutes(livePayload, key, match).some(function(min) { return min >= 7; })) {
+    function getLatePatternTarget(pattern) {
+        return pattern && pattern.target ? pattern.target : 'has_late';
+    }
+
+    function hasLateTargetGoal(pattern, match, livePayload, liveState) {
+        var key = matchKey(match);
+        var target = getLatePatternTarget(pattern);
+        var threshold = target === 'has_after_2h4' ? 4 : 6;
+        var goalMins = getLiveSecondHalfGoalMinutes(livePayload, key, match);
+        if (goalMins.some(function(min) { return min > threshold; })) {
             return true;
         }
+        if (goalMins.length) return false;
 
         var ht = htMemory[key];
         if (!ht) return false;
 
+        var status = parseStatus(getMatchStatusText(match));
         var score = getMatchScores(match);
-        return score.home !== ht.h || score.away !== ht.a;
+        var hasScoreChanged = score.home !== ht.h || score.away !== ht.a || (liveState && (score.home !== liveState.sc_h || score.away !== liveState.sc_a));
+
+        return hasScoreChanged && status.half === '2H' && status.min > threshold;
     }
 
-    function isLatePatternSignalWindow(match, livePayload) {
+    function isLatePatternSignalWindow(pattern, match, livePayload, liveState) {
         var statusText = getMatchStatusText(match);
         var parsedStatus = parseStatus(statusText);
         var isHalftime = /^H\.?Time$/i.test(statusText);
         if (isHalftime) return true;
 
-        var key = matchKey(match);
-        if (hasLateSecondHalfGoal(livePayload, key, match)) return false;
+        if (hasLateTargetGoal(pattern, match, livePayload, liveState)) return false;
 
         if (parsedStatus.half === '1H') return true;
-        if (parsedStatus.half === '2H' && parsedStatus.min >= 0 && parsedStatus.min < 7) return true;
+        if (parsedStatus.half === '2H' && parsedStatus.min >= 0) return true;
         return false;
     }
 
@@ -1800,10 +2138,79 @@
         return stats && stats.hits >= 15;
     }
 
+    function getLatePatternById(id) {
+        var patterns = INITIAL_DATA.latePatterns || [];
+        for (var i = 0; i < patterns.length; i++) {
+            if (patterns[i] && patterns[i].id === id) return patterns[i];
+        }
+        return null;
+    }
+
+    function mergeRecentLateCandidateDetails(details, currentMatchesByKey, livePayload) {
+        var now = Date.now();
+        Object.keys(lateLiveCandidateDetails || {}).forEach(function(pid) {
+            var pattern = getLatePatternById(pid);
+            if (!pattern) return;
+            (lateLiveCandidateDetails[pid] || []).forEach(function(entry) {
+                var key = entry && (entry.key || (entry.match ? matchKey(entry.match) : ''));
+                if (!key) return;
+                if (details[pid] && details[pid][key]) return;
+
+                var lastSeen = Number(entry.lastSeen || entry.seenAt || 0);
+                if (!Number.isFinite(lastSeen) || now - lastSeen > LIVE_SUMMARY_PRE_GOAL_CARRY_MS) return;
+
+                var currentMatch = currentMatchesByKey[key];
+                if (currentMatch && hasLateTargetGoal(pattern, currentMatch, livePayload, entry.state || null)) return;
+                if (entry.state && !matchesLatePatternLive(pid, entry.state)) return;
+
+                if (!details[pid]) details[pid] = {};
+                details[pid][key] = Object.assign({}, entry, {
+                    key: key,
+                    kind: 'late',
+                    lastSeen: lastSeen,
+                    stale: true
+                });
+            });
+        });
+    }
+
+    function mergeRecentSummaryCandidateDetails(details, currentMatchesByKey, livePayload) {
+        var now = Date.now();
+        Object.keys(liveCandidateDetails || {}).forEach(function(pid) {
+            (liveCandidateDetails[pid] || []).forEach(function(entry) {
+                var key = entry && (entry.key || (entry.match ? matchKey(entry.match) : ''));
+                if (!key) return;
+                if (details[pid] && details[pid][key]) return;
+
+                var lastSeen = Number(entry.lastSeen || entry.seenAt || 0);
+                if (!Number.isFinite(lastSeen) || now - lastSeen > LIVE_SUMMARY_PRE_GOAL_CARRY_MS) return;
+
+                var currentMatch = currentMatchesByKey[key];
+                if (!currentMatch) return;
+                if (!isSummaryPatternSignalWindow(currentMatch, livePayload)) return;
+                if (hasAnySecondHalfGoal(currentMatch, livePayload, entry.state || null)) return;
+                if (entry.state && !matchesSummaryPatternLive(pid, entry.state)) return;
+
+                if (!details[pid]) details[pid] = {};
+                details[pid][key] = Object.assign({}, entry, {
+                    match: currentMatch,
+                    key: key,
+                    kind: 'summary',
+                    status: getMatchStatusText(currentMatch),
+                    score: getMatchScores(currentMatch),
+                    provisional: isProvisionalSummaryCandidate(pid, getMatchStatusText(currentMatch)),
+                    lastSeen: lastSeen,
+                    stale: true
+                });
+            });
+        });
+    }
+
     function buildLiveSignals(match, livePayload, lg, htH, htA, h, a, curMin, phase) {
         var liveState = buildLivePatternState(match, livePayload);
         var signals = [];
         var seen = {};
+        var key = matchKey(match);
 
         if (liveState && hasAnySecondHalfGoal(match, livePayload, liveState)) {
             return signals;
@@ -1820,6 +2227,26 @@
             });
         }
 
+        if (isSummaryPatternSignalWindow(match, livePayload)) {
+            var now = Date.now();
+            Object.keys(liveCandidateDetails || {}).forEach(function(pid) {
+                if (seen[pid]) return;
+                var entries = liveCandidateDetails[pid] || [];
+                for (var i = 0; i < entries.length; i++) {
+                    var entry = entries[i];
+                    var entryKey = entry && (entry.key || (entry.match ? matchKey(entry.match) : ''));
+                    if (entryKey !== key) continue;
+                    var lastSeen = Number(entry.lastSeen || entry.seenAt || 0);
+                    if (!Number.isFinite(lastSeen) || now - lastSeen > LIVE_SUMMARY_PRE_GOAL_CARRY_MS) continue;
+                    if (hasAnySecondHalfGoal(match, livePayload, entry.state || null)) continue;
+                    if (entry.state && !matchesSummaryPatternLive(pid, entry.state)) continue;
+                    seen[pid] = true;
+                    signals.push({ id: pid, label: getPatternLabelById(pid) || pid });
+                    break;
+                }
+            });
+        }
+
         if (liveState && isNextPatternSignalWindow(match, livePayload)) {
             (INITIAL_DATA.nextPatterns || []).forEach(function(pattern) {
                 if (!pattern || !pattern.id || seen[pattern.id]) return;
@@ -1831,10 +2258,11 @@
             });
         }
 
-        if (liveState && isLatePatternSignalWindow(match, livePayload)) {
+        if (liveState) {
             (INITIAL_DATA.latePatterns || []).forEach(function(pattern) {
                 if (!pattern || !pattern.id || seen[pattern.id]) return;
                 if (!hasMinHits(pattern.id)) return;
+                if (!isLatePatternSignalWindow(pattern, match, livePayload, liveState)) return;
                 if (matchesLatePatternLive(pattern.id, liveState)) {
                     seen[pattern.id] = true;
                     signals.push({ id: pattern.id, label: pattern.label || pattern.id });
@@ -1856,6 +2284,11 @@
             var pid = row.getAttribute('data-pid') || (row.cells[0] ? row.cells[0].textContent.trim() : '');
             var deltaCell = row.querySelector('.delta-cell') || row.cells[5];
             if (!pid || !deltaCell) return;
+
+            var recordCell = row.cells[2];
+            if (recordCell && !recordCell.dataset.baseHtml) {
+                recordCell.dataset.baseHtml = recordCell.innerHTML;
+            }
 
             if (!deltaCell.dataset.baseHtml) {
                 deltaCell.dataset.baseHtml = deltaCell.innerHTML;
@@ -1905,16 +2338,32 @@
             var deltaCell = row.querySelector('.delta-cell') || row.cells[5];
             if (!pid || !deltaCell) return;
 
+            var recordCell = row.cells[2];
+            if (recordCell && !recordCell.dataset.baseHtml) {
+                recordCell.dataset.baseHtml = recordCell.innerHTML;
+            }
+
             if (!deltaCell.dataset.baseHtml) {
                 deltaCell.dataset.baseHtml = deltaCell.innerHTML;
             }
 
             var baseHtml = deltaCell.dataset.baseHtml;
             var liveCount = lateLiveCandidateCounts[pid] || 0;
+            var settledStats = getSettledLateStats(pid);
+            var settledHtml = '';
+            if (settledStats.win || settledStats.lose) {
+                var parts = [];
+                if (settledStats.win) parts.push('W ' + settledStats.win);
+                if (settledStats.lose) parts.push('L ' + settledStats.lose);
+                settledHtml = '<br><span style="color:#8b949e;font-weight:600;">settled ' + parts.join(' / ') + '</span>';
+            }
+            if (recordCell) {
+                recordCell.innerHTML = recordCell.dataset.baseHtml + (settledStats.win ? ' <span class="record-sub">+ live W ' + settledStats.win + '</span>' : '');
+            }
             if (liveCount > 0) {
-                deltaCell.innerHTML = baseHtml + '<br><span style="color:#58a6ff;font-weight:600;">live ' + liveCount + ' candidate' + (liveCount > 1 ? 's' : '') + (restoredLiveCandidateState ? ' (cached)' : '') + '</span>';
+                deltaCell.innerHTML = baseHtml + '<br><span style="color:#58a6ff;font-weight:600;">live ' + liveCount + ' candidate' + (liveCount > 1 ? 's' : '') + (restoredLiveCandidateState ? ' (cached)' : '') + '</span>' + settledHtml;
             } else {
-                deltaCell.innerHTML = baseHtml;
+                deltaCell.innerHTML = baseHtml + settledHtml;
             }
         });
     }
@@ -1922,20 +2371,41 @@
     function collectLiveCandidateCounts(matches, livePayload) {
         var counts = {};
         var details = {};
+        var currentMatchesByKey = {};
         (matches || []).forEach(function(match) {
             var statusText = getMatchStatusText(match);
             var s = parseStatus(statusText);
             var isHalftime = /^H\.?Time$/i.test(statusText);
             var key = matchKey(match);
+            currentMatchesByKey[key] = match;
             var state = buildLivePatternState(match, livePayload);
             if (!state) return;
             var hasSecondHalfGoal = hasAnySecondHalfGoal(match, livePayload, state);
             var isFirstHalf = s.half === '1H';
             var isPreSecondHalfGoalWindow = s.half === '2H' && !hasSecondHalfGoal;
-            if (!isFirstHalf && !isHalftime && !isPreSecondHalfGoalWindow) return;
 
             PATTERN_DEFS.forEach(function(pattern) {
                 if (matchesSummaryPatternLive(pattern.id, state)) {
+                    if (hasSecondHalfGoal) {
+                        if (requiresPriorCandidateForSettled(pattern.id) && !hasPriorSummaryCandidate(pattern.id, key, state)) {
+                            return;
+                        }
+                        if (!hasSettledSummaryResult(pattern.id, key)) {
+                            var settled = buildSettledSummaryResult(pattern.id, {
+                                match: match,
+                                state: state,
+                                kind: 'summary',
+                                key: key,
+                                status: statusText,
+                                score: getMatchScores(match)
+                            }, match, livePayload);
+                            if (settled) upsertSettledSummaryResult(settled);
+                        }
+                        return;
+                    }
+
+                    if (!isFirstHalf && !isHalftime && !isPreSecondHalfGoalWindow) return;
+
                     counts[pattern.id] = (counts[pattern.id] || 0) + 1;
                     if (!details[pattern.id]) details[pattern.id] = {};
                     details[pattern.id][key] = {
@@ -1944,10 +2414,19 @@
                         kind: 'summary',
                         key: key,
                         status: getMatchStatusText(match),
-                        score: getMatchScores(match)
+                        score: getMatchScores(match),
+                        provisional: isProvisionalSummaryCandidate(pattern.id, statusText),
+                        lastSeen: Date.now()
                     };
                 }
             });
+        });
+
+        mergeRecentSummaryCandidateDetails(details, currentMatchesByKey, livePayload);
+
+        counts = {};
+        Object.keys(details).forEach(function(pid) {
+            counts[pid] = Object.keys(details[pid]).length;
         });
 
         Object.keys(details).forEach(function(pid) {
@@ -2004,32 +2483,38 @@
     function collectLateLiveCandidateCounts(matches, livePayload) {
         var counts = {};
         var details = {};
+        var currentMatchesByKey = {};
         (matches || []).forEach(function(match) {
-            if (!isLatePatternSignalWindow(match, livePayload)) return;
-
+            currentMatchesByKey[matchKey(match)] = match;
             var state = buildLivePatternState(match, livePayload);
             if (!state) return;
             var key = matchKey(match);
 
             (INITIAL_DATA.latePatterns || []).forEach(function(pattern) {
                 if (!pattern || !pattern.id) return;
+                if (!isLatePatternSignalWindow(pattern, match, livePayload, state)) return;
                 if (matchesLatePatternLive(pattern.id, state)) {
                     counts[pattern.id] = (counts[pattern.id] || 0) + 1;
                     if (!details[pattern.id]) details[pattern.id] = {};
-                    details[pattern.id][key] = { match: match, state: state, kind: 'late' };
+                    details[pattern.id][key] = { match: match, state: state, kind: 'late', key: key, lastSeen: Date.now() };
                 }
             });
         });
 
-        lateLiveCandidateCounts = counts;
         restoredLiveCandidateState = false;
         if (liveCandidateExpiryTimer) {
             clearTimeout(liveCandidateExpiryTimer);
             liveCandidateExpiryTimer = null;
         }
+        mergeRecentLateCandidateDetails(details, currentMatchesByKey, livePayload);
+
+        counts = {};
         Object.keys(details).forEach(function(pid) {
+            counts[pid] = Object.keys(details[pid]).length;
             details[pid] = Object.values(details[pid]);
         });
+        settleRemovedLateCandidates(lateLiveCandidateDetails, details, matches, livePayload);
+        lateLiveCandidateCounts = counts;
         lateLiveCandidateDetails = details;
         saveLiveCandidateState();
         applyLateLiveCandidateIndicators();
@@ -2212,10 +2697,10 @@
                 syncLiveGoalMemory(livePayload.matches || [], livePayload);
                 pruneSettledSummaryResultsForLiveMatches(livePayload.matches || []);
                 updateHtMemory(livePayload.matches || []);
-                renderLiveCards(livePayload.matches || [], livePayload);
                 collectLiveCandidateCounts(livePayload.matches || [], livePayload);
                 collectNextLiveCandidateCounts(livePayload.matches || [], livePayload);
                 collectLateLiveCandidateCounts(livePayload.matches || [], livePayload);
+                renderLiveCards(livePayload.matches || [], livePayload);
                 refreshActivePanelContent();
             } catch (renderError) {
                 console.error('Live payload render error:', renderError);
@@ -2492,8 +2977,10 @@
     initSortFromDom();
 
     buildPatternData();
+    restorePatternStateMemory();
     restoreLiveCandidateState();
     restoreSettledSummaryState();
+    restoreSettledLateState();
     applyLiveCandidateIndicators();
     applyNextLiveCandidateIndicators();
     applyLateLiveCandidateIndicators();

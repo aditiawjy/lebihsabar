@@ -29,6 +29,7 @@ function resetMatchTrackingState(key) {
             sentP727374Signals.delete(signalKey);
         }
     }
+    p727374SignalsByMatchKey.delete(key);
     last1HGoalMinByMatchKey.delete(key);
     first1HGoalMinByMatchKey.delete(key);
     all1HGoalMinsByMatchKey.delete(key);
@@ -454,6 +455,17 @@ function countSwitchesFromScorers(scorers) {
     return switches;
 }
 
+function maxRunFromScorers(scorers) {
+    if (!Array.isArray(scorers) || !scorers.length) return 0;
+    let longest = 1;
+    let current = 1;
+    for (let i = 1; i < scorers.length; i += 1) {
+        current = scorers[i] === scorers[i - 1] ? current + 1 : 1;
+        longest = Math.max(longest, current);
+    }
+    return longest;
+}
+
 function buildP727374State(match) {
     const key = createMatchKey(match);
     const status = String(match?.status || '').trim();
@@ -476,10 +488,30 @@ function buildP727374State(match) {
     const first = mins[0];
     const last = mins[mins.length - 1];
     const sequence = scorers.join('');
+    const switches = countSwitchesFromScorers(scorers);
+    const minGap = getMinGapFromMins(mins);
+    const maxGap = getMaxGapFromMins(mins);
     const signature = `${league}|${first}|${last}|${sequence}|${score.home}-${score.away}`;
-    const shape = `${league}|${mins.length}|${first}|${last}|${score.home}-${score.away}|${countSwitchesFromScorers(scorers)}|${getMinGapFromMins(mins)}|${getMaxGapFromMins(mins)}`;
+    const shape = `${league}|${mins.length}|${first}|${last}|${score.home}-${score.away}|${switches}|${minGap}|${maxGap}`;
+    const state = {
+        home: match?.homeTeam || '',
+        away: match?.awayTeam || '',
+        league,
+        h1c: mins.length,
+        sc_h: score.home,
+        sc_a: score.away,
+        h1_first: first,
+        h1_last: last,
+        h1s: scorers.slice(),
+        switches,
+        max_gap: maxGap,
+        min_gap: minGap,
+        max_run: maxRunFromScorers(scorers),
+        all_gaps_ge3: mins.length < 2 || mins.every((min, idx) => idx === 0 || min - mins[idx - 1] >= 3),
+        goal_mins: mins.slice()
+    };
 
-    return { key, status, score, league, mins, sequence, signature, shape };
+    return { key, status, score, league, mins, sequence, signature, shape, state };
 }
 
 async function getP727374SignatureConfig() {
@@ -523,6 +555,17 @@ async function trackP727374GoalSignal(matches) {
         if (!matched.length) continue;
 
         const signalKey = `${state.key}|${matched.join('+')}|${state.signature}|${state.shape}`;
+        p727374SignalsByMatchKey.set(state.key, {
+            ids: matched.slice(),
+            signature: state.signature,
+            shape: state.shape,
+            status: state.status,
+            score: `${state.score.home}-${state.score.away}`,
+            mins: state.mins.slice(),
+            sequence: state.sequence,
+            state: state.state,
+            seenAt: Date.now()
+        });
         if (sentP727374Signals.has(signalKey)) continue;
 
         sentP727374Signals.add(signalKey);

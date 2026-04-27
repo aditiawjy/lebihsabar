@@ -22,6 +22,7 @@ last_payload = {
     "allGoalScorers": {},
     "all2HGoalMinutes": {},
     "all2HScorers": {},
+    "patternSignals": {},
     "htScores": {},
     "timestamp": None,
 }
@@ -64,6 +65,7 @@ def receive_dashboard_live_data():
             "allGoalScorers": data.get("allGoalScorers", {}) or {},
             "all2HGoalMinutes": data.get("all2HGoalMinutes", {}) or {},
             "all2HScorers": data.get("all2HScorers", {}) or {},
+            "patternSignals": data.get("patternSignals", {}) or {},
             "htScores": data.get("htScores", {}) or {},
             "timestamp": data.get("timestamp") or datetime.now().isoformat(),
         }

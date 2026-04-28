@@ -526,8 +526,6 @@ async function getP727374SignatureConfig() {
     const patterns = payload?.patterns || {};
     p727374SignatureCache = {
         P72: new Set(Array.isArray(patterns.P72) ? patterns.P72 : []),
-        P73: new Set(Array.isArray(patterns.P73) ? patterns.P73 : []),
-        P74: new Set(Array.isArray(patterns.P74) ? patterns.P74 : []),
     };
     p727374SignatureFetchedAt = now;
     return p727374SignatureCache;
@@ -540,7 +538,7 @@ async function trackP727374GoalSignal(matches) {
     try {
         config = await getP727374SignatureConfig();
     } catch (error) {
-        await setStatus({ error: `P72/P73/P74 signatures failed: ${error.message || error}` });
+        await setStatus({ error: `P72 signatures failed: ${error.message || error}` });
         return;
     }
 
@@ -550,8 +548,6 @@ async function trackP727374GoalSignal(matches) {
 
         const matched = [];
         if (config.P72.has(state.signature)) matched.push('P72');
-        if (config.P73.has(state.signature)) matched.push('P73');
-        if (config.P74.has(state.shape)) matched.push('P74');
         if (!matched.length) continue;
 
         const signalKey = `${state.key}|${matched.join('+')}|${state.signature}|${state.shape}`;

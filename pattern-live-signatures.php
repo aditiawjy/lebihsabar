@@ -12,17 +12,6 @@ function pattern_signature(array $m): string {
         . ($m['sc_h'] ?? '') . '-' . ($m['sc_a'] ?? '');
 }
 
-function shape_signature(array $m): string {
-    return ($m['league'] ?? '') . '|'
-        . ($m['h1c'] ?? '') . '|'
-        . ($m['h1_first'] ?? '') . '|'
-        . ($m['h1_last'] ?? '') . '|'
-        . ($m['sc_h'] ?? '') . '-' . ($m['sc_a'] ?? '') . '|'
-        . ($m['switches'] ?? '') . '|'
-        . ($m['min_gap'] ?? '') . '|'
-        . ($m['max_gap'] ?? '');
-}
-
 $data = getCachedDashboardData(__DIR__ . '/goal_log.csv', __DIR__ . '/dashboard_cache.json');
 $patterns = $data['patterns'] ?? [];
 $out = [
@@ -30,8 +19,6 @@ $out = [
     'generated_at' => $data['generated_at'] ?? null,
     'patterns' => [
         'P72' => [],
-        'P73' => [],
-        'P74' => [],
     ],
 ];
 
@@ -41,7 +28,7 @@ foreach ($patterns as $pattern) {
 
     $signatures = [];
     foreach (($pattern['data'] ?? []) as $m) {
-        $sig = $id === 'P74' ? shape_signature($m) : pattern_signature($m);
+        $sig = pattern_signature($m);
         if ($sig !== '') $signatures[$sig] = true;
     }
     $out['patterns'][$id] = array_keys($signatures);

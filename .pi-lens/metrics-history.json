@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "files": {
+    "dashboard.js": {
+      "latest": {
+        "commit": "db8c61f",
+        "timestamp": "2026-04-29T14:35:34.362Z",
+        "mi": 0,
+        "cognitive": 4218,
+        "nesting": 8,
+        "lines": 2791,
+        "maxCyclomatic": 6407,
+        "entropy": 6.26
+      },
+      "history": [
+        {
+          "commit": "db8c61f",
+          "timestamp": "2026-04-29T14:35:34.362Z",
+          "mi": 0,
+          "cognitive": 4218,
+          "nesting": 8,
+          "lines": 2791,
+          "maxCyclomatic": 6407,
+          "entropy": 6.26
+        }
+      ],
+      "trend": "stable"
+    }
+  },
+  "capturedAt": "2026-04-29T14:35:39.364Z"
+}

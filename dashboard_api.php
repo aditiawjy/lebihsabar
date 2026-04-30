@@ -8,7 +8,7 @@ header('X-Frame-Options: DENY');
 require_once __DIR__ . '/dashboard_cache.php';
 require_once __DIR__ . '/pattern_snapshot.php';
 
-const SUMMARY_MIN_SAMPLE = 15;
+const SUMMARY_MIN_SAMPLE = 10;
 const NEXT_MIN_SAMPLE = 0;
 const LATE_MIN_SAMPLE = 9;
 

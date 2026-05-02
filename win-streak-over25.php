@@ -106,25 +106,30 @@ function calculateWinStreak(array $matches, string $team, int $threshold): array
     ];
 }
 
-function findNextMatch(string $team, array $allMatches): ?array {
+function findNextMatchFromTeamMatches(string $team, array $teamMatches): ?array {
     $today = date('Y-m-d');
-    
-    foreach ($allMatches as $match) {
+    $next = null;
+    $nextTs = PHP_INT_MAX;
+
+    foreach ($teamMatches as $match) {
         $matchDate = substr($match['match_time'] ?? '', 0, 10);
+        if ($matchDate < $today) continue;
+
+        $ts = strtotime($match['match_time'] ?? '') ?: PHP_INT_MAX;
+        if ($ts >= $nextTs) continue;
+
         $home = trim($match['home_team'] ?? '');
         $away = trim($match['away_team'] ?? '');
-        
-        if (($home === $team || $away === $team) && $matchDate >= $today) {
-            return [
-                'date' => $matchDate,
-                'time' => substr($match['match_time'] ?? '', 11, 5),
-                'vs' => $team === $home ? $away : $home,
-                'is_home' => $team === $home
-            ];
-        }
+        $nextTs = $ts;
+        $next = [
+            'date' => $matchDate,
+            'time' => substr($match['match_time'] ?? '', 11, 5),
+            'vs' => $team === $home ? $away : $home,
+            'is_home' => $team === $home
+        ];
     }
-    
-    return null;
+
+    return $next;
 }
 
 // Read all matches
@@ -159,6 +164,16 @@ usort($allMatches, function($a, $b) {
     return $tb <=> $ta;
 });
 
+// Index matches once per team. The previous implementation scanned the full CSV
+// for every team, which can make the page wait 20+ seconds and look blank.
+$matchesByTeam = [];
+foreach ($allMatches as $match) {
+    $home = trim($match['home_team'] ?? '');
+    $away = trim($match['away_team'] ?? '');
+    if ($home !== '') $matchesByTeam[$home][] = $match;
+    if ($away !== '') $matchesByTeam[$away][] = $match;
+}
+
 // Process each team
 $streakData = [];
 $searchTerm = trim($_GET['search'] ?? '');
@@ -172,7 +187,7 @@ foreach ($allTeams as $team => $matchCount) {
         continue;
     }
     
-    $teamMatches = getTeamMatches($team, $allMatches);
+    $teamMatches = $matchesByTeam[$team] ?? [];
     if (count($teamMatches) < 3) continue; // Minimum 3 total matches
     
     $streak = calculateWinStreak($teamMatches, $team, $marketConfig['threshold']);
@@ -193,7 +208,7 @@ foreach ($allTeams as $team => $matchCount) {
         'current_streak' => $streak['current'],
         'max_streak' => $streak['max'],
         'last_matches' => $streak['last_matches'],
-        'next_match' => findNextMatch($team, $allMatches)
+        'next_match' => findNextMatchFromTeamMatches($team, $teamMatches)
     ];
 }
 

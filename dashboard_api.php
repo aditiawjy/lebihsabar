@@ -11,12 +11,13 @@ require_once __DIR__ . '/pattern_snapshot.php';
 const SUMMARY_MIN_SAMPLE = 10;
 const NEXT_MIN_SAMPLE = 0;
 const LATE_MIN_SAMPLE = 9;
+const NO2H_MIN_SAMPLE = 5;
 
 $csvFile = __DIR__ . '/goal_log.csv';
 $data = getCachedDashboardData($csvFile, __DIR__ . '/dashboard_cache.json');
 
 $currentSnapTime = time();
-$currentSnap = computeSnapshotData($data['patterns'], $data['next_patterns'], $data['late_patterns'] ?? []);
+$currentSnap = computeSnapshotData($data['patterns'], $data['next_patterns'], $data['late_patterns'] ?? [], $data['no2h_patterns'] ?? []);
 $oldSnap = getSnapshotHourAgo($currentSnapTime);
 $oldSnapData = $oldSnap ? $oldSnap['data'] : [];
 $oldSnapTime = $oldSnap ? $oldSnap['time'] : null;
@@ -42,11 +43,18 @@ $response = [
     'patterns' => buildPatternSummary($data['patterns'], $oldSnapData, $oldSnapTime, $currentSnapTime),
     'next_patterns' => buildNextPatternSummary($data['next_patterns'], $oldSnapData, $oldSnapTime, $currentSnapTime),
     'late_patterns' => buildLatePatternSummary($data['late_patterns'] ?? [], $oldSnapData, $oldSnapTime, $currentSnapTime),
+    'no2h_patterns' => buildNo2hPatternSummary($data['no2h_patterns'] ?? [], $oldSnapData, $oldSnapTime, $currentSnapTime),
     'pattern_defs' => $patternDefs,
+    'no2h_pattern_defs' => array_map(fn($p) => [
+        'id' => $p['id'],
+        'label' => $p['label'],
+        'tags' => extractPatternTags($p['id'], $p['label']),
+    ], $data['no2h_patterns'] ?? []),
     'all_matches' => $data['all_matches'],
     'pattern_details' => $data['patterns'],
     'next_pattern_details' => $data['next_patterns'],
     'late_pattern_details' => $data['late_patterns'] ?? [],
+    'no2h_pattern_details' => $data['no2h_patterns'] ?? [],
 ];
 
 echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -156,6 +164,39 @@ function buildLatePatternSummary(array $latePatterns, array $oldSnapData, ?int $
     }, $latePatterns);
 }
 
+function buildNo2hPatternSummary(array $no2hPatterns, array $oldSnapData, ?int $rangeStart, ?int $rangeEnd): array {
+    $no2hPatterns = array_values(array_filter($no2hPatterns, fn($np) => count($np['data']) >= NO2H_MIN_SAMPLE));
+
+    usort($no2hPatterns, function($a, $b) {
+        $ta = count($a['data']); $tb = count($b['data']);
+        $ha = $ta > 0 ? count(array_filter($a['data'], fn($m) => ($m['h2c'] ?? 0) === 0)) / $ta : 0;
+        $hb = $tb > 0 ? count(array_filter($b['data'], fn($m) => ($m['h2c'] ?? 0) === 0)) / $tb : 0;
+        if ($hb != $ha) return $hb <=> $ha;
+        return $tb <=> $ta;
+    });
+
+    return array_map(function($np) use ($oldSnapData, $rangeStart, $rangeEnd) {
+        $total = count($np['data']);
+        $hits = count(array_filter($np['data'], fn($m) => ($m['h2c'] ?? 0) === 0));
+        $pct = $total > 0 ? round($hits / $total * 100) : 0;
+        $cls = $pct >= 95 ? 'pct-high' : ($pct >= 85 ? 'pct-mid' : 'pct-low');
+        $badge = $pct >= 95 ? 'badge-green' : ($pct >= 85 ? 'badge-yellow' : 'badge-red');
+        $status = $pct >= 95 ? 'EXCELLENT' : ($pct >= 85 ? 'GOOD' : 'WARNING');
+        $delta = buildRangeDelta($np['data'], fn($m) => ($m['h2c'] ?? 0) === 0, $rangeStart, $rangeEnd);
+        return [
+            'id' => $np['id'],
+            'label' => $np['label'],
+            'total' => $total,
+            'hits' => $hits,
+            'pct' => $pct,
+            'cls' => $cls,
+            'badge' => $badge,
+            'status' => $status,
+            'delta' => $delta,
+        ];
+    }, $no2hPatterns);
+}
+
 
 
 function buildSnapshotLabel(int $oldSnapTime): string {
@@ -173,5 +214,6 @@ function extractPatternTags(string $id, string $label): array {
     if (strpos($label, 'HOME') !== false || strpos($label, 'Home') !== false) $tags[] = 'home';
     if (strpos($label, 'selisih') !== false || strpos($label, 'Selisih') !== false) $tags[] = 'diff';
     if (strpos($id, 'NG') === 0) $tags[] = 'nextgoal';
+    if (strpos($id, 'N2H') === 0 || stripos($label, 'No 2H') !== false) $tags[] = 'no2h';
     return $tags;
 }

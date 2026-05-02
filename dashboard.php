@@ -36,6 +36,7 @@ require_once __DIR__ . '/pattern_snapshot.php';
 const SUMMARY_MIN_SAMPLE = 10;
 const NEXT_MIN_SAMPLE = 0;
 const LATE_MIN_SAMPLE = 9;
+const NO2H_MIN_SAMPLE = 5;
 
 $teamConfig = require __DIR__ . '/dashboard_config.php';
 
@@ -44,7 +45,7 @@ $cacheFile = __DIR__ . '/dashboard_cache.json';
 $data = getCachedDashboardData($csvFile, $cacheFile);
 $currentSnapTime = time();
 
-$currentSnap = computeSnapshotData($data['patterns'], $data['next_patterns'], $data['late_patterns'] ?? []);
+$currentSnap = computeSnapshotData($data['patterns'], $data['next_patterns'], $data['late_patterns'] ?? [], $data['no2h_patterns'] ?? []);
 $oldSnap = getSnapshotHourAgo($currentSnapTime);
 $oldSnapData = $oldSnap ? $oldSnap['data'] : [];
 $oldSnapTime = $oldSnap ? $oldSnap['time'] : null;
@@ -53,6 +54,7 @@ saveSnapshot($currentSnap, $currentSnapTime);
 $patterns = $data['patterns'];
 $nextPatterns = $data['next_patterns'];
 $latePatterns = $data['late_patterns'] ?? [];
+$no2hPatterns = $data['no2h_patterns'] ?? [];
 $visiblePatterns = array_values(array_filter($patterns, fn($p) => count($p['data']) >= SUMMARY_MIN_SAMPLE));
 usort($nextPatterns, function($a, $b) {
     if ($a['next'] !== $b['next']) {
@@ -73,6 +75,13 @@ usort($latePatterns, function($a, $b) {
     $ta = count($a['data']); $tb = count($b['data']);
     $ha = $ta > 0 ? count(array_filter($a['data'], fn($m) => $m['has_late'])) / $ta : 0;
     $hb = $tb > 0 ? count(array_filter($b['data'], fn($m) => $m['has_late'])) / $tb : 0;
+    if ($hb != $ha) return $hb <=> $ha;
+    return $tb <=> $ta;
+});
+usort($no2hPatterns, function($a, $b) {
+    $ta = count($a['data']); $tb = count($b['data']);
+    $ha = $ta > 0 ? count(array_filter($a['data'], fn($m) => ($m['h2c'] ?? 0) === 0)) / $ta : 0;
+    $hb = $tb > 0 ? count(array_filter($b['data'], fn($m) => ($m['h2c'] ?? 0) === 0)) / $tb : 0;
     if ($hb != $ha) return $hb <=> $ha;
     return $tb <=> $ta;
 });
@@ -150,6 +159,41 @@ if (!$csvExists): ?>
         </table>
     </div>
 
+    <div class="section" id="no2h-section">
+        <h2>No 2H Goal Patterns</h2>
+        <table id="no2h-table">
+            <thead>
+            <tr>
+                <th>#</th><th>Pattern</th><th>Record</th><th>Akurasi</th><th>Status</th>
+                <th id="no2h-snap-header" style="color:#8b949e;white-space:nowrap;">+Sample<?= $oldSnapTime ? ' (' . date('H:i', $oldSnapTime) . 'â†’' . date('H:i', $currentSnapTime) . ')' : '' ?></th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody id="no2h-body">
+<?php foreach ($no2hPatterns as $p):
+    if (count($p['data']) < NO2H_MIN_SAMPLE) continue;
+    $total = count($p['data']);
+    $hits = count(array_filter($p['data'], fn($m) => ($m['h2c'] ?? 0) === 0));
+    $pct = $total > 0 ? round($hits/$total*100) : 0;
+    $cls = $pct >= 95 ? 'pct-high' : ($pct >= 85 ? 'pct-mid' : 'pct-low');
+    $badge = $pct >= 95 ? 'badge-green' : ($pct >= 85 ? 'badge-yellow' : 'badge-red');
+    $status = $pct >= 95 ? 'EXCELLENT' : ($pct >= 85 ? 'GOOD' : 'WARNING');
+    $delta = buildRangeDelta($p['data'], fn($m) => ($m['h2c'] ?? 0) === 0, $oldSnapTime, $currentSnapTime);
+?>
+            <tr data-pid="<?= esc($p['id']) ?>" data-total="<?= $total ?>" data-hits="<?= $hits ?>" data-pct="<?= $pct ?>">
+                <td><strong><?= esc($p['id']) ?></strong></td>
+                <td><?= esc($p['label']) ?></td>
+                <td><?= $hits ?>/<?= $total ?></td>
+                <td class="pct <?= $cls ?>"><?= $pct ?>%</td>
+                <td><span class="badge <?= $badge ?>"><?= $status ?></span></td>
+                <td class="delta-cell" style="font-size:0.8rem;"><?= $delta['html'] ?></td>
+                <td><button class="expand-btn" data-pid="<?= esc($p['id']) ?>">Detail</button></td>
+            </tr>
+<?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+
     <p class="last-update" id="last-update">
         CSV last modified: <?= $csvTime ? date('d/m/Y H:i:s', $csvTime) : '-' ?> |
         Total <?= $totalMatches ?> matches |
@@ -168,6 +212,7 @@ echo json_encode([
     'patterns' => $patterns,
     'nextPatterns' => $nextPatterns,
     'latePatterns' => $latePatterns,
+    'no2hPatterns' => $no2hPatterns,
     'teamConfig' => $teamConfig,
     'patternDefs' => $patternDefs,
     'csvTime' => $csvTime,

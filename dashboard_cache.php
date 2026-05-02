@@ -53,6 +53,7 @@ function buildDashboardData(string $csvFile, bool $csvExists): array {
     $patterns = computePatterns($parsedMatches);
     $nextPatterns = computeNextPatterns($parsedMatches);
     $latePatterns = computeLatePatterns($parsedMatches);
+    $no2hPatterns = computeNo2hPatterns($parsedMatches);
 
     return [
         'generated_at' => time(),
@@ -65,6 +66,7 @@ function buildDashboardData(string $csvFile, bool $csvExists): array {
         'patterns' => $patterns,
         'next_patterns' => $nextPatterns,
         'late_patterns' => $latePatterns,
+        'no2h_patterns' => $no2hPatterns,
         'all_matches' => $parsedMatches,
     ];
 }
@@ -301,6 +303,48 @@ function getTeamConfig(): array {
     return $config;
 }
 
+function matchesP12Base(array $m): bool {
+    return ($m['h1c'] ?? 0) >= 4
+        && (($m['h1_last'] ?? -1) - ($m['h1_first'] ?? -1)) >= 6
+        && ($m['min_gap'] ?? 0) >= 1
+        && ($m['h1_last'] ?? -1) <= 9
+        && ($m['h1_first'] ?? -1) >= 2
+        && ($m['max_run'] ?? 99) <= 2
+        && !(($m['league'] ?? '') === '15min'
+            && ($m['h1_first'] ?? -1) === 2
+            && ($m['h1_last'] ?? -1) === 8
+            && ($m['sc_h'] ?? -1) === 2
+            && ($m['sc_a'] ?? -1) === 2
+            && ($m['h1s'] ?? []) === ['A', 'H', 'H', 'A']);
+}
+
+function matchesP12Expanded(array $m): bool {
+    if (matchesP12Base($m)) {
+        return true;
+    }
+
+    if (($m['h1c'] ?? 0) < 4) {
+        return false;
+    }
+
+    $league = $m['league'] ?? '';
+    $first = $m['h1_first'] ?? -1;
+    $last = $m['h1_last'] ?? -1;
+    $seq = implode('', $m['h1s'] ?? []);
+
+    return
+        ($league === '15min' && $seq === 'HAHA' && $first <= 3 && $last >= 6)
+        || ($league === '20min' && $seq === 'AHAH' && $first <= 2 && $last >= 8)
+        || ($league === '15min' && $seq === 'AHAH' && $first <= 2)
+        || ($league === '15min' && $seq === 'AHHH' && $first <= 1)
+        || ($league === '20min' && $seq === 'HHAA' && $first <= 1)
+        || ($league === '20min' && $seq === 'HAAH' && $first <= 3 && $last >= 6)
+        || ($league === '20min' && $seq === 'AHAA' && $first <= 1 && $last >= 5)
+        || ($league === '15min' && $seq === 'HHHA' && $first === 0 && $last >= 6)
+        || ($league === '20min' && $seq === 'AAAH' && $first <= 1)
+        || ($league === '15min' && $seq === 'AAAA' && $first <= 4 && $last >= 7);
+}
+
 function computePatterns(array $matches): array {
     $tc = getTeamConfig();
     $p24_teams = $tc['p24_teams'];
@@ -346,7 +390,11 @@ function computePatterns(array $matches): array {
         ],
         ['id'=>'P7',  'label'=>'Seri 1-1 + gap >= 5 mnt + first goal >=3, bukan 16min AH 1-1 mnt 3-8, bukan Netherlands AH 1-1 mnt 4-9', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']==2 && $m['sc_h']==1 && $m['sc_a']==1 && $m['max_gap']>=5 && $m['h1_first']>=3 && !($m['league']==='16min' && $m['h1_first']===3 && $m['h1_last']===8 && $m['h1s']===['A','H']) && !(trim($m['home'])==='Netherlands (V)' && $m['league']==='20min' && $m['h1_first']===4 && $m['h1_last']===9 && $m['h1s']===['A','H'] && $m['sc_h']===1 && $m['sc_a']===1)))],
         ['id'=>'P9',  'label'=>'AH seri 1-1 + gap >= 5 mnt + first goal >=3, bukan 16min AH 1-1 mnt 3-8', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']==2 && $m['sc_h']==1 && $m['sc_a']==1 && $m['h1s']==['A','H'] && $m['max_gap']>=5 && $m['h1_first']>=3 && !($m['league']==='16min' && $m['h1_first']===3 && $m['h1_last']===8 && $m['h1s']===['A','H'])))],
-        ['id'=>'P12', 'label'=>'Total gol 1H >= 4 + span >= 6 mnt + min_gap>=1 + lm<=9 + fm>=1 + first!=1 + max_run<=2, kecuali Manchester City vs Arsenal', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c'] >= 4 && ($m['h1_last']-$m['h1_first']) >= 6 && $m['min_gap'] >= 1 && $m['h1_last'] <= 9 && $m['h1_first'] >= 1 && $m['h1_first'] != 1 && $m['max_run'] <= 2 && !(trim($m['home'])==='Manchester City (V)' && trim($m['away'])==='Arsenal (V)')))],
+        [
+            'id' => 'P12',
+            'label' => 'Total gol 1H >= 4 + span >= 6 mnt + min_gap>=1 + lm<=9 + first>=2 + max_run<=2 + struktur multi-branch (HAHA/AHAH/AHHH/HHAA/HAAH/AHAA/HHHA/AAAH/AAAA), tanpa team block',
+            'data' => array_values(array_filter($matches, fn($m) => matchesP12Expanded($m))),
+        ],
         ['id'=>'P13', 'label'=>'First 2\' + last 7\' + selisih <=2 + min_gap>=3 + switches>=1, kecuali Man City vs Liverpool dan England vs Spain', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']>=2 && $m['h1_first']===2 && $m['h1_last']===7 && abs($m['sc_h']-$m['sc_a'])<=2 && $m['min_gap']>=3 && $m['switches']>=1 && !(trim($m['home'])==='Manchester City (V)' && trim($m['away'])==='Liverpool (V)') && !(trim($m['home'])==='England (V)' && trim($m['away'])==='Spain (V)')))],
         ['id'=>'P14', 'label'=>'Seri + gap >= 4 mnt + span >= 5 mnt + first goal >=3 + min_gap>=2, bukan 16min AH 1-1 mnt 3-8, bukan Netherlands AH 1-1 mnt 4-9', 'data'=>array_values(array_filter($matches, fn($m) => $m['h1c']>=2 && $m['sc_h']===$m['sc_a'] && $m['sc_h']>0 && $m['max_gap']>=4 && ($m['h1_last']-$m['h1_first'])>=5 && $m['h1_first']>=3 && $m['min_gap']>=2 && !($m['league']==='16min' && $m['h1_first']===3 && $m['h1_last']===8 && $m['h1s']===['A','H']) && !(trim($m['home'])==='Netherlands (V)' && $m['league']==='20min' && $m['h1_first']===4 && $m['h1_last']===9 && $m['h1s']===['A','H'] && $m['sc_h']===1 && $m['sc_a']===1)))],
         ['id'=>'P15', 'label'=>'HT 2-2 + max_gap<=2 + bukan last=8 atau (first=0 dan last=5), bukan 15min AHHA mnt 1-2-4-6, bukan 20min HAAH 2-2 mnt 0-5, atau 20min + HT 2-2 + max_gap=3 + first=0 + last<=7, atau 16min + HT 2-2 + max_gap=3 + first>=2, atau 15min + HT 2-2 + max_gap=3 + first=1 + last<=6', 'data'=>array_values(array_filter($matches, fn($m) => (($m['sc_h']==2 && $m['sc_a']==2 && $m['max_gap']<=2 && $m['h1_last']!=8 && !($m['h1_first']===0 && $m['h1_last']===5)) || ($m['league']==='20min' && $m['sc_h']==2 && $m['sc_a']==2 && $m['max_gap']===3 && $m['h1_first']===0 && $m['h1_last']<=7) || ($m['league']==='16min' && $m['sc_h']==2 && $m['sc_a']==2 && $m['max_gap']===3 && $m['h1_first']>=2) || ($m['league']==='15min' && $m['sc_h']==2 && $m['sc_a']==2 && $m['max_gap']===3 && $m['h1_first']===1 && $m['h1_last']<=6)) && !($m['league']==='15min' && $m['h1s']===['A','H','H','A'] && array_map(fn($g) => $g['min'], $m['h1'])===[1,2,4,6]) && !($m['league']==='20min' && $m['h1_first']===0 && $m['h1_last']===5 && $m['h1s']===['H','A','A','H'] && $m['sc_h']===2 && $m['sc_a']===2)))],
@@ -390,7 +438,7 @@ function computePatterns(array $matches): array {
                 $m['league']==='15min' && $m['h1c']>=4 && abs($m['sc_h']-$m['sc_a'])<=1 && $m['min_gap']>=1 && $m['h1_last']>=6 && ($m['switches']>=2 || $m['h1_first']>=1) && !($m['h1s']===['A','H','H','A'] && $m['max_gap']===2 && ($m['h1_last']>=8 || $m['h1_first']<=1)) && !($m['h1_first']===3 && $m['h1_last']===8 && $m['h1s']===['A','A','H','H'] && $m['sc_h']===2 && $m['sc_a']===2 && $m['max_gap']===2)
             )),
         ],
-        ['id'=>'P34', 'label'=>'First AWAY + last HOME + span >=6 + gol 1H >=4, 15min, bukan AAHH 2-2 mnt 0-7 min_gap=2, bukan AHAHH 3-2 mnt 0-7', 'data'=>array_values(array_filter($matches, fn($m) => $m['league']==='15min' && count($m['h1s'])>0 && $m['h1s'][0]==='A' && $m['h1s'][count($m['h1s'])-1]==='H' && ($m['h1_last']-$m['h1_first'])>=6 && $m['h1c']>=4 && !($m['h1_first']===0 && $m['h1_last']===7 && $m['h1s']===['A','A','H','H'] && $m['sc_h']===2 && $m['sc_a']===2 && $m['min_gap']===2) && !($m['h1_first']===0 && $m['h1_last']===7 && $m['h1s']===['A','H','A','H','H'] && $m['sc_h']===3 && $m['sc_a']===2)))],
+        ['id'=>'P34', 'label'=>'First AWAY + last HOME + gol 1H >=4, 15min + (span >=6 atau first=1 + last=6), bukan AAHH 2-2 mnt 0-7 min_gap=2, bukan AHAHH 3-2 mnt 0-7', 'data'=>array_values(array_filter($matches, fn($m) => $m['league']==='15min' && count($m['h1s'])>0 && $m['h1s'][0]==='A' && $m['h1s'][count($m['h1s'])-1]==='H' && $m['h1c']>=4 && ((($m['h1_last']-$m['h1_first'])>=6) || ($m['h1_first']===1 && $m['h1_last']===6)) && !($m['h1_first']===0 && $m['h1_last']===7 && $m['h1s']===['A','A','H','H'] && $m['sc_h']===2 && $m['sc_a']===2 && $m['min_gap']===2) && !($m['h1_first']===0 && $m['h1_last']===7 && $m['h1s']===['A','H','A','H','H'] && $m['sc_h']===3 && $m['sc_a']===2)))],
         [
             'id'=>'P35',
             'label'=>'AWAY shortlist: Mexico / Belgium / Germany / AS Monaco / Wales / Portugal / Osasuna / Austria / Poland / Croatia / Algeria + gol 1H>=2 + first>=3 + max_run<=2 + last gol 1H>=5 + min_gap>=2 + bukan HH mnt 3&5 + bukan 16min HH 2-0 mnt 4-6 + bukan 16min HH 2-0 first>=5 last=7 + bukan Poland 16min AA 0-2 mnt 5-7 + bukan 20min AA 0-2 mnt 4-9 + bukan HA 1-1 mnt 3-5 + bukan HAA mnt 3-7 + bukan 20min AH 1-1 mnt 4-6, atau 16min shortlist first=1 + h1c>=3, atau shortlist first=0 + h1c>=3 + last>=6 + last scorer AWAY + bukan 20min AHA 1-2 mnt 0-7, atau Portugal single AWAY bukan mnt 0, atau h1c=3 scorer HHA min_gap=1',
@@ -680,7 +728,37 @@ function computeLatePatterns(array $matches): array {
     return $latePatterns;
 }
 
-function computeSnapshotData(array $patterns, array $nextPatterns, array $latePatterns = []): array {
+function matchesNo2hPattern1(array $m): bool {
+    $seq = implode('', $m['h1s'] ?? []);
+    $h1s = $m['h1s'] ?? [];
+    $firstScorer = count($h1s) ? $h1s[0] : null;
+    $lastScorer = count($h1s) ? $h1s[count($h1s) - 1] : null;
+    $span = ($m['h1_last'] ?? -1) - ($m['h1_first'] ?? -1);
+    $diff = abs(($m['sc_h'] ?? 0) - ($m['sc_a'] ?? 0));
+
+    return
+        (($m['league'] ?? '') === '15min' && ($m['h1c'] ?? 0) === 4 && ($m['sc_h'] ?? 0) > ($m['sc_a'] ?? 0) && $span <= 5 && ($m['max_run'] ?? 0) === 3)
+        || (($m['league'] ?? '') === '15min' && $seq === 'HH' && ($m['h1_first'] ?? -1) === 5 && ($m['h1_last'] ?? -1) <= 6)
+        || (($m['league'] ?? '') === '20min' && $seq === 'HH' && ($m['h1_first'] ?? -1) === 0 && ($m['h1_last'] ?? -1) <= 2)
+        || (($m['league'] ?? '') === '20min' && ($m['h1c'] ?? 0) === 2 && $lastScorer === 'A' && ($m['h1_first'] ?? -1) === 1 && ($m['h1_last'] ?? -1) === 4)
+        || (($m['league'] ?? '') === '15min' && ($m['h1c'] ?? 0) <= 2 && $lastScorer === 'A' && ($m['h1_first'] ?? -1) >= 4 && ($m['h1_last'] ?? -1) === 8)
+        || (($m['league'] ?? '') === '20min' && $diff === 1 && $lastScorer === 'H' && ($m['h1_first'] ?? -1) === 0 && ($m['h1_last'] ?? -1) >= 9)
+        || (($m['league'] ?? '') === '15min' && ($m['h1c'] ?? 0) >= 4 && ($m['sc_a'] ?? 0) > ($m['sc_h'] ?? 0) && ($m['max_gap'] ?? -1) === 1 && ($m['max_run'] ?? 99) <= 4)
+        || (($m['league'] ?? '') === '15min' && ($m['h1c'] ?? 0) === 4 && $firstScorer === 'H' && $lastScorer === 'A' && ($m['h1_last'] ?? -1) === 5 && ($m['max_run'] ?? 99) <= 3);
+}
+
+function computeNo2hPatterns(array $matches): array {
+    return [
+        [
+            'id' => 'N2H1',
+            'label' => 'No 2H Goal: family reverse dari pola 1H (15/20min, struktur HH/last scorer/gap/run), tanpa team block',
+            'target' => 'no_2h_goal',
+            'data' => array_values(array_filter($matches, fn($m) => matchesNo2hPattern1($m))),
+        ],
+    ];
+}
+
+function computeSnapshotData(array $patterns, array $nextPatterns, array $latePatterns = [], array $no2hPatterns = []): array {
     $snap = [];
     foreach ($patterns as $p) {
         $t = count($p['data']);
@@ -698,6 +776,11 @@ function computeSnapshotData(array $patterns, array $nextPatterns, array $latePa
         $target = $lp['target'] ?? 'has_late';
         $h = count(array_filter($lp['data'], fn($m) => $m[$target] ?? false));
         $snap[$lp['id']] = ['t' => $t, 'h' => $h, 'sig' => buildSnapshotSignature($lp['id'], $lp['label'], $target)];
+    }
+    foreach ($no2hPatterns as $np) {
+        $t = count($np['data']);
+        $h = count(array_filter($np['data'], fn($m) => ($m['h2c'] ?? 0) === 0));
+        $snap[$np['id']] = ['t' => $t, 'h' => $h, 'sig' => buildSnapshotSignature($np['id'], $np['label'], 'no_2h_goal')];
     }
     return $snap;
 }

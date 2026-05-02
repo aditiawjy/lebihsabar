@@ -491,11 +491,15 @@ function buildP727374State(match) {
     const switches = countSwitchesFromScorers(scorers);
     const minGap = getMinGapFromMins(mins);
     const maxGap = getMaxGapFromMins(mins);
+    const kickoffRaw = kickoffTimeByMatchKey.get(key) || '';
+    const kickoffDate = kickoffRaw ? new Date(kickoffRaw) : null;
+    const hasKickoffDate = kickoffDate && !Number.isNaN(kickoffDate.getTime());
     const signature = `${league}|${first}|${last}|${sequence}|${score.home}-${score.away}`;
     const shape = `${league}|${mins.length}|${first}|${last}|${score.home}-${score.away}|${switches}|${minGap}|${maxGap}`;
     const state = {
         home: match?.homeTeam || '',
         away: match?.awayTeam || '',
+        datetime: kickoffRaw,
         league,
         h1c: mins.length,
         sc_h: score.home,
@@ -508,6 +512,10 @@ function buildP727374State(match) {
         min_gap: minGap,
         max_run: maxRunFromScorers(scorers),
         all_gaps_ge3: mins.length < 2 || mins.every((min, idx) => idx === 0 || min - mins[idx - 1] >= 3),
+        kickoff_hour: hasKickoffDate ? kickoffDate.getHours() : -1,
+        kickoff_minute: hasKickoffDate ? kickoffDate.getMinutes() : -1,
+        kickoff_dow: hasKickoffDate ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][kickoffDate.getDay()] : '',
+        kickoff_dow_num: hasKickoffDate ? kickoffDate.getDay() : -1,
         goal_mins: mins.slice()
     };
 

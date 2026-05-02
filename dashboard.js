@@ -46,7 +46,7 @@
     var LIVE_PATTERN_STATE_STORAGE_KEY = 'livePatternStateMemory';
     var LIVE_SETTLED_STORAGE_KEY = 'liveSettledState';
     var LIVE_LATE_SETTLED_STORAGE_KEY = 'liveLateSettledState';
-    var LIVE_STATE_SCHEMA_VERSION = '2026-05-02-rules-v154';
+    var LIVE_STATE_SCHEMA_VERSION = '2026-05-02-rules-v155';
     var LIVE_CANDIDATE_CACHE_TTL_MS = 30000;
     var LIVE_CANDIDATE_GRACE_MS = 15000;
     var LIVE_SUMMARY_PRE_GOAL_CARRY_MS = 12 * 60 * 1000;
@@ -421,7 +421,7 @@
         return goalMins.map(function(min, idx) {
             if (scorers[idx] === 'H') home += 1;
             if (scorers[idx] === 'A') away += 1;
-            return min + '’ (' + home + '-' + away + ')';
+            return min + '\u2019 (' + home + '-' + away + ')';
         }).join('  ');
     }
 
@@ -432,7 +432,7 @@
             var score = getMatchScores(match);
             var seq = (state.h1s || []).map(function(s) {
                 return s === 'H' ? '<span class="scorer-h">H</span>' : '<span class="scorer-a">A</span>';
-            }).join(' → ');
+            }).join(' \u2192 ');
 
             return '<tr>'
                 + '<td class="record-sub"><span class="badge badge-yellow">LIVE</span> ' + escHtml(getMatchStatusText(match) || '') + '</td>'
@@ -456,7 +456,7 @@
             var state = item.state || {};
             var seq = Array.isArray(state.h1s) ? state.h1s.map(function(s) {
                 return s === 'H' ? '<span class="scorer-h">H</span>' : '<span class="scorer-a">A</span>';
-            }).join(' → ') : '';
+            }).join(' \u2192 ') : '';
             var score = item.scoreObj || { home: state.sc_h || 0, away: state.sc_a || 0 };
             var outcomeBadge = item.outcome === 'win'
                 ? '<span class="badge badge-green">LIVE WIN</span>'
@@ -486,7 +486,7 @@
             var score = getMatchScores(match);
             var seq = (state.h1s || []).map(function(s) {
                 return s === 'H' ? '<span class="scorer-h">H</span>' : '<span class="scorer-a">A</span>';
-            }).join(' → ');
+            }).join(' \u2192 ');
 
             return '<tr>'
                 + '<td class="record-sub"><span class="badge badge-yellow">LIVE</span> ' + escHtml(getMatchStatusText(match) || '') + '</td>'
@@ -508,7 +508,7 @@
             var score = getMatchScores(match);
             var seq = (state.h1s || []).map(function(s) {
                 return s === 'H' ? '<span class="scorer-h">H</span>' : '<span class="scorer-a">A</span>';
-            }).join(' → ');
+            }).join(' \u2192 ');
 
             return '<tr>'
                 + '<td class="record-sub"><span class="badge badge-yellow">LIVE</span> ' + escHtml(getMatchStatusText(match) || '') + '</td>'
@@ -548,7 +548,7 @@
 
         return '<div class="detail-pagination">'
             + '<button class="detail-page-btn" data-pid="' + escHtml(id) + '" data-page="' + prevPage + '"' + prevDisabled + '>Prev</button>'
-            + '<span class="detail-page-info">Page ' + page + ' / ' + totalPages + ' • ' + startRow + '-' + endRow + ' dari ' + totalRows + '</span>'
+            + '<span class="detail-page-info">Page ' + page + ' / ' + totalPages + ' \u2022 ' + startRow + '-' + endRow + ' dari ' + totalRows + '</span>'
             + '<button class="detail-page-btn" data-pid="' + escHtml(id) + '" data-page="' + nextPage + '"' + nextDisabled + '>Next</button>'
             + '</div>';
     }
@@ -1047,7 +1047,7 @@
             var state = item.state || {};
             var seq = Array.isArray(state.h1s) ? state.h1s.map(function(s) {
                 return s === 'H' ? '<span class="scorer-h">H</span>' : '<span class="scorer-a">A</span>';
-            }).join(' → ') : '';
+            }).join(' \u2192 ') : '';
             var timeline = buildLiveTimeline(state);
             var outcomeBadge = item.outcome === 'win'
                 ? '<span class="badge badge-green">WIN</span>'
@@ -1123,7 +1123,7 @@
             var state = item.state || {};
             var seq = Array.isArray(state.h1s) ? state.h1s.map(function(s) {
                 return s === 'H' ? '<span class="scorer-h">H</span>' : '<span class="scorer-a">A</span>';
-            }).join(' → ') : '';
+            }).join(' \u2192 ') : '';
             var outcomeBadge = item.outcome === 'win'
                 ? '<span class="badge badge-green">WIN</span>'
                 : '<span class="badge badge-red">LOSE</span>';
@@ -1325,7 +1325,7 @@
                 refreshActivePanelContent();
             }
         } catch(e) {
-            // silent — keep current data
+            // silent \u2014 keep current data
         }
     }
 
@@ -1468,6 +1468,7 @@
                 allGoalScorers: apiData.allGoalScorers || {},
                 all2HGoalMinutes: apiData.all2HGoalMinutes || {},
                 htScores: apiData.htScores || {},
+                kickoffTimes: apiData.kickoffTimes || {},
                 patternSignals: apiData.patternSignals || {}
             };
         }
@@ -1479,6 +1480,7 @@
             allGoalScorers: data.allGoalScorers || apiData.allGoalScorers || {},
             all2HGoalMinutes: data.all2HGoalMinutes || apiData.all2HGoalMinutes || {},
             htScores: data.htScores || apiData.htScores || {},
+            kickoffTimes: data.kickoffTimes || apiData.kickoffTimes || {},
             patternSignals: data.patternSignals || apiData.patternSignals || {}
         };
     }
@@ -1497,6 +1499,51 @@
 
     function getMatchAwayTeam(match) {
         return String((match && (match.awayTeam || match.away_team || match.away)) || '').trim();
+    }
+
+    function getMatchDateTimeText(match) {
+        return String((match && (match.datetime || match.dateTime || match.startTime || match.start_time || match.kickoff || match.match_time || match.createdAt || match.created_at || match.date)) || '').trim();
+    }
+
+    function parseMatchDateParts(value) {
+        var raw = String(value || '').trim();
+        var m = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
+        var date = null;
+        if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+            date = new Date(value > 1000000000000 ? value : value * 1000);
+        } else if (m) {
+            date = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), Number(m[4]), Number(m[5]), 0);
+        } else if (raw && /^\d{10,13}$/.test(raw)) {
+            var numeric = Number(raw);
+            date = new Date(numeric > 1000000000000 ? numeric : numeric * 1000);
+        } else if (raw && (raw.indexOf('T') !== -1 || raw.indexOf('-') !== -1)) {
+            var parsed = Date.parse(raw);
+            if (!Number.isNaN(parsed)) {
+                date = new Date(parsed);
+            }
+        }
+
+        if (!date || Number.isNaN(date.getTime())) return null;
+        return {
+            hour: date.getHours(),
+            minute: date.getMinutes(),
+            dow: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()],
+            dowNum: date.getDay()
+        };
+    }
+
+    function getMatchKickoffParts(match, livePayload, key) {
+        var parsed = parseMatchDateParts(getMatchDateTimeText(match));
+        if (parsed) return parsed;
+        parsed = parseMatchDateParts(getLiveKickoffTimeText(livePayload, key, match));
+        if (parsed) return parsed;
+        var now = new Date();
+        return {
+            hour: now.getHours(),
+            minute: now.getMinutes(),
+            dow: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][now.getDay()],
+            dowNum: now.getDay()
+        };
     }
 
     function getMatchScores(match) {
@@ -1824,9 +1871,11 @@
 
         var counts = scorerCountsJS(scorers);
         var liveScore = getMatchScores(match);
+        var kickoff = getMatchKickoffParts(match, livePayload, key);
         var state = {
             home: getMatchHomeTeam(match),
             away: getMatchAwayTeam(match),
+            datetime: getMatchDateTimeText(match),
             league: getLeagueTypeJS(getMatchLeague(match)),
             h1c: goalMins.length,
             sc_h: counts.home,
@@ -1841,6 +1890,10 @@
             min_gap: minGapJS(goalMins),
             max_run: maxRunJS(scorers),
             all_gaps_ge3: allGapsGeJS(goalMins, 3),
+            kickoff_hour: kickoff.hour,
+            kickoff_minute: kickoff.minute,
+            kickoff_dow: kickoff.dow,
+            kickoff_dow_num: kickoff.dowNum,
             goal_mins: goalMins.slice()
         };
         persistPatternState(key, state);
@@ -1926,6 +1979,12 @@
         var diff = Math.abs(s.sc_h - s.sc_a);
         var lastScorer = s.h1s.length ? s.h1s[s.h1s.length - 1] : null;
         var firstScorer = s.h1s.length ? s.h1s[0] : null;
+        var kickoffHour = parseInt(s.kickoff_hour, 10);
+        var kickoffMinute = parseInt(s.kickoff_minute, 10);
+        var kickoffDowNum = parseInt(s.kickoff_dow_num, 10);
+        if (Number.isNaN(kickoffHour)) kickoffHour = -1;
+        if (Number.isNaN(kickoffMinute)) kickoffMinute = -1;
+        if (Number.isNaN(kickoffDowNum)) kickoffDowNum = -1;
 
         switch (pid) {
             case 'P2': return s.league === '16min' && s.h1c >= 2 && diff >= 2 && s.h1_last === 7 && s.all_gaps_ge3 && s.max_run <= 2 && s.h1_first <= 1;
@@ -1975,6 +2034,10 @@
             case 'P61': return (s.league === '15min' && inTeamConfig('p61_teams', s.away) && s.h1_last >= 5 && diff <= 1 && !(s.home === 'Girondins de Bordeaux (V)' && s.away === 'Lille OSC (V)') && !(s.away === 'AS Monaco (V)' && s.h1_first === 3 && s.h1_last === 5 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['H', 'A'])) && !(s.h1c === 1 && s.h1_last === 5) && !(s.h1c === 1 && s.h1_first === 6 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A']) && s.fh === 0 && s.fa === 1) && !(s.h1_first === 4 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1) && !(s.h1_first === 3 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1) && !(s.h1_first === 3 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1) && !(s.h1_last === 7 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['A', 'H', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 5 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 1 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H', 'H']) && s.sc_h === 3 && s.sc_a === 0) && !(s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H', 'H']) && s.sc_h === 2 && s.sc_a === 1) && !(s.away === 'Lille OSC (V)' && s.h1_first === 0 && s.h1_last === 6 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 2 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2)) || (s.league === '15min' && s.h1_first <= 1 && s.h1_last >= 6 && diff <= 1 && firstScorer === 'H' && lastScorer === 'H');
             case 'P62': return (((s.league === '15min' && inTeamConfig('p62_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 4 && (s.h1_first === 0 || s.home !== 'FC Koln (V)') && (s.switches >= 1 || s.h1c <= 3 || s.h1_last >= 7) && !(s.h1_first === 1 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ['A', 'A', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 1 && s.h1_last === 5 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2)) || (s.league === '15min' && s.h1_first <= 1 && s.h1_last >= 6 && s.switches >= 2 && diff <= 2 && lastScorer === 'H' && !arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'H']) && !arrayEqualsJS(s.h1s, ['H', 'H', 'A', 'H'])) || (s.league === '15min' && s.h1_first === 3 && s.h1_last === 7 && diff === 2 && lastScorer === 'H') || (s.league === '15min' && s.h1_first === 2 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H'])) || (s.league === '16min' && s.h1_first <= 1 && s.h1_last >= 7 && diff <= 2 && lastScorer === 'H') || (s.league === '20min' && s.h1_first <= 1 && s.h1_last >= 3 && s.switches >= 2 && s.sc_h === s.sc_a && lastScorer === 'H') || (s.league === '20min' && s.h1_first === 1 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H']))) && !(s.away === 'Getafe CF (V)' && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.home === 'Lazio (V)' && s.league === '15min' && s.h1_first === 2 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.league === '15min' && s.h1c === 5 && s.h1_first === 0 && s.h1_last >= 7 && s.min_gap === 0 && s.sc_h === 3 && s.sc_a === 2) && !(s.league === '16min' && s.h1_first === 1 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.league === '16min' && s.h1_first === 0 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A', 'H']) && s.sc_h === 3 && s.sc_a === 2) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'A', 'A', 'H']) && s.sc_h === 2 && s.sc_a === 2));
             case 'P72': return (((s.league === '15min' && s.h1_first <= 1 && s.h1_last >= 6 && s.switches >= 2 && diff <= 2 && lastScorer === 'H' && !arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'H']) && !arrayEqualsJS(s.h1s, ['H', 'H', 'A', 'H'])) || (s.league === '15min' && s.h1_first === 3 && s.h1_last === 7 && diff === 2 && lastScorer === 'H') || (s.league === '15min' && s.h1_first === 2 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H'])) || (s.league === '16min' && s.h1_first <= 1 && s.h1_last >= 7 && diff <= 2 && lastScorer === 'H') || (s.league === '20min' && s.h1_first <= 1 && s.h1_last >= 3 && s.switches >= 2 && s.sc_h === s.sc_a && lastScorer === 'H') || (s.league === '20min' && s.h1_first === 1 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H']))) && !(s.league === '15min' && s.h1c === 5 && s.h1_first === 0 && s.h1_last >= 7 && s.min_gap === 0 && s.sc_h === 3 && s.sc_a === 2) && !(s.league === '16min' && s.h1_first === 1 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.league === '16min' && s.h1_first === 0 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A', 'H']) && s.sc_h === 3 && s.sc_a === 2) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'A', 'A', 'H']) && s.sc_h === 2 && s.sc_a === 2));
+            case 'P73': return s.h1c >= 1 && kickoffMinute >= 15 && kickoffMinute <= 29 && arrayEqualsJS(s.h1s, ['A', 'H']) && span >= 4;
+            case 'P74': return s.h1c >= 1 && kickoffDowNum === 4 && kickoffMinute >= 0 && kickoffMinute <= 14 && s.h1_last >= 8;
+            case 'P75': return s.h1c >= 1 && kickoffHour >= 16 && kickoffHour <= 19 && s.h1_first >= 2 && s.max_gap >= 5;
+            case 'P76': return s.h1c >= 1 && kickoffHour === 19 && s.max_gap >= 3 && diff === 1;
             case 'P63': return s.league === '16min' && inTeamConfig('p63_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 6 && !(s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['H', 'H', 'A']) && s.sc_h === 2 && s.sc_a === 1) && !(s.h1_first === 0 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A', 'H']) && s.sc_h === 3 && s.sc_a === 2) && !(lastScorer === 'A' && (s.sc_h - s.sc_a) >= 2 && s.max_run >= 3 && s.max_gap <= 3);
             case 'P64': return ((s.league === '15min' && inTeamConfig('p64_teams', s.away) && s.h1_first <= 1 && s.h1_last >= 4 && (s.away !== 'Napoli (V)' || s.max_run <= 2) && !(s.away === 'Napoli (V)' && arrayEqualsJS(s.h1s, ['A', 'A', 'H'])) && !(s.away === 'Lille OSC (V)' && s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'A', 'A'])) && !(s.away === 'Lille OSC (V)' && s.h1_first === 0 && s.h1_last === 6 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 1 && s.h1_last === 4 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'H'])) && !(s.h1_first === 1 && s.h1_last === 5 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1) && !(s.h1_first === 1 && s.h1_last === 7 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['H', 'A']) && s.sc_h === 1 && s.sc_a === 1) && !(s.away === 'FC Koln (V)' && s.h1c === 2 && s.sc_h === 2 && s.sc_a === 0 && s.h1_first === 0 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ['H', 'H']))) || (s.league === '15min' && s.h1_first === 1 && s.h1_last >= 7 && firstScorer === 'A' && lastScorer === 'H' && !(s.h1c === 2 && s.h1_last === 7 && s.h1_first === 1))) && !(s.league === '15min' && s.h1_first === 1 && s.h1_last === 7 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['H', 'A']) && s.sc_h === 1 && s.sc_a === 1);
             case 'P65': return s.league === '15min' && inTeamConfig('p65_teams', s.home) && s.h1c >= 1 && s.h1_first <= 1 && !(s.home === 'Leicester City (V)' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 1 && s.h1_last === 5 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.home === 'Napoli (V)' && s.h1c === 1 && s.h1_first === 1 && s.sc_h === 0 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['A'])) && !(s.home === 'Olympique Lyonnais (V)' && s.h1c === 1 && s.h1_first === 1 && s.sc_h === 1 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H'])) && !(s.h1_first === 1 && s.h1_last === 3 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.h1_first === 1 && s.h1_last === 3 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2);
@@ -2170,6 +2233,21 @@
             if (keys.indexOf(simpleKey) === -1) keys.push(simpleKey);
         }
         return keys;
+    }
+
+    function getLiveKickoffTimeText(livePayload, key, match) {
+        var kickoffTimes = livePayload && livePayload.kickoffTimes ? livePayload.kickoffTimes : {};
+        var candidates = getPayloadKeyCandidates(match, key);
+        for (var i = 0; i < candidates.length; i++) {
+            var value = kickoffTimes[candidates[i]];
+            if (typeof value === 'string' && value.trim()) {
+                return value.trim();
+            }
+            if (typeof value === 'number' && Number.isFinite(value)) {
+                return String(value);
+            }
+        }
+        return '';
     }
 
     function updateHtMemory(matches) {
@@ -2386,16 +2464,17 @@
         var extensionState = extensionSignals.length && extensionSignals[0] && extensionSignals[0].state
             ? extensionSignals[0].state
             : null;
+        var signalState = liveState || extensionState;
 
-        if ((liveState || extensionState) && hasAnySecondHalfGoal(match, livePayload, liveState || extensionState)) {
+        if (signalState && hasAnySecondHalfGoal(match, livePayload, signalState)) {
             return signals;
         }
 
-        if (liveState && isSummaryPatternSignalWindow(match, livePayload)) {
+        if (signalState && isSummaryPatternSignalWindow(match, livePayload)) {
             PATTERN_DEFS.forEach(function(pattern) {
                 if (!pattern || !pattern.id) return;
                 if (!hasMinHits(pattern.id)) return;
-                if (matchesSummaryPatternLive(pattern.id, liveState)) {
+                if (matchesSummaryPatternLive(pattern.id, signalState)) {
                     seen[pattern.id] = true;
                     signals.push({ id: pattern.id, label: pattern.label || pattern.id });
                 }
@@ -2437,11 +2516,11 @@
             });
         }
 
-        if (liveState && isSecondHalfSignalWindow(match, livePayload)) {
+        if (signalState && isSecondHalfSignalWindow(match, livePayload)) {
             (INITIAL_DATA.no2hPatterns || []).forEach(function(pattern) {
                 if (!pattern || !pattern.id || seen[pattern.id]) return;
                 if (!hasMinHits(pattern.id)) return;
-                if (matchesNo2hPatternLive(pattern.id, liveState)) {
+                if (matchesNo2hPatternLive(pattern.id, signalState)) {
                     seen[pattern.id] = true;
                     signals.push({ id: pattern.id, label: pattern.label || pattern.id });
                 }
@@ -2669,18 +2748,19 @@
                 });
             });
 
-            if (!state) return;
+            var baseState = state || signalState;
+            if (!baseState) return;
 
             PATTERN_DEFS.forEach(function(pattern) {
-                if (matchesSummaryPatternLive(pattern.id, state)) {
+                if (matchesSummaryPatternLive(pattern.id, baseState)) {
                     if (hasSecondHalfGoal) {
-                        if (requiresPriorCandidateForSettled(pattern.id) && !hasPriorSummaryCandidate(pattern.id, key, state, requiresConfirmedPriorCandidateForSettled(pattern.id))) {
+                        if (requiresPriorCandidateForSettled(pattern.id) && !hasPriorSummaryCandidate(pattern.id, key, baseState, requiresConfirmedPriorCandidateForSettled(pattern.id))) {
                             return;
                         }
-                        if (!hasSettledSummaryResult(pattern.id, key, state)) {
+                        if (!hasSettledSummaryResult(pattern.id, key, baseState)) {
                             var settled = buildSettledSummaryResult(pattern.id, {
                                 match: match,
-                                state: state,
+                                state: baseState,
                                 kind: 'summary',
                                 key: key,
                                 status: statusText,
@@ -2697,7 +2777,7 @@
                     if (!details[pattern.id]) details[pattern.id] = {};
                     details[pattern.id][key] = {
                         match: match,
-                        state: state,
+                        state: baseState,
                         kind: 'summary',
                         key: key,
                         status: getMatchStatusText(match),
@@ -2813,17 +2893,22 @@
         (matches || []).forEach(function(match) {
             if (!isSecondHalfSignalWindow(match, livePayload)) return;
 
-            var state = buildLivePatternState(match, livePayload);
-            if (!state) return;
             var key = matchKey(match);
+            var state = buildLivePatternState(match, livePayload);
+            var extensionSignals = getLivePatternSignals(livePayload, key, match);
+            var extensionState = extensionSignals.length && extensionSignals[0] && extensionSignals[0].state
+                ? extensionSignals[0].state
+                : null;
+            var signalState = state || extensionState;
+            if (!signalState) return;
 
             (INITIAL_DATA.no2hPatterns || []).forEach(function(pattern) {
                 if (!pattern || !pattern.id) return;
                 if (!hasMinHits(pattern.id)) return;
-                if (matchesNo2hPatternLive(pattern.id, state)) {
+                if (matchesNo2hPatternLive(pattern.id, signalState)) {
                     counts[pattern.id] = (counts[pattern.id] || 0) + 1;
                     if (!details[pattern.id]) details[pattern.id] = {};
-                    details[pattern.id][key] = { match: match, state: state, kind: 'no2h', key: key, lastSeen: Date.now() };
+                    details[pattern.id][key] = { match: match, state: signalState, kind: 'no2h', key: key, lastSeen: Date.now() };
                 }
             });
         });

@@ -107,6 +107,7 @@ function buildActiveMatchStatePayload(matches = []) {
         allGoalScorers: objectFromMapForActiveMatches(all1HScorersByMatchKey, activeKeys),
         all2HGoalMinutes: objectFromMapForActiveMatches(all2HGoalMinsByMatchKey, activeKeys),
         all2HScorers: objectFromMapForActiveMatches(all2HScorersByMatchKey, activeKeys),
+        kickoffTimes: objectFromMapForActiveMatches(kickoffTimeByMatchKey, activeKeys),
         patternSignals: objectFromMapForActiveMatches(p727374SignalsByMatchKey, activeKeys),
         htScores: objectFromMapForActiveMatches(shScoreByMatchKey, activeKeys)
     };

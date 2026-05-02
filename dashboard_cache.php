@@ -113,6 +113,7 @@ function parseMatches(array $rows): array {
         $sh = end($h1) ?: null;
         $league = getLeagueType($row[1] ?? '');
         $h1s = getH1Scorers($h1);
+        $dateParts = parseMatchDateParts($row[0] ?? '');
 
         $matches[] = [
             'home' => $row[2] ?? '',
@@ -139,9 +140,27 @@ function parseMatches(array $rows): array {
             'has_after_2h4' => count(array_filter($h2, fn($g) => $g['min'] > 4)) > 0,
             'has_late' => count(array_filter($h2, fn($g) => $g['min'] >= 7)) > 0,
             'next_goal' => computeNextGoal($h2, $sh ? $sh['home'] : 0, $sh ? $sh['away'] : 0),
+            'kickoff_hour' => $dateParts['hour'],
+            'kickoff_minute' => $dateParts['minute'],
+            'kickoff_dow' => $dateParts['dow'],
+            'kickoff_dow_num' => $dateParts['dow_num'],
         ];
     }
     return $matches;
+}
+
+function parseMatchDateParts(string $value): array {
+    $dt = DateTime::createFromFormat('d/m/Y H:i', trim($value));
+    if (!$dt) {
+        return ['hour' => -1, 'minute' => -1, 'dow' => '', 'dow_num' => -1];
+    }
+
+    return [
+        'hour' => (int)$dt->format('G'),
+        'minute' => (int)$dt->format('i'),
+        'dow' => $dt->format('D'),
+        'dow_num' => (int)$dt->format('w'),
+    ];
 }
 
 function parseGoals(string $gs): array {
@@ -582,6 +601,46 @@ function computePatterns(array $matches): array {
                     && !($m['league']==='16min' && $m['h1_first']===0 && $m['h1_last']===8 && $m['h1s']===['A','H','H','A','H'] && $m['sc_h']===3 && $m['sc_a']===2)
                     && !($m['league']==='20min' && $m['h1_first']===0 && $m['h1_last']===5 && $m['h1s']===['H','A','A','H'] && $m['sc_h']===2 && $m['sc_a']===2);
             })),
+        ],
+        [
+            'id'=>'P73',
+            'label'=>'Experimental 2H: gol 1H>=1 + start 15-29 + scorer AH + span>=4, tanpa team block',
+            'data'=>array_values(array_filter($matches, fn($m) =>
+                ($m['h1c'] ?? 0) >= 1
+                && (($m['kickoff_minute'] ?? -1) >= 15 && ($m['kickoff_minute'] ?? -1) <= 29)
+                && ($m['h1s'] ?? []) === ['A','H']
+                && (($m['h1_last'] ?? -1) - ($m['h1_first'] ?? -1)) >= 4
+            )),
+        ],
+        [
+            'id'=>'P74',
+            'label'=>'Experimental 2H: gol 1H>=1 + hari Kamis + start 00-14 + last>=8, tanpa team block',
+            'data'=>array_values(array_filter($matches, fn($m) =>
+                ($m['h1c'] ?? 0) >= 1
+                && (($m['kickoff_dow_num'] ?? -1) === 4)
+                && (($m['kickoff_minute'] ?? -1) >= 0 && ($m['kickoff_minute'] ?? -1) <= 14)
+                && ($m['h1_last'] ?? -1) >= 8
+            )),
+        ],
+        [
+            'id'=>'P75',
+            'label'=>'Experimental 2H: gol 1H>=1 + jam 16-19 + first>=2 + max_gap>=5, tanpa team block',
+            'data'=>array_values(array_filter($matches, fn($m) =>
+                ($m['h1c'] ?? 0) >= 1
+                && (($m['kickoff_hour'] ?? -1) >= 16 && ($m['kickoff_hour'] ?? -1) <= 19)
+                && ($m['h1_first'] ?? -1) >= 2
+                && ($m['max_gap'] ?? -1) >= 5
+            )),
+        ],
+        [
+            'id'=>'P76',
+            'label'=>'Experimental 2H: gol 1H>=1 + jam 19 + max_gap>=3 + diff=1, tanpa team block',
+            'data'=>array_values(array_filter($matches, fn($m) =>
+                ($m['h1c'] ?? 0) >= 1
+                && (($m['kickoff_hour'] ?? -1) === 19)
+                && ($m['max_gap'] ?? -1) >= 3
+                && abs(($m['sc_h'] ?? 0) - ($m['sc_a'] ?? 0)) === 1
+            )),
         ],
         ['id'=>'P63', 'label'=>'HOME shortlist: Belgium / Germany / Netherlands / Norway / Ghana / Mexico / Poland / Portugal (16min, first<=1, last>=6, bukan HHA 2-1 mnt 1-6, bukan AHHAH 3-2 mnt 0-8, bukan last AWAY + home lead>=2 + max_run>=3 + max_gap<=3)', 'data'=>array_values(array_filter($matches, fn($m) => $m['league']==='16min' && in_array(trim($m['home']), $p63_teams) && $m['h1_first']<=1 && $m['h1_last']>=6 && !($m['h1_first']===1 && $m['h1_last']===6 && $m['h1s']===['H','H','A'] && $m['sc_h']===2 && $m['sc_a']===1) && !($m['h1_first']===0 && $m['h1_last']===8 && $m['h1s']===['A','H','H','A','H'] && $m['sc_h']===3 && $m['sc_a']===2) && !(count($m['h1s'])>0 && $m['h1s'][count($m['h1s'])-1]==='A' && ($m['sc_h']-$m['sc_a'])>=2 && $m['max_run']>=3 && $m['max_gap']<=3)))],
         ['id'=>'P64', 'label'=>'AWAY shortlist: Liverpool / Napoli / Bayern / FC Koln / FSV Mainz / Lille (15min, first<=1, last>=4, Napoli khusus max_run<=2, kecuali Napoli h1s=[A,A,H], bukan Lille AAA 0-3 mnt 1-6, bukan Lille HAA 1-2 mnt 0-6, bukan AH 1-1 mnt 1-4/1-5, bukan HA 1-1 mnt 1-7, bukan FC Koln HH 2-0 mnt 0-4) atau umum: first=1 + last>=7 + scorer AH, bukan h1c=2 last=7 first=1', 'data'=>array_values(array_filter($matches, fn($m) => (($m['league']==='15min' && in_array(trim($m['away']), $p64_teams) && $m['h1_first']<=1 && $m['h1_last']>=4 && (trim($m['away'])!=='Napoli (V)' || $m['max_run']<=2) && !(trim($m['away'])==='Napoli (V)' && $m['h1s']===['A','A','H']) && !(trim($m['away'])==='Lille OSC (V)' && $m['h1_first']===1 && $m['h1_last']===6 && $m['h1s']===['A','A','A']) && !(trim($m['away'])==='Lille OSC (V)' && $m['h1_first']===0 && $m['h1_last']===6 && $m['h1c']===3 && $m['h1s']===['H','A','A'] && $m['sc_h']===1 && $m['sc_a']===2) && !($m['h1_first']===1 && $m['h1_last']===4 && $m['h1c']===2 && $m['h1s']===['A','H']) && !($m['h1_first']===1 && $m['h1_last']===5 && $m['h1c']===2 && $m['h1s']===['A','H'] && $m['sc_h']===1 && $m['sc_a']===1) && !($m['h1_first']===1 && $m['h1_last']===7 && $m['h1c']===2 && $m['h1s']===['H','A'] && $m['sc_h']===1 && $m['sc_a']===1) && !(trim($m['away'])==='FC Koln (V)' && $m['h1c']===2 && $m['sc_h']===2 && $m['sc_a']===0 && $m['h1_first']===0 && $m['h1_last']===4 && $m['h1s']===['H','H'])) || ($m['league']==='15min' && $m['h1_first']===1 && $m['h1_last']>=7 && count($m['h1s'])>0 && $m['h1s'][0]==='A' && $m['h1s'][count($m['h1s'])-1]==='H' && !($m['h1c']===2 && $m['h1_last']===7 && $m['h1_first']===1))) && !($m['league']==='15min' && $m['h1_first']===1 && $m['h1_last']===7 && $m['h1c']===2 && $m['h1s']===['H','A'] && $m['sc_h']===1 && $m['sc_a']===1)))],

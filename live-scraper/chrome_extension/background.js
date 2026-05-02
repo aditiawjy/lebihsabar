@@ -455,6 +455,7 @@ async function sendDashboardLiveData(data) {
                 allGoalScorers: activeState.allGoalScorers,
                 all2HGoalMinutes: activeState.all2HGoalMinutes,
                 all2HScorers: activeState.all2HScorers,
+                kickoffTimes: activeState.kickoffTimes,
                 patternSignals: activeState.patternSignals,
                 htScores: activeState.htScores,
                 timestamp: new Date().toISOString()

@@ -3,113 +3,113 @@
   "clones": [
     {
       "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 627,
+      "startA": 635,
       "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 586,
+      "startB": 594,
       "lines": 7,
       "tokens": 0
     },
     {
       "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 633,
+      "startA": 641,
       "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 592,
+      "startB": 600,
       "lines": 10,
       "tokens": 0
     },
     {
       "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 679,
+      "startA": 687,
       "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 586,
+      "startB": 594,
       "lines": 7,
       "tokens": 0
     },
     {
       "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 685,
+      "startA": 693,
       "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 592,
+      "startB": 600,
       "lines": 9,
       "tokens": 0
     },
     {
       "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 744,
+      "startA": 752,
       "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 586,
+      "startB": 594,
       "lines": 7,
       "tokens": 0
     },
     {
       "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 750,
+      "startA": 758,
       "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 592,
+      "startB": 600,
       "lines": 9,
       "tokens": 0
     },
     {
       "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 796,
+      "startA": 804,
       "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 586,
+      "startB": 594,
       "lines": 7,
       "tokens": 0
     },
     {
       "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 818,
+      "startA": 826,
       "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 645,
+      "startB": 653,
       "lines": 9,
       "tokens": 0
     },
     {
       "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 831,
+      "startA": 839,
       "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 716,
+      "startB": 724,
       "lines": 8,
       "tokens": 0
     },
     {
       "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 841,
+      "startA": 849,
       "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 725,
+      "startB": 733,
       "lines": 7,
       "tokens": 0
     },
     {
       "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 858,
+      "startA": 866,
       "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 586,
+      "startB": 594,
       "lines": 7,
       "tokens": 0
     },
     {
       "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 873,
+      "startA": 881,
       "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 807,
+      "startB": 815,
       "lines": 9,
       "tokens": 0
     },
     {
       "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 894,
+      "startA": 902,
       "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 716,
+      "startB": 724,
       "lines": 10,
       "tokens": 0
     },
     {
       "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 903,
+      "startA": 911,
       "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 725,
+      "startB": 733,
       "lines": 7,
       "tokens": 0
     },
@@ -355,17 +355,17 @@
     },
     {
       "fileA": "goal-log-save.php",
-      "startA": 199,
+      "startA": 202,
       "fileB": "goal-log-save.php",
-      "startB": 141,
+      "startB": 144,
       "lines": 7,
       "tokens": 0
     },
     {
       "fileA": "goal-log-save.php",
-      "startA": 275,
+      "startA": 278,
       "fileB": "goal-log-save.php",
-      "startB": 155,
+      "startB": 158,
       "lines": 9,
       "tokens": 0
     },
@@ -386,16 +386,16 @@
       "tokens": 0
     },
     {
-      "fileA": "dashboard_cache.php",
-      "startA": 480,
-      "fileB": "dashboard_cache.php",
-      "startB": 423,
-      "lines": 6,
+      "fileA": "dashboard.php",
+      "startA": 40,
+      "fileB": "dashboard_api.php",
+      "startB": 134,
+      "lines": 8,
       "tokens": 0
     },
     {
       "fileA": "dashboard.php",
-      "startA": 44,
+      "startA": 51,
       "fileB": "dashboard_api.php",
       "startB": 16,
       "lines": 10,
@@ -403,26 +403,42 @@
     },
     {
       "fileA": "dashboard.php",
-      "startA": 56,
+      "startA": 63,
       "fileB": "dashboard_api.php",
-      "startB": 88,
+      "startB": 89,
       "lines": 17,
       "tokens": 0
     },
     {
       "fileA": "dashboard.php",
-      "startA": 82,
+      "startA": 91,
       "fileB": "dashboard_api.php",
-      "startB": 55,
+      "startB": 56,
       "lines": 11,
       "tokens": 0
     },
     {
       "fileA": "dashboard.php",
-      "startA": 131,
+      "startA": 140,
       "fileB": "dashboard_api.php",
-      "startB": 66,
+      "startB": 67,
       "lines": 7,
+      "tokens": 0
+    },
+    {
+      "fileA": "dashboard.php",
+      "startA": 182,
+      "fileB": "dashboard.php",
+      "startB": 146,
+      "lines": 6,
+      "tokens": 0
+    },
+    {
+      "fileA": "dashboard.php",
+      "startA": 187,
+      "fileB": "dashboard.php",
+      "startB": 151,
+      "lines": 11,
       "tokens": 0
     },
     {
@@ -714,7 +730,7 @@
       "tokens": 0
     }
   ],
-  "duplicatedLines": 1023,
-  "totalLines": 21146,
-  "percentage": 4.84
+  "duplicatedLines": 1040,
+  "totalLines": 20509,
+  "percentage": 5.07
 }

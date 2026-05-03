@@ -2951,7 +2951,14 @@
 
 	function matchesLG10Live(s) {
 		if (!s) return false;
-		return Object.hasOwn(LG10_SIGNATURES, lateLeadSignatureJS(s));
+		var kickoffHour = parseInt(s.kickoff_hour, 10);
+		var kickoffMinute = parseInt(s.kickoff_minute, 10);
+		var kickoffDowNum = parseInt(s.kickoff_dow_num, 10);
+		if (Number.isNaN(kickoffHour)) kickoffHour = -1;
+		if (Number.isNaN(kickoffMinute)) kickoffMinute = -1;
+		if (Number.isNaN(kickoffDowNum)) kickoffDowNum = -1;
+		return Object.hasOwn(LG10_SIGNATURES, lateLeadSignatureJS(s))
+			&& !(kickoffDowNum === 0 && kickoffHour === 22 && kickoffMinute === 17 && s.league === "20min" && s.h1_first === 4 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ["A"]) && s.sc_h === 0 && s.sc_a === 1);
 	}
 
 	function matchesLG5Live(s) {
@@ -4286,6 +4293,14 @@
 						s.sc_h === 1 &&
 						s.sc_a === 3 &&
 						s.max_gap <= 2
+					) &&
+					!(
+						kickoffDowNum === 0 &&
+						s.h1_first === 0 &&
+						s.h1_last === 6 &&
+						arrayEqualsJS(s.h1s, ["H", "H"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 0
 					)
 				);
 			case "P41":
@@ -5493,6 +5508,8 @@
 		if (!s) return false;
 		var span = s.h1c >= 2 ? s.h1_last - s.h1_first : 0;
 		var firstScorer = s.h1s.length ? s.h1s[0] : null;
+		var kickoffHour = parseInt(s.kickoff_hour, 10);
+		if (Number.isNaN(kickoffHour)) kickoffHour = -1;
 
 		switch (pid) {
 			case "LG1":
@@ -5509,7 +5526,21 @@
 					s.h1c >= 3 &&
 					firstScorer === "A" &&
 					s.h1_last === 6 &&
-					s.max_gap !== 3
+					s.max_gap !== 3 &&
+					!(
+						kickoffHour === 18 &&
+						s.h1_first === 1 &&
+						arrayEqualsJS(s.h1s, ["A", "A", "H", "A"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 3 &&
+						s.max_gap <= 2
+					) &&
+					!(
+						s.h1_first === 0 &&
+						arrayEqualsJS(s.h1s, ["A", "A", "A", "A"]) &&
+						s.sc_h === 0 &&
+						s.sc_a === 4
+					)
 				);
 			case "LG4":
 				return matchesLG4Live(s);

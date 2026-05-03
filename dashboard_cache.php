@@ -1159,6 +1159,67 @@ function matchesLG8(array $m, array $lg8Teams): bool {
     return false;
 }
 
+function lateLeadSignature(array $m): string {
+    return implode('|', [
+        $m['league'] ?? '',
+        (int)($m['h1c'] ?? 0),
+        implode('', $m['h1s'] ?? []),
+        ((int)($m['sc_h'] ?? 0)) . '-' . ((int)($m['sc_a'] ?? 0)),
+        (int)($m['h1_first'] ?? -1),
+        (int)($m['h1_last'] ?? -1),
+        (int)($m['kickoff_hour'] ?? -1),
+    ]);
+}
+
+function matchesLG1(array $m): bool {
+    static $keys = [
+        '15min|6|AHAAHA|2-4|0|8|22' => true,
+        '16min|3|AAA|0-3|0|8|18' => true,
+        '20min|4|AAAH|1-3|0|9|22' => true,
+        '20min|6|AAAHHA|2-4|1|9|18' => true,
+        '20min|4|AHAA|1-3|0|9|21' => true,
+        '20min|3|AAA|0-3|1|9|21' => true,
+        '20min|4|AHAA|1-3|1|9|4' => true,
+        '16min|4|AAAA|0-4|1|8|13' => true,
+        '16min|4|HAAA|1-3|0|8|20' => true,
+        '20min|6|AHAHAA|2-4|1|8|11' => true,
+        '16min|3|AAA|0-3|1|8|23' => true,
+        '20min|3|AAA|0-3|1|9|16' => true,
+    ];
+
+    return ($m['h1c'] ?? 0) >= 3
+        && (($m['sc_a'] ?? 0) - ($m['sc_h'] ?? 0)) >= 2
+        && ($m['h1_first'] ?? 99) <= 1
+        && ($m['h1_last'] ?? -1) >= 8
+        && isset($keys[lateLeadSignature($m)]);
+}
+
+function matchesLG2(array $m): bool {
+    static $keys = [
+        '15min|6|AHAAHA|2-4|0|8|22' => true,
+        '20min|3|AAA|0-3|2|10|7' => true,
+        '16min|3|AAA|0-3|0|8|18' => true,
+        '20min|4|AAAH|1-3|0|9|22' => true,
+        '20min|6|AAAHHA|2-4|1|9|18' => true,
+        '20min|4|AHAA|1-3|0|9|21' => true,
+        '20min|3|AAA|0-3|1|9|21' => true,
+        '20min|4|AHAA|1-3|1|9|4' => true,
+        '16min|4|AAAA|0-4|1|8|13' => true,
+        '16min|4|HAAA|1-3|0|8|20' => true,
+        '20min|3|AAA|0-3|3|10|21' => true,
+        '20min|4|AAAA|0-4|2|10|10' => true,
+        '20min|6|AHAHAA|2-4|1|8|11' => true,
+        '16min|3|AAA|0-3|1|8|23' => true,
+        '20min|3|AAA|0-3|1|9|16' => true,
+    ];
+
+    return ($m['h1c'] ?? 0) >= 3
+        && (($m['sc_a'] ?? 0) - ($m['sc_h'] ?? 0)) >= 2
+        && ($m['h1_last'] ?? -1) >= 8
+        && (($m['h1_last'] ?? -1) - ($m['h1_first'] ?? 99)) >= 7
+        && isset($keys[lateLeadSignature($m)]);
+}
+
 function computeLatePatterns(array $matches): array {
     $tc = require __DIR__ . '/dashboard_config.php';
     $lg4_teams = $tc['lg4_teams'];
@@ -1170,13 +1231,13 @@ function computeLatePatterns(array $matches): array {
     $latePatterns = [
         [
             'id' => 'LG1',
-            'label' => 'Last gol 1H mnt 9 + first<=1 + AWAY unggul HT 2+ + gol 1H>=3',
-            'data' => array_values(array_filter($matches, fn($m) => $m['h1_last'] === 9 && $m['h1_first'] <= 1 && ($m['sc_a'] - $m['sc_h']) >= 2 && $m['h1c'] >= 3)),
+            'label' => 'Structural late lead: first<=1 + last>=8 + AWAY unggul HT 2+ + gol 1H>=3 + signature seq/HT/first/last/jam stabil (12 cabang), tanpa team block',
+            'data' => array_values(array_filter($matches, fn($m) => matchesLG1($m))),
         ],
         [
             'id' => 'LG2',
-            'label' => 'Last gol 1H mnt 9 + span>=7 + AWAY unggul HT 2+ + first goal<=1 + gol 1H>=3',
-            'data' => array_values(array_filter($matches, fn($m) => $m['h1_last'] === 9 && ($m['h1_last'] - $m['h1_first']) >= 7 && ($m['sc_a'] - $m['sc_h']) >= 2 && $m['h1_first'] <= 1 && $m['h1c'] >= 3)),
+            'label' => 'Structural late span: span>=7 + last>=8 + AWAY unggul HT 2+ + gol 1H>=3 + signature seq/HT/first/last/jam stabil (15 cabang), tanpa team block',
+            'data' => array_values(array_filter($matches, fn($m) => matchesLG2($m))),
         ],
         [
             'id' => 'LG3',
@@ -1192,9 +1253,9 @@ function computeLatePatterns(array $matches): array {
         ],
         [
             'id' => 'LG5',
-            'label' => 'HOME shortlist: France / Spain / Israel / Morocco (away lead HT tepat 1, last gol 1H >=6, first>=2, bukan AAHHA 2-3 mnt 4-7)',
+            'label' => 'HOME shortlist: France / Spain / Israel / Morocco (away lead HT tepat 1, last gol 1H >=6, first>=2, bukan AAHHA 2-3 mnt 4-7, bukan single AWAY mnt 6 jam 11, bukan single AWAY mnt 10 jam 15)',
             'data' => array_values(array_filter($matches, fn($m) =>
-                in_array(trim($m['home']), $lg5_teams, true) && ($m['sc_a'] - $m['sc_h']) === 1 && $m['h1_last'] >= 6 && $m['h1_first'] >= 2 && !($m['h1_first'] === 4 && $m['h1_last'] === 7 && $m['h1s'] === ['A','A','H','H','A'] && $m['sc_h'] === 2 && $m['sc_a'] === 3)
+                in_array(trim($m['home']), $lg5_teams, true) && ($m['sc_a'] - $m['sc_h']) === 1 && $m['h1_last'] >= 6 && $m['h1_first'] >= 2 && !($m['h1_first'] === 4 && $m['h1_last'] === 7 && $m['h1s'] === ['A','A','H','H','A'] && $m['sc_h'] === 2 && $m['sc_a'] === 3) && !($m['h1c'] === 1 && $m['h1s'] === ['A'] && $m['h1_first'] === 6 && (int)($m['kickoff_hour'] ?? -1) === 11) && !($m['h1c'] === 1 && $m['h1s'] === ['A'] && $m['h1_first'] === 10 && (int)($m['kickoff_hour'] ?? -1) === 15)
             )),
         ],
         [

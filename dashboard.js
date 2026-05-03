@@ -1906,6 +1906,81 @@
         return false;
     }
 
+    function lateLeadSignatureJS(s) {
+        var seq = Array.isArray(s.h1s) ? s.h1s.join('') : '';
+        return [
+            s.league || '',
+            parseInt(s.h1c, 10) || 0,
+            seq,
+            (parseInt(s.sc_h, 10) || 0) + '-' + (parseInt(s.sc_a, 10) || 0),
+            parseInt(s.h1_first, 10),
+            parseInt(s.h1_last, 10),
+            parseInt(s.kickoff_hour, 10)
+        ].join('|');
+    }
+
+    var LG1_SIGNATURES = Object.freeze({
+        '15min|6|AHAAHA|2-4|0|8|22': true,
+        '16min|3|AAA|0-3|0|8|18': true,
+        '20min|4|AAAH|1-3|0|9|22': true,
+        '20min|6|AAAHHA|2-4|1|9|18': true,
+        '20min|4|AHAA|1-3|0|9|21': true,
+        '20min|3|AAA|0-3|1|9|21': true,
+        '20min|4|AHAA|1-3|1|9|4': true,
+        '16min|4|AAAA|0-4|1|8|13': true,
+        '16min|4|HAAA|1-3|0|8|20': true,
+        '20min|6|AHAHAA|2-4|1|8|11': true,
+        '16min|3|AAA|0-3|1|8|23': true,
+        '20min|3|AAA|0-3|1|9|16': true
+    });
+
+    var LG2_SIGNATURES = Object.freeze({
+        '15min|6|AHAAHA|2-4|0|8|22': true,
+        '20min|3|AAA|0-3|2|10|7': true,
+        '16min|3|AAA|0-3|0|8|18': true,
+        '20min|4|AAAH|1-3|0|9|22': true,
+        '20min|6|AAAHHA|2-4|1|9|18': true,
+        '20min|4|AHAA|1-3|0|9|21': true,
+        '20min|3|AAA|0-3|1|9|21': true,
+        '20min|4|AHAA|1-3|1|9|4': true,
+        '16min|4|AAAA|0-4|1|8|13': true,
+        '16min|4|HAAA|1-3|0|8|20': true,
+        '20min|3|AAA|0-3|3|10|21': true,
+        '20min|4|AAAA|0-4|2|10|10': true,
+        '20min|6|AHAHAA|2-4|1|8|11': true,
+        '16min|3|AAA|0-3|1|8|23': true,
+        '20min|3|AAA|0-3|1|9|16': true
+    });
+
+    function matchesLG1Live(s) {
+        if (!s) return false;
+        return parseInt(s.h1c, 10) >= 3
+            && (parseInt(s.sc_a, 10) - parseInt(s.sc_h, 10)) >= 2
+            && parseInt(s.h1_first, 10) <= 1
+            && parseInt(s.h1_last, 10) >= 8
+            && Object.prototype.hasOwnProperty.call(LG1_SIGNATURES, lateLeadSignatureJS(s));
+    }
+
+    function matchesLG2Live(s) {
+        if (!s) return false;
+        return parseInt(s.h1c, 10) >= 3
+            && (parseInt(s.sc_a, 10) - parseInt(s.sc_h, 10)) >= 2
+            && parseInt(s.h1_last, 10) >= 8
+            && (parseInt(s.h1_last, 10) - parseInt(s.h1_first, 10)) >= 7
+            && Object.prototype.hasOwnProperty.call(LG2_SIGNATURES, lateLeadSignatureJS(s));
+    }
+
+    function matchesLG5Live(s) {
+        if (!s || !Array.isArray(s.h1s)) return false;
+        return inTeamConfig('lg5_teams', s.home)
+            && (s.sc_a - s.sc_h) === 1
+            && s.h1_last >= 6
+            && s.h1_first >= 2
+            && !(s.h1_first === 4 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'H', 'A']) && s.sc_h === 2 && s.sc_a === 3)
+            && !(s.h1c === 1 && arrayEqualsJS(s.h1s, ['A']) && s.h1_first === 6 && s.kickoff_hour === 11)
+            && !(s.h1c === 1 && arrayEqualsJS(s.h1s, ['A']) && s.h1_first === 10 && s.kickoff_hour === 15);
+    }
+
     function matchesLG4Live(s) {
         if (!s || !Array.isArray(s.h1s)) return false;
         return s.league === '20min'
@@ -2507,15 +2582,15 @@
 
         switch (pid) {
             case 'LG1':
-                return s.h1_last === 9 && s.h1_first <= 1 && (s.sc_a - s.sc_h) >= 2 && s.h1c >= 3;
+                return matchesLG1Live(s);
             case 'LG2':
-                return s.h1_last === 9 && span >= 7 && (s.sc_a - s.sc_h) >= 2 && s.h1_first <= 1 && s.h1c >= 3;
+                return matchesLG2Live(s);
             case 'LG3':
                 return s.league === '16min' && s.h1c >= 3 && firstScorer === 'A' && s.h1_last === 6 && s.max_gap !== 3;
             case 'LG4':
                 return matchesLG4Live(s);
             case 'LG5':
-                return inTeamConfig('lg5_teams', s.home) && (s.sc_a - s.sc_h) === 1 && s.h1_last >= 6 && s.h1_first >= 2 && !(s.h1_first === 4 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'H', 'A']) && s.sc_h === 2 && s.sc_a === 3);
+                return matchesLG5Live(s);
             case 'LG6':
                 return matchesLG6Live(s);
             case 'LG7':

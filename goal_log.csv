@@ -5532,7 +5532,6 @@ datetime,league,home_team,away_team,goals,final_home,final_away,1h3,2h1,2h7
 "03/05/2026 21:16","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","Binh Dinh (V)","Hong Linh Ha Tinh (V)","1H 2' (0-1)",0,1,OK,OK,OK
 "03/05/2026 21:00","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","USA (V)","Denmark (V)","1H 7' (0-1) | 2H 5' (1-1) | 2H 8' (2-1)",2,1,OK,OK,OK
 "03/05/2026 21:19","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","CA Osasuna (V)","Inter Milan (V)","1H 1' (0-1) | 1H 4' (0-2)",0,2,OK,OK,OK
-"03/05/2026 21:30","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Portugal (V)","Ghana (V)","1H 0' (1-0)",1,0,OK,OK,
 "03/05/2026 21:02","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","USA (V)","Algeria (V)","1H 5' (1-0) | 1H 5' (2-0) | 1H 6' (3-0) | 1H 6' (3-1) | 1H 9' (4-1) | 2H 9' (5-1)",5,1,OK,OK,OK
 "03/05/2026 21:16","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","SHB Da Nang FC (V)","Becamex Binh Duong (V)","1H 6' (0-1) | 2H 3' (1-1) | 2H 5' (1-2)",1,2,OK,OK,OK
 "03/05/2026 21:15","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Norway (V)","Wales  (V)","1H 2' (0-1) | 1H 5' (1-1) | 2H 5' (1-2)",1,2,OK,OK,OK
@@ -5541,7 +5540,8 @@ datetime,league,home_team,away_team,goals,final_home,final_away,1h3,2h1,2h7
 "03/05/2026 21:46","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Valencia CF (V)","RB Leipzig (V)",,0,0,OK,,
 "03/05/2026 21:46","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Olympique de Marseille (V)","AS Monaco (V)",,0,0,OK,,
 "03/05/2026 21:45","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Italy (V)","Spain (V)","1H 0' (1-0)",1,0,OK,,
-"03/05/2026 21:47","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Netherlands (V)","Slovenia (V)",,0,0,OK,,
 "03/05/2026 21:47","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Germany (V)","Switzerland (V)",,0,0,OK,,
-"03/05/2026 21:30","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Lazio (V)","Real Sociedad (V)","1H 3' (1-0) | 2H 4' (2-0)",2,0,OK,OK,
+"03/05/2026 21:30","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Lazio (V)","Real Sociedad (V)","1H 3' (1-0) | 2H 4' (2-0)",2,0,OK,OK,OK
 "03/05/2026 21:31","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Arminia Bielefeld (V)","Udinese (V)","1H 4' (0-1) | 2H 7' (0-2)",0,2,OK,OK,OK
+"03/05/2026 21:47","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Netherlands (V)","Slovenia (V)","1H 6' (1-0)",1,0,OK,,
+"03/05/2026 21:30","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Portugal (V)","Ghana (V)","1H 0' (1-0) | 2H 6' (2-0) | 2H 7' (3-0)",3,0,OK,OK,OK

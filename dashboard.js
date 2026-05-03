@@ -3322,6 +3322,30 @@
 			return false;
 		}
 
+		if (
+			s.league === "20min" &&
+			first === 2 &&
+			last === 9 &&
+			seq === "AAHA" &&
+			s.sc_h === 1 &&
+			s.sc_a === 3 &&
+			s.max_gap === 3
+		) {
+			return false;
+		}
+
+		if (
+			s.league === "20min" &&
+			s.h1c === 2 &&
+			s.sc_h === 0 &&
+			s.sc_a === 2 &&
+			first === 4 &&
+			last === 10 &&
+			seq === "AA"
+		) {
+			return false;
+		}
+
 		if (s.max_gap >= 7 && s.h1c === 2 && s.sc_a > s.sc_h) {
 			return false;
 		}
@@ -3405,6 +3429,18 @@
 		}
 
 		if (s.h1c === 2 && s.max_gap >= 7 && s.sc_a > s.sc_h) {
+			return false;
+		}
+
+		if (
+			s.league === "20min" &&
+			s.h1c === 2 &&
+			s.sc_h === 0 &&
+			s.sc_a === 2 &&
+			first === 4 &&
+			last === 10 &&
+			seq === "AA"
+		) {
 			return false;
 		}
 
@@ -4113,6 +4149,16 @@
 						arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
 						s.sc_h === 1 &&
 						s.sc_a === 2
+					) &&
+					!(
+						s.league === "16min" &&
+						s.h1_first === 0 &&
+						s.h1_last === 7 &&
+						arrayEqualsJS(s.h1s, ["H", "H", "A"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 1 &&
+						s.min_gap >= 3 &&
+						s.max_gap === 4
 					)
 				);
 			case "P32":
@@ -4602,6 +4648,15 @@
 						arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
 						s.sc_h === 1 &&
 						s.sc_a === 2
+					) &&
+					!(
+						s.league === "20min" &&
+						s.h1_first === 2 &&
+						s.h1_last === 9 &&
+						arrayEqualsJS(s.h1s, ["A", "A", "H", "A"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 3 &&
+						s.max_gap === 3
 					)
 				);
 			case "P55":
@@ -4838,6 +4893,15 @@
 						s.sc_a === 2 &&
 						s.min_gap === 0 &&
 						arrayEqualsJS(s.h1s, ["H", "A", "H", "A"])
+					) &&
+					!(
+						s.league === "20min" &&
+						s.h1_first === 2 &&
+						s.h1_last === 9 &&
+						arrayEqualsJS(s.h1s, ["A", "A", "H", "A"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 3 &&
+						s.max_gap === 3
 					)
 				);
 			case "P60":

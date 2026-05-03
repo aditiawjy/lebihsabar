@@ -995,12 +995,13 @@
 		var pageRows = rows.slice(start, end).join("");
 		var liveRows = page === 1 ? buildSummaryLiveSampleRows(id) : "";
 		var table =
+			'<div class="detail-table-wrap">' +
 			'<table class="detail-table"><thead>' +
 			data.tableHead +
 			"</thead><tbody>" +
 			liveRows +
 			pageRows +
-			"</tbody></table>";
+			"</tbody></table></div>";
 		return table + buildDetailPagination(id, page, totalPages, totalRows);
 	}
 
@@ -1672,12 +1673,13 @@
 			.join("");
 
 		return (
-			'<div style="margin-top:16px;">' +
-			'<h4 style="margin:0 0 8px 0; font-size:0.95rem; color:var(--text-primary);">Settled Live Results</h4>' +
+			'<section class="detail-section detail-settled">' +
+			"<h4>Settled Live Results</h4>" +
+			'<div class="detail-table-wrap">' +
 			'<table class="detail-table"><thead><tr><th>Jam</th><th>Match</th><th>League</th><th>Status Terakhir</th><th>Skor</th><th>Timeline 1H</th><th>Sequence</th><th>Hasil</th></tr></thead><tbody>' +
 			rowsHtml +
-			"</tbody></table>" +
-			"</div>"
+			"</tbody></table></div>" +
+			"</section>"
 		);
 	}
 
@@ -1807,12 +1809,13 @@
 			.join("");
 
 		return (
-			'<div style="margin-top:16px;">' +
-			'<h4 style="margin:0 0 8px 0; font-size:0.95rem; color:var(--text-primary);">Settled Live Late Results</h4>' +
+			'<section class="detail-section detail-settled">' +
+			"<h4>Settled Live Late Results</h4>" +
+			'<div class="detail-table-wrap">' +
 			'<table class="detail-table"><thead><tr><th>Jam</th><th>Match</th><th>League</th><th>Status Terakhir</th><th>Skor</th><th>Target</th><th>Sequence</th><th>Hasil</th></tr></thead><tbody>' +
 			rowsHtml +
-			"</tbody></table>" +
-			"</div>"
+			"</tbody></table></div>" +
+			"</section>"
 		);
 	}
 
@@ -1901,7 +1904,13 @@
 	function buildPanelHtml(id, data) {
 		if (!data) return "";
 		var html = buildPaginatedDetailTable(id, data);
-		return html + buildSettledSummarySection(id) + buildSettledLateSection(id);
+		return (
+			'<div class="detail-panel-stack">' +
+			html +
+			buildSettledSummarySection(id) +
+			buildSettledLateSection(id) +
+			"</div>"
+		);
 	}
 
 	function refreshActivePanelContent() {
@@ -3185,7 +3194,15 @@
 			s.sc_a === 0 &&
 			s.h1_first === 1 &&
 			s.h1_last === 7
-		);
+		) &&
+			!(
+				kickoffDowNum === 0 &&
+				seq === "HH" &&
+				s.sc_h === 2 &&
+				s.sc_a === 0 &&
+				s.h1_first === 0 &&
+				s.h1_last === 6
+			);
 	}
 
 	function matchesP12Summary(s) {
@@ -3831,8 +3848,9 @@
 					) &&
 					!(
 						s.league === "20min" &&
+						kickoffDowNum === 0 &&
 						s.h1_first === 0 &&
-						s.h1_last === 5 &&
+						[4, 5].indexOf(s.h1_last) !== -1 &&
 						arrayEqualsJS(s.h1s, ["H", "A", "A", "H"]) &&
 						s.sc_h === 2 &&
 						s.sc_a === 2
@@ -4315,7 +4333,14 @@
 					s.h1_first === 0 &&
 					span >= 6 &&
 					s.max_gap >= 6 &&
-					s.max_run <= 2
+					s.max_run <= 2 &&
+					!(
+						kickoffDowNum === 0 &&
+						s.h1_last === 6 &&
+						arrayEqualsJS(s.h1s, ["H", "H"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 0
+					)
 				);
 			case "P46":
 				return (
@@ -4327,6 +4352,14 @@
 					!(
 						s.h1_first === 1 &&
 						s.h1_last === 7 &&
+						arrayEqualsJS(s.h1s, ["H", "H"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 0
+					) &&
+					!(
+						kickoffDowNum === 0 &&
+						s.h1_first === 0 &&
+						s.h1_last === 6 &&
 						arrayEqualsJS(s.h1s, ["H", "H"]) &&
 						s.sc_h === 2 &&
 						s.sc_a === 0
@@ -4419,6 +4452,14 @@
 					!(
 						s.h1_first === 1 &&
 						s.h1_last === 7 &&
+						arrayEqualsJS(s.h1s, ["H", "H"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 0
+					) &&
+					!(
+						kickoffDowNum === 0 &&
+						s.h1_first === 0 &&
+						s.h1_last === 6 &&
 						arrayEqualsJS(s.h1s, ["H", "H"]) &&
 						s.sc_h === 2 &&
 						s.sc_a === 0
@@ -4672,6 +4713,15 @@
 						s.league === "16min" &&
 						s.h1_first === 1 &&
 						s.h1_last === 7 &&
+						arrayEqualsJS(s.h1s, ["H", "H"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 0
+					) &&
+					!(
+						s.league === "16min" &&
+						kickoffDowNum === 0 &&
+						s.h1_first === 0 &&
+						s.h1_last === 6 &&
 						arrayEqualsJS(s.h1s, ["H", "H"]) &&
 						s.sc_h === 2 &&
 						s.sc_a === 0
@@ -4958,6 +5008,25 @@
 						s.min_gap === 2 &&
 						s.max_run === 3 &&
 						kickoffDowNum === 0
+					) &&
+					!(
+						s.league === "15min" &&
+						s.h1_first === 0 &&
+						s.h1_last === 4 &&
+						arrayEqualsJS(s.h1s, ["H", "A", "H", "H"]) &&
+						s.sc_h === 3 &&
+						s.sc_a === 1 &&
+						s.min_gap === 0 &&
+						s.max_gap === 3
+					) &&
+					!(
+						s.league === "15min" &&
+						kickoffDowNum === 0 &&
+						s.h1_first === 1 &&
+						s.h1_last === 4 &&
+						arrayEqualsJS(s.h1s, ["A", "A"]) &&
+						s.sc_h === 0 &&
+						s.sc_a === 2
 					) &&
 					!(
 						s.league === "15min" &&

@@ -6489,6 +6489,12 @@
 			if (recordCell && !recordCell.dataset.baseHtml) {
 				recordCell.dataset.baseHtml = recordCell.innerHTML;
 			}
+			if (!row.dataset.baseTotal) {
+				row.dataset.baseTotal = row.getAttribute("data-total") || "0";
+			}
+			if (!row.dataset.baseHits) {
+				row.dataset.baseHits = row.getAttribute("data-hits") || "0";
+			}
 			var pctCell = row.cells[3];
 			if (pctCell && !pctCell.dataset.baseHtml) {
 				pctCell.dataset.baseHtml = pctCell.innerHTML;
@@ -6504,35 +6510,44 @@
 			var settledHtml = "";
 			var settledInlineHtml = "";
 			var settledPctHtml = "";
+			row.removeAttribute("data-adjusted-total");
+			row.removeAttribute("data-adjusted-hits");
+			row.removeAttribute("data-adjusted-pct");
 			if (settledStats.win || settledStats.lose) {
 				var parts = [];
 				if (settledStats.win) parts.push("W " + settledStats.win);
 				if (settledStats.lose) parts.push("L " + settledStats.lose);
-				var baseTotal = parseInt(row.getAttribute("data-total"), 10) || 0;
-				var baseHits = parseInt(row.getAttribute("data-hits"), 10) || 0;
+				var baseTotal = parseInt(row.dataset.baseTotal, 10) || 0;
+				var baseHits = parseInt(row.dataset.baseHits, 10) || 0;
 				var adjustedTotal = baseTotal + settledStats.win + settledStats.lose;
 				var adjustedHits = baseHits + settledStats.win;
 				var adjustedPct =
 					adjustedTotal > 0
 						? Math.round((adjustedHits / adjustedTotal) * 100)
 						: 0;
+				row.setAttribute("data-adjusted-total", adjustedTotal);
+				row.setAttribute("data-adjusted-hits", adjustedHits);
+				row.setAttribute("data-adjusted-pct", adjustedPct);
 				settledHtml =
 					'<br><span style="color:#8b949e;font-weight:600;">settled ' +
 					parts.join(" / ") +
 					"</span>";
 				settledInlineHtml =
-					'<br><span class="record-sub">settled ' +
-					parts.join(" / ") +
-					" => live adj " +
 					adjustedHits +
 					"/" +
 					adjustedTotal +
+					'<br><span class="record-sub">base ' +
+					baseHits +
+					"/" +
+					baseTotal +
+					" + settled " +
+					parts.join(" / ") +
 					"</span>";
 				settledPctHtml =
 					'<br><span class="record-sub">live adj ' + adjustedPct + "%</span>";
 			}
 			if (recordCell) {
-				recordCell.innerHTML = recordCell.dataset.baseHtml + settledInlineHtml;
+				recordCell.innerHTML = settledInlineHtml || recordCell.dataset.baseHtml;
 			}
 			if (pctCell) {
 				pctCell.innerHTML = pctCell.dataset.baseHtml + settledPctHtml;
@@ -7374,11 +7389,23 @@
 		rows.sort((a, b) => {
 			var dir = st.dir === "asc" ? 1 : -1;
 			if (st.col === "record") {
-				var ta = parseInt(a.getAttribute("data-total")) || 0;
-				var tb = parseInt(b.getAttribute("data-total")) || 0;
+				var ta =
+					parseInt(a.getAttribute("data-adjusted-total")) ||
+					parseInt(a.getAttribute("data-total")) ||
+					0;
+				var tb =
+					parseInt(b.getAttribute("data-adjusted-total")) ||
+					parseInt(b.getAttribute("data-total")) ||
+					0;
 				if (ta !== tb) return dir * (ta - tb);
-				var ha = parseInt(a.getAttribute("data-hits")) || 0;
-				var hb = parseInt(b.getAttribute("data-hits")) || 0;
+				var ha =
+					parseInt(a.getAttribute("data-adjusted-hits")) ||
+					parseInt(a.getAttribute("data-hits")) ||
+					0;
+				var hb =
+					parseInt(b.getAttribute("data-adjusted-hits")) ||
+					parseInt(b.getAttribute("data-hits")) ||
+					0;
 				return dir * (ha - hb);
 			}
 			if (st.col === "pct") {

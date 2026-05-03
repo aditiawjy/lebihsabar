@@ -2957,8 +2957,20 @@
 		if (Number.isNaN(kickoffHour)) kickoffHour = -1;
 		if (Number.isNaN(kickoffMinute)) kickoffMinute = -1;
 		if (Number.isNaN(kickoffDowNum)) kickoffDowNum = -1;
-		return Object.hasOwn(LG10_SIGNATURES, lateLeadSignatureJS(s))
-			&& !(kickoffDowNum === 0 && kickoffHour === 22 && kickoffMinute === 17 && s.league === "20min" && s.h1_first === 4 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ["A"]) && s.sc_h === 0 && s.sc_a === 1);
+		return (
+			Object.hasOwn(LG10_SIGNATURES, lateLeadSignatureJS(s)) &&
+			!(
+				kickoffDowNum === 0 &&
+				kickoffHour === 22 &&
+				kickoffMinute === 17 &&
+				s.league === "20min" &&
+				s.h1_first === 4 &&
+				s.h1_last === 4 &&
+				arrayEqualsJS(s.h1s, ["A"]) &&
+				s.sc_h === 0 &&
+				s.sc_a === 1
+			)
+		);
 	}
 
 	function matchesLG5Live(s) {
@@ -3193,15 +3205,16 @@
 			return false;
 		}
 
-		return !(
-			kickoffDowNum === 0 &&
-			kickoffHour === 12 &&
-			seq === "HH" &&
-			s.sc_h === 2 &&
-			s.sc_a === 0 &&
-			s.h1_first === 1 &&
-			s.h1_last === 7
-		) &&
+		return (
+			!(
+				kickoffDowNum === 0 &&
+				kickoffHour === 12 &&
+				seq === "HH" &&
+				s.sc_h === 2 &&
+				s.sc_a === 0 &&
+				s.h1_first === 1 &&
+				s.h1_last === 7
+			) &&
 			!(
 				kickoffDowNum === 0 &&
 				seq === "HH" &&
@@ -3209,7 +3222,8 @@
 				s.sc_a === 0 &&
 				s.h1_first === 0 &&
 				s.h1_last === 6
-			);
+			)
+		);
 	}
 
 	function matchesP12Summary(s) {
@@ -3233,6 +3247,15 @@
 				s.sc_h === 2 &&
 				s.sc_a === 2 &&
 				arrayEqualsJS(s.h1s, ["A", "H", "H", "A"])
+			) &&
+			!(
+				s.league === "20min" &&
+				first === 2 &&
+				last === 9 &&
+				s.sc_h === 1 &&
+				s.sc_a === 3 &&
+				s.max_gap === 3 &&
+				arrayEqualsJS(s.h1s, ["A", "A", "H", "A"])
 			)
 		) {
 			return true;
@@ -4012,25 +4035,34 @@
 						arrayEqualsJS(s.h1s, ["H", "A"]) &&
 						s.sc_h === 1 &&
 						s.sc_a === 1
+					) &&
+					!(
+						s.league === "16min" &&
+						s.h1_first === 0 &&
+						s.h1_last === 7 &&
+						arrayEqualsJS(s.h1s, ["H", "H", "A"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 1 &&
+						s.min_gap >= 3 &&
+						s.max_gap === 4
 					)
 				);
 			case "P26":
 				return (
-					(s.league === "16min" &&
-						(s.sc_h + s.sc_a) % 2 === 1 &&
-						s.h1_last >= 6 &&
-						s.h1c >= 2 &&
-						s.sc_a > s.sc_h &&
-						s.max_run <= 2 &&
-						(s.h1_first !== 1 || s.max_gap >= 4) &&
-						!(
-							s.h1_last === 8 &&
-							[3, 5].indexOf(s.h1_first) !== -1 &&
-							arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
-							s.sc_h === 1 &&
-							s.sc_a === 2
-						)) ||
-					matchesP26StrongGroup(s)
+					s.league === "16min" &&
+					(s.sc_h + s.sc_a) % 2 === 1 &&
+					s.h1_last >= 6 &&
+					s.h1c >= 2 &&
+					s.sc_a > s.sc_h &&
+					s.max_run <= 2 &&
+					(s.h1_first !== 1 || s.max_gap >= 4) &&
+					!(
+						s.h1_last === 8 &&
+						[3, 5].indexOf(s.h1_first) !== -1 &&
+						arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 2
+					)
 				);
 			case "P27":
 				return (
@@ -4039,7 +4071,16 @@
 					s.max_gap >= 3 &&
 					s.h1_first !== 1 &&
 					span >= 6 &&
-					(s.switches >= 1 || s.max_gap >= 6)
+					(s.switches >= 1 || s.max_gap >= 6) &&
+					!(
+						s.h1_first === 0 &&
+						s.h1_last === 7 &&
+						arrayEqualsJS(s.h1s, ["H", "H", "A"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 1 &&
+						s.min_gap >= 3 &&
+						s.max_gap === 4
+					)
 				);
 			case "P28":
 				return (
@@ -4340,6 +4381,15 @@
 						arrayEqualsJS(s.h1s, ["A", "H", "A", "A"]) &&
 						s.sc_h === 1 &&
 						s.sc_a === 3
+					) &&
+					!(
+						s.league === "20min" &&
+						s.h1_first === 2 &&
+						s.h1_last === 9 &&
+						arrayEqualsJS(s.h1s, ["A", "A", "H", "A"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 3 &&
+						s.max_gap === 3
 					)
 				);
 			case "P45":
@@ -4682,6 +4732,15 @@
 						s.league === "20min" &&
 						s.h1_first === 4 &&
 						s.h1_last === 9 &&
+						s.h1c === 2 &&
+						s.sc_h === 0 &&
+						s.sc_a === 2 &&
+						arrayEqualsJS(s.h1s, ["A", "A"])
+					) &&
+					!(
+						s.league === "20min" &&
+						s.h1_first === 4 &&
+						s.h1_last === 10 &&
 						s.h1c === 2 &&
 						s.sc_h === 0 &&
 						s.sc_a === 2 &&
@@ -5497,6 +5556,16 @@
 						arrayEqualsJS(s.h1s, ["H", "A", "A", "H", "A"]) &&
 						s.sc_h === 2 &&
 						s.sc_a === 3
+					) &&
+					!(
+						s.league === "16min" &&
+						s.h1_first === 0 &&
+						s.h1_last === 7 &&
+						arrayEqualsJS(s.h1s, ["H", "H", "A"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 1 &&
+						s.min_gap >= 3 &&
+						s.max_gap === 4
 					)
 				);
 			default:

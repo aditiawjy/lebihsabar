@@ -90,6 +90,9 @@ function getLastGoalSnapshot(string $goals): ?array {
 }
 
 function shouldKeepPendingRow(array $row): bool {
+    // Preserve any row that already has goal history.
+    if (trim((string)($row['goals'] ?? '')) !== '') return true;
+
     if (trim((string)($row['2h7'] ?? '')) !== '') return true;
 
     $dt = DateTime::createFromFormat('d/m/Y H:i', (string)($row['datetime'] ?? ''));

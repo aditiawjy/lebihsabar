@@ -131,7 +131,12 @@ function buildNextPatternSummary(array $nextPatterns, array $oldSnapData, ?int $
 }
 
 function buildLatePatternSummary(array $latePatterns, array $oldSnapData, ?int $rangeStart, ?int $rangeEnd): array {
-    $latePatterns = array_values(array_filter($latePatterns, fn($lp) => count($lp['data']) >= LATE_MIN_SAMPLE));
+    $latePatterns = array_values(array_filter($latePatterns, function($lp) {
+        $total = count($lp['data']);
+        $lateTarget = $lp['target'] ?? 'has_late';
+        $lateHits = count(array_filter($lp['data'], fn($m) => $m[$lateTarget] ?? false));
+        return $total >= LATE_MIN_SAMPLE || ($total >= 6 && $lateHits === $total);
+    }));
 
     return array_map(function($lp) use ($oldSnapData, $rangeStart, $rangeEnd) {
         $total = count($lp['data']);

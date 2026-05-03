@@ -37,6 +37,13 @@ const SUMMARY_MIN_SAMPLE = 10;
 const NEXT_MIN_SAMPLE = 0;
 const LATE_MIN_SAMPLE = 9;
 
+function shouldShowLatePattern(array $lp): bool {
+    $total = count($lp['data']);
+    $lateTarget = $lp['target'] ?? 'has_late';
+    $lateHits = count(array_filter($lp['data'], fn($m) => $m[$lateTarget] ?? false));
+    return $total >= LATE_MIN_SAMPLE || ($total >= 6 && $lateHits === $total);
+}
+
 $teamConfig = require __DIR__ . '/dashboard_config.php';
 
 $csvFile = __DIR__ . '/goal_log.csv';
@@ -164,7 +171,7 @@ if (!$csvExists): ?>
             </thead>
             <tbody id="late-body">
 <?php foreach ($latePatterns as $p):
-    if (count($p['data']) < LATE_MIN_SAMPLE) continue;
+    if (!shouldShowLatePattern($p)) continue;
     $total = count($p['data']);
     $target = $p['target'] ?? 'has_late';
     $hits = count(array_filter($p['data'], fn($m) => $m[$target] ?? false));

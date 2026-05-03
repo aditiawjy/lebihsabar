@@ -1388,8 +1388,14 @@
     }
 
     function renderLateTable(latePatterns) {
+        function isVisibleLatePattern(lp) {
+            var total = parseInt(lp.total, 10) || 0;
+            var hits = parseInt(lp.late_hits, 10) || 0;
+            return total >= LATE_MIN_SAMPLE || (total >= 6 && hits === total);
+        }
+
         var visibleLatePatterns = latePatterns.filter(function(lp) {
-            return (lp.total || 0) >= LATE_MIN_SAMPLE;
+            return isVisibleLatePattern(lp);
         });
         currentLateData = visibleLatePatterns;
         var tbody = document.getElementById('late-body');
@@ -1952,6 +1958,32 @@
         '20min|3|AAA|0-3|1|9|16': true
     });
 
+    var LG9_SIGNATURES = Object.freeze({
+        '15min|1|H|1-0|0|0|9': true,
+        '15min|1|H|1-0|1|1|8': true,
+        '15min|1|H|1-0|4|4|13': true
+    });
+
+    var LG10_SIGNATURES = Object.freeze({
+        '16min|1|A|0-1|3|3|16': true,
+        '16min|1|H|1-0|8|8|11': true,
+        '16min|2|AH|1-1|5|7|22': true,
+        '20min|1|A|0-1|4|4|13': true,
+        '20min|1|A|0-1|4|4|22': true,
+        '20min|1|A|0-1|8|8|19': true,
+        '20min|1|A|0-1|9|9|16': true,
+        '20min|1|H|1-0|1|1|14': true,
+        '20min|1|H|1-0|1|1|16': true,
+        '20min|1|H|1-0|3|3|19': true,
+        '20min|1|H|1-0|4|4|2': true,
+        '20min|1|H|1-0|6|6|0': true,
+        '20min|1|H|1-0|7|7|8': true,
+        '20min|1|H|1-0|8|8|0': true,
+        '20min|1|H|1-0|8|8|21': true,
+        '20min|2|HH|2-0|0|4|20': true,
+        '20min|2|HH|2-0|7|10|14': true
+    });
+
     function matchesLG1Live(s) {
         if (!s) return false;
         return parseInt(s.h1c, 10) >= 3
@@ -1968,6 +2000,16 @@
             && parseInt(s.h1_last, 10) >= 8
             && (parseInt(s.h1_last, 10) - parseInt(s.h1_first, 10)) >= 7
             && Object.prototype.hasOwnProperty.call(LG2_SIGNATURES, lateLeadSignatureJS(s));
+    }
+
+    function matchesLG9Live(s) {
+        if (!s) return false;
+        return Object.prototype.hasOwnProperty.call(LG9_SIGNATURES, lateLeadSignatureJS(s));
+    }
+
+    function matchesLG10Live(s) {
+        if (!s) return false;
+        return Object.prototype.hasOwnProperty.call(LG10_SIGNATURES, lateLeadSignatureJS(s));
     }
 
     function matchesLG5Live(s) {
@@ -2585,6 +2627,10 @@
                 return matchesLG1Live(s);
             case 'LG2':
                 return matchesLG2Live(s);
+            case 'LG9':
+                return matchesLG9Live(s);
+            case 'LG10':
+                return matchesLG10Live(s);
             case 'LG3':
                 return s.league === '16min' && s.h1c >= 3 && firstScorer === 'A' && s.h1_last === 6 && s.max_gap !== 3;
             case 'LG4':

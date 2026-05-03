@@ -1220,6 +1220,40 @@ function matchesLG2(array $m): bool {
         && isset($keys[lateLeadSignature($m)]);
 }
 
+function matchesLG9(array $m): bool {
+    static $keys = [
+        '15min|1|H|1-0|0|0|9' => true,
+        '15min|1|H|1-0|1|1|8' => true,
+        '15min|1|H|1-0|4|4|13' => true,
+    ];
+
+    return isset($keys[lateLeadSignature($m)]);
+}
+
+function matchesLG10(array $m): bool {
+    static $keys = [
+        '16min|1|A|0-1|3|3|16' => true,
+        '16min|1|H|1-0|8|8|11' => true,
+        '16min|2|AH|1-1|5|7|22' => true,
+        '20min|1|A|0-1|4|4|13' => true,
+        '20min|1|A|0-1|4|4|22' => true,
+        '20min|1|A|0-1|8|8|19' => true,
+        '20min|1|A|0-1|9|9|16' => true,
+        '20min|1|H|1-0|1|1|14' => true,
+        '20min|1|H|1-0|1|1|16' => true,
+        '20min|1|H|1-0|3|3|19' => true,
+        '20min|1|H|1-0|4|4|2' => true,
+        '20min|1|H|1-0|6|6|0' => true,
+        '20min|1|H|1-0|7|7|8' => true,
+        '20min|1|H|1-0|8|8|0' => true,
+        '20min|1|H|1-0|8|8|21' => true,
+        '20min|2|HH|2-0|0|4|20' => true,
+        '20min|2|HH|2-0|7|10|14' => true,
+    ];
+
+    return isset($keys[lateLeadSignature($m)]);
+}
+
 function computeLatePatterns(array $matches): array {
     $tc = require __DIR__ . '/dashboard_config.php';
     $lg4_teams = $tc['lg4_teams'];
@@ -1229,6 +1263,16 @@ function computeLatePatterns(array $matches): array {
     $lg8_teams = $tc['lg8_teams'];
 
     $latePatterns = [
+        [
+            'id' => 'LG9',
+            'label' => 'Club 100 late: 15min + single HOME 1H + HT 1-0 + exact branch first/last/jam (0/0 jam 09, 1/1 jam 08, 4/4 jam 13), target gol 2H menit >=7, tanpa team block',
+            'data' => array_values(array_filter($matches, fn($m) => matchesLG9($m))),
+        ],
+        [
+            'id' => 'LG10',
+            'label' => 'Negara 100 late: 16/20min + exact 1H signature single H/A, AH 1-1, atau HH 2-0 + first/last/jam stabil (17 cabang), target gol 2H menit >=7, tanpa team block',
+            'data' => array_values(array_filter($matches, fn($m) => matchesLG10($m))),
+        ],
         [
             'id' => 'LG1',
             'label' => 'Structural late lead: first<=1 + last>=8 + AWAY unggul HT 2+ + gol 1H>=3 + signature seq/HT/first/last/jam stabil (12 cabang), tanpa team block',

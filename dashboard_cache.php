@@ -1139,7 +1139,7 @@ function matchesLG8(array $m, array $lg8Teams): bool {
     }
 
     if ($seq === 'AA') {
-        return ($maxGap >= 5 && !($first === 0 && $last === 9))
+        return ($maxGap >= 5 && !($first === 0 && $last === 9) && !($first === 4 && $last === 9 && (int)($m['kickoff_hour'] ?? -1) === 18))
             || ($last >= 9 && $maxGap <= 3);
     }
 
@@ -1274,7 +1274,7 @@ function computeLatePatterns(array $matches): array {
         ],
         [
             'id' => 'LG8',
-            'label' => 'AWAY shortlist: Norway / Nigeria / Poland / Slovenia / Romania / Argentina / India / Belgium (20min, away lead HT, last gol 1H>=6, gol 1H>=2; branch AA max_gap>=5 bukan first=0 last=9 atau AA last>=9 max_gap<=3; AAH/AAHA/AHHAA; AAA/AAAA first>=2 last>=8; AHA bukan first=4 last=6 min_gap=0 dan bukan first=1 last=9; HAA bukan first=2 last=6 max_gap=2)',
+            'label' => 'AWAY shortlist: Norway / Nigeria / Poland / Slovenia / Romania / Argentina / India / Belgium (20min, away lead HT, last gol 1H>=6, gol 1H>=2; branch AA max_gap>=5 bukan first=0 last=9 atau AA last>=9 max_gap<=3, kecuali first=4 last=9 jam 18; AAH/AAHA/AHHAA; AAA/AAAA first>=2 last>=8; AHA bukan first=4 last=6 min_gap=0 dan bukan first=1 last=9; HAA bukan first=2 last=6 max_gap=2)',
             'data' => array_values(array_filter($matches, fn($m) => matchesLG8($m, $lg8_teams))),
         ],
     ];

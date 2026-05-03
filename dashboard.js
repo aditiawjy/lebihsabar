@@ -19,6 +19,7 @@
     var NO2H_MIN_SAMPLE = 5;
     var SUMMARY_REFRESH_SECONDS = 5;
     var LIVE_FETCH_INTERVAL_MS = 2000;
+    var LIVE_SIGNALS_ENABLED = true;
     var refreshCountdown = SUMMARY_REFRESH_SECONDS;
     var countdownEl = document.getElementById('countdown');
     var summarySyncStateEl = document.getElementById('summary-sync-state');
@@ -46,7 +47,7 @@
     var LIVE_PATTERN_STATE_STORAGE_KEY = 'livePatternStateMemory';
     var LIVE_SETTLED_STORAGE_KEY = 'liveSettledState';
     var LIVE_LATE_SETTLED_STORAGE_KEY = 'liveLateSettledState';
-    var LIVE_STATE_SCHEMA_VERSION = '2026-05-02-rules-v155';
+    var LIVE_STATE_SCHEMA_VERSION = '2026-05-03-live-signals-on-v171';
     var LIVE_CANDIDATE_CACHE_TTL_MS = 30000;
     var LIVE_CANDIDATE_GRACE_MS = 15000;
     var LIVE_SUMMARY_PRE_GOAL_CARRY_MS = 12 * 60 * 1000;
@@ -600,7 +601,8 @@
     function hasAnyLiveCandidateState() {
         return Object.keys(liveCandidateCounts).length > 0
             || Object.keys(nextLiveCandidateCounts).length > 0
-            || Object.keys(lateLiveCandidateCounts).length > 0;
+            || Object.keys(lateLiveCandidateCounts).length > 0
+            || Object.keys(no2hLiveCandidateCounts).length > 0;
     }
 
     function getLiveCandidateBadgeText(entry) {
@@ -612,9 +614,11 @@
         liveCandidateCounts = {};
         nextLiveCandidateCounts = {};
         lateLiveCandidateCounts = {};
+        no2hLiveCandidateCounts = {};
         liveCandidateDetails = {};
         nextLiveCandidateDetails = {};
         lateLiveCandidateDetails = {};
+        no2hLiveCandidateDetails = {};
         restoredLiveCandidateState = false;
 
         if (liveCandidateExpiryTimer) {
@@ -631,10 +635,30 @@
         }
     }
 
+    function clearLiveSignalState(clearStorage) {
+        clearLiveCandidateState(clearStorage);
+        liveGoalMemory = {};
+        liveScorerMemory = {};
+        livePatternStateMemory = {};
+        settledSummaryResults = [];
+        settledLateResults = [];
+
+        if (clearStorage) {
+            try {
+                sessionStorage.removeItem(LIVE_PATTERN_STATE_STORAGE_KEY);
+                sessionStorage.removeItem(LIVE_SETTLED_STORAGE_KEY);
+                sessionStorage.removeItem(LIVE_LATE_SETTLED_STORAGE_KEY);
+            } catch (e) {
+                // ignore storage failures
+            }
+        }
+    }
+
     function applyLiveCandidateStateToUi() {
         applyLiveCandidateIndicators();
         applyNextLiveCandidateIndicators();
         applyLateLiveCandidateIndicators();
+        applyNo2hLiveCandidateIndicators();
         refreshActivePanelContent();
     }
 
@@ -653,6 +677,7 @@
     }
 
     function saveLiveCandidateState() {
+        if (!LIVE_SIGNALS_ENABLED) return;
         try {
             sessionStorage.setItem(LIVE_CANDIDATE_STORAGE_KEY, JSON.stringify({
                 schemaVersion: LIVE_STATE_SCHEMA_VERSION,
@@ -1935,6 +1960,34 @@
         return matchesLG7StrongGroup(s);
     }
 
+    function matchesP2Summary(s) {
+        if (!s) return false;
+        var seq = Array.isArray(s.h1s) ? s.h1s.join('') : '';
+        var kickoffHour = parseInt(s.kickoff_hour, 10);
+        var kickoffDowNum = parseInt(s.kickoff_dow_num, 10);
+        if (Number.isNaN(kickoffHour)) kickoffHour = -1;
+        if (Number.isNaN(kickoffDowNum)) kickoffDowNum = -1;
+
+        if (s.league !== '16min'
+            || s.h1c < 2
+            || Math.abs(s.sc_h - s.sc_a) < 2
+            || s.h1_first > 1
+            || s.h1_last < 6
+            || s.h1_last > 8
+            || !s.all_gaps_ge3
+            || s.max_run > 2) {
+            return false;
+        }
+
+        return !(kickoffDowNum === 0
+            && kickoffHour === 12
+            && seq === 'HH'
+            && s.sc_h === 2
+            && s.sc_a === 0
+            && s.h1_first === 1
+            && s.h1_last === 7);
+    }
+
     function matchesP12Summary(s) {
         if (!s) return false;
         var seq = Array.isArray(s.h1s) ? s.h1s.join('') : '';
@@ -1961,6 +2014,16 @@
             return false;
         }
 
+        if (s.league === '20min'
+            && seq === 'AAAH'
+            && first === 0
+            && last === 10
+            && s.sc_h === 1
+            && s.sc_a === 3
+            && s.min_gap === 0) {
+            return false;
+        }
+
         return (s.league === '15min' && seq === 'HAHA' && first <= 3 && last >= 6)
             || (s.league === '20min' && seq === 'AHAH' && first <= 2 && last >= 8)
             || (s.league === '15min' && seq === 'AHAH' && first <= 2)
@@ -1971,6 +2034,203 @@
             || (s.league === '15min' && seq === 'HHHA' && first === 0 && last >= 6)
             || (s.league === '20min' && seq === 'AAAH' && first <= 1)
             || (s.league === '15min' && seq === 'AAAA' && first <= 4 && last >= 7);
+    }
+
+    function matchesP42Summary(s) {
+        if (!s) return false;
+        var seq = Array.isArray(s.h1s) ? s.h1s.join('') : '';
+        var first = s.h1_first;
+        var last = s.h1_last;
+        var span = s.h1c >= 2 ? (last - first) : 0;
+        var kickoffHour = parseInt(s.kickoff_hour, 10);
+        var kickoffDowNum = parseInt(s.kickoff_dow_num, 10);
+        if (Number.isNaN(kickoffHour)) kickoffHour = -1;
+        if (Number.isNaN(kickoffDowNum)) kickoffDowNum = -1;
+
+        if (s.league !== '20min'
+            || first < 2
+            || span < 6
+            || s.min_gap < 3
+            || seq === 'HA') {
+            return false;
+        }
+
+        if (first === 2
+            && last === 9
+            && s.sc_h === 2
+            && s.sc_a === 1
+            && seq === 'HHA') {
+            return false;
+        }
+
+        if (s.max_gap >= 7
+            && s.h1c === 2
+            && s.sc_a > s.sc_h) {
+            return false;
+        }
+
+        if (s.h1c === 2
+            && s.sc_h === 2
+            && s.sc_a === 0
+            && first === 2
+            && last === 9
+            && seq === 'HH') {
+            return false;
+        }
+
+        if (kickoffHour === 7
+            && s.h1c === 2
+            && s.sc_h === 0
+            && s.sc_a === 2
+            && first === 2
+            && last === 8
+            && seq === 'AA') {
+            return false;
+        }
+
+        if (seq === 'HHH'
+            && s.sc_h === 3
+            && s.sc_a === 0
+            && first >= 3
+            && last >= 10
+            && s.max_run >= 3
+            && s.max_gap <= 4) {
+            return false;
+        }
+
+        if (kickoffDowNum === 0
+            && s.h1c === 2
+            && s.sc_h === 2
+            && s.sc_a === 0
+            && first === 2
+            && last === 8
+            && seq === 'HH') {
+            return false;
+        }
+
+        if (kickoffDowNum === 0
+            && s.h1c === 2
+            && s.sc_h === 2
+            && s.sc_a === 0
+            && first === 2
+            && last === 10
+            && seq === 'HH') {
+            return false;
+        }
+
+        return true;
+    }
+
+    function matchesP41Summary(s) {
+        if (!s) return false;
+        var seq = Array.isArray(s.h1s) ? s.h1s.join('') : '';
+        var first = s.h1_first;
+        var last = s.h1_last;
+        var span = s.h1c >= 2 ? (last - first) : 0;
+        var diff = Math.abs(s.sc_h - s.sc_a);
+        var kickoffHour = parseInt(s.kickoff_hour, 10);
+        var kickoffDowNum = parseInt(s.kickoff_dow_num, 10);
+        if (Number.isNaN(kickoffHour)) kickoffHour = -1;
+        if (Number.isNaN(kickoffDowNum)) kickoffDowNum = -1;
+
+        if (diff < 2
+            || first < 2
+            || span < 6
+            || s.max_gap < 5) {
+            return false;
+        }
+
+        if (s.h1c === 2
+            && s.max_gap >= 7
+            && s.sc_a > s.sc_h) {
+            return false;
+        }
+
+        if (s.league === '20min'
+            && s.h1c === 2
+            && s.sc_h === 2
+            && s.sc_a === 0
+            && first === 2
+            && last === 9
+            && seq === 'HH') {
+            return false;
+        }
+
+        if (s.league === '20min'
+            && first >= 2
+            && last >= 10
+            && seq === 'HHH') {
+            return false;
+        }
+
+        if (s.league === '20min'
+            && kickoffHour === 7
+            && s.h1c === 2
+            && s.sc_h === 0
+            && s.sc_a === 2
+            && first === 2
+            && last === 8
+            && seq === 'AA') {
+            return false;
+        }
+
+        if (s.league === '20min'
+            && kickoffDowNum === 0
+            && s.h1c === 2
+            && s.sc_h === 2
+            && s.sc_a === 0
+            && first === 2
+            && last === 8
+            && seq === 'HH') {
+            return false;
+        }
+
+        if (s.league === '20min'
+            && kickoffDowNum === 0
+            && s.h1c === 2
+            && s.sc_h === 2
+            && s.sc_a === 0
+            && first === 2
+            && last === 10
+            && seq === 'HH') {
+            return false;
+        }
+
+        return true;
+    }
+
+    function matchesP65Summary(s) {
+        if (!s) return false;
+        var seq = Array.isArray(s.h1s) ? s.h1s.join('') : '';
+        var kickoffHour = parseInt(s.kickoff_hour, 10);
+        if (Number.isNaN(kickoffHour)) kickoffHour = -1;
+
+        if (s.league !== '15min'
+            || !inTeamConfig('p65_teams', s.home)
+            || s.h1c < 1
+            || s.h1_first > 1) {
+            return false;
+        }
+
+        if (s.home === 'Leicester City (V)' && s.h1_first === 0 && s.h1_last === 5 && seq === 'HH') return false;
+        if (s.home === 'Leicester City (V)' && s.h1_first === 1 && s.h1_last === 5 && s.sc_h === 0 && s.sc_a === 2 && seq === 'AA') return false;
+        if (s.home === 'Napoli (V)' && s.h1c === 1 && s.h1_first === 1 && s.sc_h === 0 && s.sc_a === 1 && seq === 'A') return false;
+        if (s.home === 'Napoli (V)' && s.h1c === 2 && s.h1_first === 1 && s.h1_last === 5 && s.sc_h === 0 && s.sc_a === 2 && seq === 'AA') return false;
+        if (s.home === 'Olympique Lyonnais (V)' && s.h1c === 1 && s.h1_first === 1 && s.sc_h === 1 && s.sc_a === 0 && seq === 'H') return false;
+        if (s.h1_first === 1 && s.h1_last === 3 && seq === 'HH' && s.sc_h === 2 && s.sc_a === 0) return false;
+        if (s.h1_first === 1 && s.h1_last === 3 && seq === 'AA' && s.sc_h === 0 && s.sc_a === 2) return false;
+
+        if (kickoffHour === 7
+            && s.h1c === 1
+            && s.h1_first === 0
+            && s.h1_last === 0
+            && s.sc_h === 1
+            && s.sc_a === 0
+            && seq === 'H') {
+            return false;
+        }
+
+        return true;
     }
 
     function matchesSummaryPatternLive(pid, s) {
@@ -1987,7 +2247,7 @@
         if (Number.isNaN(kickoffDowNum)) kickoffDowNum = -1;
 
         switch (pid) {
-            case 'P2': return s.league === '16min' && s.h1c >= 2 && diff >= 2 && s.h1_last === 7 && s.all_gaps_ge3 && s.max_run <= 2 && s.h1_first <= 1;
+            case 'P2': return matchesP2Summary(s);
             case 'P6': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.h1_last === 7 && span >= 5 && s.h1_first !== 1 && ['Manchester City (V)', 'Atletico de Madrid (V)', 'England (V)'].indexOf(s.home) === -1 && !(s.league === '15min' && s.h1_first === 0 && arrayEqualsJS(s.h1s, ['H', 'A'])) && !(s.h1_first === 0 && arrayEqualsJS(s.h1s, ['A', 'H']));
             case 'P7': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && s.max_gap >= 5 && s.h1_first >= 3 && !(s.league === '16min' && s.h1_first === 3 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H'])) && !(s.home === 'Netherlands (V)' && s.league === '20min' && s.h1_first === 4 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1);
             case 'P9': return s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.max_gap >= 5 && s.h1_first >= 3 && !(s.league === '16min' && s.h1_first === 3 && s.h1_last === 8);
@@ -2010,9 +2270,9 @@
             case 'P35': return (inTeamConfig('p35_teams', s.away) && s.h1c >= 2 && s.h1_first >= 3 && s.max_run <= 2 && s.h1_last >= 5 && s.min_gap >= 2 && !(s.h1s.length === 2 && s.h1s[0] === 'H' && s.h1s[1] === 'H' && s.h1_first === 3 && s.h1_last === 5) && !(s.league === '16min' && s.h1c === 2 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.h1_first === 4 && s.h1_last === 6) && !(s.league === '16min' && s.h1c === 2 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.h1_first >= 5 && s.h1_last === 7) && !(s.away === 'Poland (V)' && s.league === '16min' && s.h1_first === 5 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2) && !(s.league === '20min' && s.h1_first === 4 && s.h1_last === 9 && s.h1c === 2 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1_first === 3 && s.h1_last === 5 && s.h1c === 2 && s.sc_h === 1 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['H', 'A'])) && !(s.h1_first === 3 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A'])) && !(s.league === '20min' && s.h1_first === 4 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1)) || (s.league === '16min' && inTeamConfig('p35_teams', s.away) && s.h1c >= 3 && s.h1_first === 1 && s.max_run <= 2 && s.h1_last >= 5 && s.min_gap >= 2) || (inTeamConfig('p35_teams', s.away) && s.h1c >= 3 && s.h1_first === 0 && s.max_run <= 2 && s.h1_last >= 6 && s.min_gap >= 2 && lastScorer === 'A' && !(s.league === '20min' && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['A', 'H', 'A']) && s.sc_h === 1 && s.sc_a === 2)) || (s.away === 'Portugal (V)' && s.h1c === 1 && arrayEqualsJS(s.h1s, ['A']) && !(s.h1_first === 0 && s.h1_last === 0 && s.sc_h === 0 && s.sc_a === 1)) || (inTeamConfig('p35_teams', s.away) && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'H', 'A']) && s.min_gap === 1);
             case 'P37': return s.league === '16min' && s.h1c >= 2 && s.h1_first <= 1 && s.h1_last <= 4 && firstScorer === 'A' && lastScorer === 'A' && s.switches === 0 && !(s.h1_first === 0 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0);
             case 'P39': return s.league === '20min' && s.h1c >= 3 && span >= 7 && diff <= 3 && s.min_gap >= 3 && s.h1_first >= 2;
-            case 'P40': return s.league === '16min' && diff === 2 && s.h1_first <= 1 && span >= 5 && (s.min_gap >= 1 || s.max_gap >= 4) && !((s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) || (s.h1_first === 1 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0)) && !(lastScorer === 'A' && (s.sc_h - s.sc_a) >= 2 && s.max_run >= 3 && s.max_gap <= 3);
-            case 'P41': return diff >= 2 && s.h1_first >= 2 && span >= 6 && s.max_gap >= 5 && !(s.h1c === 2 && s.max_gap >= 7 && s.sc_a > s.sc_h) && !(s.league === '20min' && s.h1c === 2 && s.sc_h === 2 && s.sc_a === 0 && s.h1_first === 2 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.league === '20min' && s.h1_first >= 2 && s.h1_last >= 10 && arrayEqualsJS(s.h1s, ['H', 'H', 'H'])) && !(s.home === 'Bosnia-Herzegovina (V)' && s.away === 'Spain (V)' && s.league === '20min' && s.h1_first === 2 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2);
-            case 'P42': return s.league === '20min' && s.h1_first >= 2 && span >= 6 && s.min_gap >= 3 && !arrayEqualsJS(s.h1s, ['H', 'A']) && !(s.h1_first === 2 && s.h1_last === 9 && s.sc_h === 2 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['H', 'H', 'A'])) && !(s.max_gap >= 7 && s.h1c === 2 && s.sc_a > s.sc_h) && !(s.h1c === 2 && s.sc_h === 2 && s.sc_a === 0 && s.h1_first === 2 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.home === 'Bosnia-Herzegovina (V)' && s.away === 'Spain (V)' && s.league === '20min' && s.h1_first === 2 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2);
+            case 'P40': return s.league === '16min' && diff === 2 && s.h1_first <= 1 && span >= 5 && (s.min_gap >= 1 || s.max_gap >= 4) && !((s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) || (s.h1_first === 1 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0)) && !(lastScorer === 'A' && (s.sc_h - s.sc_a) >= 2 && s.max_run >= 3 && s.max_gap <= 3) && !(kickoffHour === 18 && s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'A']) && s.sc_h === 1 && s.sc_a === 3 && s.max_gap <= 2);
+            case 'P41': return matchesP41Summary(s);
+            case 'P42': return matchesP42Summary(s);
             case 'P43': return s.sc_a > s.sc_h && span >= 6 && lastScorer === 'H' && (s.sc_a - s.sc_h) === 1 && s.h1c <= 3 && !(s.league === '20min' && s.sc_h === 1 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A', 'H']) && ((s.h1_first === 0 && s.h1_last === 9) || (s.h1_first === 1 && s.h1_last === 8) || (s.h1_first === 2 && s.h1_last === 9)));
             case 'P44': return diff >= 2 && s.h1_first >= 2 && s.switches >= 1 && s.max_run <= 2 && (s.league === '20min' || s.h1_last >= 8 || (s.sc_h === 3 && s.sc_a === 1)) && !(s.league === '20min' && s.h1_first === 2 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['A', 'H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 3);
             case 'P45': return s.league === '16min' && s.h1_first === 0 && span >= 6 && s.max_gap >= 6 && s.max_run <= 2;
@@ -2027,20 +2287,20 @@
             case 'P54': return s.league === '20min' && s.sc_a > s.sc_h && s.h1_last === 9 && span >= 4 && s.h1_first >= 2 && s.h1c <= 4 && !(s.h1_first === 2 && arrayEqualsJS(s.h1s, ['A', 'A', 'H'])) && !(s.h1_first === 2 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2) && !(s.h1_first === 4 && s.h1_last === 9 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2) && !(s.home === 'China (V)' && s.h1_first === 5 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2) && !(s.h1_first === 5 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2);
             case 'P55': return s.league === '16min' && s.h1_last === 8 && s.sc_a > s.sc_h && !(s.h1_first === 3 && s.sc_h === 1 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['H', 'A', 'A'])) && !(s.h1_first === 5 && s.h1_last === 8 && s.sc_h === 1 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.min_gap === 0) && !(s.h1c === 1 && s.h1_first === 8 && arrayEqualsJS(s.h1s, ['A']) && s.sc_h === 0 && s.sc_a === 1);
             case 'P56': return s.league === '16min' && s.max_gap >= 6 && lastScorer === 'A';
-            case 'P57': return s.h1_first === 0 && s.h1_last === 6 && firstScorer === 'A' && (s.league === '15min' || s.league === '16min' || s.h1c >= 3) && (s.switches >= 2 || s.max_gap >= 4) && !arrayEqualsJS(s.h1s, ['A', 'H', 'H']) && !arrayEqualsJS(s.h1s, ['A', 'A', 'A']) && !(s.league === '15min' && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2);
-            case 'P58': return ((s.h1_first >= 3 && span >= 5 && s.min_gap >= 3 && !(s.h1_first === 4 && span === 5 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.switches === 0)) || (s.league === '20min' && s.h1_first === 2 && span >= 5 && s.min_gap >= 3 && (lastScorer === 'H' || s.h1c >= 3) && !(s.h1_last === 9 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.switches === 0)) || (s.league === '16min' && s.h1_first === 1 && span >= 5 && s.min_gap >= 3 && s.max_gap >= 4) || (s.league === '16min' && s.h1_first === 0 && span >= 5 && s.min_gap >= 3 && diff >= 2 && !(s.sc_h === 2 && s.sc_a === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H']))) || (s.league === '15min' && s.h1c === 3 && s.h1_first === 2 && span === 5 && s.min_gap === 1) || (s.league === '15min' && s.h1_first === 0 && s.h1_last === 6 && span === 6 && s.min_gap === 2)) && !(s.home === 'Netherlands (V)' && s.league === '20min' && s.h1_first === 4 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1) && !(s.league === '20min' && s.h1_first === 2 && s.h1_last === 7 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.league === '20min' && s.h1_first === 2 && s.h1_last === 9 && s.sc_h === 2 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['H', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 4 && s.h1_last === 9 && s.h1c === 2 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.league === '16min' && s.h1c === 1 && s.sc_h === 0 && s.sc_a === 1 && [1, 8].indexOf(s.h1_first) !== -1) && !(s.league === '16min' && s.h1_first === 1 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.league === '15min' && s.h1_first === 2 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.league === '16min' && s.h1_first === 3 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1);
+            case 'P57': return s.h1_first === 0 && s.h1_last === 6 && firstScorer === 'A' && (s.league === '15min' || s.league === '16min' || s.h1c >= 3) && (s.switches >= 2 || s.max_gap >= 4) && !arrayEqualsJS(s.h1s, ['A', 'H', 'H']) && !arrayEqualsJS(s.h1s, ['A', 'A', 'A']) && !(s.league === '15min' && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2) && !(s.league === '16min' && arrayEqualsJS(s.h1s, ['A', 'A', 'A', 'A']) && s.sc_h === 0 && s.sc_a === 4);
+            case 'P58': return ((s.h1_first >= 3 && span >= 5 && s.min_gap >= 3 && !(s.h1_first === 4 && span === 5 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.switches === 0)) || (s.league === '20min' && s.h1_first === 2 && span >= 5 && s.min_gap >= 3 && (lastScorer === 'H' || s.h1c >= 3) && !(s.h1_last === 9 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.switches === 0)) || (s.league === '16min' && s.h1_first === 1 && span >= 5 && s.min_gap >= 3 && s.max_gap >= 4) || (s.league === '16min' && s.h1_first === 0 && span >= 5 && s.min_gap >= 3 && diff >= 2 && !(s.sc_h === 2 && s.sc_a === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H']))) || (s.league === '15min' && s.h1c === 3 && s.h1_first === 2 && span === 5 && s.min_gap === 1) || (s.league === '15min' && s.h1_first === 0 && s.h1_last === 6 && span === 6 && s.min_gap === 2)) && !(s.league === '20min' && kickoffHour === 22 && kickoffMinute <= 14 && s.h1_first === 4 && s.h1_last === 9 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1) && !(s.league === '20min' && s.h1_first === 2 && s.h1_last === 7 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.league === '20min' && s.h1_first === 2 && s.h1_last === 9 && s.sc_h === 2 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['H', 'H', 'A'])) && !(s.league === '20min' && s.h1_first === 4 && s.h1_last === 9 && s.h1c === 2 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.league === '20min' && s.h1_first >= 3 && s.h1_last >= 10 && arrayEqualsJS(s.h1s, ['H', 'H', 'H']) && s.sc_h === 3 && s.sc_a === 0 && s.max_run >= 3 && s.max_gap <= 4) && !(s.league === '20min' && kickoffDowNum === 0 && s.h1c === 2 && s.h1_first === 2 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.league === '20min' && kickoffDowNum === 0 && s.h1c === 2 && s.h1_first === 2 && s.h1_last === 10 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.league === '16min' && s.h1c === 1 && s.sc_h === 0 && s.sc_a === 1 && [1, 8].indexOf(s.h1_first) !== -1) && !(s.league === '16min' && s.h1_first === 1 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.league === '15min' && s.h1_first === 2 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.league === '16min' && s.h1_first === 3 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1);
             case 'P59': return s.h1_last === 9 && s.switches >= 2 && lastScorer === 'A' && (firstScorer === 'A' || s.max_gap >= 6) && !(s.h1_first === 1 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.h1c === 5 && s.h1_first === 2) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 9 && s.h1c === 4 && s.sc_h === 2 && s.sc_a === 2 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'A']));
             case 'P60': return s.league === '20min' && s.h1_first === 3 && s.sc_h === s.sc_a && s.h1_last >= 5 && !(s.home === 'Denmark (V)' && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'A']) && s.sc_h === 1 && s.sc_a === 1) && !(s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A'])) && !(s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1);
             case 'P61': return (s.league === '15min' && inTeamConfig('p61_teams', s.away) && s.h1_last >= 5 && diff <= 1 && !(s.home === 'Girondins de Bordeaux (V)' && s.away === 'Lille OSC (V)') && !(s.away === 'AS Monaco (V)' && s.h1_first === 3 && s.h1_last === 5 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['H', 'A'])) && !(s.h1c === 1 && s.h1_last === 5) && !(s.h1c === 1 && s.h1_first === 6 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A']) && s.fh === 0 && s.fa === 1) && !(s.h1_first === 4 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1) && !(s.h1_first === 3 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1) && !(s.h1_first === 3 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1) && !(s.h1_last === 7 && s.min_gap === 0 && arrayEqualsJS(s.h1s, ['A', 'H', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 5 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 1 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H', 'H']) && s.sc_h === 3 && s.sc_a === 0) && !(s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'H', 'H']) && s.sc_h === 2 && s.sc_a === 1) && !(s.away === 'Lille OSC (V)' && s.h1_first === 0 && s.h1_last === 6 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 2 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2)) || (s.league === '15min' && s.h1_first <= 1 && s.h1_last >= 6 && diff <= 1 && firstScorer === 'H' && lastScorer === 'H');
-            case 'P62': return (((s.league === '15min' && inTeamConfig('p62_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 4 && (s.h1_first === 0 || s.home !== 'FC Koln (V)') && (s.switches >= 1 || s.h1c <= 3 || s.h1_last >= 7) && !(s.h1_first === 1 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ['A', 'A', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 1 && s.h1_last === 5 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2)) || (s.league === '15min' && s.h1_first <= 1 && s.h1_last >= 6 && s.switches >= 2 && diff <= 2 && lastScorer === 'H' && !arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'H']) && !arrayEqualsJS(s.h1s, ['H', 'H', 'A', 'H'])) || (s.league === '15min' && s.h1_first === 3 && s.h1_last === 7 && diff === 2 && lastScorer === 'H') || (s.league === '15min' && s.h1_first === 2 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H'])) || (s.league === '16min' && s.h1_first <= 1 && s.h1_last >= 7 && diff <= 2 && lastScorer === 'H') || (s.league === '20min' && s.h1_first <= 1 && s.h1_last >= 3 && s.switches >= 2 && s.sc_h === s.sc_a && lastScorer === 'H') || (s.league === '20min' && s.h1_first === 1 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H']))) && !(s.away === 'Getafe CF (V)' && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.home === 'Lazio (V)' && s.league === '15min' && s.h1_first === 2 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.league === '15min' && s.h1c === 5 && s.h1_first === 0 && s.h1_last >= 7 && s.min_gap === 0 && s.sc_h === 3 && s.sc_a === 2) && !(s.league === '16min' && s.h1_first === 1 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.league === '16min' && s.h1_first === 0 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A', 'H']) && s.sc_h === 3 && s.sc_a === 2) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'A', 'A', 'H']) && s.sc_h === 2 && s.sc_a === 2));
-            case 'P72': return (((s.league === '15min' && s.h1_first <= 1 && s.h1_last >= 6 && s.switches >= 2 && diff <= 2 && lastScorer === 'H' && !arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'H']) && !arrayEqualsJS(s.h1s, ['H', 'H', 'A', 'H'])) || (s.league === '15min' && s.h1_first === 3 && s.h1_last === 7 && diff === 2 && lastScorer === 'H') || (s.league === '15min' && s.h1_first === 2 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H'])) || (s.league === '16min' && s.h1_first <= 1 && s.h1_last >= 7 && diff <= 2 && lastScorer === 'H') || (s.league === '20min' && s.h1_first <= 1 && s.h1_last >= 3 && s.switches >= 2 && s.sc_h === s.sc_a && lastScorer === 'H') || (s.league === '20min' && s.h1_first === 1 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H']))) && !(s.league === '15min' && s.h1c === 5 && s.h1_first === 0 && s.h1_last >= 7 && s.min_gap === 0 && s.sc_h === 3 && s.sc_a === 2) && !(s.league === '16min' && s.h1_first === 1 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.league === '16min' && s.h1_first === 0 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A', 'H']) && s.sc_h === 3 && s.sc_a === 2) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'A', 'A', 'H']) && s.sc_h === 2 && s.sc_a === 2));
+            case 'P62': return (((s.league === '15min' && inTeamConfig('p62_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 4 && (s.h1_first === 0 || s.home !== 'FC Koln (V)') && (s.switches >= 1 || s.h1c <= 3 || s.h1_last >= 7) && !(s.h1_first === 1 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ['A', 'A', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 1 && s.h1_last === 5 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2) && !(s.h1_first === 1 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2)) || (s.league === '15min' && s.h1_first <= 1 && s.h1_last >= 6 && s.switches >= 2 && diff <= 2 && lastScorer === 'H' && !arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'H']) && !arrayEqualsJS(s.h1s, ['H', 'H', 'A', 'H'])) || (s.league === '15min' && s.h1_first === 3 && s.h1_last === 7 && diff === 2 && lastScorer === 'H') || (s.league === '15min' && s.h1_first === 2 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H'])) || (s.league === '16min' && s.h1_first <= 1 && s.h1_last >= 7 && diff <= 2 && lastScorer === 'H') || (s.league === '20min' && s.h1_first <= 1 && s.h1_last >= 3 && s.switches >= 2 && s.sc_h === s.sc_a && lastScorer === 'H') || (s.league === '20min' && s.h1_first === 1 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H']))) && !(s.away === 'Getafe CF (V)' && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.home === 'Lazio (V)' && s.league === '15min' && s.h1_first === 2 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.league === '15min' && s.h1c === 5 && s.h1_first === 0 && s.h1_last >= 7 && s.min_gap === 0 && s.sc_h === 3 && s.sc_a === 2) && !(s.league === '15min' && s.h1_first === 0 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['H', 'A', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 3 && s.min_gap === 2 && s.max_run === 3 && kickoffDowNum === 0) && !(s.league === '15min' && s.h1_first === 2 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0 && kickoffDowNum === 0) && !(s.league === '16min' && s.h1_first === 1 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.league === '16min' && s.h1_first === 0 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A', 'H']) && s.sc_h === 3 && s.sc_a === 2) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'A', 'A', 'H']) && s.sc_h === 2 && s.sc_a === 2));
+            case 'P72': return (((s.league === '15min' && s.h1_first <= 1 && s.h1_last >= 6 && s.switches >= 2 && diff <= 2 && lastScorer === 'H' && !arrayEqualsJS(s.h1s, ['H', 'A', 'H', 'H']) && !arrayEqualsJS(s.h1s, ['H', 'H', 'A', 'H'])) || (s.league === '15min' && s.h1_first === 3 && s.h1_last === 7 && diff === 2 && lastScorer === 'H') || (s.league === '15min' && s.h1_first === 2 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H'])) || (s.league === '16min' && s.h1_first <= 1 && s.h1_last >= 7 && diff <= 2 && lastScorer === 'H') || (s.league === '20min' && s.h1_first <= 1 && s.h1_last >= 3 && s.switches >= 2 && s.sc_h === s.sc_a && lastScorer === 'H') || (s.league === '20min' && s.h1_first === 1 && s.h1_last === 4 && s.sc_h === 2 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H', 'H']))) && !(s.league === '15min' && s.h1c === 5 && s.h1_first === 0 && s.h1_last >= 7 && s.min_gap === 0 && s.sc_h === 3 && s.sc_a === 2) && !(s.league === '15min' && kickoffDowNum === 0 && s.h1_first === 2 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.league === '16min' && s.h1_first === 1 && s.h1_last === 7 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.league === '16min' && s.h1_first === 0 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A', 'H']) && s.sc_h === 3 && s.sc_a === 2) && !(s.league === '20min' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'A', 'A', 'H']) && s.sc_h === 2 && s.sc_a === 2));
             case 'P73': return s.h1c >= 1 && kickoffMinute >= 15 && kickoffMinute <= 29 && arrayEqualsJS(s.h1s, ['A', 'H']) && span >= 4;
             case 'P74': return s.h1c >= 1 && kickoffDowNum === 4 && kickoffMinute >= 0 && kickoffMinute <= 14 && s.h1_last >= 8;
             case 'P75': return s.h1c >= 1 && kickoffHour >= 16 && kickoffHour <= 19 && s.h1_first >= 2 && s.max_gap >= 5;
             case 'P76': return s.h1c >= 1 && kickoffHour === 19 && s.max_gap >= 3 && diff === 1;
-            case 'P63': return s.league === '16min' && inTeamConfig('p63_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 6 && !(s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['H', 'H', 'A']) && s.sc_h === 2 && s.sc_a === 1) && !(s.h1_first === 0 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A', 'H']) && s.sc_h === 3 && s.sc_a === 2) && !(lastScorer === 'A' && (s.sc_h - s.sc_a) >= 2 && s.max_run >= 3 && s.max_gap <= 3);
+            case 'P63': return s.league === '16min' && inTeamConfig('p63_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 6 && !(s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['H', 'H', 'A']) && s.sc_h === 2 && s.sc_a === 1) && !(s.h1_first === 0 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'H', 'H', 'A', 'H']) && s.sc_h === 3 && s.sc_a === 2) && !(lastScorer === 'A' && (s.sc_h - s.sc_a) >= 2 && s.max_run >= 3 && s.max_gap <= 3) && !(kickoffHour === 18 && s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'A']) && s.sc_h === 1 && s.sc_a === 3 && s.max_gap <= 2);
             case 'P64': return ((s.league === '15min' && inTeamConfig('p64_teams', s.away) && s.h1_first <= 1 && s.h1_last >= 4 && (s.away !== 'Napoli (V)' || s.max_run <= 2) && !(s.away === 'Napoli (V)' && arrayEqualsJS(s.h1s, ['A', 'A', 'H'])) && !(s.away === 'Lille OSC (V)' && s.h1_first === 1 && s.h1_last === 6 && arrayEqualsJS(s.h1s, ['A', 'A', 'A'])) && !(s.away === 'Lille OSC (V)' && s.h1_first === 0 && s.h1_last === 6 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['H', 'A', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 1 && s.h1_last === 4 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'H'])) && !(s.h1_first === 1 && s.h1_last === 5 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'H']) && s.sc_h === 1 && s.sc_a === 1) && !(s.h1_first === 1 && s.h1_last === 7 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['H', 'A']) && s.sc_h === 1 && s.sc_a === 1) && !(s.away === 'FC Koln (V)' && s.h1c === 2 && s.sc_h === 2 && s.sc_a === 0 && s.h1_first === 0 && s.h1_last === 4 && arrayEqualsJS(s.h1s, ['H', 'H']))) || (s.league === '15min' && s.h1_first === 1 && s.h1_last >= 7 && firstScorer === 'A' && lastScorer === 'H' && !(s.h1c === 2 && s.h1_last === 7 && s.h1_first === 1))) && !(s.league === '15min' && s.h1_first === 1 && s.h1_last === 7 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['H', 'A']) && s.sc_h === 1 && s.sc_a === 1);
-            case 'P65': return s.league === '15min' && inTeamConfig('p65_teams', s.home) && s.h1c >= 1 && s.h1_first <= 1 && !(s.home === 'Leicester City (V)' && s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.home === 'Leicester City (V)' && s.h1_first === 1 && s.h1_last === 5 && s.sc_h === 0 && s.sc_a === 2 && arrayEqualsJS(s.h1s, ['A', 'A'])) && !(s.home === 'Napoli (V)' && s.h1c === 1 && s.h1_first === 1 && s.sc_h === 0 && s.sc_a === 1 && arrayEqualsJS(s.h1s, ['A'])) && !(s.home === 'Olympique Lyonnais (V)' && s.h1c === 1 && s.h1_first === 1 && s.sc_h === 1 && s.sc_a === 0 && arrayEqualsJS(s.h1s, ['H'])) && !(s.h1_first === 1 && s.h1_last === 3 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.h1_first === 1 && s.h1_last === 3 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2);
+            case 'P65': return matchesP65Summary(s);
             case 'P67': return s.league === '20min' && inTeamConfig('p67_teams', s.home) && s.h1_first <= 1 && s.h1_last >= 5 && !(s.h1_first === 1 && s.h1_last === 7 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['H', 'H'])) && !(s.h1_first === 1 && s.h1_last === 6 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.h1_first === 1 && s.h1_last === 10 && arrayEqualsJS(s.h1s, ['A', 'A', 'H', 'A', 'A'])) && !(s.h1_first === 1 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'A', 'A']) && s.sc_h === 0 && s.sc_a === 3) && !(s.h1_first === 0 && s.h1_last === 8 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A'])) && !(s.h1_first === 0 && s.h1_last === 5 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'A', 'H']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 0 && s.h1_last === 7 && s.h1c === 3 && arrayEqualsJS(s.h1s, ['A', 'H', 'A']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 0 && s.h1_last === 6 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2) && !(s.h1_first === 1 && s.h1_last === 5 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2) && !(s.h1_first === 1 && s.h1_last === 9 && s.h1c === 2 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2) && !(s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'A', 'A', 'H']) && s.sc_h === 2 && s.sc_a === 2);
             case 'P68': return s.league === '15min' && s.home === 'Leicester City (V)' && s.h1c >= 1 && s.h1_first <= 1 && !(s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['H', 'H']) && s.sc_h === 2 && s.sc_a === 0) && !(s.h1_first === 1 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['A', 'A']) && s.sc_h === 0 && s.sc_a === 2);
             case 'P69': return s.league === '20min' && s.home === 'Denmark (V)' && s.h1_first <= 1 && s.h1_last >= 5 && !(s.h1_first === 0 && s.h1_last === 5 && arrayEqualsJS(s.h1s, ['A', 'A', 'H']) && s.sc_h === 1 && s.sc_a === 2) && !(s.h1_first === 1 && s.h1_last === 8 && arrayEqualsJS(s.h1s, ['A', 'A', 'A']) && s.sc_h === 0 && s.sc_a === 3);
@@ -2688,6 +2948,8 @@
     }
 
     function collectLiveCandidateCounts(matches, livePayload) {
+        if (!LIVE_SIGNALS_ENABLED) return;
+
         var counts = {};
         var details = {};
         var currentMatchesByKey = {};
@@ -2814,6 +3076,8 @@
     }
 
     function collectNextLiveCandidateCounts(matches, livePayload) {
+        if (!LIVE_SIGNALS_ENABLED) return;
+
         var counts = {};
         var details = {};
         (matches || []).forEach(function(match) {
@@ -2848,6 +3112,8 @@
     }
 
     function collectLateLiveCandidateCounts(matches, livePayload) {
+        if (!LIVE_SIGNALS_ENABLED) return;
+
         var counts = {};
         var details = {};
         var currentMatchesByKey = {};
@@ -2888,6 +3154,8 @@
     }
 
     function collectNo2hLiveCandidateCounts(matches, livePayload) {
+        if (!LIVE_SIGNALS_ENABLED) return;
+
         var counts = {};
         var details = {};
         (matches || []).forEach(function(match) {
@@ -2924,6 +3192,13 @@
     function renderLiveCards(matches, livePayload) {
         var container = document.getElementById('live-cards');
         var signalMatches = [];
+        if (!LIVE_SIGNALS_ENABLED) {
+            clearLiveSignalState(true);
+            container.innerHTML = '<div class="live-empty">Live signal dimatikan.</div>';
+            renderLiveAlerts([]);
+            return;
+        }
+
         if (!matches || !matches.length) {
             container.innerHTML = '<div class="live-empty">Tidak ada match live saat ini.</div>';
             renderLiveAlerts([]);
@@ -3015,6 +3290,15 @@
         var updateStatus = document.getElementById('update-status');
         if (!alertBox || !updateStatus) return;
 
+        if (!LIVE_SIGNALS_ENABLED) {
+            alertBox.className = 'live-alerts-empty';
+            alertBox.textContent = 'Live signal dimatikan.';
+            updateStatus.textContent = '\u25CF SIGNAL OFF';
+            updateStatus.className = 'badge badge-yellow';
+            document.title = 'Pattern Accuracy Dashboard';
+            return;
+        }
+
         var settledResults = getRecentSettledSummaryResults(10);
 
         if ((!signalMatches || !signalMatches.length) && !settledResults.length) {
@@ -3103,13 +3387,17 @@
             document.getElementById('live-last-update').textContent = 'Update: ' + new Date().toLocaleTimeString();
             try {
                 var livePayload = normalizeLivePayload(data);
-                syncLiveGoalMemory(livePayload.matches || [], livePayload);
-                pruneSettledSummaryResultsForLiveMatches(livePayload.matches || []);
-                updateHtMemory(livePayload.matches || []);
-                collectLiveCandidateCounts(livePayload.matches || [], livePayload);
-                collectNextLiveCandidateCounts(livePayload.matches || [], livePayload);
-                collectLateLiveCandidateCounts(livePayload.matches || [], livePayload);
-                collectNo2hLiveCandidateCounts(livePayload.matches || [], livePayload);
+                if (LIVE_SIGNALS_ENABLED) {
+                    syncLiveGoalMemory(livePayload.matches || [], livePayload);
+                    pruneSettledSummaryResultsForLiveMatches(livePayload.matches || []);
+                    updateHtMemory(livePayload.matches || []);
+                    collectLiveCandidateCounts(livePayload.matches || [], livePayload);
+                    collectNextLiveCandidateCounts(livePayload.matches || [], livePayload);
+                    collectLateLiveCandidateCounts(livePayload.matches || [], livePayload);
+                    collectNo2hLiveCandidateCounts(livePayload.matches || [], livePayload);
+                } else {
+                    clearLiveSignalState(true);
+                }
                 renderLiveCards(livePayload.matches || [], livePayload);
                 refreshActivePanelContent();
             } catch (renderError) {
@@ -3123,6 +3411,7 @@
             document.getElementById('btn-stop-api').style.display = 'none';
             document.getElementById('live-last-update').textContent = '';
             document.getElementById('live-cards').innerHTML = '<div class="live-empty">API tidak aktif \u2014 klik \u25B6 Jalankan API</div>';
+            if (!LIVE_SIGNALS_ENABLED) clearLiveSignalState(true);
             applyLiveCandidateIndicators();
             applyNextLiveCandidateIndicators();
             applyLateLiveCandidateIndicators();
@@ -3388,10 +3677,14 @@
     initSortFromDom();
 
     buildPatternData();
-    restorePatternStateMemory();
-    restoreLiveCandidateState();
-    restoreSettledSummaryState();
-    restoreSettledLateState();
+    if (LIVE_SIGNALS_ENABLED) {
+        restorePatternStateMemory();
+        restoreLiveCandidateState();
+        restoreSettledSummaryState();
+        restoreSettledLateState();
+    } else {
+        clearLiveSignalState(true);
+    }
     applyLiveCandidateIndicators();
     applyNextLiveCandidateIndicators();
     applyLateLiveCandidateIndicators();

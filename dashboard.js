@@ -1886,7 +1886,7 @@
         if (['AAH', 'AAHA', 'AHHAA'].indexOf(seq) !== -1) return true;
 
         if (seq === 'AA') {
-            return (s.max_gap >= 5 && !(s.h1_first === 0 && s.h1_last === 9))
+            return (s.max_gap >= 5 && !(s.h1_first === 0 && s.h1_last === 9) && !(s.h1_first === 4 && s.h1_last === 9 && s.kickoff_hour === 18))
                 || (s.h1_last >= 9 && s.max_gap <= 3);
         }
 

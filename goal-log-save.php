@@ -22,7 +22,7 @@ if (!$hasGoals && !$hasMatches && !$hasMilestones) {
 }
 
 $csvFile = __DIR__ . '/goal_log.csv';
-$headers = ['datetime', 'league', 'home_team', 'away_team', 'goals', 'final_home', 'final_away', '1h3', '2h1', '2h7', 'ht_w1', 'ht_x', 'ht_w2'];
+$headers = ['datetime', 'league', 'home_team', 'away_team', 'goals', 'final_home', 'final_away', '1h3', '2h1', '2h7'];
 
 function parseMinute(string $minute): array {
     if (preg_match('/^(1H|2H)\s+(\d+)\'/i', $minute, $m)) {
@@ -89,14 +89,6 @@ function getLastGoalSnapshot(string $goals): ?array {
     return ['home' => (int)$last[3], 'away' => (int)$last[4]];
 }
 
-function applyHtOdds(array &$row, array $source): void {
-    foreach (['ht_w1', 'ht_x', 'ht_w2'] as $field) {
-        if (!array_key_exists($field, $source)) continue;
-        $value = trim((string)$source[$field]);
-        if ($value !== '') $row[$field] = $value;
-    }
-}
-
 function shouldKeepPendingRow(array $row): bool {
     // Preserve any row that already has goal history.
     if (trim((string)($row['goals'] ?? '')) !== '') return true;
@@ -141,9 +133,6 @@ if (is_file($csvFile) && is_readable($csvFile)) {
             '1h3'        => $row[7] ?? '',
             '2h1'        => $row[8] ?? '',
             '2h7'        => $row[9] ?? '',
-            'ht_w1'      => $row[10] ?? '',
-            'ht_x'       => $row[11] ?? '',
-            'ht_w2'      => $row[12] ?? '',
         ];
     }
     fclose($fh);
@@ -179,13 +168,9 @@ if ($hasMatches) {
                 '1h3'        => '',
                 '2h1'        => '',
                 '2h7'        => '',
-                'ht_w1'      => '',
-                'ht_x'       => '',
-                'ht_w2'      => '',
             ];
         }
 
-        applyHtOdds($rows[$key], $m);
         if ($homeScore !== null && $homeScore !== '') $rows[$key]['final_home'] = $homeScore;
         if ($awayScore !== null && $awayScore !== '') $rows[$key]['final_away'] = $awayScore;
     }
@@ -259,17 +244,12 @@ foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
             '1h3'        => '',
             '2h1'        => '',
             '2h7'        => '',
-            'ht_w1'      => '',
-            'ht_x'       => '',
-            'ht_w2'      => '',
         ];
     } else {
         $rows[$key]['goals'] = $candidateGoals;
         $rows[$key]['final_home'] = $homeFinal;
         $rows[$key]['final_away'] = $awayFinal;
     }
-
-    applyHtOdds($rows[$key], $goal);
 
     // Auto-derive milestone flags from goal minute
     $pm = parseMinute($minute);
@@ -308,13 +288,9 @@ if ($hasMilestones) {
                 '1h3'        => '',
                 '2h1'        => '',
                 '2h7'        => '',
-                'ht_w1'      => '',
-                'ht_x'       => '',
-                'ht_w2'      => '',
             ];
         }
 
-        applyHtOdds($rows[$key], $ms);
         $rows[$key][$msId] = 'OK';
         // 2H milestones imply 1H 3' was also reached.
         if ($msId === '2h1' || $msId === '2h7') $rows[$key]['1h3'] = 'OK';
@@ -367,9 +343,6 @@ foreach ($rows as $row) {
         $row['1h3'] ?? '',
         $row['2h1'] ?? '',
         $row['2h7'] ?? '',
-        $row['ht_w1'] ?? '',
-        $row['ht_x'] ?? '',
-        $row['ht_w2'] ?? '',
     ]);
 }
 fclose($fh);

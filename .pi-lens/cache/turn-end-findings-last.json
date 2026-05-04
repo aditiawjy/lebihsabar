@@ -1,3 +1,3 @@
 {
-  "signature": "live-scraper/chrome_extension/lib/state.js::🔴 New duplicates in modified code:\n  live-scraper/chrome_extension/lib/state.js:292 ↔ live-scraper/chrome_extension/lib/state.js:276 (9 lines)\n  First location: live-scraper/chrome_extension/lib/state.js\n"
+  "signature": "live-scraper/chrome_extension/background.js|live-scraper/chrome_extension/lib/constants.js::🔴 New duplicates in modified code:\n  live-scraper/chrome_extension/background.js:344 ↔ live-scraper/chrome_extension/background.js:300 (14 lines)\n  First location: live-scraper/chrome_extension/background.js\n"
 }

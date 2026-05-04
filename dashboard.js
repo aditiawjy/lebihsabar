@@ -43,7 +43,7 @@
 	var LIVE_PATTERN_STATE_STORAGE_KEY = "livePatternStateMemory";
 	var LIVE_SETTLED_STORAGE_KEY = "liveSettledState";
 	var LIVE_LATE_SETTLED_STORAGE_KEY = "liveLateSettledState";
-	var LIVE_STATE_SCHEMA_VERSION = "2026-05-04-live-signals-on-v173";
+	var LIVE_STATE_SCHEMA_VERSION = "2026-05-04-live-signals-on-v174";
 	var LIVE_CANDIDATE_CACHE_TTL_MS = 30000;
 	var LIVE_CANDIDATE_GRACE_MS = 15000;
 	var LIVE_SUMMARY_PRE_GOAL_CARRY_MS = 12 * 60 * 1000;
@@ -2852,7 +2852,10 @@
 		}
 
 		if (seq === "HAA") {
-			return !(s.h1_first === 2 && s.h1_last === 6 && s.max_gap === 2);
+			return (
+				!(s.h1_first === 2 && s.h1_last === 6 && s.max_gap === 2) &&
+				!(s.h1_first === 5 && s.h1_last === 10 && s.kickoff_hour === 14)
+			);
 		}
 
 		return false;
@@ -3013,6 +3016,14 @@
 				arrayEqualsJS(s.h1s, ["A"]) &&
 				s.h1_first === 10 &&
 				s.kickoff_hour === 15
+			) &&
+			!(
+				s.h1_first === 5 &&
+				s.h1_last === 10 &&
+				arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
+				s.sc_h === 1 &&
+				s.sc_a === 2 &&
+				s.kickoff_hour === 14
 			)
 		);
 	}
@@ -3644,7 +3655,6 @@
 		"15min|1|A|0-1|3|11": true,
 		"15min|1|A|0-1|4|23": true,
 		"15min|1|A|0-1|5|11": true,
-		"15min|1|H|1-0|1|14": true,
 		"15min|1|H|1-0|1|18": true,
 		"15min|1|H|1-0|3|16": true,
 		"16min|1|A|0-1|4|11": true,

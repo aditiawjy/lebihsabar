@@ -763,7 +763,6 @@ function matchesP77(array $m): bool {
         '15min|1|A|0-1|3|11' => true,
         '15min|1|A|0-1|4|23' => true,
         '15min|1|A|0-1|5|11' => true,
-        '15min|1|H|1-0|1|14' => true,
         '15min|1|H|1-0|1|18' => true,
         '15min|1|H|1-0|3|16' => true,
         '16min|1|A|0-1|4|11' => true,
@@ -1090,7 +1089,7 @@ function computePatterns(array $matches): array {
         ],
         [
             'id'=>'P77',
-            'label'=>'Experimental 2H: gol 1H tunggal stabil (h1c=1 + skor 1-0/0-1 + scorer H/A + first minute/jam stabil per league, 27 cabang; contoh 15min H mnt1 jam22, 15min A mnt5 jam15, 20min A mnt9 jam20, 20min H mnt7 jam21; bukan 20min H mnt8 jam10), tanpa team block',
+            'label'=>'Experimental 2H: gol 1H tunggal stabil (h1c=1 + skor 1-0/0-1 + scorer H/A + first minute/jam stabil per league, 27 cabang; contoh 15min H mnt1 jam22, 15min A mnt5 jam15, 20min A mnt9 jam20, 20min H mnt7 jam21; bukan 20min H mnt8 jam10, bukan 15min H mnt1 jam14), tanpa team block',
             'data'=>array_values(array_filter($matches, fn($m) => matchesP77($m))),
         ],
         [
@@ -1204,7 +1203,8 @@ function matchesLG8(array $m, array $lg8Teams): bool {
     }
 
     if ($seq === 'HAA') {
-        return !($first === 2 && $last === 6 && $maxGap === 2);
+        return !($first === 2 && $last === 6 && $maxGap === 2)
+            && !($first === 5 && $last === 10 && (int)($m['kickoff_hour'] ?? -1) === 14);
     }
 
     return false;
@@ -1366,9 +1366,9 @@ function computeLatePatterns(array $matches): array {
         ],
         [
             'id' => 'LG5',
-            'label' => 'HOME shortlist: France / Spain / Israel / Morocco (away lead HT tepat 1, last gol 1H >=6, first>=2, bukan AAHHA 2-3 mnt 4-7, bukan AHA 1-2 mnt 3-7, bukan single AWAY mnt 6 jam 11, bukan single AWAY mnt 10 jam 15)',
+            'label' => 'HOME shortlist: France / Spain / Israel / Morocco (away lead HT tepat 1, last gol 1H >=6, first>=2, bukan AAHHA 2-3 mnt 4-7, bukan AHA 1-2 mnt 3-7, bukan single AWAY mnt 6 jam 11, bukan single AWAY mnt 10 jam 15, bukan HAA 1-2 mnt 5-10 jam 14)',
             'data' => array_values(array_filter($matches, fn($m) =>
-                in_array(trim($m['home']), $lg5_teams, true) && ($m['sc_a'] - $m['sc_h']) === 1 && $m['h1_last'] >= 6 && $m['h1_first'] >= 2 && !($m['h1_first'] === 4 && $m['h1_last'] === 7 && $m['h1s'] === ['A','A','H','H','A'] && $m['sc_h'] === 2 && $m['sc_a'] === 3) && !($m['h1_first'] === 3 && $m['h1_last'] === 7 && $m['h1s'] === ['A','H','A'] && $m['sc_h'] === 1 && $m['sc_a'] === 2) && !($m['h1c'] === 1 && $m['h1s'] === ['A'] && $m['h1_first'] === 6 && (int)($m['kickoff_hour'] ?? -1) === 11) && !($m['h1c'] === 1 && $m['h1s'] === ['A'] && $m['h1_first'] === 10 && (int)($m['kickoff_hour'] ?? -1) === 15)
+                in_array(trim($m['home']), $lg5_teams, true) && ($m['sc_a'] - $m['sc_h']) === 1 && $m['h1_last'] >= 6 && $m['h1_first'] >= 2 && !($m['h1_first'] === 4 && $m['h1_last'] === 7 && $m['h1s'] === ['A','A','H','H','A'] && $m['sc_h'] === 2 && $m['sc_a'] === 3) && !($m['h1_first'] === 3 && $m['h1_last'] === 7 && $m['h1s'] === ['A','H','A'] && $m['sc_h'] === 1 && $m['sc_a'] === 2) && !($m['h1c'] === 1 && $m['h1s'] === ['A'] && $m['h1_first'] === 6 && (int)($m['kickoff_hour'] ?? -1) === 11) && !($m['h1c'] === 1 && $m['h1s'] === ['A'] && $m['h1_first'] === 10 && (int)($m['kickoff_hour'] ?? -1) === 15) && !($m['h1_first'] === 5 && $m['h1_last'] === 10 && $m['h1s'] === ['H','A','A'] && $m['sc_h'] === 1 && $m['sc_a'] === 2 && (int)($m['kickoff_hour'] ?? -1) === 14)
             )),
         ],
         [
@@ -1387,7 +1387,7 @@ function computeLatePatterns(array $matches): array {
         ],
         [
             'id' => 'LG8',
-            'label' => 'AWAY shortlist: Norway / Nigeria / Poland / Slovenia / Romania / Argentina / India / Belgium (20min, away lead HT, last gol 1H>=6, gol 1H>=2; branch AA max_gap>=5 bukan first=0 last=9 atau AA last>=9 max_gap<=3, kecuali first=4 last=9 jam 18; AAH/AAHA/AHHAA; AAA/AAAA first>=2 last>=8; AHA bukan first=4 last=6 min_gap=0 dan bukan first=1 last=9; HAA bukan first=2 last=6 max_gap=2)',
+            'label' => 'AWAY shortlist: Norway / Nigeria / Poland / Slovenia / Romania / Argentina / India / Belgium (20min, away lead HT, last gol 1H>=6, gol 1H>=2; branch AA max_gap>=5 bukan first=0 last=9 atau AA last>=9 max_gap<=3, kecuali first=4 last=9 jam 18; AAH/AAHA/AHHAA; AAA/AAAA first>=2 last>=8; AHA bukan first=4 last=6 min_gap=0 dan bukan first=1 last=9; HAA bukan first=2 last=6 max_gap=2 dan bukan mnt 5-10 jam 14)',
             'data' => array_values(array_filter($matches, fn($m) => matchesLG8($m, $lg8_teams))),
         ],
     ];

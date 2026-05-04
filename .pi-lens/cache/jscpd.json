@@ -2,115 +2,11 @@
   "success": true,
   "clones": [
     {
-      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 635,
-      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 594,
-      "lines": 7,
-      "tokens": 0
-    },
-    {
-      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 641,
-      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 600,
-      "lines": 10,
-      "tokens": 0
-    },
-    {
-      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 687,
-      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 594,
-      "lines": 7,
-      "tokens": 0
-    },
-    {
-      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 693,
-      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 600,
+      "fileA": "live-scraper\\chrome_extension\\lib\\state.js",
+      "startA": 301,
+      "fileB": "live-scraper\\chrome_extension\\lib\\state.js",
+      "startB": 285,
       "lines": 9,
-      "tokens": 0
-    },
-    {
-      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 752,
-      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 594,
-      "lines": 7,
-      "tokens": 0
-    },
-    {
-      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 758,
-      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 600,
-      "lines": 9,
-      "tokens": 0
-    },
-    {
-      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 804,
-      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 594,
-      "lines": 7,
-      "tokens": 0
-    },
-    {
-      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 826,
-      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 653,
-      "lines": 9,
-      "tokens": 0
-    },
-    {
-      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 839,
-      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 724,
-      "lines": 8,
-      "tokens": 0
-    },
-    {
-      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 849,
-      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 733,
-      "lines": 7,
-      "tokens": 0
-    },
-    {
-      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 866,
-      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 594,
-      "lines": 7,
-      "tokens": 0
-    },
-    {
-      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 881,
-      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 815,
-      "lines": 9,
-      "tokens": 0
-    },
-    {
-      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 902,
-      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 724,
-      "lines": 10,
-      "tokens": 0
-    },
-    {
-      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startA": 911,
-      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
-      "startB": 733,
-      "lines": 7,
       "tokens": 0
     },
     {
@@ -355,17 +251,17 @@
     },
     {
       "fileA": "goal-log-save.php",
-      "startA": 202,
+      "startA": 217,
       "fileB": "goal-log-save.php",
-      "startB": 144,
+      "startB": 155,
       "lines": 7,
       "tokens": 0
     },
     {
       "fileA": "goal-log-save.php",
-      "startA": 278,
+      "startA": 298,
       "fileB": "goal-log-save.php",
-      "startB": 158,
+      "startB": 169,
       "lines": 9,
       "tokens": 0
     },
@@ -538,7 +434,7 @@
       "tokens": 0
     }
   ],
-  "duplicatedLines": 691,
-  "totalLines": 17995,
-  "percentage": 3.84
+  "duplicatedLines": 600,
+  "totalLines": 17215,
+  "percentage": 3.49
 }

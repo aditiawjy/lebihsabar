@@ -3,14 +3,14 @@
   "files": {
     "dashboard.js": {
       "latest": {
-        "commit": "c02b4a5",
-        "timestamp": "2026-05-04T01:22:47.799Z",
+        "commit": "eacca73",
+        "timestamp": "2026-05-04T01:49:50.162Z",
         "mi": 0,
-        "cognitive": 5658,
+        "cognitive": 5722,
         "nesting": 8,
-        "lines": 7227,
-        "maxCyclomatic": 9127,
-        "entropy": 5.81
+        "lines": 7293,
+        "maxCyclomatic": 9191,
+        "entropy": 5.82
       },
       "history": [
         {
@@ -62,10 +62,220 @@
           "lines": 7227,
           "maxCyclomatic": 9127,
           "entropy": 5.81
+        },
+        {
+          "commit": "eacca73",
+          "timestamp": "2026-05-04T01:49:50.162Z",
+          "mi": 0,
+          "cognitive": 5722,
+          "nesting": 8,
+          "lines": 7293,
+          "maxCyclomatic": 9191,
+          "entropy": 5.82
         }
       ],
       "trend": "regressing"
+    },
+    "live-scraper\\chrome_extension\\lib\\signals.js": {
+      "latest": {
+        "commit": "eacca73",
+        "timestamp": "2026-05-04T01:49:13.107Z",
+        "mi": 3.6,
+        "cognitive": 621,
+        "nesting": 5,
+        "lines": 779,
+        "maxCyclomatic": 107,
+        "entropy": 6.86
+      },
+      "history": [
+        {
+          "commit": "eacca73",
+          "timestamp": "2026-05-04T01:49:13.107Z",
+          "mi": 3.6,
+          "cognitive": 621,
+          "nesting": 5,
+          "lines": 779,
+          "maxCyclomatic": 107,
+          "entropy": 6.86
+        }
+      ],
+      "trend": "stable"
+    },
+    "live-scraper\\chrome_extension\\background.js": {
+      "latest": {
+        "commit": "eacca73",
+        "timestamp": "2026-05-04T01:49:22.920Z",
+        "mi": 8.9,
+        "cognitive": 344,
+        "nesting": 5,
+        "lines": 663,
+        "maxCyclomatic": 19,
+        "entropy": 6.76
+      },
+      "history": [
+        {
+          "commit": "eacca73",
+          "timestamp": "2026-05-04T01:49:22.920Z",
+          "mi": 8.9,
+          "cognitive": 344,
+          "nesting": 5,
+          "lines": 663,
+          "maxCyclomatic": 19,
+          "entropy": 6.76
+        }
+      ],
+      "trend": "stable"
+    },
+    "live-scraper\\chrome_extension\\content.js": {
+      "latest": {
+        "commit": "eacca73",
+        "timestamp": "2026-05-04T01:51:12.506Z",
+        "mi": 11.6,
+        "cognitive": 334,
+        "nesting": 6,
+        "lines": 489,
+        "maxCyclomatic": 147,
+        "entropy": 6.83
+      },
+      "history": [
+        {
+          "commit": "eacca73",
+          "timestamp": "2026-05-04T01:51:12.506Z",
+          "mi": 11.6,
+          "cognitive": 334,
+          "nesting": 6,
+          "lines": 489,
+          "maxCyclomatic": 147,
+          "entropy": 6.83
+        }
+      ],
+      "trend": "stable"
+    },
+    "live-scraper\\chrome_extension\\lib\\odd-tracker.js": {
+      "latest": {
+        "commit": "eacca73",
+        "timestamp": "2026-05-04T01:51:12.584Z",
+        "mi": 13.6,
+        "cognitive": 216,
+        "nesting": 6,
+        "lines": 418,
+        "maxCyclomatic": 68,
+        "entropy": 7.21
+      },
+      "history": [
+        {
+          "commit": "eacca73",
+          "timestamp": "2026-05-04T01:51:12.584Z",
+          "mi": 13.6,
+          "cognitive": 216,
+          "nesting": 6,
+          "lines": 418,
+          "maxCyclomatic": 68,
+          "entropy": 7.21
+        }
+      ],
+      "trend": "stable"
+    },
+    "live-scraper\\chrome_extension\\lib\\utils.js": {
+      "latest": {
+        "commit": "eacca73",
+        "timestamp": "2026-05-04T01:51:12.643Z",
+        "mi": 32,
+        "cognitive": 46,
+        "nesting": 2,
+        "lines": 110,
+        "maxCyclomatic": 18,
+        "entropy": 5.55
+      },
+      "history": [
+        {
+          "commit": "eacca73",
+          "timestamp": "2026-05-04T01:51:12.643Z",
+          "mi": 32,
+          "cognitive": 46,
+          "nesting": 2,
+          "lines": 110,
+          "maxCyclomatic": 18,
+          "entropy": 5.55
+        }
+      ],
+      "trend": "stable"
+    },
+    "live-scraper\\chrome_extension\\lib\\state.js": {
+      "latest": {
+        "commit": "eacca73",
+        "timestamp": "2026-05-04T01:59:47.486Z",
+        "mi": 20.5,
+        "cognitive": 84,
+        "nesting": 4,
+        "lines": 253,
+        "maxCyclomatic": 50,
+        "entropy": 6.74
+      },
+      "history": [
+        {
+          "commit": "eacca73",
+          "timestamp": "2026-05-04T01:59:47.486Z",
+          "mi": 20.5,
+          "cognitive": 84,
+          "nesting": 4,
+          "lines": 253,
+          "maxCyclomatic": 50,
+          "entropy": 6.74
+        }
+      ],
+      "trend": "stable"
+    },
+    "live-scraper\\chrome_extension\\popup.js": {
+      "latest": {
+        "commit": "eacca73",
+        "timestamp": "2026-05-04T02:06:08.340Z",
+        "mi": 6.8,
+        "cognitive": 440,
+        "nesting": 9,
+        "lines": 706,
+        "maxCyclomatic": 105,
+        "entropy": 7.04
+      },
+      "history": [
+        {
+          "commit": "eacca73",
+          "timestamp": "2026-05-04T02:06:08.340Z",
+          "mi": 6.8,
+          "cognitive": 440,
+          "nesting": 9,
+          "lines": 706,
+          "maxCyclomatic": 105,
+          "entropy": 7.04
+        }
+      ],
+      "trend": "stable"
+    },
+    "live-scraper\\chrome_extension\\lib\\constants.js": {
+      "latest": {
+        "commit": "eacca73",
+        "timestamp": "2026-05-04T02:08:37.890Z",
+        "mi": 45.4,
+        "cognitive": 0,
+        "nesting": 0,
+        "lines": 44,
+        "maxCyclomatic": 1,
+        "entropy": 3.46
+      },
+      "history": [
+        {
+          "commit": "eacca73",
+          "timestamp": "2026-05-04T02:08:37.890Z",
+          "mi": 45.4,
+          "cognitive": 0,
+          "nesting": 0,
+          "lines": 44,
+          "maxCyclomatic": 1,
+          "entropy": 3.46
+        }
+      ],
+      "trend": "stable"
     }
   },
-  "capturedAt": "2026-05-04T01:22:52.801Z"
+  "capturedAt": "2026-05-04T02:08:42.901Z"
 }

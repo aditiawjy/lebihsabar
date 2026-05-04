@@ -4597,6 +4597,15 @@
 						s.sc_h === 3 &&
 						s.sc_a === 2 &&
 						s.min_gap === 0
+					) &&
+					!(
+						s.h1_first === 2 &&
+						s.h1_last === 7 &&
+						arrayEqualsJS(s.h1s, ["A", "H", "A", "A", "A"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 4 &&
+						s.min_gap === 0 &&
+						s.max_run === 3
 					)
 				);
 			case "P52":

@@ -2821,7 +2821,14 @@
 
 		var seq = s.h1s.join("");
 
-		if (["AAH", "AAHA", "AHHAA"].indexOf(seq) !== -1) return true;
+		if (["AAH", "AAHA", "AHHAA"].indexOf(seq) !== -1) {
+			return !(
+				seq === "AAH" &&
+				s.h1_first === 2 &&
+				s.h1_last === 7 &&
+				s.max_gap === 4
+			);
+		}
 
 		if (seq === "AA") {
 			return (
@@ -2988,6 +2995,13 @@
 				s.sc_a === 3
 			) &&
 			!(
+				s.h1_first === 3 &&
+				s.h1_last === 7 &&
+				arrayEqualsJS(s.h1s, ["A", "H", "A"]) &&
+				s.sc_h === 1 &&
+				s.sc_a === 2
+			) &&
+			!(
 				s.h1c === 1 &&
 				arrayEqualsJS(s.h1s, ["A"]) &&
 				s.h1_first === 6 &&
@@ -3017,6 +3031,14 @@
 				s.h1s.join("") === "HAAA" &&
 				s.sc_h === 1 &&
 				s.sc_a === 3
+			) &&
+			!(
+				s.h1_first === 5 &&
+				s.h1_last === 9 &&
+				arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
+				s.sc_h === 1 &&
+				s.sc_a === 2 &&
+				s.min_gap === 1
 			)
 		);
 	}
@@ -3965,6 +3987,14 @@
 									s.sc_a === 1 &&
 									s.min_gap >= 1)))) &&
 					!(
+						s.h1_first === 0 &&
+						s.h1_last === 1 &&
+						arrayEqualsJS(s.h1s, ["A", "H"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 1 &&
+						s.min_gap === 1
+					) &&
+					!(
 						s.h1_first === 1 &&
 						s.h1_last === 3 &&
 						arrayEqualsJS(s.h1s, ["H", "H", "H", "A", "H", "H"]) &&
@@ -4436,6 +4466,15 @@
 						s.sc_h === 1 &&
 						s.sc_a === 3 &&
 						s.max_gap === 3
+					) &&
+					!(
+						s.league === "15min" &&
+						s.h1_first === 2 &&
+						s.h1_last === 6 &&
+						arrayEqualsJS(s.h1s, ["H", "H", "A", "H"]) &&
+						s.sc_h === 3 &&
+						s.sc_a === 1 &&
+						s.min_gap === 0
 					)
 				);
 			case "P45":
@@ -4931,18 +4970,15 @@
 						inTeamConfig("p61_teams", s.away) &&
 						s.h1_last >= 5 &&
 						diff <= 1 &&
-						!(
-							s.home === "Girondins de Bordeaux (V)" &&
-							s.away === "Lille OSC (V)"
-						) &&
-						!(
-							s.away === "AS Monaco (V)" &&
-							s.h1_first === 3 &&
-							s.h1_last === 5 &&
-							s.h1c === 2 &&
-							arrayEqualsJS(s.h1s, ["H", "A"])
-						) &&
 						!(s.h1c === 1 && s.h1_last === 5) &&
+						!(
+							s.h1c === 1 &&
+							s.h1_first === 6 &&
+							s.h1_last === 6 &&
+							arrayEqualsJS(s.h1s, ["H"]) &&
+							s.fh === 1 &&
+							s.fa === 0
+						) &&
 						!(
 							s.h1c === 1 &&
 							s.h1_first === 6 &&
@@ -4973,6 +5009,13 @@
 							s.sc_a === 1
 						) &&
 						!(
+							s.h1_first === 3 &&
+							s.h1_last === 5 &&
+							arrayEqualsJS(s.h1s, ["H", "A"]) &&
+							s.sc_h === 1 &&
+							s.sc_a === 1
+						) &&
+						!(
 							s.h1_last === 7 &&
 							s.min_gap === 0 &&
 							arrayEqualsJS(s.h1s, ["A", "H", "A"]) &&
@@ -4980,8 +5023,22 @@
 							s.sc_a === 2
 						) &&
 						!(
+							s.h1_first === 3 &&
+							s.h1_last === 7 &&
+							arrayEqualsJS(s.h1s, ["A", "A", "H"]) &&
+							s.sc_h === 1 &&
+							s.sc_a === 2
+						) &&
+						!(
 							s.h1_first === 0 &&
 							s.h1_last === 5 &&
+							arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
+							s.sc_h === 1 &&
+							s.sc_a === 2
+						) &&
+						!(
+							s.h1_first === 0 &&
+							s.h1_last === 6 &&
 							arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
 							s.sc_h === 1 &&
 							s.sc_a === 2
@@ -5006,15 +5063,6 @@
 							arrayEqualsJS(s.h1s, ["A", "H", "H"]) &&
 							s.sc_h === 2 &&
 							s.sc_a === 1
-						) &&
-						!(
-							s.away === "Lille OSC (V)" &&
-							s.h1_first === 0 &&
-							s.h1_last === 6 &&
-							s.h1c === 3 &&
-							arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
-							s.sc_h === 1 &&
-							s.sc_a === 2
 						) &&
 						!(
 							s.h1_first === 2 &&
@@ -5176,6 +5224,15 @@
 						kickoffDowNum === 0
 					) &&
 					!(
+						s.league === "15min" &&
+						s.h1_first === 2 &&
+						s.h1_last === 4 &&
+						arrayEqualsJS(s.h1s, ["H", "H"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 0 &&
+						kickoffHour === 7
+					) &&
+					!(
 						s.league === "16min" &&
 						s.h1_first === 1 &&
 						s.h1_last === 7 &&
@@ -5250,6 +5307,15 @@
 					!(
 						s.league === "15min" &&
 						kickoffDowNum === 0 &&
+						s.h1_first === 2 &&
+						s.h1_last === 4 &&
+						arrayEqualsJS(s.h1s, ["H", "H"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 0
+					) &&
+					!(
+						s.league === "15min" &&
+						kickoffHour === 7 &&
 						s.h1_first === 2 &&
 						s.h1_last === 4 &&
 						arrayEqualsJS(s.h1s, ["H", "H"]) &&

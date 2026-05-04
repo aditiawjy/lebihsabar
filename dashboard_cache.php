@@ -1051,7 +1051,7 @@ function computePatterns(array $matches): array {
         ],
         [
             'id'=>'P73',
-            'label'=>'Experimental 2H: gol 1H>=1 + start 15-29 + scorer AH + span>=4, tanpa team block',
+            'label'=>'Experimental 2H detail: target ada gol 2H; kickoff menit 15-29 (contoh 12:15 s/d 12:29); 1H harus tepat 2 gol dengan urutan A lalu H (Away cetak dulu, Home balas); jarak gol pertama ke gol terakhir 1H minimal 4 menit; tanpa filter team block',
             'data'=>array_values(array_filter($matches, fn($m) =>
                 ($m['h1c'] ?? 0) >= 1
                 && (($m['kickoff_minute'] ?? -1) >= 15 && ($m['kickoff_minute'] ?? -1) <= 29)
@@ -1071,7 +1071,7 @@ function computePatterns(array $matches): array {
         ],
         [
             'id'=>'P75',
-            'label'=>'Experimental 2H: gol 1H>=1 + jam 16-19 + first>=2 + max_gap>=5, tanpa team block',
+            'label'=>'Experimental 2H detail: target ada gol 2H; kickoff jam 16:00-19:59; 1H minimal ada 1 gol; gol pertama 1H terjadi menit 2 atau lebih lambat; max_gap antar gol 1H minimal 5 menit; tanpa filter team block',
             'data'=>array_values(array_filter($matches, fn($m) =>
                 ($m['h1c'] ?? 0) >= 1
                 && (($m['kickoff_hour'] ?? -1) >= 16 && ($m['kickoff_hour'] ?? -1) <= 19)

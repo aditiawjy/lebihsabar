@@ -43,13 +43,13 @@
 	var LIVE_PATTERN_STATE_STORAGE_KEY = "livePatternStateMemory";
 	var LIVE_SETTLED_STORAGE_KEY = "liveSettledState";
 	var LIVE_LATE_SETTLED_STORAGE_KEY = "liveLateSettledState";
-	var LIVE_STATE_SCHEMA_VERSION = "2026-05-03-live-signals-on-v171";
+	var LIVE_STATE_SCHEMA_VERSION = "2026-05-04-live-signals-on-v173";
 	var LIVE_CANDIDATE_CACHE_TTL_MS = 30000;
 	var LIVE_CANDIDATE_GRACE_MS = 15000;
 	var LIVE_SUMMARY_PRE_GOAL_CARRY_MS = 12 * 60 * 1000;
 	var LIVE_PATTERN_STATE_TTL_MS = 15 * 60 * 1000;
 	var LIVE_SETTLED_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
-	var SECOND_HALF_SIGNAL_MINUTE = 2;
+	var SECOND_HALF_SIGNAL_MINUTE = 4;
 	var DETAIL_ROWS_PER_PAGE = 10;
 	var detailPageState = {};
 	var restoredLiveCandidateState = false;
@@ -1854,13 +1854,37 @@
 					)
 				)
 					return;
+
+				var currentMatch = currentMatchesByKey[key];
 				var settled = buildSettledSummaryResult(
 					pid,
 					entry,
-					currentMatchesByKey[key],
+					currentMatch,
 					livePayload,
 				);
-				if (settled) upsertSettledSummaryResult(settled);
+				if (settled) {
+					upsertSettledSummaryResult(settled);
+					return;
+				}
+
+				// Kalau live scraper menghapus match terlalu cepat sebelum CSV/result masuk,
+				// jangan langsung buang candidate. Simpan sementara supaya pattern seperti
+				// P77 tidak hilang sendiri dan masih bisa disettle ketika hasil muncul.
+				if (!currentMatch) {
+					var lastSeen = Number(entry.lastSeen || entry.seenAt || 0);
+					if (
+						Number.isFinite(lastSeen) &&
+						Date.now() - lastSeen <= LIVE_SUMMARY_PRE_GOAL_CARRY_MS
+					) {
+						if (!nextDetails[pid]) nextDetails[pid] = [];
+						nextDetails[pid].push(
+							Object.assign({}, entry, {
+								stale: true,
+								status: entry.status || "menunggu result",
+							}),
+						);
+					}
+				}
 			});
 		});
 	}
@@ -2145,6 +2169,7 @@
 			.join("");
 		bindExpandButtons(tbody);
 		applyLiveCandidateIndicators();
+		applySummarySampleVisibility();
 	}
 
 	function renderNextTable(nextPatterns) {
@@ -6634,6 +6659,37 @@
 		});
 	}
 
+	function applySummarySampleVisibility() {
+		var checkbox = document.getElementById("toggle-summary-sample");
+		var hidden = !!(checkbox && checkbox.checked);
+		var displayValue = hidden ? "none" : "";
+		var header = document.getElementById("snap-header");
+		if (header) header.style.display = displayValue;
+		document.querySelectorAll("#summary-body tr").forEach((row) => {
+			var cell = row.querySelector(".delta-cell") || row.cells[5];
+			if (cell) cell.style.display = displayValue;
+		});
+	}
+
+	function initSummarySampleToggle() {
+		var checkbox = document.getElementById("toggle-summary-sample");
+		if (!checkbox) return;
+		try {
+			checkbox.checked = localStorage.getItem("hideSummarySample") === "1";
+		} catch (e) {
+			// ignore storage failures
+		}
+		checkbox.addEventListener("change", () => {
+			try {
+				localStorage.setItem("hideSummarySample", checkbox.checked ? "1" : "0");
+			} catch (e) {
+				// ignore storage failures
+			}
+			applySummarySampleVisibility();
+		});
+		applySummarySampleVisibility();
+	}
+
 	function applyNextLiveCandidateIndicators() {
 		document.querySelectorAll("#next-body tr").forEach((row) => {
 			var pid =
@@ -7631,7 +7687,9 @@
 	} else {
 		clearLiveSignalState(true);
 	}
+	initSummarySampleToggle();
 	applyLiveCandidateIndicators();
+	applySummarySampleVisibility();
 	applyNextLiveCandidateIndicators();
 	applyLateLiveCandidateIndicators();
 

@@ -125,7 +125,7 @@ if (!$csvExists): ?>
     </div>
 
     <div class="section" id="summary-section">
-        <h2>Summary Akurasi</h2>
+        <h2>Summary Akurasi <label class="summary-toggle"><input type="checkbox" id="toggle-summary-sample"> Hide +Sample</label></h2>
         <table id="summary-table">
             <thead>
             <tr>

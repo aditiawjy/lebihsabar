@@ -3,14 +3,14 @@
   "files": {
     "dashboard.js": {
       "latest": {
-        "commit": "5f503b4",
-        "timestamp": "2026-05-04T00:33:44.212Z",
+        "commit": "c02b4a5",
+        "timestamp": "2026-05-04T01:22:47.799Z",
         "mi": 0,
-        "cognitive": 5610,
+        "cognitive": 5658,
         "nesting": 8,
-        "lines": 7161,
-        "maxCyclomatic": 8990,
-        "entropy": 5.82
+        "lines": 7227,
+        "maxCyclomatic": 9127,
+        "entropy": 5.81
       },
       "history": [
         {
@@ -52,10 +52,20 @@
           "lines": 7161,
           "maxCyclomatic": 8990,
           "entropy": 5.82
+        },
+        {
+          "commit": "c02b4a5",
+          "timestamp": "2026-05-04T01:22:47.799Z",
+          "mi": 0,
+          "cognitive": 5658,
+          "nesting": 8,
+          "lines": 7227,
+          "maxCyclomatic": 9127,
+          "entropy": 5.81
         }
       ],
       "trend": "regressing"
     }
   },
-  "capturedAt": "2026-05-04T00:33:49.224Z"
+  "capturedAt": "2026-05-04T01:22:52.801Z"
 }

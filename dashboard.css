@@ -122,22 +122,6 @@ h1 {
 	gap: 10px;
 }
 
-.summary-toggle {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	font-size: 0.78rem;
-	font-weight: 500;
-	color: var(--text-secondary);
-	cursor: pointer;
-	user-select: none;
-}
-
-.summary-toggle input {
-	accent-color: var(--accent);
-	cursor: pointer;
-}
-
 table {
 	width: 100%;
 	border-collapse: collapse;

@@ -43,7 +43,7 @@
 	var LIVE_PATTERN_STATE_STORAGE_KEY = "livePatternStateMemory";
 	var LIVE_SETTLED_STORAGE_KEY = "liveSettledState";
 	var LIVE_LATE_SETTLED_STORAGE_KEY = "liveLateSettledState";
-	var LIVE_STATE_SCHEMA_VERSION = "2026-05-04-live-signals-on-v174";
+	var LIVE_STATE_SCHEMA_VERSION = "2026-05-04-live-signals-on-v173";
 	var LIVE_CANDIDATE_CACHE_TTL_MS = 30000;
 	var LIVE_CANDIDATE_GRACE_MS = 15000;
 	var LIVE_SUMMARY_PRE_GOAL_CARRY_MS = 12 * 60 * 1000;
@@ -1854,37 +1854,13 @@
 					)
 				)
 					return;
-
-				var currentMatch = currentMatchesByKey[key];
 				var settled = buildSettledSummaryResult(
 					pid,
 					entry,
-					currentMatch,
+					currentMatchesByKey[key],
 					livePayload,
 				);
-				if (settled) {
-					upsertSettledSummaryResult(settled);
-					return;
-				}
-
-				// Kalau live scraper menghapus match terlalu cepat sebelum CSV/result masuk,
-				// jangan langsung buang candidate. Simpan sementara supaya pattern seperti
-				// P77 tidak hilang sendiri dan masih bisa disettle ketika hasil muncul.
-				if (!currentMatch) {
-					var lastSeen = Number(entry.lastSeen || entry.seenAt || 0);
-					if (
-						Number.isFinite(lastSeen) &&
-						Date.now() - lastSeen <= LIVE_SUMMARY_PRE_GOAL_CARRY_MS
-					) {
-						if (!nextDetails[pid]) nextDetails[pid] = [];
-						nextDetails[pid].push(
-							Object.assign({}, entry, {
-								stale: true,
-								status: entry.status || "menunggu result",
-							}),
-						);
-					}
-				}
+				if (settled) upsertSettledSummaryResult(settled);
 			});
 		});
 	}
@@ -2169,7 +2145,6 @@
 			.join("");
 		bindExpandButtons(tbody);
 		applyLiveCandidateIndicators();
-		applySummarySampleVisibility();
 	}
 
 	function renderNextTable(nextPatterns) {
@@ -2851,7 +2826,8 @@
 				seq === "AAH" &&
 				s.h1_first === 2 &&
 				s.h1_last === 7 &&
-				s.max_gap === 4
+				s.sc_h === 1 &&
+				s.sc_a === 2
 			);
 		}
 
@@ -3062,8 +3038,7 @@
 				s.h1_last === 9 &&
 				arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
 				s.sc_h === 1 &&
-				s.sc_a === 2 &&
-				s.min_gap === 1
+				s.sc_a === 2
 			)
 		);
 	}
@@ -3684,7 +3659,6 @@
 		"20min|1|H|1-0|4|21": true,
 		"20min|1|H|1-0|6|19": true,
 		"20min|1|H|1-0|7|23": true,
-		"20min|1|H|1-0|8|10": true,
 		"20min|1|H|1-0|8|13": true,
 		"20min|1|H|1-0|8|14": true,
 	});
@@ -4016,8 +3990,15 @@
 						s.h1_last === 1 &&
 						arrayEqualsJS(s.h1s, ["A", "H"]) &&
 						s.sc_h === 1 &&
-						s.sc_a === 1 &&
-						s.min_gap === 1
+						s.sc_a === 1
+					) &&
+					!(
+						kickoffHour === 9 &&
+						s.h1_first === 1 &&
+						s.h1_last === 7 &&
+						arrayEqualsJS(s.h1s, ["A", "H"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 1
 					) &&
 					!(
 						s.h1_first === 1 &&
@@ -4476,6 +4457,15 @@
 						s.h1_last >= 8 ||
 						(s.sc_h === 3 && s.sc_a === 1)) &&
 					!(
+						s.h1_first >= 2 &&
+						s.h1_last <= 7 &&
+						s.min_gap === 0 &&
+						(arrayEqualsJS(s.h1s, ["H", "H", "A", "H"]) ||
+							arrayEqualsJS(s.h1s, ["H", "A", "H", "H"])) &&
+						s.sc_h === 3 &&
+						s.sc_a === 1
+					) &&
+					!(
 						s.league === "20min" &&
 						s.h1_first === 2 &&
 						s.h1_last === 7 &&
@@ -4491,15 +4481,6 @@
 						s.sc_h === 1 &&
 						s.sc_a === 3 &&
 						s.max_gap === 3
-					) &&
-					!(
-						s.league === "15min" &&
-						s.h1_first === 2 &&
-						s.h1_last === 6 &&
-						arrayEqualsJS(s.h1s, ["H", "H", "A", "H"]) &&
-						s.sc_h === 3 &&
-						s.sc_a === 1 &&
-						s.min_gap === 0
 					)
 				);
 			case "P45":
@@ -4995,15 +4976,18 @@
 						inTeamConfig("p61_teams", s.away) &&
 						s.h1_last >= 5 &&
 						diff <= 1 &&
-						!(s.h1c === 1 && s.h1_last === 5) &&
 						!(
-							s.h1c === 1 &&
-							s.h1_first === 6 &&
-							s.h1_last === 6 &&
-							arrayEqualsJS(s.h1s, ["H"]) &&
-							s.fh === 1 &&
-							s.fa === 0
+							s.home === "Girondins de Bordeaux (V)" &&
+							s.away === "Lille OSC (V)"
 						) &&
+						!(
+							s.away === "AS Monaco (V)" &&
+							s.h1_first === 3 &&
+							s.h1_last === 5 &&
+							s.h1c === 2 &&
+							arrayEqualsJS(s.h1s, ["H", "A"])
+						) &&
+						!(s.h1c === 1 && s.h1_last === 5) &&
 						!(
 							s.h1c === 1 &&
 							s.h1_first === 6 &&
@@ -5034,13 +5018,6 @@
 							s.sc_a === 1
 						) &&
 						!(
-							s.h1_first === 3 &&
-							s.h1_last === 5 &&
-							arrayEqualsJS(s.h1s, ["H", "A"]) &&
-							s.sc_h === 1 &&
-							s.sc_a === 1
-						) &&
-						!(
 							s.h1_last === 7 &&
 							s.min_gap === 0 &&
 							arrayEqualsJS(s.h1s, ["A", "H", "A"]) &&
@@ -5048,22 +5025,8 @@
 							s.sc_a === 2
 						) &&
 						!(
-							s.h1_first === 3 &&
-							s.h1_last === 7 &&
-							arrayEqualsJS(s.h1s, ["A", "A", "H"]) &&
-							s.sc_h === 1 &&
-							s.sc_a === 2
-						) &&
-						!(
 							s.h1_first === 0 &&
 							s.h1_last === 5 &&
-							arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
-							s.sc_h === 1 &&
-							s.sc_a === 2
-						) &&
-						!(
-							s.h1_first === 0 &&
-							s.h1_last === 6 &&
 							arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
 							s.sc_h === 1 &&
 							s.sc_a === 2
@@ -5090,6 +5053,15 @@
 							s.sc_a === 1
 						) &&
 						!(
+							s.away === "Lille OSC (V)" &&
+							s.h1_first === 0 &&
+							s.h1_last === 6 &&
+							s.h1c === 3 &&
+							arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
+							s.sc_h === 1 &&
+							s.sc_a === 2
+						) &&
+						!(
 							s.h1_first === 2 &&
 							s.h1_last === 7 &&
 							arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
@@ -5103,6 +5075,13 @@
 							s.sc_h === 1 &&
 							s.sc_a === 1 &&
 							s.min_gap === 0
+						) &&
+						!(
+							s.h1_first === 3 &&
+							s.h1_last === 7 &&
+							arrayEqualsJS(s.h1s, ["A", "A", "H"]) &&
+							s.sc_h === 1 &&
+							s.sc_a === 2
 						)) ||
 					(s.league === "15min" &&
 						s.h1_first <= 1 &&
@@ -5493,13 +5472,12 @@
 							arrayEqualsJS(s.h1s, ["H", "H"])
 						) &&
 						!(
-							s.away === "Napoli (V)" &&
-							s.h1c === 2 &&
-							s.sc_h === 0 &&
-							s.sc_a === 2 &&
 							s.h1_first === 1 &&
 							s.h1_last === 7 &&
-							arrayEqualsJS(s.h1s, ["A", "A"])
+							s.h1c === 2 &&
+							arrayEqualsJS(s.h1s, ["A", "A"]) &&
+							s.sc_h === 0 &&
+							s.sc_a === 2
 						)) ||
 						(s.league === "15min" &&
 							s.h1_first === 1 &&
@@ -5607,14 +5585,6 @@
 							s.sc_a === 2 &&
 							arrayEqualsJS(s.h1s, ["A", "A"])
 						) &&
-						!(
-							s.h1_first === 1 &&
-							s.h1_last === 7 &&
-							s.h1c === 2 &&
-							s.sc_h === 0 &&
-							s.sc_a === 2 &&
-							arrayEqualsJS(s.h1s, ["A", "A"])
-						) &&
 						!(s.h1c === 2 && arrayEqualsJS(s.h1s, ["A", "H"]) && span >= 6) &&
 						!(
 							s.away === "Lille OSC (V)" &&
@@ -5656,6 +5626,15 @@
 						s.h1_last === 7 &&
 						s.sc_a - s.sc_h >= 3 &&
 						s.max_run >= 3
+					) &&
+					!(
+						s.league === "15min" &&
+						s.h1_first === 1 &&
+						s.h1_last === 7 &&
+						s.h1c === 2 &&
+						arrayEqualsJS(s.h1s, ["A", "A"]) &&
+						s.sc_h === 0 &&
+						s.sc_a === 2
 					) &&
 					!(
 						s.league === "20min" &&
@@ -6676,37 +6655,6 @@
 		});
 	}
 
-	function applySummarySampleVisibility() {
-		var checkbox = document.getElementById("toggle-summary-sample");
-		var hidden = !!(checkbox && checkbox.checked);
-		var displayValue = hidden ? "none" : "";
-		var header = document.getElementById("snap-header");
-		if (header) header.style.display = displayValue;
-		document.querySelectorAll("#summary-body tr").forEach((row) => {
-			var cell = row.querySelector(".delta-cell") || row.cells[5];
-			if (cell) cell.style.display = displayValue;
-		});
-	}
-
-	function initSummarySampleToggle() {
-		var checkbox = document.getElementById("toggle-summary-sample");
-		if (!checkbox) return;
-		try {
-			checkbox.checked = localStorage.getItem("hideSummarySample") === "1";
-		} catch (e) {
-			// ignore storage failures
-		}
-		checkbox.addEventListener("change", () => {
-			try {
-				localStorage.setItem("hideSummarySample", checkbox.checked ? "1" : "0");
-			} catch (e) {
-				// ignore storage failures
-			}
-			applySummarySampleVisibility();
-		});
-		applySummarySampleVisibility();
-	}
-
 	function applyNextLiveCandidateIndicators() {
 		document.querySelectorAll("#next-body tr").forEach((row) => {
 			var pid =
@@ -7704,9 +7652,7 @@
 	} else {
 		clearLiveSignalState(true);
 	}
-	initSummarySampleToggle();
 	applyLiveCandidateIndicators();
-	applySummarySampleVisibility();
 	applyNextLiveCandidateIndicators();
 	applyLateLiveCandidateIndicators();
 

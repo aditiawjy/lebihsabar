@@ -43,7 +43,7 @@
 	var LIVE_PATTERN_STATE_STORAGE_KEY = "livePatternStateMemory";
 	var LIVE_SETTLED_STORAGE_KEY = "liveSettledState";
 	var LIVE_LATE_SETTLED_STORAGE_KEY = "liveLateSettledState";
-	var LIVE_STATE_SCHEMA_VERSION = "2026-05-04-live-signals-on-v173";
+	var LIVE_STATE_SCHEMA_VERSION = "2026-05-04-live-signals-on-v174";
 	var LIVE_CANDIDATE_CACHE_TTL_MS = 30000;
 	var LIVE_CANDIDATE_GRACE_MS = 15000;
 	var LIVE_SUMMARY_PRE_GOAL_CARRY_MS = 12 * 60 * 1000;
@@ -5491,6 +5491,15 @@
 							s.h1_first === 0 &&
 							s.h1_last === 4 &&
 							arrayEqualsJS(s.h1s, ["H", "H"])
+						) &&
+						!(
+							s.away === "Napoli (V)" &&
+							s.h1c === 2 &&
+							s.sc_h === 0 &&
+							s.sc_a === 2 &&
+							s.h1_first === 1 &&
+							s.h1_last === 7 &&
+							arrayEqualsJS(s.h1s, ["A", "A"])
 						)) ||
 						(s.league === "15min" &&
 							s.h1_first === 1 &&
@@ -5592,6 +5601,14 @@
 						(s.away !== "Chelsea (V)" || firstScorer === "A") &&
 						!(
 							s.h1_first === 0 &&
+							s.h1_last === 7 &&
+							s.h1c === 2 &&
+							s.sc_h === 0 &&
+							s.sc_a === 2 &&
+							arrayEqualsJS(s.h1s, ["A", "A"])
+						) &&
+						!(
+							s.h1_first === 1 &&
 							s.h1_last === 7 &&
 							s.h1c === 2 &&
 							s.sc_h === 0 &&

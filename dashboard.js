@@ -43,7 +43,7 @@
 	var LIVE_PATTERN_STATE_STORAGE_KEY = "livePatternStateMemory";
 	var LIVE_SETTLED_STORAGE_KEY = "liveSettledState";
 	var LIVE_LATE_SETTLED_STORAGE_KEY = "liveLateSettledState";
-	var LIVE_STATE_SCHEMA_VERSION = "2026-05-04-live-signals-on-v174";
+	var LIVE_STATE_SCHEMA_VERSION = "2026-05-05-live-signals-on-v175";
 	var LIVE_CANDIDATE_CACHE_TTL_MS = 30000;
 	var LIVE_CANDIDATE_GRACE_MS = 15000;
 	var LIVE_SUMMARY_PRE_GOAL_CARRY_MS = 12 * 60 * 1000;
@@ -3289,6 +3289,16 @@
 				s.sc_a === 3 &&
 				s.max_gap === 3 &&
 				arrayEqualsJS(s.h1s, ["A", "A", "H", "A"])
+			) &&
+			!(
+				s.league === "15min" &&
+				first === 2 &&
+				last === 6 &&
+				s.sc_h === 2 &&
+				s.sc_a === 2 &&
+				s.min_gap === 1 &&
+				s.max_gap === 2 &&
+				arrayEqualsJS(s.h1s, ["H", "A", "H", "A"])
 			)
 		) {
 			return true;
@@ -3306,6 +3316,19 @@
 			s.sc_h === 1 &&
 			s.sc_a === 3 &&
 			s.min_gap === 0
+		) {
+			return false;
+		}
+
+		if (
+			s.league === "15min" &&
+			seq === "HAHA" &&
+			first === 2 &&
+			last === 6 &&
+			s.sc_h === 2 &&
+			s.sc_a === 2 &&
+			s.min_gap === 1 &&
+			s.max_gap === 2
 		) {
 			return false;
 		}
@@ -3951,6 +3974,16 @@
 						arrayEqualsJS(s.h1s, ["H", "A", "A", "H"]) &&
 						s.sc_h === 2 &&
 						s.sc_a === 2
+					) &&
+					!(
+						s.league === "15min" &&
+						s.h1_first === 2 &&
+						s.h1_last === 6 &&
+						arrayEqualsJS(s.h1s, ["H", "A", "H", "A"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 2 &&
+						s.min_gap === 1 &&
+						s.max_gap === 2
 					)
 				);
 			case "P17":
@@ -4236,6 +4269,15 @@
 						arrayEqualsJS(s.h1s, ["A", "A", "H", "H"]) &&
 						s.sc_h === 2 &&
 						s.sc_a === 2 &&
+						s.max_gap === 2
+					) &&
+					!(
+						s.h1_first === 2 &&
+						s.h1_last === 6 &&
+						arrayEqualsJS(s.h1s, ["H", "A", "H", "A"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 2 &&
+						s.min_gap === 1 &&
 						s.max_gap === 2
 					)
 				);
@@ -4995,17 +5037,6 @@
 						inTeamConfig("p61_teams", s.away) &&
 						s.h1_last >= 5 &&
 						diff <= 1 &&
-						!(
-							s.home === "Girondins de Bordeaux (V)" &&
-							s.away === "Lille OSC (V)"
-						) &&
-						!(
-							s.away === "AS Monaco (V)" &&
-							s.h1_first === 3 &&
-							s.h1_last === 5 &&
-							s.h1c === 2 &&
-							arrayEqualsJS(s.h1s, ["H", "A"])
-						) &&
 						!(s.h1c === 1 && s.h1_last === 5) &&
 						!(
 							s.h1c === 1 &&
@@ -5014,6 +5045,21 @@
 							arrayEqualsJS(s.h1s, ["A"]) &&
 							s.fh === 0 &&
 							s.fa === 1
+						) &&
+						!(
+							s.h1c === 1 &&
+							s.h1_first === 6 &&
+							s.h1_last === 6 &&
+							arrayEqualsJS(s.h1s, ["H"]) &&
+							s.fh === 1 &&
+							s.fa === 0
+						) &&
+						!(
+							s.h1_first === 3 &&
+							s.h1_last === 5 &&
+							arrayEqualsJS(s.h1s, ["H", "A"]) &&
+							s.sc_h === 1 &&
+							s.sc_a === 1
 						) &&
 						!(
 							s.h1_first === 4 &&
@@ -5051,6 +5097,14 @@
 							s.sc_a === 2
 						) &&
 						!(
+							s.h1_first === 0 &&
+							s.h1_last === 6 &&
+							s.h1c === 3 &&
+							arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
+							s.sc_h === 1 &&
+							s.sc_a === 2
+						) &&
+						!(
 							s.h1_first === 5 &&
 							s.h1_last === 7 &&
 							arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
@@ -5070,15 +5124,6 @@
 							arrayEqualsJS(s.h1s, ["A", "H", "H"]) &&
 							s.sc_h === 2 &&
 							s.sc_a === 1
-						) &&
-						!(
-							s.away === "Lille OSC (V)" &&
-							s.h1_first === 0 &&
-							s.h1_last === 6 &&
-							s.h1c === 3 &&
-							arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
-							s.sc_h === 1 &&
-							s.sc_a === 2
 						) &&
 						!(
 							s.h1_first === 2 &&
@@ -5101,6 +5146,14 @@
 							arrayEqualsJS(s.h1s, ["A", "A", "H"]) &&
 							s.sc_h === 1 &&
 							s.sc_a === 2
+						) &&
+						!(
+							s.h1_first === 2 &&
+							s.h1_last === 6 &&
+							arrayEqualsJS(s.h1s, ["H", "A", "H", "A"]) &&
+							s.sc_h === 2 &&
+							s.sc_a === 2 &&
+							s.max_gap <= 2
 						)) ||
 					(s.league === "15min" &&
 						s.h1_first <= 1 &&
@@ -6614,8 +6667,6 @@
 			var liveCount = liveCandidateCounts[pid] || 0;
 			var settledStats = getSettledSummaryStats(pid);
 			var settledHtml = "";
-			var settledInlineHtml = "";
-			var settledPctHtml = "";
 			row.removeAttribute("data-adjusted-total");
 			row.removeAttribute("data-adjusted-hits");
 			row.removeAttribute("data-adjusted-pct");
@@ -6623,40 +6674,16 @@
 				var parts = [];
 				if (settledStats.win) parts.push("W " + settledStats.win);
 				if (settledStats.lose) parts.push("L " + settledStats.lose);
-				var baseTotal = parseInt(row.dataset.baseTotal, 10) || 0;
-				var baseHits = parseInt(row.dataset.baseHits, 10) || 0;
-				var adjustedTotal = baseTotal + settledStats.win + settledStats.lose;
-				var adjustedHits = baseHits + settledStats.win;
-				var adjustedPct =
-					adjustedTotal > 0
-						? Math.round((adjustedHits / adjustedTotal) * 100)
-						: 0;
-				row.setAttribute("data-adjusted-total", adjustedTotal);
-				row.setAttribute("data-adjusted-hits", adjustedHits);
-				row.setAttribute("data-adjusted-pct", adjustedPct);
 				settledHtml =
 					'<br><span style="color:#8b949e;font-weight:600;">settled ' +
 					parts.join(" / ") +
 					"</span>";
-				settledInlineHtml =
-					adjustedHits +
-					"/" +
-					adjustedTotal +
-					'<br><span class="record-sub">base ' +
-					baseHits +
-					"/" +
-					baseTotal +
-					" + settled " +
-					parts.join(" / ") +
-					"</span>";
-				settledPctHtml =
-					'<br><span class="record-sub">live adj ' + adjustedPct + "%</span>";
 			}
 			if (recordCell) {
-				recordCell.innerHTML = settledInlineHtml || recordCell.dataset.baseHtml;
+				recordCell.innerHTML = recordCell.dataset.baseHtml;
 			}
 			if (pctCell) {
-				pctCell.innerHTML = pctCell.dataset.baseHtml + settledPctHtml;
+				pctCell.innerHTML = pctCell.dataset.baseHtml;
 			}
 			if (liveCount > 0) {
 				deltaCell.innerHTML =

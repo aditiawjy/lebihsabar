@@ -3291,6 +3291,16 @@
 				arrayEqualsJS(s.h1s, ["A", "A", "H", "A"])
 			) &&
 			!(
+				s.league === "20min" &&
+				first === 3 &&
+				last === 9 &&
+				s.sc_h === 1 &&
+				s.sc_a === 3 &&
+				s.min_gap === 1 &&
+				s.max_gap === 4 &&
+				arrayEqualsJS(s.h1s, ["A", "A", "H", "A"])
+			) &&
+			!(
 				s.league === "15min" &&
 				first === 2 &&
 				last === 6 &&
@@ -4279,6 +4289,16 @@
 						s.sc_a === 2 &&
 						s.min_gap === 1 &&
 						s.max_gap === 2
+					) &&
+					!(
+						s.league === "20min" &&
+						first === 3 &&
+						last === 9 &&
+						s.sc_h === 1 &&
+						s.sc_a === 3 &&
+						s.min_gap === 1 &&
+						s.max_gap === 4 &&
+						arrayEqualsJS(s.h1s, ["A", "A", "H", "A"])
 					)
 				);
 			case "P34":
@@ -4533,6 +4553,16 @@
 						s.sc_h === 1 &&
 						s.sc_a === 3 &&
 						s.max_gap === 3
+					) &&
+					!(
+						s.league === "20min" &&
+						s.h1_first === 3 &&
+						s.h1_last === 9 &&
+						arrayEqualsJS(s.h1s, ["A", "A", "H", "A"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 3 &&
+						s.min_gap === 1 &&
+						s.max_gap === 4
 					)
 				);
 			case "P45":
@@ -4763,6 +4793,26 @@
 						s.sc_h === 1 &&
 						s.sc_a === 3 &&
 						s.max_gap === 3
+					) &&
+					!(
+						s.league === "20min" &&
+						s.h1_first === 3 &&
+						s.h1_last === 9 &&
+						arrayEqualsJS(s.h1s, ["A", "A", "H", "A"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 3 &&
+						s.min_gap === 1 &&
+						s.max_gap === 4
+					) &&
+					!(
+						s.league === "15min" &&
+						s.h1_first === 1 &&
+						s.h1_last === 4 &&
+						arrayEqualsJS(s.h1s, ["H", "H", "A"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 1 &&
+						s.min_gap === 1 &&
+						s.max_gap === 2
 					)
 				);
 			case "P55":
@@ -4976,6 +5026,18 @@
 						arrayEqualsJS(s.h1s, ["A", "H"]) &&
 						s.sc_h === 1 &&
 						s.sc_a === 1
+					) &&
+					!(
+						s.league === "15min" &&
+						kickoffHour === 10 &&
+						kickoffMinute === 31 &&
+						s.h1_first === 0 &&
+						s.h1_last === 6 &&
+						arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 2 &&
+						s.min_gap === 2 &&
+						s.max_gap === 4
 					)
 				);
 			case "P59":
@@ -5008,6 +5070,16 @@
 						s.sc_h === 1 &&
 						s.sc_a === 3 &&
 						s.max_gap === 3
+					) &&
+					!(
+						s.league === "20min" &&
+						s.h1_first === 3 &&
+						s.h1_last === 9 &&
+						arrayEqualsJS(s.h1s, ["A", "A", "H", "A"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 3 &&
+						s.min_gap === 1 &&
+						s.max_gap === 4
 					)
 				);
 			case "P60":
@@ -5241,6 +5313,16 @@
 							arrayEqualsJS(s.h1s, ["H", "H"]))) &&
 					!(
 						s.away === "Getafe CF (V)" && arrayEqualsJS(s.h1s, ["A", "H", "A"])
+					) &&
+					!(
+						s.league === "15min" &&
+						s.h1_first === 1 &&
+						s.h1_last === 7 &&
+						arrayEqualsJS(s.h1s, ["A", "H", "A"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 2 &&
+						s.min_gap === 1 &&
+						s.max_gap === 5
 					) &&
 					!(
 						s.home === "Lazio (V)" &&
@@ -5550,6 +5632,16 @@
 							arrayEqualsJS(s.h1s, ["A", "A"]) &&
 							s.sc_h === 0 &&
 							s.sc_a === 2
+						) &&
+						!(
+							s.h1_first === 1 &&
+							s.h1_last === 4 &&
+							s.h1c === 3 &&
+							arrayEqualsJS(s.h1s, ["H", "H", "A"]) &&
+							s.sc_h === 2 &&
+							s.sc_a === 1 &&
+							s.min_gap === 1 &&
+							s.max_gap === 2
 						)) ||
 						(s.league === "15min" &&
 							s.h1_first === 1 &&
@@ -5771,6 +5863,28 @@
 						arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
 						s.sc_h === 1 &&
 						s.sc_a === 2
+					) &&
+					!(
+						s.league === "15min" &&
+						kickoffHour === 10 &&
+						kickoffMinute === 31 &&
+						s.h1_first === 0 &&
+						s.h1_last === 6 &&
+						arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 2 &&
+						s.min_gap === 2 &&
+						s.max_gap === 4
+					) &&
+					!(
+						s.league === "15min" &&
+						s.h1_first === 1 &&
+						s.h1_last === 4 &&
+						arrayEqualsJS(s.h1s, ["H", "H", "A"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 1 &&
+						s.min_gap === 1 &&
+						s.max_gap === 2
 					) &&
 					!(
 						s.league === "20min" &&

@@ -1,0 +1,1 @@
+{"timestamp":"2026-05-06T08:57:44.499Z","filePath":"C:/xampp/htdocs/lebihsabar/tmp_remove_p64.py","rule":"I001","tool":"ruff","message":"Import block is un-sorted or un-formatted","line":1,"column":1,"fixable":true,"autoFixed":false}

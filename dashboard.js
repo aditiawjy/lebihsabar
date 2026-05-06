@@ -1372,7 +1372,9 @@
 				return;
 			}
 			settledSummaryResults = Array.isArray(parsed.results)
-				? parsed.results.filter((result) => result && isActivePatternId(result.pid))
+				? parsed.results.filter(
+						(result) => result && isActivePatternId(result.pid),
+					)
 				: [];
 			pruneSettledSummaryResults();
 		} catch (e) {
@@ -1404,7 +1406,11 @@
 				sessionStorage.removeItem(LIVE_LATE_SETTLED_STORAGE_KEY);
 				return;
 			}
-			settledLateResults = Array.isArray(parsed.results) ? parsed.results.filter((result) => result && isActivePatternId(result.pid)) : [];
+			settledLateResults = Array.isArray(parsed.results)
+				? parsed.results.filter(
+						(result) => result && isActivePatternId(result.pid),
+					)
+				: [];
 			pruneSettledLateResults();
 		} catch (e) {
 			settledLateResults = [];
@@ -3778,24 +3784,79 @@
 		var lastScorer = seq.length ? seq[seq.length - 1] : null;
 		var firstScorer = seq.length ? seq[0] : null;
 		return (
-			(s.league === '16min' && s.switches === 1 && s.h1_first <= 1 && s.max_gap >= 5) ||
-			(s.league === '20min' && arrayEqualsJS(seq, ['H','A','A']) && span >= 5 && s.min_gap >= 2) ||
-			(s.league === '20min' && s.h1_first === 1 && s.h1_last === 8 && s.switches >= 2) ||
-			(arrayEqualsJS(seq, ['A','A','A']) && s.h1_first >= 2 && s.max_gap >= 4) ||
-			(s.league === '20min' && s.h1c === 2 && s.h1_first === 3 && span >= 5) ||
-			(s.league === '15min' && s.sc_h === 2 && s.sc_a === 1 && s.max_gap === 4 && s.h1_last >= 5) ||
-			(s.league === '20min' && s.sc_h === 1 && s.sc_a === 2 && s.min_gap === 3) ||
-			(s.h1c === 3 && seq.length > 0 && firstScorer === 'A' && span === 6 && s.max_gap === 4) ||
-			(s.league === '16min' && s.sc_h === s.sc_a && s.sc_h === 1 && s.h1_first <= 1 && span >= 4) ||
-			(s.league === '16min' && seq.length > 0 && lastScorer === 'A' && s.max_gap >= 5 && s.switches >= 1) ||
-			(arrayEqualsJS(seq, ['H','A','A']) && s.h1_last >= 7 && span >= 6 && s.min_gap >= 2) ||
-			(s.sc_h === 1 && s.sc_a === 2 && s.switches === 1 && span >= 7 && s.min_gap >= 2) ||
-			(s.league === '16min' && s.sc_h === s.sc_a && s.sc_h === 1 && s.h1_first <= 1 && s.max_gap >= 4) ||
-			(s.league === '20min' && s.sc_a > s.sc_h && s.min_gap === 3 && s.switches >= 1) ||
-			(s.league === '20min' && span === 3 && s.min_gap === 0 && diff <= 2) ||
-			(s.h1c === 3 && seq.length > 0 && firstScorer === 'A' && s.min_gap === 2 && s.max_gap === 4) ||
-			(s.league === '16min' && s.h1_last === 7 && s.min_gap === 1 && s.switches >= 1) ||
-			(s.league === '16min' && seq.length > 0 && firstScorer === 'H' && s.max_gap >= 5 && s.switches >= 1)
+			(s.league === "16min" &&
+				s.switches === 1 &&
+				s.h1_first <= 1 &&
+				s.max_gap >= 5) ||
+			(s.league === "20min" &&
+				arrayEqualsJS(seq, ["H", "A", "A"]) &&
+				span >= 5 &&
+				s.min_gap >= 2) ||
+			(s.league === "20min" &&
+				s.h1_first === 1 &&
+				s.h1_last === 8 &&
+				s.switches >= 2) ||
+			(arrayEqualsJS(seq, ["A", "A", "A"]) &&
+				s.h1_first >= 2 &&
+				s.max_gap >= 4) ||
+			(s.league === "20min" && s.h1c === 2 && s.h1_first === 3 && span >= 5) ||
+			(s.league === "15min" &&
+				s.sc_h === 2 &&
+				s.sc_a === 1 &&
+				s.max_gap === 4 &&
+				s.h1_last >= 5) ||
+			(s.league === "20min" &&
+				s.sc_h === 1 &&
+				s.sc_a === 2 &&
+				s.min_gap === 3) ||
+			(s.h1c === 3 &&
+				seq.length > 0 &&
+				firstScorer === "A" &&
+				span === 6 &&
+				s.max_gap === 4) ||
+			(s.league === "16min" &&
+				s.sc_h === s.sc_a &&
+				s.sc_h === 1 &&
+				s.h1_first <= 1 &&
+				span >= 4) ||
+			(s.league === "16min" &&
+				seq.length > 0 &&
+				lastScorer === "A" &&
+				s.max_gap >= 5 &&
+				s.switches >= 1) ||
+			(arrayEqualsJS(seq, ["H", "A", "A"]) &&
+				s.h1_last >= 7 &&
+				span >= 6 &&
+				s.min_gap >= 2) ||
+			(s.sc_h === 1 &&
+				s.sc_a === 2 &&
+				s.switches === 1 &&
+				span >= 7 &&
+				s.min_gap >= 2) ||
+			(s.league === "16min" &&
+				s.sc_h === s.sc_a &&
+				s.sc_h === 1 &&
+				s.h1_first <= 1 &&
+				s.max_gap >= 4) ||
+			(s.league === "20min" &&
+				s.sc_a > s.sc_h &&
+				s.min_gap === 3 &&
+				s.switches >= 1) ||
+			(s.league === "20min" && span === 3 && s.min_gap === 0 && diff <= 2) ||
+			(s.h1c === 3 &&
+				seq.length > 0 &&
+				firstScorer === "A" &&
+				s.min_gap === 2 &&
+				s.max_gap === 4) ||
+			(s.league === "16min" &&
+				s.h1_last === 7 &&
+				s.min_gap === 1 &&
+				s.switches >= 1) ||
+			(s.league === "16min" &&
+				seq.length > 0 &&
+				firstScorer === "H" &&
+				s.max_gap >= 5 &&
+				s.switches >= 1)
 		);
 	}
 
@@ -3806,14 +3867,38 @@
 		var seq = Array.isArray(s.h1s) ? s.h1s : [];
 		var lastScorer = seq.length ? seq[seq.length - 1] : null;
 		var firstScorer = seq.length ? seq[0] : null;
-		return matchesP82Summary(s) ||
-			(s.league === '20min' && s.h1_first === 5 && s.max_gap >= 3 && s.switches >= 1) ||
-			(s.h1_last <= 6 && s.min_gap === 0 && s.max_gap <= 4 && s.sc_h === 2 && s.sc_a === 2) ||
-			(s.h1_first >= 1 && s.min_gap === 1 && s.max_gap >= 4 && s.switches === 0) ||
-			(s.league === '16min' && s.h1c >= 3 && s.max_gap <= 2 && diff <= 1) ||
-			(s.league === '16min' && s.h1c >= 3 && s.h1_last <= 5 && seq.length > 0 && lastScorer === 'A') ||
-			(s.h1c >= 2 && s.h1_first === 7 && s.h1_last >= 8 && seq.length > 0 && firstScorer === 'H') ||
-			(s.h1_first === 0 && s.h1_last <= 2 && s.max_run === 2 && seq.length > 0 && lastScorer === 'A');
+		return (
+			matchesP82Summary(s) ||
+			(s.league === "20min" &&
+				s.h1_first === 5 &&
+				s.max_gap >= 3 &&
+				s.switches >= 1) ||
+			(s.h1_last <= 6 &&
+				s.min_gap === 0 &&
+				s.max_gap <= 4 &&
+				s.sc_h === 2 &&
+				s.sc_a === 2) ||
+			(s.h1_first >= 1 &&
+				s.min_gap === 1 &&
+				s.max_gap >= 4 &&
+				s.switches === 0) ||
+			(s.league === "16min" && s.h1c >= 3 && s.max_gap <= 2 && diff <= 1) ||
+			(s.league === "16min" &&
+				s.h1c >= 3 &&
+				s.h1_last <= 5 &&
+				seq.length > 0 &&
+				lastScorer === "A") ||
+			(s.h1c >= 2 &&
+				s.h1_first === 7 &&
+				s.h1_last >= 8 &&
+				seq.length > 0 &&
+				firstScorer === "H") ||
+			(s.h1_first === 0 &&
+				s.h1_last <= 2 &&
+				s.max_run === 2 &&
+				seq.length > 0 &&
+				lastScorer === "A")
+		);
 	}
 
 	function matchesP84Summary(s) {
@@ -3823,20 +3908,25 @@
 			(s.h1_last <= 7 && s.switches >= 4) ||
 			(s.h1_first >= 5 && span >= 5) ||
 			(s.h1c === 3 && s.h1_first >= 7) ||
-			(s.league === '20min' && s.switches >= 4) ||
+			(s.league === "20min" && s.switches >= 4) ||
 			(s.h1_last <= 2 && s.sc_h === 2 && s.sc_a === 1) ||
-			(s.h1_last >= 6 && arrayEqualsJS(s.h1s || [], ['H','A','A','H']) && s.sc_h === 2 && s.sc_a === 2)
+			(s.h1_last >= 6 &&
+				arrayEqualsJS(s.h1s || [], ["H", "A", "A", "H"]) &&
+				s.sc_h === 2 &&
+				s.sc_a === 2)
 		);
 	}
 
 	function matchesP85Summary(s) {
 		if (!s) return false;
 		var span = s.h1_last - s.h1_first;
-		return matchesP84Summary(s) ||
-			(arrayEqualsJS(s.h1s || [], ['H','A','A']) && s.min_gap >= 3) ||
-			(arrayEqualsJS(s.h1s || [], ['A','H','A','H']) && s.max_gap >= 4) ||
+		return (
+			matchesP84Summary(s) ||
+			(arrayEqualsJS(s.h1s || [], ["H", "A", "A"]) && s.min_gap >= 3) ||
+			(arrayEqualsJS(s.h1s || [], ["A", "H", "A", "H"]) && s.max_gap >= 4) ||
 			(s.h1_last <= 4 && s.sc_h === 2 && s.sc_a === 2) ||
-			(arrayEqualsJS(s.h1s || [], ['A','A','H']) && s.h1_first >= 5);
+			(arrayEqualsJS(s.h1s || [], ["A", "A", "H"]) && s.h1_first >= 5)
+		);
 	}
 
 	function matchesP65Summary(s) {
@@ -3954,17 +4044,10 @@
 					s.h1_last === 7 &&
 					span >= 5 &&
 					s.h1_first !== 1 &&
-					[
-						"Manchester City (V)",
-						"Atletico de Madrid (V)",
-						"England (V)",
-					].indexOf(s.home) === -1 &&
-					!(
-						s.league === "15min" &&
-						s.h1_first === 0 &&
-						arrayEqualsJS(s.h1s, ["H", "A"])
-					) &&
-					!(s.h1_first === 0 && arrayEqualsJS(s.h1s, ["A", "H"]))
+					!(kickoffHour === 14 && kickoffMinute === 1) &&
+					!(kickoffHour === 22 && kickoffMinute === 46) &&
+					!(kickoffHour === 23 && kickoffMinute === 2) &&
+					!(kickoffHour === 20 && kickoffMinute === 31)
 				);
 			case "P7":
 				return (
@@ -4003,14 +4086,17 @@
 				return matchesP12Summary(s);
 			case "P13":
 				return (
-					s.h1c >= 2 &&
-					s.h1_first === 2 &&
-					s.h1_last === 7 &&
-					diff <= 2 &&
-					s.min_gap >= 3 &&
-					s.switches >= 1 &&
-					!(s.home === "Manchester City (V)" && s.away === "Liverpool (V)") &&
-					!(s.home === "England (V)" && s.away === "Spain (V)")
+					(s.h1c >= 2 &&
+						s.h1_first === 2 &&
+						s.h1_last === 7 &&
+						diff <= 2 &&
+						s.min_gap >= 3 &&
+						s.switches >= 1 &&
+						!(kickoffHour === 14 && kickoffMinute === 1) &&
+						!(kickoffHour === 23 && kickoffMinute === 2)) ||
+					(arrayEqualsJS(s.h1s, ["H", "A", "A"]) && s.min_gap >= 3) ||
+					(arrayEqualsJS(s.h1s, ["A", "H", "A", "H"]) && s.max_gap >= 4) ||
+					(s.h1_last <= 4 && s.sc_h === 2 && s.sc_a === 2)
 				);
 			case "P14":
 				return (

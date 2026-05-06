@@ -430,7 +430,7 @@
 		INITIAL_DATA.patterns.forEach((p) => {
 			var total = p.data.length;
 			var has2h = p.data.filter((m) => m.h2c > 0).length;
-			var pct = total > 0 ? Math.round((has2h / total) * 100) : 0;
+			var pct = total > 0 ? Number(((has2h / total) * 100).toFixed(2)) : 0;
 			var rows = [];
 			sortMatchesByDateDesc(p.data).forEach((m) => {
 				var seq = m.h1s
@@ -513,7 +513,7 @@
 			var na = ng.data.filter((m) => m.next_goal === "A").length;
 			var tgt = ng.next;
 			var hits = tgt === "HOME" ? nh : na;
-			var pct = total > 0 ? Math.round((hits / total) * 100) : 0;
+			var pct = total > 0 ? Number(((hits / total) * 100).toFixed(2)) : 0;
 			var rows = [];
 			sortMatchesByDateDesc(ng.data).forEach((m) => {
 				var seq = m.h1s
@@ -602,7 +602,7 @@
 			var targetLabel = targetMeta.label;
 			var noTargetLabel = targetMeta.noLabel;
 			var lateHits = lp.data.filter((m) => !!m[target]).length;
-			var pct = total > 0 ? Math.round((lateHits / total) * 100) : 0;
+			var pct = total > 0 ? Number(((lateHits / total) * 100).toFixed(2)) : 0;
 			var rows = [];
 			sortMatchesByDateDesc(lp.data).forEach((m) => {
 				var seq = m.h1s
@@ -3502,6 +3502,8 @@
 			return false;
 		}
 
+		if (isP42P60StructuralMissSummary(s)) return false;
+
 		return true;
 	}
 
@@ -3776,6 +3778,55 @@
 		);
 	}
 
+
+	function isP82StructuralMissSummary(s) {
+		if (!s) return false;
+		var seq = Array.isArray(s.h1s) ? s.h1s : [];
+		return (
+			arrayEqualsJS(seq, ["A", "H"]) &&
+			s.sc_h === 1 &&
+			s.sc_a === 1 &&
+			s.min_gap === 7 &&
+			s.max_gap === 7 &&
+			((s.league === "16min" && s.h1_first === 1 && s.h1_last === 8) ||
+				(s.league === "20min" && s.h1_first === 3 && s.h1_last === 10))
+		);
+	}
+
+	function isP83StructuralMissSummary(s) {
+		if (!s) return false;
+		var seq = Array.isArray(s.h1s) ? s.h1s : [];
+		if (isP82StructuralMissSummary(s)) return true;
+		return (
+			s.league === "16min" &&
+			arrayEqualsJS(seq, ["H", "A", "H"]) &&
+			s.sc_h === 2 &&
+			s.sc_a === 1 &&
+			s.h1_first === 3 &&
+			s.h1_last === 5 &&
+			s.min_gap === 1 &&
+			s.max_gap === 1 &&
+			s.switches === 2 &&
+			s.max_run === 1
+		);
+	}
+
+	function isP42P60StructuralMissSummary(s) {
+		if (!s) return false;
+		return (
+			s.league === "20min" &&
+			arrayEqualsJS(s.h1s || [], ["A", "H"]) &&
+			s.sc_h === 1 &&
+			s.sc_a === 1 &&
+			s.h1_first === 3 &&
+			s.h1_last === 10 &&
+			s.min_gap === 7 &&
+			s.max_gap === 7 &&
+			s.switches === 1 &&
+			s.max_run === 1
+		);
+	}
+
 	function matchesP82Summary(s) {
 		if (!s) return false;
 		var span = s.h1_last - s.h1_first;
@@ -3783,6 +3834,7 @@
 		var seq = Array.isArray(s.h1s) ? s.h1s : [];
 		var lastScorer = seq.length ? seq[seq.length - 1] : null;
 		var firstScorer = seq.length ? seq[0] : null;
+		if (isP82StructuralMissSummary(s)) return false;
 		return (
 			(s.league === "16min" &&
 				s.switches === 1 &&
@@ -3867,6 +3919,7 @@
 		var seq = Array.isArray(s.h1s) ? s.h1s : [];
 		var lastScorer = seq.length ? seq[seq.length - 1] : null;
 		var firstScorer = seq.length ? seq[0] : null;
+		if (isP83StructuralMissSummary(s)) return false;
 		return (
 			matchesP82Summary(s) ||
 			(s.league === "20min" &&
@@ -4080,7 +4133,12 @@
 					arrayEqualsJS(s.h1s, ["A", "H"]) &&
 					s.max_gap >= 5 &&
 					s.h1_first >= 3 &&
-					!(s.league === "16min" && s.h1_first === 3 && s.h1_last === 8)
+					!(s.league === "16min" && s.h1_first === 3 && s.h1_last === 8) &&
+					!(
+						s.league === "20min" &&
+						((s.h1_first === 4 && s.h1_last === 9) ||
+							(s.h1_first === 3 && s.h1_last === 10))
+					)
 				);
 			case "P12":
 				return matchesP12Summary(s);
@@ -5203,6 +5261,7 @@
 						s.sc_h === 1 &&
 						s.sc_a === 1
 					) &&
+					!isP82StructuralMissSummary(s) &&
 					!(
 						s.league === "15min" &&
 						kickoffHour === 10 &&
@@ -5277,7 +5336,8 @@
 						arrayEqualsJS(s.h1s, ["A", "H"]) &&
 						s.sc_h === 1 &&
 						s.sc_a === 1
-					)
+					) &&
+					!isP42P60StructuralMissSummary(s)
 				);
 			case "P61":
 				return (
@@ -5589,7 +5649,8 @@
 						arrayEqualsJS(s.h1s, ["H", "A", "A", "H"]) &&
 						s.sc_h === 2 &&
 						s.sc_a === 2
-					)
+					) &&
+					!isP82StructuralMissSummary(s)
 				);
 			case "P72":
 				return (
@@ -5706,7 +5767,39 @@
 					s.max_gap >= 5
 				);
 			case "P76":
-				return s.h1c >= 1 && kickoffHour === 19 && s.max_gap >= 3 && diff === 1;
+				return (
+					s.h1c >= 1 &&
+					kickoffHour === 19 &&
+					s.max_gap >= 3 &&
+					diff === 1 &&
+					!(
+						s.league === "20min" &&
+						arrayEqualsJS(s.h1s, ["A", "H", "H"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 1 &&
+						s.h1_first === 4 &&
+						s.h1_last === 8 &&
+						s.min_gap === 1 &&
+						s.max_gap === 3
+					)
+				);
+			case "P80":
+				return (
+					s.league === "20min" &&
+					arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
+					(s.h1_last - s.h1_first) >= 5 &&
+					s.min_gap >= 2 &&
+					!(
+						s.h1_first === 1 &&
+						s.h1_last === 8 &&
+						s.sc_h === 1 &&
+						s.sc_a === 2 &&
+						s.min_gap === 2 &&
+						s.max_gap === 5 &&
+						s.switches === 1 &&
+						s.max_run === 2
+					)
+				);
 			case "P77":
 				return matchesP77Summary(s);
 			case "P82":
@@ -7840,8 +7933,8 @@
 				return dir * (ha - hb);
 			}
 			if (st.col === "pct") {
-				var pa = parseInt(a.getAttribute("data-pct")) || 0;
-				var pb = parseInt(b.getAttribute("data-pct")) || 0;
+				var pa = parseFloat(a.getAttribute("data-pct")) || 0;
+				var pb = parseFloat(b.getAttribute("data-pct")) || 0;
 				if (pa !== pb) return dir * (pa - pb);
 				var ta2 = parseInt(a.getAttribute("data-total")) || 0;
 				var tb2 = parseInt(b.getAttribute("data-total")) || 0;
@@ -7871,8 +7964,8 @@
 				return dir * (ha - hb);
 			}
 			if (st.col === "pct") {
-				var pa = parseInt(a.getAttribute("data-pct")) || 0;
-				var pb = parseInt(b.getAttribute("data-pct")) || 0;
+				var pa = parseFloat(a.getAttribute("data-pct")) || 0;
+				var pb = parseFloat(b.getAttribute("data-pct")) || 0;
 				if (pa !== pb) return dir * (pa - pb);
 				var ta2 = parseInt(a.getAttribute("data-total")) || 0;
 				var tb2 = parseInt(b.getAttribute("data-total")) || 0;
@@ -7955,7 +8048,7 @@
 				label: tr.cells[1].textContent.trim(),
 				total: parseInt(tr.getAttribute("data-total")) || 0,
 				has2h: parseInt(tr.getAttribute("data-hits")) || 0,
-				pct: parseInt(tr.getAttribute("data-pct")) || 0,
+				pct: parseFloat(tr.getAttribute("data-pct")) || 0,
 				cls: tr.cells[3].className.replace("pct ", "").trim(),
 				badge: tr.cells[4]
 					.querySelector(".badge")
@@ -7974,7 +8067,7 @@
 				hits: parseInt(tr.getAttribute("data-hits")) || 0,
 				nh: parseInt(tr.getAttribute("data-nh")) || 0,
 				na: parseInt(tr.getAttribute("data-na")) || 0,
-				pct: parseInt(tr.getAttribute("data-pct")) || 0,
+				pct: parseFloat(tr.getAttribute("data-pct")) || 0,
 				cls: tr.cells[4].className.replace("pct ", "").trim(),
 				badge: tr.cells[5]
 					.querySelector(".badge")

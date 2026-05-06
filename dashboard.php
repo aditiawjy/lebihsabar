@@ -139,7 +139,7 @@ if (!$csvExists): ?>
     if (count($p['data']) < SUMMARY_MIN_SAMPLE) continue;
     $total = count($p['data']);
     $has2h = count(array_filter($p['data'], fn($m) => $m['h2c'] > 0));
-    $pct = $total > 0 ? round($has2h/$total*100) : 0;
+    $pct = $total > 0 ? round($has2h / $total * 100, 2) : 0;
     $cls = $pct >= 95 ? 'pct-high' : ($pct >= 85 ? 'pct-mid' : 'pct-low');
     $badge = $pct >= 95 ? 'badge-green' : ($pct >= 85 ? 'badge-yellow' : 'badge-red');
     $status = $pct >= 95 ? 'EXCELLENT' : ($pct >= 85 ? 'GOOD' : 'WARNING');
@@ -175,7 +175,7 @@ if (!$csvExists): ?>
     $total = count($p['data']);
     $target = $p['target'] ?? 'has_late';
     $hits = count(array_filter($p['data'], fn($m) => $m[$target] ?? false));
-    $pct = $total > 0 ? round($hits/$total*100) : 0;
+    $pct = $total > 0 ? round($hits / $total * 100, 2) : 0;
     $cls = $pct >= 80 ? 'pct-high' : ($pct >= 70 ? 'pct-mid' : 'pct-low');
     $badge = $pct >= 80 ? 'badge-green' : ($pct >= 70 ? 'badge-yellow' : 'badge-red');
     $status = $pct >= 80 ? 'STRONG' : ($pct >= 70 ? 'GOOD' : 'WATCH');

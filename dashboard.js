@@ -43,7 +43,7 @@
 	var LIVE_PATTERN_STATE_STORAGE_KEY = "livePatternStateMemory";
 	var LIVE_SETTLED_STORAGE_KEY = "liveSettledState";
 	var LIVE_LATE_SETTLED_STORAGE_KEY = "liveLateSettledState";
-	var LIVE_STATE_SCHEMA_VERSION = "2026-05-05-live-signals-on-v175";
+	var LIVE_STATE_SCHEMA_VERSION = "2026-05-05-live-signals-on-v176";
 	var LIVE_CANDIDATE_CACHE_TTL_MS = 30000;
 	var LIVE_CANDIDATE_GRACE_MS = 15000;
 	var LIVE_SUMMARY_PRE_GOAL_CARRY_MS = 12 * 60 * 1000;
@@ -54,6 +54,26 @@
 	var detailPageState = {};
 	var restoredLiveCandidateState = false;
 	var liveCandidateExpiryTimer = null;
+
+	function isActivePatternId(id) {
+		if (!id) return false;
+		for (var i = 0; i < PATTERN_DEFS.length; i++) {
+			if (PATTERN_DEFS[i] && PATTERN_DEFS[i].id === id) return true;
+		}
+		var lateDefs = INITIAL_DATA.latePatterns || [];
+		for (var j = 0; j < lateDefs.length; j++) {
+			if (lateDefs[j] && lateDefs[j].id === id) return true;
+		}
+		var no2hDefs = INITIAL_DATA.no2hPatterns || [];
+		for (var n = 0; n < no2hDefs.length; n++) {
+			if (no2hDefs[n] && no2hDefs[n].id === id) return true;
+		}
+		var nextDefs = INITIAL_DATA.nextPatterns || [];
+		for (var k = 0; k < nextDefs.length; k++) {
+			if (nextDefs[k] && nextDefs[k].id === id) return true;
+		}
+		return false;
+	}
 
 	function getPatternLabelById(id) {
 		for (var i = 0; i < PATTERN_DEFS.length; i++) {
@@ -1261,6 +1281,7 @@
 		settledLateResults = settledLateResults.filter((result) => {
 			var pattern =
 				result && result.pid ? getLatePatternById(result.pid) : null;
+			if (result && !isActivePatternId(result.pid)) return false;
 			var historical =
 				result && pattern
 					? findHistoricalMatch(
@@ -1351,7 +1372,7 @@
 				return;
 			}
 			settledSummaryResults = Array.isArray(parsed.results)
-				? parsed.results
+				? parsed.results.filter((result) => result && isActivePatternId(result.pid))
 				: [];
 			pruneSettledSummaryResults();
 		} catch (e) {
@@ -1383,7 +1404,7 @@
 				sessionStorage.removeItem(LIVE_LATE_SETTLED_STORAGE_KEY);
 				return;
 			}
-			settledLateResults = Array.isArray(parsed.results) ? parsed.results : [];
+			settledLateResults = Array.isArray(parsed.results) ? parsed.results.filter((result) => result && isActivePatternId(result.pid)) : [];
 			pruneSettledLateResults();
 		} catch (e) {
 			settledLateResults = [];
@@ -3749,6 +3770,75 @@
 		);
 	}
 
+	function matchesP82Summary(s) {
+		if (!s) return false;
+		var span = s.h1_last - s.h1_first;
+		var diff = Math.abs(s.sc_h - s.sc_a);
+		var seq = Array.isArray(s.h1s) ? s.h1s : [];
+		var lastScorer = seq.length ? seq[seq.length - 1] : null;
+		var firstScorer = seq.length ? seq[0] : null;
+		return (
+			(s.league === '16min' && s.switches === 1 && s.h1_first <= 1 && s.max_gap >= 5) ||
+			(s.league === '20min' && arrayEqualsJS(seq, ['H','A','A']) && span >= 5 && s.min_gap >= 2) ||
+			(s.league === '20min' && s.h1_first === 1 && s.h1_last === 8 && s.switches >= 2) ||
+			(arrayEqualsJS(seq, ['A','A','A']) && s.h1_first >= 2 && s.max_gap >= 4) ||
+			(s.league === '20min' && s.h1c === 2 && s.h1_first === 3 && span >= 5) ||
+			(s.league === '15min' && s.sc_h === 2 && s.sc_a === 1 && s.max_gap === 4 && s.h1_last >= 5) ||
+			(s.league === '20min' && s.sc_h === 1 && s.sc_a === 2 && s.min_gap === 3) ||
+			(s.h1c === 3 && seq.length > 0 && firstScorer === 'A' && span === 6 && s.max_gap === 4) ||
+			(s.league === '16min' && s.sc_h === s.sc_a && s.sc_h === 1 && s.h1_first <= 1 && span >= 4) ||
+			(s.league === '16min' && seq.length > 0 && lastScorer === 'A' && s.max_gap >= 5 && s.switches >= 1) ||
+			(arrayEqualsJS(seq, ['H','A','A']) && s.h1_last >= 7 && span >= 6 && s.min_gap >= 2) ||
+			(s.sc_h === 1 && s.sc_a === 2 && s.switches === 1 && span >= 7 && s.min_gap >= 2) ||
+			(s.league === '16min' && s.sc_h === s.sc_a && s.sc_h === 1 && s.h1_first <= 1 && s.max_gap >= 4) ||
+			(s.league === '20min' && s.sc_a > s.sc_h && s.min_gap === 3 && s.switches >= 1) ||
+			(s.league === '20min' && span === 3 && s.min_gap === 0 && diff <= 2) ||
+			(s.h1c === 3 && seq.length > 0 && firstScorer === 'A' && s.min_gap === 2 && s.max_gap === 4) ||
+			(s.league === '16min' && s.h1_last === 7 && s.min_gap === 1 && s.switches >= 1) ||
+			(s.league === '16min' && seq.length > 0 && firstScorer === 'H' && s.max_gap >= 5 && s.switches >= 1)
+		);
+	}
+
+	function matchesP83Summary(s) {
+		if (!s || s.h1c <= 0) return false;
+		var span = s.h1_last - s.h1_first;
+		var diff = Math.abs(s.sc_h - s.sc_a);
+		var seq = Array.isArray(s.h1s) ? s.h1s : [];
+		var lastScorer = seq.length ? seq[seq.length - 1] : null;
+		var firstScorer = seq.length ? seq[0] : null;
+		return matchesP82Summary(s) ||
+			(s.league === '20min' && s.h1_first === 5 && s.max_gap >= 3 && s.switches >= 1) ||
+			(s.h1_last <= 6 && s.min_gap === 0 && s.max_gap <= 4 && s.sc_h === 2 && s.sc_a === 2) ||
+			(s.h1_first >= 1 && s.min_gap === 1 && s.max_gap >= 4 && s.switches === 0) ||
+			(s.league === '16min' && s.h1c >= 3 && s.max_gap <= 2 && diff <= 1) ||
+			(s.league === '16min' && s.h1c >= 3 && s.h1_last <= 5 && seq.length > 0 && lastScorer === 'A') ||
+			(s.h1c >= 2 && s.h1_first === 7 && s.h1_last >= 8 && seq.length > 0 && firstScorer === 'H') ||
+			(s.h1_first === 0 && s.h1_last <= 2 && s.max_run === 2 && seq.length > 0 && lastScorer === 'A');
+	}
+
+	function matchesP84Summary(s) {
+		if (!s) return false;
+		var span = s.h1_last - s.h1_first;
+		return (
+			(s.h1_last <= 7 && s.switches >= 4) ||
+			(s.h1_first >= 5 && span >= 5) ||
+			(s.h1c === 3 && s.h1_first >= 7) ||
+			(s.league === '20min' && s.switches >= 4) ||
+			(s.h1_last <= 2 && s.sc_h === 2 && s.sc_a === 1) ||
+			(s.h1_last >= 6 && arrayEqualsJS(s.h1s || [], ['H','A','A','H']) && s.sc_h === 2 && s.sc_a === 2)
+		);
+	}
+
+	function matchesP85Summary(s) {
+		if (!s) return false;
+		var span = s.h1_last - s.h1_first;
+		return matchesP84Summary(s) ||
+			(arrayEqualsJS(s.h1s || [], ['H','A','A']) && s.min_gap >= 3) ||
+			(arrayEqualsJS(s.h1s || [], ['A','H','A','H']) && s.max_gap >= 4) ||
+			(s.h1_last <= 4 && s.sc_h === 2 && s.sc_a === 2) ||
+			(arrayEqualsJS(s.h1s || [], ['A','A','H']) && s.h1_first >= 5);
+	}
+
 	function matchesP65Summary(s) {
 		if (!s) return false;
 		var seq = Array.isArray(s.h1s) ? s.h1s.join("") : "";
@@ -5533,6 +5623,14 @@
 				return s.h1c >= 1 && kickoffHour === 19 && s.max_gap >= 3 && diff === 1;
 			case "P77":
 				return matchesP77Summary(s);
+			case "P82":
+				return matchesP82Summary(s);
+			case "P83":
+				return matchesP83Summary(s);
+			case "P84":
+				return matchesP84Summary(s);
+			case "P85":
+				return matchesP85Summary(s);
 			case "P63":
 				return (
 					s.league === "16min" &&

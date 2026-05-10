@@ -417,11 +417,35 @@ function csvRatioBadgeClass(?float $ratio): string {
     return 'bg-rose-100 text-rose-700';
 }
 
+function csvShortDate(?string $date, string $format = 'd/m/y'): string {
+    if (!$date || strtotime($date) === false) {
+        return '-';
+    }
+
+    return date($format, strtotime($date));
+}
+
+function csvMatchScoreText(?array $match): string {
+    if (!$match) {
+        return '-';
+    }
+
+    return $match['vs_home'].' '.$match['ft_home'].'-'.$match['ft_away'].' '.$match['vs_away'];
+}
+
+function csvNextMatchText(?array $match): string {
+    if (!$match) {
+        return '-';
+    }
+
+    return $match['vs'].' - '.csvShortDate($match['date'], 'd/m').' '.$match['time'];
+}
+
 $mktLabel = $marketOptions[$mktParam]['label'];
 $mktShort = $marketOptions[$mktParam]['short'];
 $mktClass = $marketOptions[$mktParam]['class'];
 ?>
-<div class="p-4 md:p-8 space-y-6 page-fade-in">
+<div class="p-3 sm:p-4 md:p-8 space-y-4 md:space-y-6 page-fade-in">
     <?php
     // Calculate stats
     $totalRecordBreakers = count($recordBreakers);
@@ -430,7 +454,7 @@ $mktClass = $marketOptions[$mktParam]['class'];
     ?>
 
     <!-- Broadcast Header -->
-    <div class="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-5 md:p-6 shadow-xl">
+    <div class="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-4 md:p-6 shadow-xl">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div class="space-y-1">
                 <p class="text-[11px] uppercase tracking-[0.2em] text-amber-300 font-bold">Club Analytics</p>
@@ -451,102 +475,103 @@ $mktClass = $marketOptions[$mktParam]['class'];
 
     <!-- Quick Stats Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <div class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm">
+        <div class="rounded-xl bg-white border border-slate-200 p-3 md:p-4 shadow-sm">
             <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Clubs</p>
             <p class="mt-2 text-2xl font-black text-slate-900"><?= $totalClubs ?></p>
         </div>
-        <div class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm">
+        <div class="rounded-xl bg-white border border-slate-200 p-3 md:p-4 shadow-sm">
             <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Record Breakers</p>
             <p class="mt-2 text-2xl font-black text-rose-600"><?= $totalRecordBreakers ?></p>
         </div>
-        <div class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm">
+        <div class="rounded-xl bg-white border border-slate-200 p-3 md:p-4 shadow-sm">
             <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Max Hits</p>
             <p class="mt-2 text-2xl font-black text-emerald-600"><?= $maxHits ?></p>
         </div>
-        <div class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm">
+        <div class="rounded-xl bg-white border border-slate-200 p-3 md:p-4 shadow-sm">
             <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Avg Hits</p>
             <p class="mt-2 text-2xl font-black text-blue-600"><?= $avgHits ?></p>
         </div>
     </div>
 
     <!-- Filter Form -->
-    <form method="GET" class="bg-white rounded-2xl shadow-md border-0 p-5 md:p-6 transition-all">
+    <form method="GET" class="bg-white rounded-2xl shadow-md border-0 p-4 md:p-5 transition-all">
         <input type="hidden" name="page" value="clubs">
         
-        <div class="flex flex-wrap items-center gap-2 mb-4">
-            <div class="relative flex-1 min-w-[200px]">
+        <div class="grid gap-2 md:grid-cols-[minmax(280px,1fr)_auto] md:items-center">
+            <label for="club-search" class="sr-only">Cari club</label>
+            <div class="relative min-w-0">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
-                <input type="text" name="search" value="<?= htmlspecialchars($searchTerm) ?>" placeholder="Cari club..."
-                    class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all">
+                <input id="club-search" type="text" name="search" value="<?= htmlspecialchars($searchTerm) ?>" placeholder="Cari club..."
+                    class="w-full pl-10 pr-4 py-2.5 md:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all">
             </div>
-            <div class="flex gap-1">
+            <div class="grid grid-cols-3 gap-1.5 md:flex md:gap-1">
                 <?php
                 $today = date('Y-m-d');
                 $weekStart = date('Y-m-d', strtotime('monday this week'));
                 $weekEnd = date('Y-m-d', strtotime('sunday this week'));
                 ?>
                 <a href="<?= htmlspecialchars(csvUrl(['date_from' => $today, 'date_to' => $today, 'pg' => 1])) ?>" 
-                   class="px-3 py-3 text-xs font-medium rounded-xl border <?= $dateFrom === $today && $dateTo === $today ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100' ?>">
+                   class="px-3 py-2.5 md:py-3 text-center text-xs font-medium rounded-xl border <?= $dateFrom === $today && $dateTo === $today ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100' ?>">
                     Today
                 </a>
                 <a href="<?= htmlspecialchars(csvUrl(['date_from' => $weekStart, 'date_to' => $weekEnd, 'pg' => 1])) ?>" 
-                   class="px-3 py-3 text-xs font-medium rounded-xl border <?= $dateFrom === $weekStart && $dateTo === $weekEnd ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100' ?>">
+                   class="px-3 py-2.5 md:py-3 text-center text-xs font-medium rounded-xl border <?= $dateFrom === $weekStart && $dateTo === $weekEnd ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100' ?>">
                     This Week
                 </a>
                 <a href="<?= htmlspecialchars(csvUrl(['date_from' => '', 'date_to' => '', 'league' => '', 'under' => '0.5', 'pg' => 1])) ?>" 
-                   class="px-3 py-3 text-xs font-medium rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100">
+                   class="px-3 py-2.5 md:py-3 text-center text-xs font-medium rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100">
                     Reset
                 </a>
             </div>
         </div>
         
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div class="club-filter-grid mt-3">
             <div class="flex flex-col gap-1">
-                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Jam Mulai</label>
-                <input type="text" name="time_from" value="<?= htmlspecialchars($timeFrom) ?>" placeholder="00:00" maxlength="5" class="px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all">
+                <label for="club-time-from" class="text-[11px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Jam Mulai</label>
+                <input id="club-time-from" type="text" name="time_from" value="<?= htmlspecialchars($timeFrom) ?>" placeholder="00:00" maxlength="5" class="px-3 py-2.5 md:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all">
             </div>
             <div class="flex flex-col gap-1">
-                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Jam Selesai</label>
-                <input type="text" name="time_to" value="<?= htmlspecialchars($timeTo) ?>" placeholder="23:59" maxlength="5" class="px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all">
+                <label for="club-time-to" class="text-[11px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Jam Selesai</label>
+                <input id="club-time-to" type="text" name="time_to" value="<?= htmlspecialchars($timeTo) ?>" placeholder="23:59" maxlength="5" class="px-3 py-2.5 md:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all">
             </div>
             <div class="flex flex-col gap-1">
-                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Dari Tanggal</label>
-                <input type="date" name="date_from" value="<?= htmlspecialchars($dateFrom) ?>" class="px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all h-[46px]">
+                <label for="club-date-from" class="text-[11px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Dari Tanggal</label>
+                <input id="club-date-from" type="date" name="date_from" value="<?= htmlspecialchars($dateFrom) ?>" class="px-3 py-2.5 md:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all h-[42px] md:h-[46px]">
             </div>
             <div class="flex flex-col gap-1">
-                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Sampai Tanggal</label>
-                <input type="date" name="date_to" value="<?= htmlspecialchars($dateTo) ?>" class="px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all h-[46px]">
+                <label for="club-date-to" class="text-[11px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Sampai Tanggal</label>
+                <input id="club-date-to" type="date" name="date_to" value="<?= htmlspecialchars($dateTo) ?>" class="px-3 py-2.5 md:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all h-[42px] md:h-[46px]">
             </div>
             <div class="flex flex-col gap-1">
-                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Market</label>
-                <select name="under" class="px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all appearance-none cursor-pointer h-[46px]">
+                <label for="club-market" class="text-[11px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Market</label>
+                <select id="club-market" name="under" class="px-3 py-2.5 md:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all appearance-none cursor-pointer h-[42px] md:h-[46px]">
                     <?php foreach ($marketOptions as $val => $opt): ?>
                         <option value="<?= $val ?>" <?= $mktParam === $val ? 'selected' : '' ?>><?= htmlspecialchars($opt['label']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div class="flex flex-col gap-1">
-                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Liga</label>
-                <select name="league" class="px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all appearance-none cursor-pointer h-[46px]">
+                <label for="club-league" class="text-[11px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Liga</label>
+                <select id="club-league" name="league" class="px-3 py-2.5 md:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all appearance-none cursor-pointer h-[42px] md:h-[46px]">
                     <option value="">Semua Liga</option>
                     <?php foreach ($leagueList as $lg): ?>
                         <option value="<?= htmlspecialchars($lg) ?>" <?= $lgFilter === $lg ? 'selected' : '' ?>><?= htmlspecialchars($lg) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
+            <button type="submit" class="col-span-2 w-full bg-slate-900 text-white rounded-xl px-4 py-2.5 md:py-3 text-sm font-bold hover:bg-slate-800 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 lg:col-span-1 lg:h-[46px]">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                Filter
+            </button>
         </div>
         
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 mt-4 border-t border-slate-100">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 mt-3 border-t border-slate-100">
             <div class="flex items-center gap-2">
                 <input type="checkbox" name="show_max" value="1" id="show_max" <?= $showOnlyMax ? 'checked' : '' ?> class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
                 <label for="show_max" class="text-sm text-slate-600 cursor-pointer">Hanya tampilkan MAX</label>
             </div>
-            <button type="submit" class="w-full sm:w-auto bg-slate-900 text-white rounded-xl px-6 py-3 text-sm font-bold hover:bg-slate-800 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-                Terapkan Filter
-            </button>
         </div>
     </form>
 
@@ -576,36 +601,48 @@ $mktClass = $marketOptions[$mktParam]['class'];
         $gapByMonth[$month][] = $gd;
     }
     ?>
-    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
         <button type="button" onclick="this.nextElementSibling.classList.toggle('hidden')"
-            class="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors">
-            <div class="flex items-center gap-3">
+            class="w-full grid gap-3 px-4 py-3 text-left hover:bg-slate-50 transition-colors md:grid-cols-[1fr_auto] md:items-center">
+            <div class="flex flex-wrap items-center gap-2 md:gap-3">
                 <span class="text-sm font-bold text-slate-700 uppercase tracking-wide">Monitoring Tanggal Data CSV</span>
                 <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold
                     <?= $daysGap > 0 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700' ?>">
                     <?= $daysGap > 0 ? $daysGap.' tanggal kosong' : 'Lengkap' ?>
                 </span>
             </div>
-            <div class="flex items-center gap-4 text-xs text-slate-400">
+            <div class="flex items-center justify-between gap-4 text-xs text-slate-400 md:justify-end">
                 <span><?= $csvMinDate ?? '-' ?> &rarr; <?= $csvMaxDate ?? '-' ?></span>
                 <span class="text-slate-300">&#x25BC;</span>
             </div>
         </button>
         <div class="hidden border-t border-slate-100">
-            <div class="px-4 py-3 flex gap-6 text-xs text-slate-500 border-b border-slate-100 bg-slate-50">
-                <span>Total rentang: <strong class="text-slate-700"><?= $totalDays ?></strong> hari</span>
-                <span>Ada data: <strong class="text-emerald-600"><?= $daysWithData ?></strong> hari</span>
-                <span>Kosong / gap: <strong class="text-amber-600"><?= $daysGap ?></strong> hari</span>
+            <div class="grid gap-2 px-4 py-3 text-xs text-slate-500 border-b border-slate-100 bg-slate-50 md:grid-cols-3">
+                <div class="rounded-xl bg-white border border-slate-200 px-3 py-2">
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Rentang</span>
+                    <strong class="text-lg text-slate-800"><?= $totalDays ?></strong> hari
+                </div>
+                <div class="rounded-xl bg-white border border-emerald-100 px-3 py-2">
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-emerald-500">Ada Data</span>
+                    <strong class="text-lg text-emerald-600"><?= $daysWithData ?></strong> hari
+                </div>
+                <div class="rounded-xl bg-white border border-amber-100 px-3 py-2">
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-amber-500">Tanggal Kosong</span>
+                    <strong class="text-lg text-amber-600"><?= $daysGap ?></strong> hari
+                </div>
             </div>
             <?php if ($daysGap === 0): ?>
             <div class="px-4 py-6 text-center text-sm text-emerald-600 font-medium">
                 Semua tanggal dalam rentang <?= htmlspecialchars($csvMinDate ?? '') ?> &ndash; <?= htmlspecialchars($csvMaxDate ?? '') ?> sudah ada datanya.
             </div>
             <?php else: ?>
-            <div class="px-4 py-3 space-y-3 max-h-64 overflow-y-auto">
+            <div class="px-4 py-3 space-y-3 max-h-72 overflow-y-auto">
                 <?php foreach ($gapByMonth as $month => $dates): ?>
-                <div>
-                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1"><?= htmlspecialchars($month) ?></div>
+                <div class="rounded-xl border border-slate-100 bg-white p-3">
+                    <div class="mb-2 flex items-center justify-between">
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider"><?= htmlspecialchars($month) ?></div>
+                        <div class="text-[10px] font-semibold text-amber-600"><?= count($dates) ?> gap</div>
+                    </div>
                     <div class="flex flex-wrap gap-1.5">
                         <?php foreach ($dates as $gd): ?>
                         <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-amber-50 text-amber-700 border border-amber-200">
@@ -623,16 +660,50 @@ $mktClass = $marketOptions[$mktParam]['class'];
     <!-- Record Breakers -->
     <?php if ($recordBreakers): ?>
     <div class="bg-white rounded-2xl shadow-md border-0 overflow-hidden">
-        <div class="px-5 py-4 bg-rose-600 text-white flex items-center justify-between">
-            <div class="flex items-center gap-3">
+        <div class="px-4 md:px-5 py-4 bg-rose-600 text-white flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-3">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 <span class="text-sm font-bold uppercase tracking-wide">Record Breakers</span>
                 <span class="text-xs text-rose-200 bg-rose-700/50 px-2 py-1 rounded-lg"><?= htmlspecialchars($mktLabel) ?></span>
             </div>
             <span class="text-xs text-rose-100"><?= count($recordBreakers) ?> clubs</span>
         </div>
-        <div class="overflow-x-auto">
-        <table class="min-w-full text-xs">
+        <div class="grid gap-3 p-3 md:hidden">
+            <?php foreach ($recordBreakers as $i => $r): ?>
+            <article class="rounded-xl border border-rose-100 bg-rose-50/50 p-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-black text-rose-600">#<?= $i + 1 ?></span>
+                            <span class="px-2 py-1 rounded-lg text-[10px] font-bold <?= $mktClass ?>"><?= $mktShort ?></span>
+                            <span class="px-2 py-1 rounded-full text-[10px] font-black <?= csvRatioBadgeClass($r['hits_ratio']) ?>"><?= htmlspecialchars(csvFormatRatio($r['hits_ratio'])) ?></span>
+                        </div>
+                        <h2 class="mt-2 text-base font-black text-slate-900"><?= htmlspecialchars($r['team']) ?></h2>
+                        <p class="mt-0.5 text-[10px] uppercase tracking-wide text-slate-500"><?= htmlspecialchars($r['league']) ?></p>
+                    </div>
+                    <div class="shrink-0 text-right">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Max</div>
+                        <div class="text-xl font-black text-rose-600"><?= $r['period_max_count'] ?>/<?= $r['max_count'] ?></div>
+                    </div>
+                </div>
+                <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                    <div class="rounded-lg bg-white p-2">
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Last</span>
+                        <strong class="block text-slate-700"><?= htmlspecialchars(csvMatchScoreText($r['last_match'] ?? null)) ?></strong>
+                        <?php if ($r['last_match'] ?? null): ?>
+                            <span class="text-slate-400"><?= htmlspecialchars(csvShortDate($r['last_match']['date'])) ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="rounded-lg bg-white p-2">
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Next</span>
+                        <strong class="block text-slate-700"><?= htmlspecialchars(csvNextMatchText($r['next_match'] ?? null)) ?></strong>
+                    </div>
+                </div>
+            </article>
+            <?php endforeach; ?>
+        </div>
+        <div class="hidden overflow-x-auto md:block">
+        <table class="min-w-[980px] w-full text-xs">
             <thead class="bg-rose-50 text-rose-900 sticky top-0 z-10">
                         <tr>
                             <th class="px-4 py-3 text-left font-bold">#</th>
@@ -651,7 +722,7 @@ $mktClass = $marketOptions[$mktParam]['class'];
                 <tr class="hover:bg-rose-50/30 transition-all">
                     <td class="px-4 py-3 text-slate-400 font-medium"><?= $i + 1 ?></td>
                     <td class="px-4 py-3"><span class="px-2 py-1 rounded-lg text-[10px] font-bold <?= $mktClass ?>"><?= $mktShort ?></span></td>
-                    <td class="px-4 py-3">
+                    <td class="px-4 py-3 min-w-[220px]">
                         <div class="font-bold text-slate-900"><?= htmlspecialchars($r['team']) ?></div>
                         <div class="text-[10px] text-slate-500"><?= htmlspecialchars($r['league']) ?></div>
                     </td>
@@ -663,17 +734,21 @@ $mktClass = $marketOptions[$mktParam]['class'];
                             </span>
                         </td>
                         <td class="px-4 py-3 text-center text-slate-600 font-medium"><?= htmlspecialchars(date('d-m-y', strtotime($r['max_date']))) ?></td>
-                        <td class="px-4 py-3 text-center text-slate-600">
+                        <td class="px-4 py-3 text-center text-slate-600 <?= ($r['last_match'] ?? null) ? 'bg-sky-50/70 border-l border-sky-100' : '' ?>">
                         <?php if ($r['last_match'] ?? null): ?>
-                            <div class="text-[10px] font-bold text-slate-700"><?= htmlspecialchars($r['last_match']['vs_home']).' '.$r['last_match']['ft_home'].'-'.$r['last_match']['ft_away'].' '.htmlspecialchars($r['last_match']['vs_away']) ?></div>
+                            <div class="inline-block rounded-lg px-2 py-1">
+                            <div class="text-[10px] font-bold text-slate-800"><?= htmlspecialchars(csvMatchScoreText($r['last_match'])) ?></div>
                             <div class="text-[10px] text-slate-500">(HT <?= $r['last_match']['fh_home'].'-'.$r['last_match']['fh_away'] ?>)</div>
-                            <div class="text-[10px] text-slate-400"><?= htmlspecialchars(date('d/m/y', strtotime($r['last_match']['date']))) ?></div>
+                            <div class="text-[10px] text-slate-400"><?= htmlspecialchars(csvShortDate($r['last_match']['date'])) ?></div>
+                            </div>
                         <?php else: ?>-<?php endif; ?>
                     </td>
-                        <td class="px-4 py-3 text-center text-slate-600">
+                        <td class="px-4 py-3 text-center text-slate-600 <?= $r['next_match'] ? 'bg-amber-50/80 border-l border-amber-100' : '' ?>">
                         <?php if ($r['next_match']): ?>
-                            <div class="font-bold text-slate-800 text-xs max-w-[120px] truncate mx-auto" title="<?= htmlspecialchars($r['next_match']['vs']) ?>"><?= htmlspecialchars($r['next_match']['vs']) ?></div>
-                            <div class="text-[10px] text-slate-500"><?= htmlspecialchars(date('d/m', strtotime($r['next_match']['date'])).' '.$r['next_match']['time']) ?></div>
+                            <div class="inline-block rounded-lg px-2 py-1">
+                            <div class="font-bold text-slate-900 text-xs max-w-[120px] truncate mx-auto" title="<?= htmlspecialchars($r['next_match']['vs']) ?>"><?= htmlspecialchars($r['next_match']['vs']) ?></div>
+                            <div class="text-[10px] text-slate-500"><?= htmlspecialchars(csvShortDate($r['next_match']['date'], 'd/m').' '.$r['next_match']['time']) ?></div>
+                            </div>
                         <?php else: ?>-<?php endif; ?>
                     </td>
                 </tr>
@@ -687,7 +762,7 @@ $mktClass = $marketOptions[$mktParam]['class'];
     <!-- Main Clubs Table -->
     <div class="bg-white rounded-2xl shadow-md border-0 overflow-hidden">
         <!-- Header & Per page -->
-        <div class="px-5 py-4 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3">
+        <div class="px-4 md:px-5 py-4 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-3">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 <span class="text-sm font-bold uppercase tracking-wide">Data Clubs</span>
@@ -709,8 +784,62 @@ $mktClass = $marketOptions[$mktParam]['class'];
                 </div>
             </div>
         </div>
-        <div class="overflow-x-auto">
-        <table class="min-w-full text-xs">
+        <div class="grid gap-3 p-3 md:hidden">
+            <?php if (!$pageRows): ?>
+                <div class="rounded-xl border border-slate-100 bg-slate-50 p-6 text-center text-sm font-medium text-slate-400">
+                    Tidak ada data untuk filter ini.
+                </div>
+            <?php else: ?>
+                <?php foreach ($pageRows as $i => $r): ?>
+                <article class="rounded-xl border <?= $r['is_max'] ? 'border-rose-100 bg-rose-50/40' : 'border-slate-100 bg-white' ?> p-3 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-black text-slate-400">#<?= $offset + $i + 1 ?></span>
+                                <?php if ($r['is_max']): ?>
+                                    <span class="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-rose-700">MAX</span>
+                                <?php endif; ?>
+                            </div>
+                            <h2 class="mt-2 text-base font-black text-slate-900"><?= htmlspecialchars($r['team']) ?></h2>
+                            <p class="mt-0.5 text-[10px] uppercase tracking-wide text-slate-500"><?= htmlspecialchars($r['league']) ?></p>
+                        </div>
+                        <span class="shrink-0 rounded-full px-3 py-1.5 text-xs font-black <?= csvRatioBadgeClass($r['hits_ratio']) ?>">
+                            <?= htmlspecialchars(csvFormatRatio($r['hits_ratio'])) ?>
+                        </span>
+                    </div>
+                    <div class="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
+                        <div class="rounded-lg bg-slate-50 p-2">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Hits</span>
+                            <strong class="text-lg text-emerald-600"><?= $r['under_count'] ?></strong>
+                        </div>
+                        <div class="rounded-lg bg-slate-50 p-2">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Max</span>
+                            <strong class="text-lg text-violet-600"><?= $r['max_count'] ?: '-' ?></strong>
+                        </div>
+                        <div class="rounded-lg bg-slate-50 p-2">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Tgl Max</span>
+                            <strong class="text-sm text-slate-700"><?= htmlspecialchars(csvShortDate($r['max_date'])) ?></strong>
+                        </div>
+                    </div>
+                    <div class="mt-3 grid gap-2 text-xs">
+                        <div class="rounded-lg border border-slate-100 p-2">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Last Match</span>
+                            <strong class="block text-slate-700"><?= htmlspecialchars(csvMatchScoreText($r['last_match'] ?? null)) ?></strong>
+                            <?php if ($r['last_match'] ?? null): ?>
+                                <span class="text-slate-400">(HT <?= $r['last_match']['fh_home'].'-'.$r['last_match']['fh_away'] ?>) <?= htmlspecialchars(csvShortDate($r['last_match']['date'])) ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="rounded-lg border border-slate-100 p-2">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Next Match</span>
+                            <strong class="block text-slate-700"><?= htmlspecialchars(csvNextMatchText($r['next_match'] ?? null)) ?></strong>
+                        </div>
+                    </div>
+                </article>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+        <div class="hidden overflow-x-auto md:block">
+        <table class="min-w-[920px] w-full text-xs">
             <thead class="bg-slate-50 text-slate-700 sticky top-0 z-10">
                 <tr>
                     <th class="px-4 py-3 text-left font-bold">#</th>
@@ -745,7 +874,7 @@ $mktClass = $marketOptions[$mktParam]['class'];
                 <?php foreach ($pageRows as $i => $r): ?>
                 <tr class="hover:bg-blue-50/30 transition-all duration-200 <?= $r['is_max'] ? 'bg-rose-50/30' : '' ?>">
                     <td class="px-4 py-3 text-slate-500 font-medium"><?= $offset + $i + 1 ?></td>
-                    <td class="px-4 py-3">
+                    <td class="px-4 py-3 min-w-[220px]">
                         <div class="font-bold text-slate-900"><?= htmlspecialchars($r['team']) ?></div>
                         <div class="text-[10px] text-slate-500 uppercase tracking-wide"><?= htmlspecialchars($r['league']) ?></div>
                     </td>
@@ -761,18 +890,22 @@ $mktClass = $marketOptions[$mktParam]['class'];
                             title="<?= (int)$r['under_count'] ?>/<?= (int)$r['max_count'] ?> (<?= htmlspecialchars(csvFormatRatio($r['hits_ratio'])) ?>)"
                         ><?= htmlspecialchars(csvFormatRatio($r['hits_ratio'])) ?></span>
                     </td>
-                    <td class="px-4 py-3 text-center text-slate-600 font-medium"><?= $r['max_date'] ? htmlspecialchars(date('d-m-y', strtotime($r['max_date']))) : '-' ?></td>
-                    <td class="px-4 py-3 text-center text-slate-600">
+                    <td class="px-4 py-3 text-center text-slate-600 font-medium"><?= htmlspecialchars(csvShortDate($r['max_date'], 'd-m-y')) ?></td>
+                    <td class="px-4 py-3 text-center text-slate-600 <?= ($r['last_match'] ?? null) ? 'bg-sky-50/70 border-l border-sky-100' : '' ?>">
                         <?php if ($r['last_match'] ?? null): ?>
-                            <div class="text-[10px] font-bold text-slate-700"><?= htmlspecialchars($r['last_match']['vs_home']).' '.$r['last_match']['ft_home'].'-'.$r['last_match']['ft_away'].' '.htmlspecialchars($r['last_match']['vs_away']) ?></div>
+                            <div class="inline-block rounded-lg px-2 py-1">
+                            <div class="text-[10px] font-bold text-slate-800"><?= htmlspecialchars(csvMatchScoreText($r['last_match'])) ?></div>
                             <div class="text-[10px] text-slate-500">(HT <?= $r['last_match']['fh_home'].'-'.$r['last_match']['fh_away'] ?>)</div>
-                            <div class="text-[10px] text-slate-400"><?= htmlspecialchars(date('d/m/y', strtotime($r['last_match']['date']))) ?></div>
+                            <div class="text-[10px] text-slate-400"><?= htmlspecialchars(csvShortDate($r['last_match']['date'])) ?></div>
+                            </div>
                         <?php else: ?>-<?php endif; ?>
                     </td>
-                    <td class="px-4 py-3 text-center text-slate-600">
+                    <td class="px-4 py-3 text-center text-slate-600 <?= $r['next_match'] ? 'bg-amber-50/80 border-l border-amber-100' : '' ?>">
                         <?php if ($r['next_match']): ?>
-                            <div class="font-bold text-slate-800 text-xs max-w-[120px] truncate mx-auto" title="<?= htmlspecialchars($r['next_match']['vs']) ?>"><?= htmlspecialchars($r['next_match']['vs']) ?></div>
-                            <div class="text-[10px] text-slate-500"><?= htmlspecialchars(date('d/m', strtotime($r['next_match']['date'])).' '.$r['next_match']['time']) ?></div>
+                            <div class="inline-block rounded-lg px-2 py-1">
+                            <div class="font-bold text-slate-900 text-xs max-w-[120px] truncate mx-auto" title="<?= htmlspecialchars($r['next_match']['vs']) ?>"><?= htmlspecialchars($r['next_match']['vs']) ?></div>
+                            <div class="text-[10px] text-slate-500"><?= htmlspecialchars(csvShortDate($r['next_match']['date'], 'd/m').' '.$r['next_match']['time']) ?></div>
+                            </div>
                         <?php else: ?>-<?php endif; ?>
                     </td>
                 </tr>

@@ -35,7 +35,6 @@ AGENTS.md
 # Node / Playwright testing
 node_modules/
 package-lock.json
-package.json
 playwright.config.js
 test-results/
 tests/

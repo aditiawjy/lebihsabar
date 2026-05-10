@@ -342,10 +342,12 @@ function h2hPctClass(float $pct): string {
                     <?php foreach ($pageRows as $i => $r): ?>
                     <tr class="hover:bg-blue-50/30 transition-all duration-200">
                         <td class="px-4 py-3 text-slate-400 font-medium"><?= $offset + $i + 1 ?></td>
-                        <td class="px-4 py-3">
-                            <div class="font-bold text-slate-900"><?= htmlspecialchars($r['home']) ?></div>
-                            <div class="text-[10px] text-slate-400 font-medium">vs</div>
-                            <div class="font-bold text-slate-900"><?= htmlspecialchars($r['away']) ?></div>
+                        <td class="px-4 py-3 min-w-[300px]">
+                            <div class="flex flex-wrap items-center gap-1.5 font-bold text-slate-900">
+                                <span><?= htmlspecialchars($r['home']) ?></span>
+                                <span class="text-[10px] uppercase tracking-wider text-slate-400">vs</span>
+                                <span><?= htmlspecialchars($r['away']) ?></span>
+                            </div>
                             <div class="text-[10px] text-slate-500 uppercase tracking-wide mt-0.5"><?= htmlspecialchars($r['league']) ?></div>
                         </td>
                         <td class="px-4 py-3 text-center">
@@ -365,9 +367,11 @@ function h2hPctClass(float $pct): string {
                         </td>
                         <td class="px-4 py-3 text-center text-slate-600">
                             <?php if ($r['next']): ?>
-                                <div class="font-bold text-slate-800 text-xs"><?= htmlspecialchars($r['next']['home']) ?></div>
-                                <div class="text-[10px] text-slate-400">vs</div>
-                                <div class="font-bold text-slate-800 text-xs"><?= htmlspecialchars($r['next']['away']) ?></div>
+                                <div class="flex flex-wrap justify-center items-center gap-1 text-xs font-bold text-slate-800">
+                                    <span><?= htmlspecialchars($r['next']['home']) ?></span>
+                                    <span class="text-[10px] uppercase tracking-wider text-slate-400">vs</span>
+                                    <span><?= htmlspecialchars($r['next']['away']) ?></span>
+                                </div>
                                 <div class="text-[10px] text-slate-500"><?= htmlspecialchars(date('d/m', strtotime($r['next']['date'])).' '.$r['next']['time']) ?></div>
                             <?php else: ?>-<?php endif; ?>
                         </td>

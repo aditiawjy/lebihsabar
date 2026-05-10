@@ -61,7 +61,7 @@ $navIconIdleClass = 'text-slate-500 group-hover:text-blue-400';
     <script>
         document.documentElement.classList.remove('no-js');
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/app.css?v=<?php echo filemtime(__DIR__ . '/assets/app.css'); ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -200,9 +200,9 @@ $navIconIdleClass = 'text-slate-500 group-hover:text-blue-400';
         <!-- Main Content -->
         <main class="flex-1 flex flex-col min-w-0 bg-slate-50">
             <!-- Top Navbar -->
-            <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-10">
-                <nav aria-label="Breadcrumb" class="flex items-center gap-2">
-                    <ol class="flex items-center gap-2" itemscope itemtype="https://schema.org/BreadcrumbList">
+            <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between pl-20 pr-4 lg:px-8 sticky top-0 z-10">
+                <nav aria-label="Breadcrumb" class="flex min-w-0 items-center gap-2">
+                    <ol class="flex min-w-0 items-center gap-2" itemscope itemtype="https://schema.org/BreadcrumbList">
                         <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="hidden lg:flex items-center gap-2">
                             <span itemprop="name" class="text-slate-400 text-sm font-medium">Dashboard</span>
                             <meta itemprop="position" content="1">
@@ -210,8 +210,8 @@ $navIconIdleClass = 'text-slate-500 group-hover:text-blue-400';
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                             </svg>
                         </li>
-                        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                            <span itemprop="name" class="text-slate-900 text-base font-semibold">
+                        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="min-w-0">
+                            <span itemprop="name" class="block truncate text-slate-900 text-base font-semibold">
                                 <?php echo htmlspecialchars($pages[$page]['title'], ENT_QUOTES, 'UTF-8'); ?>
                             </span>
                             <meta itemprop="position" content="2">
@@ -230,6 +230,21 @@ $navIconIdleClass = 'text-slate-500 group-hover:text-blue-400';
                     </div>
                 </div>
             </header>
+
+            <nav aria-label="Primary" class="lg:hidden border-b border-slate-200 bg-white/95 px-3 py-2">
+                <div class="flex gap-2 overflow-x-auto scrollbar-thin">
+                    <?php foreach ($pages as $key => $config): ?>
+                        <?php $isActive = $page === $key; ?>
+                        <a
+                            href="index.php?page=<?php echo urlencode($key); ?>"
+                            class="shrink-0 rounded-full border px-3 py-2 text-xs font-semibold transition-colors <?php echo $isActive ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'; ?>"
+                            aria-current="<?php echo $isActive ? 'page' : 'false'; ?>"
+                        >
+                            <?php echo htmlspecialchars($config['nav'], ENT_QUOTES, 'UTF-8'); ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </nav>
 
             <div class="flex-1 overflow-auto" id="mainContent">
                 <div class="max-w-7xl mx-auto">

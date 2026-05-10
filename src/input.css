@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.club-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+@media (min-width: 1024px) {
+  .club-filter-grid {
+    grid-template-columns: 120px 120px 170px 170px 150px minmax(170px, 1fr) 120px !important;
+    align-items: end;
+    gap: 0.75rem;
+  }
+}

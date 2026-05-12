@@ -657,6 +657,105 @@ $mktClass = $marketOptions[$mktParam]['class'];
         </div>
     </div>
 
+    <!-- All-Time Max Table -->
+    <?php
+    $allTimeMaxClubs = [];
+    foreach ($rows as $r) {
+        if ($r['max_count'] > 0 && $r['period_max_count'] >= $r['max_count']) {
+            $allTimeMaxClubs[] = $r;
+        }
+    }
+    usort($allTimeMaxClubs, fn($a, $b) => $b['max_count'] <=> $a['max_count']);
+    ?>
+    <?php if ($allTimeMaxClubs): ?>
+    <div class="bg-white rounded-2xl shadow-md border-0 overflow-hidden">
+        <div class="px-4 md:px-5 py-4 bg-indigo-600 text-white flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-3">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                <span class="text-sm font-bold uppercase tracking-wide">All-Time Max</span>
+                <span class="text-xs text-indigo-200 bg-indigo-700/50 px-2 py-1 rounded-lg"><?= htmlspecialchars($mktLabel) ?></span>
+            </div>
+            <span class="text-xs text-indigo-100"><?= count($allTimeMaxClubs) ?> clubs</span>
+        </div>
+        <div class="grid gap-3 p-3 md:hidden">
+            <?php foreach ($allTimeMaxClubs as $i => $r): ?>
+            <article class="rounded-xl border border-indigo-100 bg-indigo-50/50 p-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-black text-indigo-600">#<?= $i + 1 ?></span>
+                            <span class="px-2 py-1 rounded-lg text-[10px] font-bold <?= $mktClass ?>"><?= $mktShort ?></span>
+                        </div>
+                        <h2 class="mt-2 text-base font-black text-slate-900"><?= htmlspecialchars($r['team']) ?></h2>
+                        <p class="mt-0.5 text-[10px] uppercase tracking-wide text-slate-500"><?= htmlspecialchars($r['league']) ?></p>
+                    </div>
+                    <div class="shrink-0 text-right">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">All-Time Max</div>
+                        <div class="text-xl font-black text-indigo-600"><?= $r['max_count'] ?></div>
+                    </div>
+                </div>
+                <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                    <div class="rounded-lg bg-white p-2">
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Tgl Max</span>
+                        <strong class="block text-slate-700"><?= htmlspecialchars(csvShortDate($r['max_date'])) ?></strong>
+                    </div>
+                    <div class="rounded-lg bg-white p-2">
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Period Max</span>
+                        <strong class="block text-slate-700"><?= $r['period_max_count'] ?></strong>
+                    </div>
+                </div>
+            </article>
+            <?php endforeach; ?>
+        </div>
+        <div class="hidden overflow-x-auto md:block">
+        <table class="min-w-[800px] w-full text-xs">
+            <thead class="bg-indigo-50 text-indigo-900 sticky top-0 z-10">
+                <tr>
+                    <th class="px-4 py-3 text-left font-bold">#</th>
+                    <th class="px-4 py-3 text-left font-bold">Club</th>
+                    <th class="px-4 py-3 text-center font-bold">All-Time Max</th>
+                    <th class="px-4 py-3 text-center font-bold">Period Max</th>
+                    <th class="px-4 py-3 text-center font-bold">Tgl Max</th>
+                    <th class="px-4 py-3 text-center font-bold">Last Match</th>
+                    <th class="px-4 py-3 text-center font-bold">Next Match</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+            <?php foreach ($allTimeMaxClubs as $i => $r): ?>
+                <tr class="hover:bg-indigo-50/30 transition-all">
+                    <td class="px-4 py-3 text-slate-400 font-medium"><?= $i + 1 ?></td>
+                    <td class="px-4 py-3 min-w-[220px]">
+                        <div class="font-bold text-slate-900"><?= htmlspecialchars($r['team']) ?></div>
+                        <div class="text-[10px] text-slate-500"><?= htmlspecialchars($r['league']) ?></div>
+                    </td>
+                    <td class="px-4 py-3 text-center"><span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 font-black text-sm"><?= $r['max_count'] ?></span></td>
+                    <td class="px-4 py-3 text-center"><span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-black text-sm"><?= $r['period_max_count'] ?></span></td>
+                    <td class="px-4 py-3 text-center text-slate-600 font-medium"><?= htmlspecialchars(date('d-m-y', strtotime($r['max_date']))) ?></td>
+                    <td class="px-4 py-3 text-center text-slate-600 <?= ($r['last_match'] ?? null) ? 'bg-sky-50/70 border-l border-sky-100' : '' ?>">
+                        <?php if ($r['last_match'] ?? null): ?>
+                            <div class="inline-block rounded-lg px-2 py-1">
+                            <div class="text-[10px] font-bold text-slate-800"><?= htmlspecialchars(csvMatchScoreText($r['last_match'])) ?></div>
+                            <div class="text-[10px] text-slate-500">(HT <?= $r['last_match']['fh_home'].'-'.$r['last_match']['fh_away'] ?>)</div>
+                            <div class="text-[10px] text-slate-400"><?= htmlspecialchars(csvShortDate($r['last_match']['date'])) ?></div>
+                            </div>
+                        <?php else: ?>-<?php endif; ?>
+                    </td>
+                    <td class="px-4 py-3 text-center text-slate-600 <?= $r['next_match'] ? 'bg-amber-50/80 border-l border-amber-100' : '' ?>">
+                        <?php if ($r['next_match']): ?>
+                            <div class="inline-block rounded-lg px-2 py-1">
+                            <div class="font-bold text-slate-900 text-xs max-w-[120px] truncate mx-auto" title="<?= htmlspecialchars($r['next_match']['vs']) ?>"><?= htmlspecialchars($r['next_match']['vs']) ?></div>
+                            <div class="text-[10px] text-slate-500"><?= htmlspecialchars(csvShortDate($r['next_match']['date'], 'd/m').' '.$r['next_match']['time']) ?></div>
+                            </div>
+                        <?php else: ?>-<?php endif; ?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- Record Breakers -->
     <?php if ($recordBreakers): ?>
     <div class="bg-white rounded-2xl shadow-md border-0 overflow-hidden">

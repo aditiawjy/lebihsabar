@@ -400,7 +400,7 @@ $allTimeMaxMultiMarket = [];
 foreach ($_allMkts as $_mk) {
     foreach ($_mmAllTime[$_mk] as $key => $atm) {
         $pm = $_mmPeriod[$_mk][$key] ?? ['count' => 0, 'date' => ''];
-        if ($pm['count'] > 0 && $pm['count'] >= $atm['count']) {
+        if ($pm['count'] > 0 && $pm['count'] >= $atm['count'] - 1 && isset($nextMatch[$key])) {
             [$team, $league] = explode('|', $key, 2);
             $allTimeMaxMultiMarket[] = [
                 'team'             => $team,

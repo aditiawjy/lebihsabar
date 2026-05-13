@@ -251,7 +251,12 @@ csvReadMatches($csvPath, function(array $m) use (
         return;
     }
 
-    if ($m['date'] < $today) {
+    if (
+        $m['date'] < $today ||
+        $m['date'] < $dateFrom ||
+        $m['date'] > $dateTo ||
+        !csvTimeInRange($m['time'], $timeFrom, $timeTo)
+    ) {
         return;
     }
 
@@ -387,7 +392,7 @@ csvReadMatches($csvPath, function(array $m) use (
     $inPeriod = $m['date'] >= $dateFrom && $m['date'] <= $dateTo && csvTimeInRange($m['time'], $timeFrom, $timeTo);
     foreach ($_allMkts as $_mk) {
         if ($_mk === '2.5' && isset($hiddenLeagues[$m['league']])) continue;
-        if (!csvCheckMarket($m, $_mk)) continue;
+        if (!csvCheckMarket($m, $_mk) || !csvTimeInRange($m['time'], $timeFrom, $timeTo)) continue;
         foreach ([$hKey, $aKey] as $key) {
             csvBumpDailyMax($_mmDaily[$_mk], $_mmAllTime[$_mk], $key, $m['date']);
             if ($inPeriod) {
@@ -495,6 +500,15 @@ function csvNextMatchText(?array $match): string {
     }
 
     return $match['vs'].' - '.csvShortDate($match['date'], 'd/m').' '.$match['time'];
+}
+
+function csvDisplayTimeMinusOneHour(string $date, string $time): string {
+    $timestamp = strtotime(trim($date.' '.$time));
+    if ($timestamp === false) {
+        return $time;
+    }
+
+    return date('H:i', $timestamp - 3600);
 }
 
 $mktLabel = $marketOptions[$mktParam]['label'];
@@ -797,7 +811,7 @@ $mktClass = $marketOptions[$mktParam]['class'];
                         <?php if ($r['next_match']): ?>
                             <div class="inline-block rounded-lg px-2 py-1">
                             <div class="font-bold text-slate-900 text-xs max-w-[120px] truncate mx-auto" title="<?= htmlspecialchars($r['next_match']['vs']) ?>"><?= htmlspecialchars($r['next_match']['vs']) ?></div>
-                            <div class="text-[10px] text-slate-500"><?= htmlspecialchars(csvShortDate($r['next_match']['date'], 'd/m').' '.$r['next_match']['time']) ?></div>
+                            <div class="text-[10px] text-slate-500"><?= htmlspecialchars(csvShortDate($r['next_match']['date'], 'd/m').' '.csvDisplayTimeMinusOneHour($r['next_match']['date'], $r['next_match']['time'])) ?></div>
                             </div>
                         <?php else: ?>-<?php endif; ?>
                     </td>

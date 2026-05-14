@@ -6,13 +6,10 @@ $marketOptions = [
     '0.5'       => ['label' => 'Under 0.5',       'short' => 'U0.5',  'class' => 'bg-blue-500 text-white'],
     '1.5'       => ['label' => 'Under 1.5',       'short' => 'U1.5',  'class' => 'bg-sky-500 text-white'],
     '2.5'       => ['label' => 'Under 2.5',       'short' => 'U2.5',  'class' => 'bg-cyan-500 text-white'],
+    '3.5'       => ['label' => 'Under 3.5',       'short' => 'U3.5',  'class' => 'bg-emerald-500 text-white'],
     'fhg0.5'    => ['label' => 'FHG Under 0.5',   'short' => 'FHG',   'class' => 'bg-violet-500 text-white'],
     'shg0.5'    => ['label' => 'SHG Under 0.5',   'short' => 'SHG',   'class' => 'bg-fuchsia-500 text-white'],
     'draw_ft'   => ['label' => 'Draw FT',          'short' => 'DRAW',  'class' => 'bg-indigo-500 text-white'],
-    'home_wtn'  => ['label' => 'Home Win to Nil',   'short' => 'HWTN',  'class' => 'bg-orange-500 text-white'],
-    'away_wtn'  => ['label' => 'Away Win to Nil',   'short' => 'AWTN',  'class' => 'bg-teal-500 text-white'],
-    '!home_wtn' => ['label' => '!Home Win to Nil',  'short' => '!HWTN', 'class' => 'bg-orange-800 text-white'],
-    '!away_wtn' => ['label' => '!Away Win to Nil',  'short' => '!AWTN', 'class' => 'bg-teal-800 text-white'],
     '!2-3'      => ['label' => '!2-3 Goal',        'short' => '!2-3',  'class' => 'bg-red-600 text-white'],
 ];
 
@@ -23,13 +20,10 @@ function csvCheckMarket(array $m, string $mkt): bool {
         '0.5'     => ($ftH + $ftA) < 1,
         '1.5'     => ($ftH + $ftA) < 2,
         '2.5'     => ($ftH + $ftA) < 3,
+        '3.5'     => ($ftH + $ftA) < 4,
         'fhg0.5'  => ($fhH + $fhA) < 1,
         'shg0.5'  => (($ftH - $fhH) + ($ftA - $fhA)) < 1,
         'draw_ft'  => $ftH === $ftA,
-        'home_wtn'  => $ftH > $ftA && $ftA === 0,
-        'away_wtn'  => $ftA > $ftH && $ftH === 0,
-        '!home_wtn' => $ftH > $ftA && $ftA > 0,
-        '!away_wtn' => $ftA > $ftH && $ftH > 0,
         '!2-3'    => ($ftH + $ftA) !== 2 && ($ftH + $ftA) !== 3,
         default    => false,
     };
@@ -234,17 +228,8 @@ csvReadMatches($csvPath, function(array $m) use (
         }
 
         if ($isMarketHit && csvTimeInRange($m['time'], $timeFrom, $timeTo)) {
-            // Markets that only apply to home team
-            $homeOnlyMarkets = ['home_wtn', '!home_wtn'];
-            $isHomeOnlyMarket = in_array($mktParam, $homeOnlyMarkets);
-            
-            // For home-only markets, only track home team; for others, track both
-            if ($isHomeOnlyMarket) {
-                csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $hKey, $m['date']);
-            } else {
-                csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $hKey, $m['date']);
-                csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $aKey, $m['date']);
-            }
+            csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $hKey, $m['date']);
+            csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $aKey, $m['date']);
         }
 
         if (
@@ -256,12 +241,7 @@ csvReadMatches($csvPath, function(array $m) use (
                 csvTimeInRange($m['time'], $timeFrom, $timeTo)
             ))
         ) {
-            // Markets that only apply to home team
-            $homeOnlyMarkets = ['home_wtn', '!home_wtn'];
-            $isHomeOnlyMarket = in_array($mktParam, $homeOnlyMarkets);
-            
-            // For home-only markets, only add home team; for others, add both
-            $teamsToAdd = $isHomeOnlyMarket ? [$hKey => $m['home']] : [$hKey => $m['home'], $aKey => $m['away']];
+            $teamsToAdd = [$hKey => $m['home'], $aKey => $m['away']];
             
             foreach ($teamsToAdd as $key => $team) {
                 if (!isset($inRange[$key])) {
@@ -417,12 +397,7 @@ csvReadMatches($csvPath, function(array $m) use (
         if ($_mk === '2.5' && isset($hiddenLeagues[$m['league']])) continue;
         if (!csvCheckMarket($m, $_mk) || !csvTimeInRange($m['time'], $timeFrom, $timeTo)) continue;
         
-        // Markets that only apply to home team
-        $homeOnlyMarkets = ['home_wtn', '!home_wtn'];
-        $isHomeOnlyMarket = in_array($_mk, $homeOnlyMarkets);
-        
-        // For home-only markets, only track home team; for others, track both
-        $keysToTrack = $isHomeOnlyMarket ? [$hKey] : [$hKey, $aKey];
+        $keysToTrack = [$hKey, $aKey];
         
         foreach ($keysToTrack as $key) {
             csvBumpDailyMax($_mmDaily[$_mk], $_mmAllTime[$_mk], $key, $m['date']);

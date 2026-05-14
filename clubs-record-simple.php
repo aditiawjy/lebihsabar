@@ -234,8 +234,17 @@ csvReadMatches($csvPath, function(array $m) use (
         }
 
         if ($isMarketHit && csvTimeInRange($m['time'], $timeFrom, $timeTo)) {
-            csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $hKey, $m['date']);
-            csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $aKey, $m['date']);
+            // Markets that only apply to home team
+            $homeOnlyMarkets = ['home_wtn', '!home_wtn'];
+            $isHomeOnlyMarket = in_array($mktParam, $homeOnlyMarkets);
+            
+            // For home-only markets, only track home team; for others, track both
+            if ($isHomeOnlyMarket) {
+                csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $hKey, $m['date']);
+            } else {
+                csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $hKey, $m['date']);
+                csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $aKey, $m['date']);
+            }
         }
 
         if (

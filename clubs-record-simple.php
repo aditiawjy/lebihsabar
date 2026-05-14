@@ -247,7 +247,14 @@ csvReadMatches($csvPath, function(array $m) use (
                 csvTimeInRange($m['time'], $timeFrom, $timeTo)
             ))
         ) {
-            foreach ([$hKey => $m['home'], $aKey => $m['away']] as $key => $team) {
+            // Markets that only apply to home team
+            $homeOnlyMarkets = ['home_wtn', '!home_wtn'];
+            $isHomeOnlyMarket = in_array($mktParam, $homeOnlyMarkets);
+            
+            // For home-only markets, only add home team; for others, add both
+            $teamsToAdd = $isHomeOnlyMarket ? [$hKey => $m['home']] : [$hKey => $m['home'], $aKey => $m['away']];
+            
+            foreach ($teamsToAdd as $key => $team) {
                 if (!isset($inRange[$key])) {
                     $inRange[$key] = ['team' => $team, 'league' => $m['league'], 'under_count' => 0];
                 }

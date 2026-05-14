@@ -51,7 +51,7 @@ function csvTimeInRange(string $time, string $from, string $to): bool {
 function csvBumpDailyMax(array &$dailyCounts, array &$maxByKey, string $key, string $date): void {
     $dailyCounts[$key][$date] = ($dailyCounts[$key][$date] ?? 0) + 1;
     $newCount = $dailyCounts[$key][$date];
-    if (!isset($maxByKey[$key]) || $newCount > $maxByKey[$key]['count']) {
+    if (!isset($maxByKey[$key]) || $newCount >= $maxByKey[$key]['count']) {
         $maxByKey[$key] = ['count' => $newCount, 'date' => $date];
     }
 }
@@ -143,6 +143,7 @@ $perPageOpt = [25, 50, 100, 200];
 $perPageRaw = (int)($_GET['per_page'] ?? 50);
 $perPage    = in_array($perPageRaw, $perPageOpt) ? $perPageRaw : 50;
 $showOnlyMax = isset($_GET['show_max']) && $_GET['show_max'] === '1';
+$showNearAllTimeMax = isset($_GET['show_near_all_time_max']) && $_GET['show_near_all_time_max'] === '1';
 
 if (!in_array($sortCol, ['team', 'under_count', 'max_count', 'max_date', 'hits_ratio'], true)) {
     $sortCol = 'hits_ratio';
@@ -338,7 +339,7 @@ if ($searchTerm) {
 
 // Filter: U0.5 shows all with max >= 1; others require hits/max >= 60%
 if ($mktParam === '0.5') {
-    $rows = array_values(array_filter($rows, fn($r) => ($r['max_count'] ?? 0) >= 1));
+    $rows = array_values(array_filter($rows, fn($r) => ($r['max_count'] ?? 0) >= 1 && ($r['under_count'] ?? 0) >= ($r['max_count'] ?? 0) - 2 && ($r['hits_ratio'] ?? 0) > 50));
 } else {
     $rows = array_values(array_filter($rows, fn($r) => ($r['hits_ratio'] ?? 0) >= 60));
 }
@@ -405,7 +406,8 @@ $allTimeMaxMultiMarket = [];
 foreach ($_allMkts as $_mk) {
     foreach ($_mmAllTime[$_mk] as $key => $atm) {
         $pm = $_mmPeriod[$_mk][$key] ?? ['count' => 0, 'date' => ''];
-        if ($pm['count'] > 0 && $pm['count'] >= $atm['count'] - 1 && isset($nextMatch[$key])) {
+        $minPeriodMax = $showNearAllTimeMax ? $atm['count'] - 1 : $atm['count'];
+        if ($pm['count'] > 0 && $pm['count'] >= $minPeriodMax && isset($nextMatch[$key])) {
             [$team, $league] = explode('|', $key, 2);
             $allTimeMaxMultiMarket[] = [
                 'team'             => $team,
@@ -413,6 +415,7 @@ foreach ($_allMkts as $_mk) {
                 'market'           => $_mk,
                 'max_count'        => $atm['count'],
                 'max_date'         => $atm['date'],
+                'max_times'        => count(array_filter($_mmDaily[$_mk][$key] ?? [], fn($c) => $c >= $atm['count'])),
                 'period_max_count' => $pm['count'],
                 'period_max_date'  => $pm['date'],
                 'next_match'       => $nextMatch[$key] ?? null,
@@ -425,7 +428,7 @@ usort($allTimeMaxMultiMarket, fn($a, $b) => $b['max_count'] <=> $a['max_count'] 
 
 // Helper: build URL preserving all current GET params
 function csvUrl(array $extra = []): string {
-    $allowedKeys = ['page', 'search', 'date_from', 'date_to', 'time_from', 'time_to', 'league', 'under', 'sort', 'order', 'pg', 'per_page', 'show_max'];
+    $allowedKeys = ['page', 'search', 'date_from', 'date_to', 'time_from', 'time_to', 'league', 'under', 'sort', 'order', 'pg', 'per_page', 'show_max', 'show_near_all_time_max'];
     $params = ['page' => 'clubs'];
 
     foreach ($allowedKeys as $key) {
@@ -484,6 +487,12 @@ function csvShortDate(?string $date, string $format = 'd/m/y'): string {
     }
 
     return date($format, strtotime($date));
+}
+
+function csvDaysSince(?string $date): string {
+    if (!$date || strtotime($date) === false) return '';
+    $days = (int)floor((time() - strtotime($date)) / 86400);
+    return $days > 0 ? $days.' hari' : 'hari ini';
 }
 
 function csvMatchScoreText(?array $match): string {
@@ -638,9 +647,15 @@ $mktClass = $marketOptions[$mktParam]['class'];
         </div>
         
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 mt-3 border-t border-slate-100">
-            <div class="flex items-center gap-2">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div class="flex items-center gap-2">
                 <input type="checkbox" name="show_max" value="1" id="show_max" <?= $showOnlyMax ? 'checked' : '' ?> class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
                 <label for="show_max" class="text-sm text-slate-600 cursor-pointer">Hanya tampilkan MAX</label>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" name="show_near_all_time_max" value="1" id="show_near_all_time_max" <?= $showNearAllTimeMax ? 'checked' : '' ?> class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                    <label for="show_near_all_time_max" class="text-sm text-slate-600 cursor-pointer">Tampilkan juga All-Time Max - 1</label>
+                </div>
             </div>
         </div>
     </form>
@@ -742,7 +757,7 @@ $mktClass = $marketOptions[$mktParam]['class'];
             <?php foreach ($allTimeMaxMultiMarket as $i => $r):
                 $_rmkt = $marketOptions[$r['market']] ?? ['short'=>$r['market'],'class'=>'bg-slate-500 text-white'];
             ?>
-            <article class="rounded-xl border border-indigo-100 bg-indigo-50/50 p-3">
+            <article class="rounded-xl border p-3 <?= $r['period_max_count'] >= $r['max_count'] ? 'border-emerald-200 bg-emerald-50' : 'border-indigo-100 bg-indigo-50/50' ?>">
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
@@ -754,13 +769,14 @@ $mktClass = $marketOptions[$mktParam]['class'];
                     </div>
                     <div class="shrink-0 text-right">
                         <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">All-Time Max</div>
-                        <div class="text-xl font-black text-indigo-600"><?= $r['max_count'] ?></div>
+                        <div class="text-xl font-black text-indigo-600"><?= $r['max_count'] ?><?= ($r['max_times'] ?? 0) > 1 ? ' <span class="text-[10px] font-normal opacity-60">('.$r['max_times'].'x)</span>' : '' ?></div>
                     </div>
                 </div>
                 <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
                     <div class="rounded-lg bg-white p-2">
                         <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Tgl Max</span>
                         <strong class="block text-slate-700"><?= htmlspecialchars(csvShortDate($r['max_date'])) ?></strong>
+                        <?php if ($r['max_date']): ?><span class="text-[10px] text-slate-400"><?= csvDaysSince($r['max_date']) ?></span><?php endif; ?>
                     </div>
                     <div class="rounded-lg bg-white p-2">
                         <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Period Max</span>
@@ -788,16 +804,19 @@ $mktClass = $marketOptions[$mktParam]['class'];
             <?php foreach ($allTimeMaxMultiMarket as $i => $r):
                 $_rmkt = $marketOptions[$r['market']] ?? ['short'=>$r['market'],'class'=>'bg-slate-500 text-white'];
             ?>
-                <tr class="hover:bg-indigo-50/30 transition-all">
+                <tr class="hover:bg-indigo-50/30 transition-all <?= $r['period_max_count'] >= $r['max_count'] ? 'bg-emerald-50' : '' ?>">
                     <td class="px-4 py-3 text-slate-400 font-medium"><?= $i + 1 ?></td>
                     <td class="px-4 py-3 min-w-[220px]">
                         <div class="font-bold text-slate-900"><?= htmlspecialchars($r['team']) ?></div>
                         <div class="text-[10px] text-slate-500"><?= htmlspecialchars($r['league']) ?></div>
                     </td>
                     <td class="px-4 py-3 text-center"><span class="px-2 py-1 rounded-lg text-[10px] font-bold <?= $_rmkt['class'] ?>"><?= htmlspecialchars($_rmkt['short']) ?></span></td>
-                    <td class="px-4 py-3 text-center"><span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 font-black text-sm"><?= $r['max_count'] ?></span></td>
+                    <td class="px-4 py-3 text-center"><span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 font-black text-sm"><?= $r['max_count'] ?><?= ($r['max_times'] ?? 0) > 1 ? ' <span class="text-[10px] font-normal opacity-70">('.$r['max_times'].'x)</span>' : '' ?></span></td>
                     <td class="px-4 py-3 text-center"><span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-black text-sm"><?= $r['period_max_count'] ?></span></td>
-                    <td class="px-4 py-3 text-center text-slate-600 font-medium"><?= htmlspecialchars(csvShortDate($r['max_date'])) ?></td>
+                    <td class="px-4 py-3 text-center text-slate-600 font-medium">
+                        <?= htmlspecialchars(csvShortDate($r['max_date'])) ?>
+                        <?php if ($r['max_date']): ?><div class="text-[10px] text-slate-400"><?= csvDaysSince($r['max_date']) ?></div><?php endif; ?>
+                    </td>
                     <td class="px-4 py-3 text-center text-slate-600 <?= ($r['last_match'] ?? null) ? 'bg-sky-50/70 border-l border-sky-100' : '' ?>">
                         <?php if ($r['last_match'] ?? null): ?>
                             <div class="inline-block rounded-lg px-2 py-1">
@@ -985,6 +1004,7 @@ $mktClass = $marketOptions[$mktParam]['class'];
                         <div class="rounded-lg bg-slate-50 p-2">
                             <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Tgl Max</span>
                             <strong class="text-sm text-slate-700"><?= htmlspecialchars(csvShortDate($r['max_date'])) ?></strong>
+                            <?php if ($r['max_date']): ?><span class="text-[10px] text-slate-400"><?= csvDaysSince($r['max_date']) ?></span><?php endif; ?>
                         </div>
                     </div>
                     <div class="mt-3 grid gap-2 text-xs">
@@ -1056,7 +1076,10 @@ $mktClass = $marketOptions[$mktParam]['class'];
                             title="<?= (int)$r['under_count'] ?>/<?= (int)$r['max_count'] ?> (<?= htmlspecialchars(csvFormatRatio($r['hits_ratio'])) ?>)"
                         ><?= htmlspecialchars(csvFormatRatio($r['hits_ratio'])) ?></span>
                     </td>
-                    <td class="px-4 py-3 text-center text-slate-600 font-medium"><?= htmlspecialchars(csvShortDate($r['max_date'], 'd-m-y')) ?></td>
+                    <td class="px-4 py-3 text-center text-slate-600 font-medium">
+                        <?= htmlspecialchars(csvShortDate($r['max_date'], 'd-m-y')) ?>
+                        <?php if ($r['max_date']): ?><div class="text-[10px] text-slate-400"><?= csvDaysSince($r['max_date']) ?></div><?php endif; ?>
+                    </td>
                     <td class="px-4 py-3 text-center text-slate-600 <?= ($r['last_match'] ?? null) ? 'bg-sky-50/70 border-l border-sky-100' : '' ?>">
                         <?php if ($r['last_match'] ?? null): ?>
                             <div class="inline-block rounded-lg px-2 py-1">

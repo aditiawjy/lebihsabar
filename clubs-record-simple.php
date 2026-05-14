@@ -410,10 +410,6 @@ csvReadMatches($csvPath, function(array $m) use (
 });
 $allTimeMaxMultiMarket = [];
 foreach ($_allMkts as $_mk) {
-    // Only include data for the currently selected market
-    if ($_mk !== $mktParam) {
-        continue;
-    }
     foreach ($_mmAllTime[$_mk] as $key => $atm) {
         $pm = $_mmPeriod[$_mk][$key] ?? ['count' => 0, 'date' => ''];
         $minPeriodMax = $showNearAllTimeMax ? $atm['count'] - 1 : $atm['count'];

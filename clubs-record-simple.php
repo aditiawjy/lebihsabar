@@ -222,11 +222,15 @@ csvReadMatches($csvPath, function(array $m) use (
         $isMarketHit = csvCheckMarket($m, $mktParam);
 
         // Track last played match (any result) by date+time for both teams
-        $matchInfo = ['vs_home' => $m['home'], 'vs_away' => $m['away'], 'date' => $m['date'], 'time' => $m['time'], 'ft_home' => $m['ft_home'], 'ft_away' => $m['ft_away'], 'fh_home' => $m['fh_home'], 'fh_away' => $m['fh_away']];
-        foreach ([$hKey, $aKey] as $key) {
-            if (!isset($lastMatch[$key]) || ($m['date'].$m['time']) > ($lastMatch[$key]['date'].($lastMatch[$key]['time'] ?? ''))) {
-                $lastMatch[$key] = $matchInfo;
-            }
+        // For home team: opponent is away team; for away team: opponent is home team
+        $homeMatchInfo = ['vs_home' => $m['away'], 'vs_away' => $m['home'], 'date' => $m['date'], 'time' => $m['time'], 'ft_home' => $m['ft_home'], 'ft_away' => $m['ft_away'], 'fh_home' => $m['fh_home'], 'fh_away' => $m['fh_away']];
+        $awayMatchInfo = ['vs_home' => $m['home'], 'vs_away' => $m['away'], 'date' => $m['date'], 'time' => $m['time'], 'ft_home' => $m['ft_home'], 'ft_away' => $m['ft_away'], 'fh_home' => $m['fh_home'], 'fh_away' => $m['fh_away']];
+        
+        if (!isset($lastMatch[$hKey]) || ($m['date'].$m['time']) > ($lastMatch[$hKey]['date'].($lastMatch[$hKey]['time'] ?? ''))) {
+            $lastMatch[$hKey] = $homeMatchInfo;
+        }
+        if (!isset($lastMatch[$aKey]) || ($m['date'].$m['time']) > ($lastMatch[$aKey]['date'].($lastMatch[$aKey]['time'] ?? ''))) {
+            $lastMatch[$aKey] = $awayMatchInfo;
         }
 
         if ($isMarketHit && csvTimeInRange($m['time'], $timeFrom, $timeTo)) {

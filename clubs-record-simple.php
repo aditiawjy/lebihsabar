@@ -13,6 +13,7 @@ $marketOptions = [
     'away_wtn'  => ['label' => 'Away Win to Nil',   'short' => 'AWTN',  'class' => 'bg-teal-500 text-white'],
     '!home_wtn' => ['label' => '!Home Win to Nil',  'short' => '!HWTN', 'class' => 'bg-orange-800 text-white'],
     '!away_wtn' => ['label' => '!Away Win to Nil',  'short' => '!AWTN', 'class' => 'bg-teal-800 text-white'],
+    '!2-3'      => ['label' => '!2-3 Goal',        'short' => '!2-3',  'class' => 'bg-red-600 text-white'],
 ];
 
 function csvCheckMarket(array $m, string $mkt): bool {
@@ -29,6 +30,7 @@ function csvCheckMarket(array $m, string $mkt): bool {
         'away_wtn'  => $ftA > $ftH && $ftH === 0,
         '!home_wtn' => $ftH > $ftA && $ftA > 0,
         '!away_wtn' => $ftA > $ftH && $ftH > 0,
+        '!2-3'    => ($ftH + $ftA) !== 2 && ($ftH + $ftA) !== 3,
         default    => false,
     };
 }

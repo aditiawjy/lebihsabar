@@ -416,7 +416,15 @@ csvReadMatches($csvPath, function(array $m) use (
     foreach ($_allMkts as $_mk) {
         if ($_mk === '2.5' && isset($hiddenLeagues[$m['league']])) continue;
         if (!csvCheckMarket($m, $_mk) || !csvTimeInRange($m['time'], $timeFrom, $timeTo)) continue;
-        foreach ([$hKey, $aKey] as $key) {
+        
+        // Markets that only apply to home team
+        $homeOnlyMarkets = ['home_wtn', '!home_wtn'];
+        $isHomeOnlyMarket = in_array($_mk, $homeOnlyMarkets);
+        
+        // For home-only markets, only track home team; for others, track both
+        $keysToTrack = $isHomeOnlyMarket ? [$hKey] : [$hKey, $aKey];
+        
+        foreach ($keysToTrack as $key) {
             csvBumpDailyMax($_mmDaily[$_mk], $_mmAllTime[$_mk], $key, $m['date']);
             if ($inPeriod) {
                 csvBumpDailyMax($_mmPeriodDly[$_mk], $_mmPeriod[$_mk], $key, $m['date']);

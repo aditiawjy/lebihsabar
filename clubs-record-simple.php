@@ -9,6 +9,7 @@ $marketOptions = [
     'fhg0.5'    => ['label' => 'FHG Under 0.5',   'short' => 'FHG',   'class' => 'bg-violet-500 text-white'],
     'shg0.5'    => ['label' => 'SHG Under 0.5',   'short' => 'SHG',   'class' => 'bg-fuchsia-500 text-white'],
     'draw_ft'   => ['label' => 'Draw FT',          'short' => 'DRAW',  'class' => 'bg-indigo-500 text-white'],
+    'no_draw'   => ['label' => 'No Draw',          'short' => 'NODRAW','class' => 'bg-amber-500 text-white'],
     '!2-3'      => ['label' => '!2-3 Goal',        'short' => '!2-3',  'class' => 'bg-red-600 text-white'],
 ];
 
@@ -22,6 +23,7 @@ function csvCheckMarket(array $m, string $mkt): bool {
         'fhg0.5'  => ($fhH + $fhA) < 1,
         'shg0.5'  => (($ftH - $fhH) + ($ftA - $fhA)) < 1,
         'draw_ft'  => $ftH === $ftA,
+        'no_draw' => $ftH !== $ftA,
         '!2-3'    => ($ftH + $ftA) !== 2 && ($ftH + $ftA) !== 3,
         default    => false,
     };
@@ -136,7 +138,6 @@ $pg         = max(1, (int)($_GET['pg'] ?? 1));
 $perPageOpt = [25, 50, 100, 200];
 $perPageRaw = (int)($_GET['per_page'] ?? 50);
 $perPage    = in_array($perPageRaw, $perPageOpt) ? $perPageRaw : 50;
-$showOnlyMax = isset($_GET['show_max']) && $_GET['show_max'] === '1';
 $showNearAllTimeMax = isset($_GET['show_near_all_time_max']) && $_GET['show_near_all_time_max'] === '1';
 
 if (!in_array($sortCol, ['team', 'under_count', 'max_count', 'max_date', 'hits_ratio'], true)) {
@@ -162,7 +163,9 @@ $lastMatch       = [];  // key => last completed match with score
 $inRange = [];  // key => ['team','league','under_count']
 $inRangeDailyMkt = []; // key => [date => count]
 $periodMaxByKey = [];  // key => ['count' => int, 'date' => string]
+$clubSet        = [];
 $leagueSet       = [];
+$clubNameSet     = [];
 $csvMinDate      = null;
 $csvMaxDate      = null;
 $csvDatesWithData = [];
@@ -185,7 +188,9 @@ csvReadMatches($csvPath, function(array $m) use (
     &$inRange,
     &$inRangeDailyMkt,
     &$periodMaxByKey,
+    &$clubSet,
     &$leagueSet,
+    &$clubNameSet,
     &$csvMinDate,
     &$csvMaxDate,
     &$csvDatesWithData
@@ -202,8 +207,13 @@ csvReadMatches($csvPath, function(array $m) use (
         return;
     }
 
+    $clubNameSet[$m['home']] = true;
+    $clubNameSet[$m['away']] = true;
+
     $hKey = $m['home'].'|'.$m['league'];
     $aKey = $m['away'].'|'.$m['league'];
+    $clubSet[$hKey] = ['team' => $m['home'], 'league' => $m['league']];
+    $clubSet[$aKey] = ['team' => $m['away'], 'league' => $m['league']];
 
     $hasFT = csvHasFT($m);
     if ($hasFT) {
@@ -274,19 +284,22 @@ csvReadMatches($csvPath, function(array $m) use (
 
 $leagueList = array_keys($leagueSet);
 sort($leagueList);
+$clubNameList = array_keys($clubNameSet);
+sort($clubNameList, SORT_NATURAL | SORT_FLAG_CASE);
 
 // -- Build final rows -----------------------------------------------------------
 $rows = [];
 $recordBreakers = [];
-foreach ($inRange as $key => $club) {
+$rowSource = $searchTerm ? $clubSet : $inRange;
+foreach ($rowSource as $key => $club) {
     $maxCnt = $allTimeMaxByKey[$key]['count'] ?? 0;
     $maxDate = $allTimeMaxByKey[$key]['date'] ?? '';
     $periodMaxCnt = $periodMaxByKey[$key]['count'] ?? 0;
     $periodMaxDate = $periodMaxByKey[$key]['date'] ?? '';
     $allTimeTotal = array_sum($allTimeDailyMkt[$key] ?? []);
 
-    $periodCnt = $club['under_count'];
-    if ($periodCnt <= 0) {
+    $periodCnt = $inRange[$key]['under_count'] ?? 0;
+    if (!$searchTerm && $periodCnt <= 0) {
         continue;
     }
 
@@ -337,16 +350,13 @@ if ($searchTerm) {
     ));
 }
 
-// Filter: U0.5 shows all with max >= 1; others require hits/max >= 60%
-if ($mktParam === '0.5') {
-    $rows = array_values(array_filter($rows, fn($r) => ($r['max_count'] ?? 0) >= 1 && ($r['under_count'] ?? 0) >= ($r['max_count'] ?? 0) - 2 && ($r['hits_ratio'] ?? 0) > 50));
-} else {
-    $rows = array_values(array_filter($rows, fn($r) => ($r['hits_ratio'] ?? 0) >= 60));
-}
-
-// Filter: only max if requested
-if ($showOnlyMax) {
-    $rows = array_values(array_filter($rows, fn($r) => $r['is_max']));
+if (!$searchTerm) {
+    // Filter: U0.5 shows all with max >= 1; others require hits/max >= 60%
+    if ($mktParam === '0.5') {
+        $rows = array_values(array_filter($rows, fn($r) => ($r['max_count'] ?? 0) >= 1 && ($r['under_count'] ?? 0) >= ($r['max_count'] ?? 0) - 2 && ($r['hits_ratio'] ?? 0) > 50));
+    } else {
+        $rows = array_values(array_filter($rows, fn($r) => ($r['hits_ratio'] ?? 0) >= 60));
+    }
 }
 
 // Sort
@@ -431,7 +441,7 @@ usort($allTimeMaxMultiMarket, fn($a, $b) => $b['max_count'] <=> $a['max_count'] 
 
 // Helper: build URL preserving all current GET params
 function csvUrl(array $extra = []): string {
-    $allowedKeys = ['page', 'search', 'date_from', 'date_to', 'time_from', 'time_to', 'league', 'under', 'sort', 'order', 'pg', 'per_page', 'show_max', 'show_near_all_time_max'];
+    $allowedKeys = ['page', 'search', 'date_from', 'date_to', 'time_from', 'time_to', 'league', 'under', 'sort', 'order', 'pg', 'per_page', 'show_near_all_time_max'];
     $params = ['page' => 'clubs'];
 
     foreach ($allowedKeys as $key) {
@@ -528,13 +538,6 @@ $mktShort = $marketOptions[$mktParam]['short'];
 $mktClass = $marketOptions[$mktParam]['class'];
 ?>
 <div class="p-3 sm:p-4 md:p-8 space-y-4 md:space-y-6 page-fade-in">
-    <?php
-    // Calculate stats
-    $totalRecordBreakers = count($recordBreakers);
-    $maxHits = $rows ? max(array_column($rows, 'under_count')) : 0;
-    $avgHits = $rows ? round(array_sum(array_column($rows, 'under_count')) / count($rows), 1) : 0;
-    ?>
-
     <!-- Broadcast Header -->
     <div class="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-4 md:p-6 shadow-xl">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -555,110 +558,99 @@ $mktClass = $marketOptions[$mktParam]['class'];
         </div>
     </div>
 
-    <!-- Quick Stats Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <div class="rounded-xl bg-white border border-slate-200 p-3 md:p-4 shadow-sm">
-            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Clubs</p>
-            <p class="mt-2 text-2xl font-black text-slate-900"><?= $totalClubs ?></p>
-        </div>
-        <div class="rounded-xl bg-white border border-slate-200 p-3 md:p-4 shadow-sm">
-            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Record Breakers</p>
-            <p class="mt-2 text-2xl font-black text-rose-600"><?= $totalRecordBreakers ?></p>
-        </div>
-        <div class="rounded-xl bg-white border border-slate-200 p-3 md:p-4 shadow-sm">
-            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Max Hits</p>
-            <p class="mt-2 text-2xl font-black text-emerald-600"><?= $maxHits ?></p>
-        </div>
-        <div class="rounded-xl bg-white border border-slate-200 p-3 md:p-4 shadow-sm">
-            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Avg Hits</p>
-            <p class="mt-2 text-2xl font-black text-blue-600"><?= $avgHits ?></p>
-        </div>
-    </div>
-
     <!-- Filter Form -->
-    <form method="GET" class="bg-white rounded-2xl shadow-md border-0 p-4 md:p-5 transition-all">
+    <form method="GET" class="club-filter-card bg-white rounded-2xl p-4 md:p-5 transition-all">
         <input type="hidden" name="page" value="clubs">
         
-        <div class="grid gap-2 md:grid-cols-[minmax(280px,1fr)_auto] md:items-center">
+        <div class="club-filter-top">
             <label for="club-search" class="sr-only">Cari club</label>
             <div class="relative min-w-0">
-                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
-                <input id="club-search" type="text" name="search" value="<?= htmlspecialchars($searchTerm) ?>" placeholder="Cari club..."
-                    class="w-full pl-10 pr-4 py-2.5 md:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all">
+                <input id="club-search" type="text" name="search" value="<?= htmlspecialchars($searchTerm) ?>" placeholder="Cari club..." list="club-search-options" autocomplete="off"
+                    class="club-filter-search-input">
+                <datalist id="club-search-options">
+                    <?php foreach ($clubNameList as $clubName): ?>
+                        <option value="<?= htmlspecialchars($clubName) ?>"></option>
+                    <?php endforeach; ?>
+                </datalist>
             </div>
-            <div class="grid grid-cols-3 gap-1.5 md:flex md:gap-1">
+            <div class="club-filter-actions">
                 <?php
                 $today = date('Y-m-d');
                 $weekStart = date('Y-m-d', strtotime('monday this week'));
                 $weekEnd = date('Y-m-d', strtotime('sunday this week'));
                 ?>
                 <a href="<?= htmlspecialchars(csvUrl(['date_from' => $today, 'date_to' => $today, 'pg' => 1])) ?>" 
-                   class="px-3 py-2.5 md:py-3 text-center text-xs font-medium rounded-xl border <?= $dateFrom === $today && $dateTo === $today ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100' ?>">
+                   class="club-filter-action <?= $dateFrom === $today && $dateTo === $today ? 'club-filter-action-active' : 'club-filter-action-muted' ?>">
                     Today
                 </a>
                 <a href="<?= htmlspecialchars(csvUrl(['date_from' => $weekStart, 'date_to' => $weekEnd, 'pg' => 1])) ?>" 
-                   class="px-3 py-2.5 md:py-3 text-center text-xs font-medium rounded-xl border <?= $dateFrom === $weekStart && $dateTo === $weekEnd ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100' ?>">
+                   class="club-filter-action <?= $dateFrom === $weekStart && $dateTo === $weekEnd ? 'club-filter-action-active' : 'club-filter-action-muted' ?>">
                     This Week
                 </a>
                 <a href="<?= htmlspecialchars(csvUrl(['date_from' => '', 'date_to' => '', 'league' => '', 'under' => '0.5', 'pg' => 1])) ?>" 
-                   class="px-3 py-2.5 md:py-3 text-center text-xs font-medium rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100">
+                   class="club-filter-action club-filter-action-muted">
                     Reset
                 </a>
             </div>
         </div>
         
         <div class="club-filter-grid mt-3">
-            <div class="flex flex-col gap-1">
-                <label for="club-time-from" class="text-[11px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Jam Mulai</label>
-                <input id="club-time-from" type="text" name="time_from" value="<?= htmlspecialchars($timeFrom) ?>" placeholder="00:00" maxlength="5" class="px-3 py-2.5 md:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all">
+            <div class="club-filter-field">
+                <label for="club-time-from" class="club-filter-label">Jam Mulai</label>
+                <input id="club-time-from" type="time" name="time_from" value="<?= htmlspecialchars($timeFrom) ?>" placeholder="00:00" class="club-filter-control">
             </div>
-            <div class="flex flex-col gap-1">
-                <label for="club-time-to" class="text-[11px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Jam Selesai</label>
-                <input id="club-time-to" type="text" name="time_to" value="<?= htmlspecialchars($timeTo) ?>" placeholder="23:59" maxlength="5" class="px-3 py-2.5 md:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all">
+            <div class="club-filter-field">
+                <label for="club-time-to" class="club-filter-label">Jam Selesai</label>
+                <input id="club-time-to" type="time" name="time_to" value="<?= htmlspecialchars($timeTo) ?>" placeholder="23:59" class="club-filter-control">
             </div>
-            <div class="flex flex-col gap-1">
-                <label for="club-date-from" class="text-[11px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Dari Tanggal</label>
-                <input id="club-date-from" type="date" name="date_from" value="<?= htmlspecialchars($dateFrom) ?>" class="px-3 py-2.5 md:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all h-[42px] md:h-[46px]">
+            <div class="club-filter-field">
+                <label for="club-date-from" class="club-filter-label">Dari Tanggal</label>
+                <input id="club-date-from" type="date" name="date_from" value="<?= htmlspecialchars($dateFrom) ?>" class="club-filter-control">
             </div>
-            <div class="flex flex-col gap-1">
-                <label for="club-date-to" class="text-[11px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Sampai Tanggal</label>
-                <input id="club-date-to" type="date" name="date_to" value="<?= htmlspecialchars($dateTo) ?>" class="px-3 py-2.5 md:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all h-[42px] md:h-[46px]">
+            <div class="club-filter-field">
+                <label for="club-date-to" class="club-filter-label">Sampai Tanggal</label>
+                <input id="club-date-to" type="date" name="date_to" value="<?= htmlspecialchars($dateTo) ?>" class="club-filter-control">
             </div>
-            <div class="flex flex-col gap-1">
-                <label for="club-market" class="text-[11px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Market</label>
-                <select id="club-market" name="under" class="px-3 py-2.5 md:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all appearance-none cursor-pointer h-[42px] md:h-[46px]">
-                    <?php foreach ($marketOptions as $val => $opt): ?>
-                        <option value="<?= $val ?>" <?= $mktParam === $val ? 'selected' : '' ?>><?= htmlspecialchars($opt['label']) ?></option>
-                    <?php endforeach; ?>
-                </select>
+            <div class="club-filter-field">
+                <label for="club-market" class="club-filter-label">Market</label>
+                <div class="club-filter-select-wrap">
+                    <select id="club-market" name="under" class="club-filter-control club-filter-select">
+                        <?php foreach ($marketOptions as $val => $opt): ?>
+                            <option value="<?= $val ?>" <?= $mktParam === $val ? 'selected' : '' ?>><?= htmlspecialchars($opt['label']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <svg class="club-filter-select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
             </div>
-            <div class="flex flex-col gap-1">
-                <label for="club-league" class="text-[11px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Liga</label>
-                <select id="club-league" name="league" class="px-3 py-2.5 md:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all appearance-none cursor-pointer h-[42px] md:h-[46px]">
-                    <option value="">Semua Liga</option>
-                    <?php foreach ($leagueList as $lg): ?>
-                        <option value="<?= htmlspecialchars($lg) ?>" <?= $lgFilter === $lg ? 'selected' : '' ?>><?= htmlspecialchars($lg) ?></option>
-                    <?php endforeach; ?>
-                </select>
+            <div class="club-filter-field">
+                <label for="club-league" class="club-filter-label">Liga</label>
+                <div class="club-filter-select-wrap">
+                    <select id="club-league" name="league" class="club-filter-control club-filter-select">
+                        <option value="">Semua Liga</option>
+                        <?php foreach ($leagueList as $lg): ?>
+                            <option value="<?= htmlspecialchars($lg) ?>" <?= $lgFilter === $lg ? 'selected' : '' ?>><?= htmlspecialchars($lg) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <svg class="club-filter-select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
             </div>
-            <button type="submit" class="col-span-2 w-full bg-slate-900 text-white rounded-xl px-4 py-2.5 md:py-3 text-sm font-bold hover:bg-slate-800 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 lg:col-span-1 lg:h-[46px]">
+            <button type="submit" class="club-filter-submit">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
                 Filter
             </button>
         </div>
         
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 mt-3 border-t border-slate-100">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-                <div class="flex items-center gap-2">
-                <input type="checkbox" name="show_max" value="1" id="show_max" <?= $showOnlyMax ? 'checked' : '' ?> class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-                <label for="show_max" class="text-sm text-slate-600 cursor-pointer">Hanya tampilkan MAX</label>
-                </div>
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" name="show_near_all_time_max" value="1" id="show_near_all_time_max" <?= $showNearAllTimeMax ? 'checked' : '' ?> class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
-                    <label for="show_near_all_time_max" class="text-sm text-slate-600 cursor-pointer">Tampilkan juga All-Time Max - 1</label>
-                </div>
+        <div class="club-filter-extra">
+            <div class="flex items-center gap-2">
+                <input type="checkbox" name="show_near_all_time_max" value="1" id="show_near_all_time_max" <?= $showNearAllTimeMax ? 'checked' : '' ?> class="club-filter-checkbox">
+                <label for="show_near_all_time_max" class="text-sm text-slate-600 cursor-pointer">Tampilkan juga All-Time Max - 1</label>
             </div>
         </div>
     </form>

@@ -155,39 +155,46 @@ if (!strtotime($dateTo)) {
 }
 if ($dateFrom > $dateTo) [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
 
-// -- CSV scan #2: build stats without loading full file in memory -------------
-$allTimeDailyMkt = [];  // key => [date => count]
-$allTimeMaxByKey = []; // key => ['count' => int, 'date' => string]
+// -- Single pass CSV scan: track all markets simultaneously to optimize performance -
+$_allMkts = array_keys($marketOptions);
+$_mmAllTime   = []; // mkt => key => ['count','date']
+$_mmDaily     = []; // mkt => key => [date => count]
+$_mmPeriod    = []; // mkt => key => ['count','date']
+$_mmPeriodDly = []; // mkt => key => [date => count]
+foreach ($_allMkts as $_mk) {
+    $_mmAllTime[$_mk] = [];
+    $_mmDaily[$_mk]   = [];
+    $_mmPeriod[$_mk]  = [];
+    $_mmPeriodDly[$_mk] = [];
+}
+
 $nextMatch       = [];  // key => match
 $lastMatch       = [];  // key => last completed match with score
-$inRange = [];  // key => ['team','league','under_count']
-$inRangeDailyMkt = []; // key => [date => count]
-$periodMaxByKey = [];  // key => ['count' => int, 'date' => string]
-$clubSet        = [];
+$inRange         = [];  // key => ['team','league','under_count']
+$clubSet         = [];
 $leagueSet       = [];
 $clubNameSet     = [];
 $csvMinDate      = null;
 $csvMaxDate      = null;
 $csvDatesWithData = [];
-$useDateFilter = true;
 
 csvReadMatches($csvPath, function(array $m) use (
     $lgFilter,
     $today,
     $mktParam,
-    $useDateFilter,
     $hiddenLeagues,
     $dateFrom,
     $dateTo,
     $timeFrom,
     $timeTo,
-    &$allTimeDailyMkt,
-    &$allTimeMaxByKey,
+    $_allMkts,
+    &$_mmAllTime,
+    &$_mmDaily,
+    &$_mmPeriod,
+    &$_mmPeriodDly,
     &$nextMatch,
     &$lastMatch,
     &$inRange,
-    &$inRangeDailyMkt,
-    &$periodMaxByKey,
     &$clubSet,
     &$leagueSet,
     &$clubNameSet,
@@ -195,10 +202,38 @@ csvReadMatches($csvPath, function(array $m) use (
     &$csvMaxDate,
     &$csvDatesWithData
 ): void {
-    if ($mktParam === '2.5' && isset($hiddenLeagues[$m['league']])) {
+    // If the active market is 2.5 and this is a hidden league, skip general tracking but still process other markets
+    $isMkt25Hidden = ($mktParam === '2.5' && isset($hiddenLeagues[$m['league']]));
+
+    $hKey = $m['home'].'|'.$m['league'];
+    $aKey = $m['away'].'|'.$m['league'];
+
+    // 1. Process all-time and period stats for all markets (equivalent to scan #2)
+    $hasFT = csvHasFT($m);
+    if ($hasFT) {
+        if (!($lgFilter && $m['league'] !== $lgFilter)) {
+            $inPeriod = $m['date'] >= $dateFrom && $m['date'] <= $dateTo && csvTimeInRange($m['time'], $timeFrom, $timeTo);
+            foreach ($_allMkts as $_mk) {
+                // If it is 2.5 market and the league is hidden, skip it
+                if ($_mk === '2.5' && isset($hiddenLeagues[$m['league']])) continue;
+                if (!csvCheckMarket($m, $_mk) || !csvTimeInRange($m['time'], $timeFrom, $timeTo)) continue;
+                
+                foreach ([$hKey, $aKey] as $key) {
+                    csvBumpDailyMax($_mmDaily[$_mk], $_mmAllTime[$_mk], $key, $m['date']);
+                    if ($inPeriod) {
+                        csvBumpDailyMax($_mmPeriodDly[$_mk], $_mmPeriod[$_mk], $key, $m['date']);
+                    }
+                }
+            }
+        }
+    }
+
+    // 2. If it's a hidden league match under active market 2.5, stop here (do not perform general tracking)
+    if ($isMkt25Hidden) {
         return;
     }
 
+    // 3. General tracking (equivalent to scan #1)
     if ($m['league'] !== '') {
         $leagueSet[$m['league']] = true;
     }
@@ -210,21 +245,15 @@ csvReadMatches($csvPath, function(array $m) use (
     $clubNameSet[$m['home']] = true;
     $clubNameSet[$m['away']] = true;
 
-    $hKey = $m['home'].'|'.$m['league'];
-    $aKey = $m['away'].'|'.$m['league'];
     $clubSet[$hKey] = ['team' => $m['home'], 'league' => $m['league']];
     $clubSet[$aKey] = ['team' => $m['away'], 'league' => $m['league']];
 
-    $hasFT = csvHasFT($m);
     if ($hasFT) {
         if ($csvMinDate === null || $m['date'] < $csvMinDate) $csvMinDate = $m['date'];
         if ($csvMaxDate === null || $m['date'] > $csvMaxDate) $csvMaxDate = $m['date'];
         $csvDatesWithData[$m['date']] = true;
 
-        $isMarketHit = csvCheckMarket($m, $mktParam);
-
         // Track last played match (any result) by date+time for both teams
-        // For home team: opponent is away team; for away team: opponent is home team
         $homeMatchInfo = ['vs_home' => $m['away'], 'vs_away' => $m['home'], 'date' => $m['date'], 'time' => $m['time'], 'ft_home' => $m['ft_home'], 'ft_away' => $m['ft_away'], 'fh_home' => $m['fh_home'], 'fh_away' => $m['fh_away']];
         $awayMatchInfo = ['vs_home' => $m['home'], 'vs_away' => $m['away'], 'date' => $m['date'], 'time' => $m['time'], 'ft_home' => $m['ft_home'], 'ft_away' => $m['ft_away'], 'fh_home' => $m['fh_home'], 'fh_away' => $m['fh_away']];
         
@@ -235,28 +264,15 @@ csvReadMatches($csvPath, function(array $m) use (
             $lastMatch[$aKey] = $awayMatchInfo;
         }
 
-        if ($isMarketHit && csvTimeInRange($m['time'], $timeFrom, $timeTo)) {
-            csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $hKey, $m['date']);
-            csvBumpDailyMax($allTimeDailyMkt, $allTimeMaxByKey, $aKey, $m['date']);
-        }
-
-        if (
-            $isMarketHit &&
-            (!$useDateFilter ||
-            (
-                $m['date'] >= $dateFrom &&
-                $m['date'] <= $dateTo &&
-                csvTimeInRange($m['time'], $timeFrom, $timeTo)
-            ))
-        ) {
+        // Track $inRange count for active market (under_count)
+        $inPeriod = $m['date'] >= $dateFrom && $m['date'] <= $dateTo && csvTimeInRange($m['time'], $timeFrom, $timeTo);
+        if ($inPeriod && csvCheckMarket($m, $mktParam)) {
             $teamsToAdd = [$hKey => $m['home'], $aKey => $m['away']];
-            
             foreach ($teamsToAdd as $key => $team) {
                 if (!isset($inRange[$key])) {
                     $inRange[$key] = ['team' => $team, 'league' => $m['league'], 'under_count' => 0];
                 }
                 $inRange[$key]['under_count']++;
-                csvBumpDailyMax($inRangeDailyMkt, $periodMaxByKey, $key, $m['date']);
             }
         }
         return;
@@ -281,6 +297,12 @@ csvReadMatches($csvPath, function(array $m) use (
         $nextMatch[$aKey] = $awayNext;
     }
 });
+
+// Map active market variables from multi-market structures to preserve downstream logic
+$allTimeDailyMkt = $_mmDaily[$mktParam] ?? [];
+$allTimeMaxByKey = $_mmAllTime[$mktParam] ?? [];
+$inRangeDailyMkt = $_mmPeriodDly[$mktParam] ?? [];
+$periodMaxByKey  = $_mmPeriod[$mktParam] ?? [];
 
 $leagueList = array_keys($leagueSet);
 sort($leagueList);
@@ -378,43 +400,7 @@ $pg         = min($pg, $totalPages);
 $offset     = ($pg - 1) * $perPage;
 $pageRows   = array_slice($rows, $offset, $perPage);
 
-// -- Multi-market All-Time Max scan -------------------------------------------
-// Scan CSV once, track all markets simultaneously, find clubs where period_max >= all_time_max
-$_allMkts = array_keys($marketOptions);
-$_mmAllTime  = []; // mkt => key => ['count','date']
-$_mmDaily    = []; // mkt => key => [date => count]
-$_mmPeriod   = []; // mkt => key => ['count','date']
-$_mmPeriodDly= []; // mkt => key => [date => count]
-foreach ($_allMkts as $_mk) {
-    $_mmAllTime[$_mk] = [];
-    $_mmDaily[$_mk]   = [];
-    $_mmPeriod[$_mk]  = [];
-    $_mmPeriodDly[$_mk] = [];
-}
-csvReadMatches($csvPath, function(array $m) use (
-    $_allMkts, $lgFilter, $hiddenLeagues,
-    $dateFrom, $dateTo, $timeFrom, $timeTo,
-    &$_mmAllTime, &$_mmDaily, &$_mmPeriod, &$_mmPeriodDly
-): void {
-    if (!csvHasFT($m)) return;
-    if ($lgFilter && $m['league'] !== $lgFilter) return;
-    $hKey = $m['home'].'|'.$m['league'];
-    $aKey = $m['away'].'|'.$m['league'];
-    $inPeriod = $m['date'] >= $dateFrom && $m['date'] <= $dateTo && csvTimeInRange($m['time'], $timeFrom, $timeTo);
-    foreach ($_allMkts as $_mk) {
-        if ($_mk === '2.5' && isset($hiddenLeagues[$m['league']])) continue;
-        if (!csvCheckMarket($m, $_mk) || !csvTimeInRange($m['time'], $timeFrom, $timeTo)) continue;
-        
-        $keysToTrack = [$hKey, $aKey];
-        
-        foreach ($keysToTrack as $key) {
-            csvBumpDailyMax($_mmDaily[$_mk], $_mmAllTime[$_mk], $key, $m['date']);
-            if ($inPeriod) {
-                csvBumpDailyMax($_mmPeriodDly[$_mk], $_mmPeriod[$_mk], $key, $m['date']);
-            }
-        }
-    }
-});
+
 $allTimeMaxMultiMarket = [];
 foreach ($_allMkts as $_mk) {
     foreach ($_mmAllTime[$_mk] as $key => $atm) {

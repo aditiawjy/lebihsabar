@@ -826,8 +826,9 @@ $monthKeys = array_keys($datesByMonth);
                                     <tr>
                                         <th class="px-3 py-2 text-left">Waktu</th>
                                         <th class="px-3 py-2 text-left">Match</th>
+                                        <th class="px-3 py-2 text-center">HT</th>
                                         <th class="px-3 py-2 text-center">Score FT</th>
-                                        <th class="px-3 py-2 text-center">Goals</th>
+                                        <th class="px-3 py-2 text-center">2H Gol</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
@@ -837,8 +838,13 @@ $monthKeys = array_keys($datesByMonth);
                                             try { $h2hDate = new DateTime($mTime); } catch (\Exception $e) { $h2hDate = null; }
                                             $ftHome = $h2hMatch['ft_home'];
                                             $ftAway = $h2hMatch['ft_away'];
+                                            $fhHome = $h2hMatch['fh_home'];
+                                            $fhAway = $h2hMatch['fh_away'];
                                             $hasFt = $ftHome !== null && $ftAway !== null;
+                                            $hasHt = $fhHome !== null && $fhAway !== null;
                                             $goals = $hasFt ? ((int)$ftHome + (int)$ftAway) : null;
+                                            $shGoals = ($hasFt && $hasHt) ? max(0, ((int)$ftHome - (int)$fhHome) + ((int)$ftAway - (int)$fhAway)) : null;
+                                            $htGoalsH2h = $hasHt ? ((int)$fhHome + (int)$fhAway) : null;
                                         ?>
                                         <tr class="hover:bg-slate-50">
                                             <td class="px-3 py-2 text-slate-600 whitespace-nowrap">
@@ -850,6 +856,16 @@ $monthKeys = array_keys($datesByMonth);
                                                 <?php echo htmlspecialchars((string)($h2hMatch['away_team'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?>
                                             </td>
                                             <td class="px-3 py-2 text-center">
+                                                <?php if ($hasHt): ?>
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-lg font-bold border text-xs
+                                                        <?php echo $htGoalsH2h > 0 ? 'bg-orange-50 border-orange-300 text-orange-700' : 'bg-slate-50 border-slate-200 text-slate-500'; ?>">
+                                                        <?php echo (int)$fhHome; ?>-<?php echo (int)$fhAway; ?>
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="text-slate-300 text-xs">—</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="px-3 py-2 text-center">
                                                 <?php if ($hasFt): ?>
                                                     <span class="inline-flex items-center px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
                                                         <?php echo (int)$ftHome; ?> - <?php echo (int)$ftAway; ?>
@@ -858,8 +874,15 @@ $monthKeys = array_keys($datesByMonth);
                                                     <span class="inline-flex items-center px-2 py-1 rounded-lg bg-amber-50 text-amber-700 font-bold border border-amber-200">-</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td class="px-3 py-2 text-center text-slate-700 font-bold">
-                                                <?php echo $goals !== null ? (int)$goals : '-'; ?>
+                                            <td class="px-3 py-2 text-center">
+                                                <?php if ($shGoals !== null): ?>
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-lg font-bold border text-xs
+                                                        <?php echo $shGoals > 0 ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-slate-50 border-slate-200 text-slate-500'; ?>">
+                                                        <?php echo $shGoals; ?>
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="text-slate-300 text-xs">—</span>
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -957,7 +980,7 @@ $monthKeys = array_keys($datesByMonth);
             <!-- Desktop Table View -->
             <div class="hidden md:block bg-white rounded-2xl shadow-md border-0 overflow-hidden">
                 <div class="overflow-x-auto">
-                <table class="w-full border-collapse min-w-[860px]">
+                <table class="w-full border-collapse min-w-[960px]">
                     <thead>
                         <tr class="bg-slate-900 text-white">
                             <th class="px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider">
@@ -991,12 +1014,18 @@ $monthKeys = array_keys($datesByMonth);
                                 </a>
                             </th>
                             <th class="px-6 py-4 text-center text-[11px] font-bold uppercase tracking-wider">Skor</th>
+                            <th class="px-4 py-4 text-center text-[11px] font-bold uppercase tracking-wider whitespace-nowrap">H2H 2H O0.5</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         <?php foreach ($pagedMatches as $match):
                             try { $date = new DateTime($match['match_time']); } catch (\Exception $e) { $date = null; }
                             $hasFt = ($match['ft_home'] ?? '') !== '' && ($match['ft_away'] ?? '') !== '';
+                            // Build inline H2H SHG Over 0.5 stats for this match
+                            $inlineH2h = matchesBuildH2hTimeSummary($allMatches, $match);
+                            $inlineFinished = (int)$inlineH2h['finished_meetings'];
+                            $inlineShgOver05 = (int)$inlineH2h['shg_over_05'];
+                            $inlineShgPct = $inlineFinished > 0 ? round(($inlineShgOver05 / $inlineFinished) * 100) : null;
                         ?>
                             <tr class="hover:bg-blue-50/50 transition-all duration-200 group">
                                 <td class="px-6 py-5 whitespace-nowrap">
@@ -1038,17 +1067,56 @@ $monthKeys = array_keys($datesByMonth);
                                 </td>
                                 <td class="px-6 py-5">
                                     <div class="flex flex-col items-center gap-2">
+                                        <!-- FT Score -->
                                         <div class="flex items-center gap-2 <?php echo $hasFt ? 'bg-emerald-600' : 'bg-slate-400'; ?> px-4 py-2 rounded-xl shadow-sm">
                                             <span class="text-lg font-black text-white"><?php echo $match['ft_home'] !== null ? $match['ft_home'] : '-'; ?></span>
                                             <span class="text-slate-300 font-bold">:</span>
                                             <span class="text-lg font-black text-white"><?php echo $match['ft_away'] !== null ? $match['ft_away'] : '-'; ?></span>
                                         </div>
+                                        <!-- HT Score -->
                                         <?php if ($match['fh_home'] !== null): ?>
-                                            <span class="text-[10px] font-bold <?php echo $hasFt ? 'text-emerald-600' : 'text-amber-600'; ?> bg-white px-2 py-0.5 rounded-md border border-slate-200">
-                                                HT: <?php echo $match['fh_home']; ?>-<?php echo $match['fh_away']; ?>
-                                            </span>
+                                            <?php
+                                                $htHome = (int)$match['fh_home'];
+                                                $htAway = (int)$match['fh_away'];
+                                                $htGoals = $htHome + $htAway;
+                                            ?>
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">HT</span>
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border font-black text-sm
+                                                    <?php echo $htGoals > 0 ? 'bg-orange-50 border-orange-300 text-orange-700' : 'bg-slate-50 border-slate-200 text-slate-500'; ?>">
+                                                    <?php echo $htHome; ?><span class="font-normal opacity-50">-</span><?php echo $htAway; ?>
+                                                </span>
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="text-[10px] text-slate-300 font-medium">HT --</span>
                                         <?php endif; ?>
                                     </div>
+                                </td>
+                                <!-- H2H SHG Over 0.5 Column -->
+                                <td class="px-4 py-5 text-center">
+                                    <?php if ($inlineFinished > 0): ?>
+                                        <?php
+                                            if ($inlineShgPct >= 80) {
+                                                $shgBg = 'bg-emerald-600 text-white border-emerald-600';
+                                                $shgSub = 'text-emerald-100';
+                                            } elseif ($inlineShgPct >= 60) {
+                                                $shgBg = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                                                $shgSub = 'text-emerald-600';
+                                            } elseif ($inlineShgPct >= 40) {
+                                                $shgBg = 'bg-amber-100 text-amber-800 border-amber-300';
+                                                $shgSub = 'text-amber-600';
+                                            } else {
+                                                $shgBg = 'bg-rose-100 text-rose-800 border-rose-300';
+                                                $shgSub = 'text-rose-600';
+                                            }
+                                        ?>
+                                        <div class="inline-flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl border <?php echo $shgBg; ?>">
+                                            <span class="text-base font-black leading-none"><?php echo $inlineShgPct; ?>%</span>
+                                            <span class="text-[9px] font-bold leading-none opacity-70"><?php echo $inlineShgOver05; ?>/<?php echo $inlineFinished; ?></span>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="text-[11px] text-slate-300 font-medium">—</span>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -1062,6 +1130,11 @@ $monthKeys = array_keys($datesByMonth);
                 <?php foreach ($pagedMatches as $match):
                     try { $date = new DateTime($match['match_time']); } catch (\Exception $e) { $date = null; }
                     $hasFt = ($match['ft_home'] ?? '') !== '' && ($match['ft_away'] ?? '') !== '';
+                    // Build inline H2H SHG Over 0.5 stats for this match
+                    $inlineH2hMob = matchesBuildH2hTimeSummary($allMatches, $match);
+                    $inlineFinishedMob = (int)$inlineH2hMob['finished_meetings'];
+                    $inlineShgOver05Mob = (int)$inlineH2hMob['shg_over_05'];
+                    $inlineShgPctMob = $inlineFinishedMob > 0 ? round(($inlineShgOver05Mob / $inlineFinishedMob) * 100) : null;
                 ?>
                     <div class="bg-white rounded-2xl p-4 border-0 shadow-md relative overflow-hidden">
                         <?php if ($hasFt): ?>
@@ -1096,7 +1169,33 @@ $monthKeys = array_keys($datesByMonth);
                                     <span class="text-base font-black text-white"><?php echo $match['ft_away'] !== null ? $match['ft_away'] : '-'; ?></span>
                                 </div>
                                 <?php if ($match['fh_home'] !== null): ?>
-                                    <span class="text-[10px] font-bold <?php echo $hasFt ? 'text-emerald-600' : 'text-amber-600'; ?>">HT <?php echo $match['fh_home']; ?>-<?php echo $match['fh_away']; ?></span>
+                                    <?php
+                                        $htHomeMob = (int)$match['fh_home'];
+                                        $htAwayMob = (int)$match['fh_away'];
+                                        $htGoalsMob = $htHomeMob + $htAwayMob;
+                                    ?>
+                                    <div class="flex items-center gap-1">
+                                        <span class="text-[9px] font-bold text-slate-400 uppercase">HT</span>
+                                        <span class="text-xs font-black px-1.5 py-0.5 rounded border
+                                            <?php echo $htGoalsMob > 0 ? 'bg-orange-50 border-orange-300 text-orange-700' : 'bg-slate-50 border-slate-200 text-slate-500'; ?>">
+                                            <?php echo $htHomeMob; ?>-<?php echo $htAwayMob; ?>
+                                        </span>
+                                    </div>
+                                <?php endif; ?>
+                                <!-- H2H SHG Over 0.5 badge -->
+                                <?php if ($inlineFinishedMob > 0): ?>
+                                    <?php
+                                        if ($inlineShgPctMob >= 80) $shgBadge = 'bg-emerald-600 text-white';
+                                        elseif ($inlineShgPctMob >= 60) $shgBadge = 'bg-emerald-100 text-emerald-800';
+                                        elseif ($inlineShgPctMob >= 40) $shgBadge = 'bg-amber-100 text-amber-800';
+                                        else $shgBadge = 'bg-rose-100 text-rose-800';
+                                    ?>
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-[9px] font-bold text-slate-400 uppercase">2H O0.5</span>
+                                        <span class="text-xs font-black px-2 py-0.5 rounded-lg <?php echo $shgBadge; ?>">
+                                            <?php echo $inlineShgPctMob; ?>%
+                                        </span>
+                                    </div>
                                 <?php endif; ?>
                             </div>
 

@@ -541,6 +541,50 @@ $h2hPctOver05 = $h2hStats['finished_meetings'] > 0 ? round(($h2hStats['over_05']
 $h2hPctOver15 = $h2hStats['finished_meetings'] > 0 ? round(($h2hStats['over_15'] / $h2hFinishedDenominator) * 100, 1) : 0;
 $h2hPctOver25 = $h2hStats['finished_meetings'] > 0 ? round(($h2hStats['over_25'] / $h2hFinishedDenominator) * 100, 1) : 0;
 
+// ── HT Score Input → H2H 2H Over 0.5 checker ──────────────────────────────
+$htCheckHome  = isset($_GET['ht_home']) && $_GET['ht_home'] !== '' ? (int)$_GET['ht_home'] : null;
+$htCheckAway  = isset($_GET['ht_away']) && $_GET['ht_away'] !== '' ? (int)$_GET['ht_away'] : null;
+$htCheckActive = $htCheckHome !== null && $htCheckAway !== null;
+
+$htCheckResult = [
+    'total'       => 0,   // H2H matches with same HT score
+    'shg_over05'  => 0,   // of those, how many had 2H goal
+    'shg_pct'     => null,
+    'matches'     => [],
+];
+
+if ($htCheckActive && !empty($h2hMatches)) {
+    foreach ($h2hMatches as $hm) {
+        $hmFhHome = $hm['fh_home'];
+        $hmFhAway = $hm['fh_away'];
+        $hmFtHome = $hm['ft_home'];
+        $hmFtAway = $hm['ft_away'];
+
+        // Only matches that have both HT and FT data
+        if ($hmFhHome === null || $hmFhAway === null || $hmFtHome === null || $hmFtAway === null) {
+            continue;
+        }
+
+        // Match HT score (same order or reverse order)
+        $sameHt    = (int)$hmFhHome === $htCheckHome && (int)$hmFhAway === $htCheckAway;
+        $reverseHt = (int)$hmFhHome === $htCheckAway && (int)$hmFhAway === $htCheckHome;
+        if (!$sameHt && !$reverseHt) {
+            continue;
+        }
+
+        $htCheckResult['total']++;
+        $shGoals = max(0, ((int)$hmFtHome - (int)$hmFhHome) + ((int)$hmFtAway - (int)$hmFhAway));
+        if ($shGoals > 0) {
+            $htCheckResult['shg_over05']++;
+        }
+        $htCheckResult['matches'][] = array_merge($hm, ['_sh_goals' => $shGoals]);
+    }
+
+    if ($htCheckResult['total'] > 0) {
+        $htCheckResult['shg_pct'] = round(($htCheckResult['shg_over05'] / $htCheckResult['total']) * 100);
+    }
+}
+
 // Build date pagination: collect all unique dates with data, then group by year-month
 $datesWithData = [];
 foreach ($allMatches as $match) {
@@ -826,9 +870,8 @@ $monthKeys = array_keys($datesByMonth);
                                     <tr>
                                         <th class="px-3 py-2 text-left">Waktu</th>
                                         <th class="px-3 py-2 text-left">Match</th>
-                                        <th class="px-3 py-2 text-center">HT</th>
                                         <th class="px-3 py-2 text-center">Score FT</th>
-                                        <th class="px-3 py-2 text-center">2H Gol</th>
+                                        <th class="px-3 py-2 text-center">Goals</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
@@ -838,13 +881,8 @@ $monthKeys = array_keys($datesByMonth);
                                             try { $h2hDate = new DateTime($mTime); } catch (\Exception $e) { $h2hDate = null; }
                                             $ftHome = $h2hMatch['ft_home'];
                                             $ftAway = $h2hMatch['ft_away'];
-                                            $fhHome = $h2hMatch['fh_home'];
-                                            $fhAway = $h2hMatch['fh_away'];
                                             $hasFt = $ftHome !== null && $ftAway !== null;
-                                            $hasHt = $fhHome !== null && $fhAway !== null;
                                             $goals = $hasFt ? ((int)$ftHome + (int)$ftAway) : null;
-                                            $shGoals = ($hasFt && $hasHt) ? max(0, ((int)$ftHome - (int)$fhHome) + ((int)$ftAway - (int)$fhAway)) : null;
-                                            $htGoalsH2h = $hasHt ? ((int)$fhHome + (int)$fhAway) : null;
                                         ?>
                                         <tr class="hover:bg-slate-50">
                                             <td class="px-3 py-2 text-slate-600 whitespace-nowrap">
@@ -856,16 +894,6 @@ $monthKeys = array_keys($datesByMonth);
                                                 <?php echo htmlspecialchars((string)($h2hMatch['away_team'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?>
                                             </td>
                                             <td class="px-3 py-2 text-center">
-                                                <?php if ($hasHt): ?>
-                                                    <span class="inline-flex items-center px-2 py-1 rounded-lg font-bold border text-xs
-                                                        <?php echo $htGoalsH2h > 0 ? 'bg-orange-50 border-orange-300 text-orange-700' : 'bg-slate-50 border-slate-200 text-slate-500'; ?>">
-                                                        <?php echo (int)$fhHome; ?>-<?php echo (int)$fhAway; ?>
-                                                    </span>
-                                                <?php else: ?>
-                                                    <span class="text-slate-300 text-xs">—</span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="px-3 py-2 text-center">
                                                 <?php if ($hasFt): ?>
                                                     <span class="inline-flex items-center px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
                                                         <?php echo (int)$ftHome; ?> - <?php echo (int)$ftAway; ?>
@@ -874,15 +902,8 @@ $monthKeys = array_keys($datesByMonth);
                                                     <span class="inline-flex items-center px-2 py-1 rounded-lg bg-amber-50 text-amber-700 font-bold border border-amber-200">-</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td class="px-3 py-2 text-center">
-                                                <?php if ($shGoals !== null): ?>
-                                                    <span class="inline-flex items-center px-2 py-1 rounded-lg font-bold border text-xs
-                                                        <?php echo $shGoals > 0 ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-slate-50 border-slate-200 text-slate-500'; ?>">
-                                                        <?php echo $shGoals; ?>
-                                                    </span>
-                                                <?php else: ?>
-                                                    <span class="text-slate-300 text-xs">—</span>
-                                                <?php endif; ?>
+                                            <td class="px-3 py-2 text-center text-slate-700 font-bold">
+                                                <?php echo $goals !== null ? (int)$goals : '-'; ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -900,6 +921,179 @@ $monthKeys = array_keys($datesByMonth);
             <div class="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm font-medium text-slate-500">
                 Isi kedua input H2H (Home dan Away) lalu klik <strong>Terapkan</strong> untuk melihat statistik Over 0.5 / 1.5 / 2.5.
             </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- ── Panel: Cek Skor HT → Prediksi 2H Over 0.5 ── -->
+    <div class="bg-white rounded-2xl shadow-md border-0 p-5 md:p-6">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+            </div>
+            <div>
+                <h2 class="text-sm font-black uppercase tracking-wider text-slate-700">Cek Skor Babak Pertama → 2H Over 0.5</h2>
+                <p class="text-xs text-slate-400 mt-0.5">Input skor HT, lihat dari H2H berapa % ada gol di babak kedua</p>
+            </div>
+        </div>
+
+        <?php if (!$h2hStats['active']): ?>
+            <div class="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm font-medium text-slate-500">
+                Aktifkan H2H terlebih dahulu (isi input H2H Home &amp; Away di atas) agar bisa mengecek skor babak pertama.
+            </div>
+        <?php else: ?>
+            <!-- Form input HT score -->
+            <form method="GET" class="mb-5">
+                <?php
+                // Preserve all current GET params
+                $htPreserveKeys = ['page','date_from','date_to','sort','order','per_page','league','search',
+                                   'home_team','away_team','h2h_home','h2h_away','time_from','time_to','status','p'];
+                foreach ($htPreserveKeys as $k) {
+                    if (isset($_GET[$k]) && $_GET[$k] !== '') {
+                        echo '<input type="hidden" name="' . htmlspecialchars($k, ENT_QUOTES) . '" value="' . htmlspecialchars($_GET[$k], ENT_QUOTES) . '">';
+                    }
+                }
+                ?>
+                <div class="flex flex-wrap items-end gap-3">
+                    <div class="space-y-1.5">
+                        <label class="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                            Skor HT — <?php echo htmlspecialchars($h2hStats['home'], ENT_QUOTES, 'UTF-8'); ?>
+                        </label>
+                        <input type="number" name="ht_home" min="0" max="20"
+                               value="<?php echo $htCheckHome !== null ? $htCheckHome : ''; ?>"
+                               placeholder="0"
+                               class="w-20 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-black text-slate-900 focus:ring-4 focus:ring-orange-100 focus:border-orange-400 transition-all">
+                    </div>
+                    <div class="pb-2.5 text-slate-400 font-black text-xl">—</div>
+                    <div class="space-y-1.5">
+                        <label class="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                            Skor HT — <?php echo htmlspecialchars($h2hStats['away'], ENT_QUOTES, 'UTF-8'); ?>
+                        </label>
+                        <input type="number" name="ht_away" min="0" max="20"
+                               value="<?php echo $htCheckAway !== null ? $htCheckAway : ''; ?>"
+                               placeholder="0"
+                               class="w-20 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-black text-slate-900 focus:ring-4 focus:ring-orange-100 focus:border-orange-400 transition-all">
+                    </div>
+                    <button type="submit"
+                            class="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-sm transition-all shadow-md active:scale-95 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                        </svg>
+                        Cek
+                    </button>
+                    <?php if ($htCheckActive): ?>
+                        <?php
+                        $htResetParams = $htPreserveKeys;
+                        $htResetUrl = 'index.php?page=matches';
+                        foreach ($htPreserveKeys as $k) {
+                            if (isset($_GET[$k]) && $_GET[$k] !== '') {
+                                $htResetUrl .= '&' . urlencode($k) . '=' . urlencode($_GET[$k]);
+                            }
+                        }
+                        ?>
+                        <a href="<?php echo htmlspecialchars($htResetUrl, ENT_QUOTES); ?>"
+                           class="px-4 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">
+                            Reset
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </form>
+
+            <?php if ($htCheckActive): ?>
+                <?php if ($htCheckResult['total'] === 0): ?>
+                    <div class="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm font-medium text-slate-500">
+                        Tidak ada data H2H dengan skor HT
+                        <strong class="text-slate-700"><?php echo $htCheckHome; ?>–<?php echo $htCheckAway; ?></strong>
+                        pada pasangan tim ini.
+                    </div>
+                <?php else: ?>
+                    <?php
+                        $pct = $htCheckResult['shg_pct'];
+                        if ($pct >= 80)      { $pctBg = 'bg-emerald-600'; $pctText = 'text-white'; $pctBorder = 'border-emerald-600'; $label = 'Sangat Tinggi'; $labelColor = 'text-emerald-700'; }
+                        elseif ($pct >= 60)  { $pctBg = 'bg-emerald-100'; $pctText = 'text-emerald-800'; $pctBorder = 'border-emerald-300'; $label = 'Tinggi'; $labelColor = 'text-emerald-700'; }
+                        elseif ($pct >= 40)  { $pctBg = 'bg-amber-100'; $pctText = 'text-amber-800'; $pctBorder = 'border-amber-300'; $label = 'Sedang'; $labelColor = 'text-amber-700'; }
+                        else                 { $pctBg = 'bg-rose-100'; $pctText = 'text-rose-800'; $pctBorder = 'border-rose-300'; $label = 'Rendah'; $labelColor = 'text-rose-700'; }
+                    ?>
+                    <!-- Result summary -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                            <p class="text-[11px] uppercase tracking-wider font-bold text-slate-500">HT yang Dicek</p>
+                            <p class="mt-1 text-2xl font-black text-slate-900"><?php echo $htCheckHome; ?> – <?php echo $htCheckAway; ?></p>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Skor babak pertama</p>
+                        </div>
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                            <p class="text-[11px] uppercase tracking-wider font-bold text-slate-500">Match Ditemukan</p>
+                            <p class="mt-1 text-2xl font-black text-slate-900"><?php echo $htCheckResult['total']; ?></p>
+                            <p class="text-[11px] text-slate-400 mt-0.5">H2H dengan HT sama</p>
+                        </div>
+                        <div class="rounded-xl border <?php echo $pctBorder; ?> <?php echo $pctBg; ?> px-4 py-3">
+                            <p class="text-[11px] uppercase tracking-wider font-bold <?php echo $labelColor; ?>">2H Over 0.5</p>
+                            <p class="mt-1 text-2xl font-black <?php echo $pctText; ?>"><?php echo $pct; ?>%</p>
+                            <p class="text-[11px] font-bold mt-0.5 <?php echo $labelColor; ?>">
+                                <?php echo $htCheckResult['shg_over05']; ?>/<?php echo $htCheckResult['total']; ?> — <?php echo $label; ?>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Match detail list -->
+                    <h3 class="text-xs font-black uppercase tracking-wider text-slate-500 mb-2">Detail Match (HT = <?php echo $htCheckHome; ?>–<?php echo $htCheckAway; ?>)</h3>
+                    <div class="rounded-xl border border-slate-200 overflow-hidden">
+                        <div class="max-h-72 overflow-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-slate-100 text-slate-600 uppercase text-[11px] tracking-wider sticky top-0">
+                                    <tr>
+                                        <th class="px-3 py-2 text-left">Waktu</th>
+                                        <th class="px-3 py-2 text-left">Match</th>
+                                        <th class="px-3 py-2 text-center">HT</th>
+                                        <th class="px-3 py-2 text-center">FT</th>
+                                        <th class="px-3 py-2 text-center">Gol 2H</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <?php foreach ($htCheckResult['matches'] as $hm): ?>
+                                        <?php
+                                            $hmTime = (string)($hm['match_time'] ?? '');
+                                            try { $hmDate = new DateTime($hmTime); } catch (\Exception $e) { $hmDate = null; }
+                                            $hmShGoals = (int)$hm['_sh_goals'];
+                                        ?>
+                                        <tr class="hover:bg-slate-50 <?php echo $hmShGoals > 0 ? 'bg-emerald-50/40' : ''; ?>">
+                                            <td class="px-3 py-2 text-slate-500 whitespace-nowrap text-xs">
+                                                <?php echo $hmDate ? $hmDate->format('d M Y H:i') : htmlspecialchars($hmTime, ENT_QUOTES, 'UTF-8'); ?>
+                                            </td>
+                                            <td class="px-3 py-2 text-slate-800 font-semibold text-xs">
+                                                <?php echo htmlspecialchars((string)($hm['home_team'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?>
+                                                <span class="text-slate-400 font-normal">vs</span>
+                                                <?php echo htmlspecialchars((string)($hm['away_team'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?>
+                                            </td>
+                                            <td class="px-3 py-2 text-center">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-orange-50 border border-orange-200 text-orange-700 font-bold text-xs">
+                                                    <?php echo (int)$hm['fh_home']; ?>–<?php echo (int)$hm['fh_away']; ?>
+                                                </span>
+                                            </td>
+                                            <td class="px-3 py-2 text-center">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold text-xs">
+                                                    <?php echo (int)$hm['ft_home']; ?>–<?php echo (int)$hm['ft_away']; ?>
+                                                </span>
+                                            </td>
+                                            <td class="px-3 py-2 text-center">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-md font-black text-sm
+                                                    <?php echo $hmShGoals > 0 ? 'bg-emerald-100 border border-emerald-300 text-emerald-700' : 'bg-slate-100 border border-slate-200 text-slate-500'; ?>">
+                                                    <?php echo $hmShGoals; ?>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            <?php else: ?>
+                <div class="rounded-xl border border-dashed border-orange-200 bg-orange-50 px-4 py-5 text-sm font-medium text-orange-600">
+                    Masukkan skor babak pertama (HT) lalu klik <strong>Cek</strong> untuk melihat prediksi 2H Over 0.5 dari data H2H.
+                </div>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 
@@ -980,7 +1174,7 @@ $monthKeys = array_keys($datesByMonth);
             <!-- Desktop Table View -->
             <div class="hidden md:block bg-white rounded-2xl shadow-md border-0 overflow-hidden">
                 <div class="overflow-x-auto">
-                <table class="w-full border-collapse min-w-[960px]">
+                <table class="w-full border-collapse min-w-[860px]">
                     <thead>
                         <tr class="bg-slate-900 text-white">
                             <th class="px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider">
@@ -1014,18 +1208,12 @@ $monthKeys = array_keys($datesByMonth);
                                 </a>
                             </th>
                             <th class="px-6 py-4 text-center text-[11px] font-bold uppercase tracking-wider">Skor</th>
-                            <th class="px-4 py-4 text-center text-[11px] font-bold uppercase tracking-wider whitespace-nowrap">H2H 2H O0.5</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         <?php foreach ($pagedMatches as $match):
                             try { $date = new DateTime($match['match_time']); } catch (\Exception $e) { $date = null; }
                             $hasFt = ($match['ft_home'] ?? '') !== '' && ($match['ft_away'] ?? '') !== '';
-                            // Build inline H2H SHG Over 0.5 stats for this match
-                            $inlineH2h = matchesBuildH2hTimeSummary($allMatches, $match);
-                            $inlineFinished = (int)$inlineH2h['finished_meetings'];
-                            $inlineShgOver05 = (int)$inlineH2h['shg_over_05'];
-                            $inlineShgPct = $inlineFinished > 0 ? round(($inlineShgOver05 / $inlineFinished) * 100) : null;
                         ?>
                             <tr class="hover:bg-blue-50/50 transition-all duration-200 group">
                                 <td class="px-6 py-5 whitespace-nowrap">
@@ -1067,56 +1255,17 @@ $monthKeys = array_keys($datesByMonth);
                                 </td>
                                 <td class="px-6 py-5">
                                     <div class="flex flex-col items-center gap-2">
-                                        <!-- FT Score -->
                                         <div class="flex items-center gap-2 <?php echo $hasFt ? 'bg-emerald-600' : 'bg-slate-400'; ?> px-4 py-2 rounded-xl shadow-sm">
                                             <span class="text-lg font-black text-white"><?php echo $match['ft_home'] !== null ? $match['ft_home'] : '-'; ?></span>
                                             <span class="text-slate-300 font-bold">:</span>
                                             <span class="text-lg font-black text-white"><?php echo $match['ft_away'] !== null ? $match['ft_away'] : '-'; ?></span>
                                         </div>
-                                        <!-- HT Score -->
                                         <?php if ($match['fh_home'] !== null): ?>
-                                            <?php
-                                                $htHome = (int)$match['fh_home'];
-                                                $htAway = (int)$match['fh_away'];
-                                                $htGoals = $htHome + $htAway;
-                                            ?>
-                                            <div class="flex items-center gap-1.5">
-                                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">HT</span>
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border font-black text-sm
-                                                    <?php echo $htGoals > 0 ? 'bg-orange-50 border-orange-300 text-orange-700' : 'bg-slate-50 border-slate-200 text-slate-500'; ?>">
-                                                    <?php echo $htHome; ?><span class="font-normal opacity-50">-</span><?php echo $htAway; ?>
-                                                </span>
-                                            </div>
-                                        <?php else: ?>
-                                            <span class="text-[10px] text-slate-300 font-medium">HT --</span>
+                                            <span class="text-[10px] font-bold <?php echo $hasFt ? 'text-emerald-600' : 'text-amber-600'; ?> bg-white px-2 py-0.5 rounded-md border border-slate-200">
+                                                HT: <?php echo $match['fh_home']; ?>-<?php echo $match['fh_away']; ?>
+                                            </span>
                                         <?php endif; ?>
                                     </div>
-                                </td>
-                                <!-- H2H SHG Over 0.5 Column -->
-                                <td class="px-4 py-5 text-center">
-                                    <?php if ($inlineFinished > 0): ?>
-                                        <?php
-                                            if ($inlineShgPct >= 80) {
-                                                $shgBg = 'bg-emerald-600 text-white border-emerald-600';
-                                                $shgSub = 'text-emerald-100';
-                                            } elseif ($inlineShgPct >= 60) {
-                                                $shgBg = 'bg-emerald-100 text-emerald-800 border-emerald-300';
-                                                $shgSub = 'text-emerald-600';
-                                            } elseif ($inlineShgPct >= 40) {
-                                                $shgBg = 'bg-amber-100 text-amber-800 border-amber-300';
-                                                $shgSub = 'text-amber-600';
-                                            } else {
-                                                $shgBg = 'bg-rose-100 text-rose-800 border-rose-300';
-                                                $shgSub = 'text-rose-600';
-                                            }
-                                        ?>
-                                        <div class="inline-flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl border <?php echo $shgBg; ?>">
-                                            <span class="text-base font-black leading-none"><?php echo $inlineShgPct; ?>%</span>
-                                            <span class="text-[9px] font-bold leading-none opacity-70"><?php echo $inlineShgOver05; ?>/<?php echo $inlineFinished; ?></span>
-                                        </div>
-                                    <?php else: ?>
-                                        <span class="text-[11px] text-slate-300 font-medium">—</span>
-                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -1130,11 +1279,6 @@ $monthKeys = array_keys($datesByMonth);
                 <?php foreach ($pagedMatches as $match):
                     try { $date = new DateTime($match['match_time']); } catch (\Exception $e) { $date = null; }
                     $hasFt = ($match['ft_home'] ?? '') !== '' && ($match['ft_away'] ?? '') !== '';
-                    // Build inline H2H SHG Over 0.5 stats for this match
-                    $inlineH2hMob = matchesBuildH2hTimeSummary($allMatches, $match);
-                    $inlineFinishedMob = (int)$inlineH2hMob['finished_meetings'];
-                    $inlineShgOver05Mob = (int)$inlineH2hMob['shg_over_05'];
-                    $inlineShgPctMob = $inlineFinishedMob > 0 ? round(($inlineShgOver05Mob / $inlineFinishedMob) * 100) : null;
                 ?>
                     <div class="bg-white rounded-2xl p-4 border-0 shadow-md relative overflow-hidden">
                         <?php if ($hasFt): ?>
@@ -1169,33 +1313,7 @@ $monthKeys = array_keys($datesByMonth);
                                     <span class="text-base font-black text-white"><?php echo $match['ft_away'] !== null ? $match['ft_away'] : '-'; ?></span>
                                 </div>
                                 <?php if ($match['fh_home'] !== null): ?>
-                                    <?php
-                                        $htHomeMob = (int)$match['fh_home'];
-                                        $htAwayMob = (int)$match['fh_away'];
-                                        $htGoalsMob = $htHomeMob + $htAwayMob;
-                                    ?>
-                                    <div class="flex items-center gap-1">
-                                        <span class="text-[9px] font-bold text-slate-400 uppercase">HT</span>
-                                        <span class="text-xs font-black px-1.5 py-0.5 rounded border
-                                            <?php echo $htGoalsMob > 0 ? 'bg-orange-50 border-orange-300 text-orange-700' : 'bg-slate-50 border-slate-200 text-slate-500'; ?>">
-                                            <?php echo $htHomeMob; ?>-<?php echo $htAwayMob; ?>
-                                        </span>
-                                    </div>
-                                <?php endif; ?>
-                                <!-- H2H SHG Over 0.5 badge -->
-                                <?php if ($inlineFinishedMob > 0): ?>
-                                    <?php
-                                        if ($inlineShgPctMob >= 80) $shgBadge = 'bg-emerald-600 text-white';
-                                        elseif ($inlineShgPctMob >= 60) $shgBadge = 'bg-emerald-100 text-emerald-800';
-                                        elseif ($inlineShgPctMob >= 40) $shgBadge = 'bg-amber-100 text-amber-800';
-                                        else $shgBadge = 'bg-rose-100 text-rose-800';
-                                    ?>
-                                    <div class="flex flex-col items-center">
-                                        <span class="text-[9px] font-bold text-slate-400 uppercase">2H O0.5</span>
-                                        <span class="text-xs font-black px-2 py-0.5 rounded-lg <?php echo $shgBadge; ?>">
-                                            <?php echo $inlineShgPctMob; ?>%
-                                        </span>
-                                    </div>
+                                    <span class="text-[10px] font-bold <?php echo $hasFt ? 'text-emerald-600' : 'text-amber-600'; ?>">HT <?php echo $match['fh_home']; ?>-<?php echo $match['fh_away']; ?></span>
                                 <?php endif; ?>
                             </div>
 

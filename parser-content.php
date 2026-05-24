@@ -1,24 +1,4 @@
 <div class="p-4 md:p-8 max-w-6xl mx-auto space-y-6 page-fade-in">
-    <!-- Broadcast Header -->
-    <div class="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-5 md:p-6 shadow-xl">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div class="space-y-1">
-                <p class="text-[11px] uppercase tracking-[0.2em] text-sky-300 font-bold">Sport Broadcast Console</p>
-                <h1 class="text-2xl md:text-3xl font-black tracking-tight">
-                    Parser <span class="text-sky-300">Match Feed</span>
-                </h1>
-                <p class="text-slate-300 text-sm md:text-base">Validasi data pertandingan sebelum masuk ke database produksi.</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <div class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/15 border border-emerald-400/30">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-200">Data Feed Active</span>
-                </div>
-                <div class="px-3 py-2 rounded-lg bg-slate-700/70 border border-slate-600 text-xs font-bold text-slate-200" id="serverClock">--:--:-- WIB</div>
-            </div>
-        </div>
-    </div>
-
     <!-- Main Input Card -->
     <div class="bg-white rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-200 p-6 md:p-8 transition-all hover:shadow-xl hover:shadow-slate-200/60 relative overflow-hidden group">
         <!-- Decoration -->

@@ -75,9 +75,22 @@ $awayTeamFilter = trim((string)($_GET['away_team'] ?? ''));
 $h2hHomeFilter = trim((string)($_GET['h2h_home'] ?? ''));
 $h2hAwayFilter = trim((string)($_GET['h2h_away'] ?? ''));
 
-// Date defaults (Default to today if not set)
-$date_from = isset($_GET['date_from']) ? $_GET['date_from'] : date('Y-m-d');
-$date_to = isset($_GET['date_to']) ? $_GET['date_to'] : date('Y-m-d');
+// Date defaults and range parsing
+$dateRange = $_GET['date_range'] ?? '';
+$date_from = $_GET['date_from'] ?? '';
+$date_to   = $_GET['date_to']   ?? '';
+
+if ($dateRange !== '') {
+    $parts = explode(' to ', $dateRange);
+    $date_from = trim($parts[0] ?? '');
+    $date_to = trim($parts[1] ?? $date_from);
+} elseif ($date_from !== '' && $date_to !== '') {
+    $dateRange = $date_from === $date_to ? $date_from : $date_from . ' to ' . $date_to;
+} else {
+    $date_from = date('Y-m-d');
+    $date_to   = date('Y-m-d');
+    $dateRange = $date_from;
+}
 // Auto-swap if date_from is after date_to
 if ($date_from > $date_to) [$date_from, $date_to] = [$date_to, $date_from];
 
@@ -101,7 +114,7 @@ $timeTo   = preg_match('/^\d{2}:\d{2}$/', $_GET['time_to']   ?? '') ? $_GET['tim
 
 function matchesBuildQuery(array $overrides = []): string {
     $allowedKeys = [
-        'page', 'p', 'per_page', 'date_from', 'date_to', 'sort', 'order', 'status',
+        'page', 'p', 'per_page', 'date_range', 'date_from', 'date_to', 'sort', 'order', 'status',
         'time_from', 'time_to', 'league', 'search', 'home_team', 'away_team', 'h2h_home', 'h2h_away', 'export',
     ];
 
@@ -117,6 +130,13 @@ function matchesBuildQuery(array $overrides = []): string {
         }
 
         $base[$key] = (string)$value;
+    }
+
+    if (array_key_exists('date_from', $overrides) || array_key_exists('date_to', $overrides)) {
+        unset($base['date_range']);
+    }
+    if (array_key_exists('date_range', $overrides)) {
+        unset($base['date_from'], $base['date_to']);
     }
 
     $query = array_merge($base, $overrides);
@@ -625,6 +645,7 @@ $monthKeys = array_keys($datesByMonth);
 ?>
 
 <div class="p-4 md:p-8 space-y-6 page-fade-in">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <?php
     // Calculate quick stats
     $today = date('Y-m-d');
@@ -642,26 +663,6 @@ $monthKeys = array_keys($datesByMonth);
     }
     ?>
     
-    <!-- Broadcast Header -->
-    <div class="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-5 md:p-6 shadow-xl">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div class="space-y-1">
-                <p class="text-[11px] uppercase tracking-[0.2em] text-amber-300 font-bold">Match Feed Monitor</p>
-                <h1 class="text-2xl md:text-3xl font-black tracking-tight">
-                    Semua <span class="text-amber-300">Pertandingan</span>
-                </h1>
-                <p class="text-slate-300 text-sm md:text-base">Monitoring data pertandingan real-time dari database.</p>
-            </div>
-            <div class="flex flex-wrap items-center gap-3">
-                <div class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/15 border border-emerald-400/30">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-200">Live</span>
-                </div>
-                <div class="px-3 py-2 rounded-lg bg-slate-700/70 border border-slate-600 text-xs font-bold text-slate-200"><?php echo date('d M Y'); ?></div>
-            </div>
-        </div>
-    </div>
-
     <!-- Quick Stats Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <div class="rounded-xl bg-white border border-slate-200 p-4 shadow-sm">
@@ -684,7 +685,7 @@ $monthKeys = array_keys($datesByMonth);
 
     <!-- Filters Section -->
     <div class="bg-white rounded-2xl shadow-md border-0 p-5 md:p-6 transition-all">
-        <form method="GET" class="space-y-5">
+        <form id="matches-filter-form" method="GET" class="space-y-5">
             <input type="hidden" name="page" value="matches">
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5">
@@ -713,7 +714,7 @@ $monthKeys = array_keys($datesByMonth);
                         Liga
                     </label>
                     <div class="relative">
-                        <select name="league" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-sm appearance-none transition-all cursor-pointer font-medium text-slate-700">
+                        <select id="matches-league-select" name="league" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-sm appearance-none transition-all cursor-pointer font-medium text-slate-700">
                             <option value="">Semua Liga</option>
                             <?php foreach ($leagues as $league): ?>
                                 <option value="<?php echo htmlspecialchars($league); ?>" <?php echo ($_GET['league'] ?? '') == $league ? 'selected' : ''; ?>>
@@ -728,17 +729,11 @@ $monthKeys = array_keys($datesByMonth);
                 </div>
 
                 <!-- Date Range -->
-                <div class="lg:col-span-3 grid grid-cols-2 gap-3">
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Dari</label>
-                        <input type="date" name="date_from" value="<?php echo htmlspecialchars($date_from); ?>"
-                               class="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-sm transition-all font-medium text-slate-700 h-[46px]">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Sampai</label>
-                        <input type="date" name="date_to" value="<?php echo htmlspecialchars($date_to); ?>"
-                               class="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-sm transition-all font-medium text-slate-700 h-[46px]">
-                    </div>
+                <div class="lg:col-span-3 space-y-2">
+                    <label for="matches-date-range" class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Rentang Tanggal</label>
+                    <input id="matches-date-range" type="text" name="date_range" value="<?php echo htmlspecialchars($dateRange); ?>"
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-sm transition-all font-medium text-slate-700 h-[46px]"
+                           placeholder="Pilih rentang tanggal...">
                 </div>
 
                 <!-- Time Range -->
@@ -762,7 +757,7 @@ $monthKeys = array_keys($datesByMonth);
                         Status
                     </label>
                     <div class="relative">
-                        <select name="status" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-sm appearance-none transition-all cursor-pointer font-medium text-slate-700">
+                        <select id="matches-status-select" name="status" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-sm appearance-none transition-all cursor-pointer font-medium text-slate-700">
                             <option value="" <?php echo $statusFilter === '' ? 'selected' : ''; ?>>Semua</option>
                             <option value="finished" <?php echo $statusFilter === 'finished' ? 'selected' : ''; ?>>Selesai</option>
                             <option value="upcoming" <?php echo $statusFilter === 'upcoming' ? 'selected' : ''; ?>>Upcoming</option>
@@ -833,6 +828,7 @@ $monthKeys = array_keys($datesByMonth);
         </form>
     </div>
 
+    <?php if (false): ?>
     <div class="bg-white rounded-2xl shadow-md border-0 p-5 md:p-6">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-sm font-black uppercase tracking-wider text-slate-700">H2H Over Summary</h2>
@@ -941,6 +937,7 @@ $monthKeys = array_keys($datesByMonth);
     </div>
 
     <!-- ── Panel: Cek Skor HT → Prediksi 2H Over 0.5 ── -->
+    <?php endif; ?>
     <div class="bg-white rounded-2xl shadow-md border-0 p-5 md:p-6">
         <div class="flex items-center gap-3 mb-4">
             <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center shrink-0">
@@ -955,17 +952,7 @@ $monthKeys = array_keys($datesByMonth);
         </div>
 
         <!-- Form input: tim + skor HT -->
-        <form method="GET">
-            <input type="hidden" name="page" value="matches">
-            <?php
-            // Preserve main filters
-            foreach (['date_from','date_to','sort','order','per_page','league','search',
-                      'home_team','away_team','h2h_home','h2h_away','time_from','time_to','status'] as $k) {
-                if (isset($_GET[$k]) && $_GET[$k] !== '') {
-                    echo '<input type="hidden" name="' . htmlspecialchars($k, ENT_QUOTES) . '" value="' . htmlspecialchars($_GET[$k], ENT_QUOTES) . '">';
-                }
-            }
-            ?>
+        <div class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <!-- Tim Home -->
                 <div class="space-y-1.5">
@@ -974,6 +961,7 @@ $monthKeys = array_keys($datesByMonth);
                         <input type="text"
                                id="htTeamHomeInput"
                                name="ht_team_home"
+                               form="matches-filter-form"
                                value="<?php echo htmlspecialchars($htCheckTeamHome, ENT_QUOTES, 'UTF-8'); ?>"
                                placeholder="Ketik nama tim home..."
                                autocomplete="off"
@@ -988,6 +976,7 @@ $monthKeys = array_keys($datesByMonth);
                         <input type="text"
                                id="htTeamAwayInput"
                                name="ht_team_away"
+                               form="matches-filter-form"
                                value="<?php echo htmlspecialchars($htCheckTeamAway, ENT_QUOTES, 'UTF-8'); ?>"
                                placeholder="Ketik nama tim away..."
                                autocomplete="off"
@@ -1001,7 +990,7 @@ $monthKeys = array_keys($datesByMonth);
             <div class="flex flex-wrap items-end gap-3">
                 <div class="space-y-1.5">
                     <label class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Skor HT Home</label>
-                    <input type="number" name="ht_home" min="0" max="20"
+                    <input type="number" name="ht_home" min="0" max="20" form="matches-filter-form"
                            value="<?php echo $htCheckHome !== null ? $htCheckHome : ''; ?>"
                            placeholder="0"
                            class="w-20 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-center text-xl font-black text-slate-900 focus:ring-4 focus:ring-orange-100 focus:border-orange-400 transition-all">
@@ -1009,30 +998,26 @@ $monthKeys = array_keys($datesByMonth);
                 <div class="pb-2.5 text-slate-300 font-black text-2xl select-none">–</div>
                 <div class="space-y-1.5">
                     <label class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Skor HT Away</label>
-                    <input type="number" name="ht_away" min="0" max="20"
+                    <input type="number" name="ht_away" min="0" max="20" form="matches-filter-form"
                            value="<?php echo $htCheckAway !== null ? $htCheckAway : ''; ?>"
                            placeholder="0"
                            class="w-20 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-center text-xl font-black text-slate-900 focus:ring-4 focus:ring-orange-100 focus:border-orange-400 transition-all">
                 </div>
-                <button type="submit"
-                        class="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-sm transition-all shadow-md active:scale-95 flex items-center gap-2">
+                <button type="submit" form="matches-filter-form" style="background: #f97316 !important; color: #ffffff !important;"
+                        class="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 !text-white rounded-xl font-bold text-sm transition-all shadow-md active:scale-95 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                     Cek
                 </button>
                 <?php if ($htCheckActive): ?>
-                    <a href="index.php?page=matches<?php
-                        foreach (['date_from','date_to','sort','order','per_page','league','search',
-                                  'home_team','away_team','h2h_home','h2h_away','time_from','time_to','status'] as $k) {
-                            if (isset($_GET[$k]) && $_GET[$k] !== '') echo '&' . urlencode($k) . '=' . urlencode($_GET[$k]);
-                        }
-                    ?>" class="px-4 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">
+                    <a href="<?php echo htmlspecialchars(matchesBuildQuery(['ht_team_home' => '', 'ht_team_away' => '', 'ht_home' => '', 'ht_away' => ''])); ?>"
+                       class="px-4 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">
                         Reset
                     </a>
                 <?php endif; ?>
             </div>
-        </form>
+        </div>
 
         <!-- Hasil -->
         <?php if ($htCheckActive): ?>
@@ -1127,17 +1112,6 @@ $monthKeys = array_keys($datesByMonth);
                 <?php endif; ?>
             </div>
         <?php endif; ?>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="hidden fixed inset-0 z-[9999] bg-white/70 backdrop-blur-sm flex items-center justify-center">
-        <div class="flex flex-col items-center gap-4 bg-white rounded-2xl shadow-xl px-10 py-8 border border-slate-100">
-            <svg class="animate-spin w-10 h-10 text-blue-600" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
-            </svg>
-            <span class="text-sm font-bold text-slate-600 tracking-wide">Memuat data...</span>
-        </div>
     </div>
 
     <!-- Date Pagination -->
@@ -1381,7 +1355,7 @@ $monthKeys = array_keys($datesByMonth);
             </div>
             <div class="flex items-center gap-2">
                 <label class="text-slate-400">Tampil:</label>
-                <select onchange="window.location.href=this.value" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium text-slate-700 cursor-pointer hover:bg-slate-100 transition-colors">
+                <select id="matches-per-page" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium text-slate-700 cursor-pointer hover:bg-slate-100 transition-colors">
                     <?php 
                     foreach ($perPageOptions as $option):
                         $url = "?page=matches&p=1";
@@ -1477,29 +1451,69 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+// Global pageLoader loading overlay logic
+function showMatchesPageLoader() {
+    const pageLoader = document.getElementById('pageLoader');
+    if (pageLoader) {
+        pageLoader.classList.remove('hidden');
+    }
+}
+
 // Loading overlay on filter submit
 document.addEventListener('DOMContentLoaded', function () {
-    const form = document.querySelector('form[method="GET"]');
-    const overlay = document.getElementById('loadingOverlay');
-    const exportInput = form ? form.querySelector('input[name="export"]') : null;
+    const mainForm = document.getElementById('matches-filter-form');
+    const exportInput = mainForm ? mainForm.querySelector('input[name="export"]') : null;
     const exportBtn = document.getElementById('exportBtn');
 
-    if (form && overlay) {
-        form.addEventListener('submit', function () {
-            if (exportInput && exportInput.value === 'csv') return; // skip overlay for export
-            overlay.classList.remove('hidden');
+    if (mainForm) {
+        mainForm.addEventListener('submit', function () {
+            if (exportInput && exportInput.value === 'csv') return; // skip loader for export
+            showMatchesPageLoader();
         });
     }
 
     // Export button: set export=csv on the hidden input then submit
-    if (exportBtn && form && exportInput) {
+    if (exportBtn && mainForm && exportInput) {
         exportBtn.addEventListener('click', function () {
             exportInput.value = 'csv';
-            form.submit();
+            mainForm.submit();
             // Reset after brief delay so normal filter submit still works
             setTimeout(function () { exportInput.value = ''; }, 500);
         });
     }
+
+    // Auto-submit dropdowns with loading state
+    const leagueSelect = document.getElementById('matches-league-select');
+    const statusSelect = document.getElementById('matches-status-select');
+    if (leagueSelect && mainForm) {
+        leagueSelect.addEventListener('change', function() {
+            showMatchesPageLoader();
+            mainForm.submit();
+        });
+    }
+    if (statusSelect && mainForm) {
+        statusSelect.addEventListener('change', function() {
+            showMatchesPageLoader();
+            mainForm.submit();
+        });
+    }
+
+    // Per-page select auto-submit with loader
+    const perPageSelect = document.getElementById('matches-per-page');
+    if (perPageSelect) {
+        perPageSelect.addEventListener('change', function() {
+            showMatchesPageLoader();
+            window.location.href = this.value;
+        });
+    }
+
+    // Show loader on page navigation/filter/sorting/pagination/quick links
+    document.querySelectorAll('.page-fade-in a').forEach(function(link) {
+        const href = link.getAttribute('href');
+        if (href && (href.startsWith('index.php') || href.includes('page=matches') || href.startsWith('?p='))) {
+            link.addEventListener('click', showMatchesPageLoader);
+        }
+    });
 });
 
 function showMonth(ym) {
@@ -1520,17 +1534,36 @@ function showMonth(ym) {
 
 const TEAMS_DATA = <?php echo json_encode($teams, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 
-function setupAutocomplete(inputId, dropdownId, teams) {
+function setupAutocomplete(inputId, dropdownId, teams, onSelect) {
     const input = document.getElementById(inputId);
     const dropdown = document.getElementById(dropdownId);
     if (!input || !dropdown) return;
 
-    const ITEM_CLASS = 'px-4 py-3 cursor-pointer hover:bg-blue-50 text-sm font-medium text-slate-700 transition-colors flex items-center justify-between group';
+    const ITEM_CLASS = 'px-4 py-3 cursor-pointer text-sm font-medium text-slate-700 transition-colors flex items-center justify-between group';
     const CHECK_SVG = '<svg class="w-4 h-4 text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+    let activeIndex = -1;
+
+    function closeDropdown() {
+        dropdown.classList.add('hidden');
+        dropdown.innerHTML = '';
+        activeIndex = -1;
+    }
+
+    function highlightItem(items) {
+        items.forEach((item, idx) => {
+            if (idx === activeIndex) {
+                item.classList.add('bg-blue-50');
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.classList.remove('bg-blue-50');
+            }
+        });
+    }
 
     input.addEventListener('input', function () {
         const query = this.value.toLowerCase();
         dropdown.innerHTML = '';
+        activeIndex = -1;
         if (query.length < 2) { dropdown.classList.add('hidden'); return; }
 
         const matches = teams.filter(t => t.toLowerCase().includes(query)).slice(0, 10);
@@ -1542,22 +1575,53 @@ function setupAutocomplete(inputId, dropdownId, teams) {
             div.innerHTML = `<span>${team}</span>${CHECK_SVG}`;
             div.addEventListener('click', function () {
                 input.value = team;
-                dropdown.classList.add('hidden');
+                closeDropdown();
+                if (typeof onSelect === 'function') {
+                    onSelect(team);
+                }
             });
             dropdown.appendChild(div);
         });
         dropdown.classList.remove('hidden');
     });
 
+    input.addEventListener('keydown', function (e) {
+        const items = dropdown.querySelectorAll('div');
+        if (dropdown.classList.contains('hidden') || items.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeIndex = (activeIndex + 1) % items.length;
+            highlightItem(items);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeIndex = (activeIndex - 1 + items.length) % items.length;
+            highlightItem(items);
+        } else if (e.key === 'Enter') {
+            if (activeIndex > -1) {
+                e.preventDefault();
+                items[activeIndex].click();
+            }
+        } else if (e.key === 'Escape') {
+            closeDropdown();
+        }
+    });
+
     document.addEventListener('click', function (e) {
         if (!input.contains(e.target) && !dropdown.contains(e.target)) {
-            dropdown.classList.add('hidden');
+            closeDropdown();
         }
     });
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    setupAutocomplete('teamSearch',     'autocompleteResults',     TEAMS_DATA);
+    setupAutocomplete('teamSearch',     'autocompleteResults',     TEAMS_DATA, function(selectedTeam) {
+        const mainForm = document.getElementById('matches-filter-form');
+        if (mainForm) {
+            showMatchesPageLoader();
+            mainForm.submit();
+        }
+    });
     setupAutocomplete('homeTeamSearch', 'homeAutocompleteResults', TEAMS_DATA);
     setupAutocomplete('awayTeamSearch', 'awayAutocompleteResults', TEAMS_DATA);
     setupAutocomplete('htTeamHomeInput', 'htHomeAutocomplete', TEAMS_DATA);
@@ -1574,5 +1638,20 @@ document.addEventListener('DOMContentLoaded', function () {
             homeInput.focus();
         });
     }
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    flatpickr("#matches-date-range", {
+        mode: "range",
+        dateFormat: "Y-m-d",
+        onClose: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length === 2) {
+                showMatchesPageLoader();
+                instance.element.form.submit();
+            }
+        }
+    });
 });
 </script>

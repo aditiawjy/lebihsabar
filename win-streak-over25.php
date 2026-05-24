@@ -132,84 +132,136 @@ function findNextMatchFromTeamMatches(string $team, array $teamMatches): ?array 
     return $next;
 }
 
-// Read all matches
-$allMatches = [];
-$allTeams = [];
+function buildWinStreakBaseRows(string $csvPath, int $threshold): array {
+    $allMatches = [];
+    $allTeams = [];
 
-if (is_readable($csvPath) && ($fh = fopen($csvPath, 'r')) !== false) {
-    $headers = fgetcsv($fh);
-    if ($headers) {
-        while (($row = fgetcsv($fh)) !== false) {
-            if (count($row) !== count($headers)) continue;
-            $match = array_combine($headers, $row);
-            if (!$match) continue;
-            
-            $home = trim($match['home_team'] ?? '');
-            $away = trim($match['away_team'] ?? '');
-            
-            if ($home && $away) {
+    if (is_readable($csvPath) && ($fh = fopen($csvPath, 'r')) !== false) {
+        $headers = fgetcsv($fh);
+        if (is_array($headers)) {
+            while (($row = fgetcsv($fh)) !== false) {
+                if (count($row) !== count($headers)) {
+                    continue;
+                }
+
+                $match = array_combine($headers, $row);
+                if (!is_array($match)) {
+                    continue;
+                }
+
+                $home = trim($match['home_team'] ?? '');
+                $away = trim($match['away_team'] ?? '');
+                if ($home === '' || $away === '') {
+                    continue;
+                }
+
+                $match['_ts'] = strtotime((string)($match['match_time'] ?? '')) ?: 0;
                 $allMatches[] = $match;
                 $allTeams[$home] = ($allTeams[$home] ?? 0) + 1;
                 $allTeams[$away] = ($allTeams[$away] ?? 0) + 1;
             }
         }
+        fclose($fh);
     }
-    fclose($fh);
+
+    usort($allMatches, function($a, $b) {
+        return (($b['_ts'] ?? 0) <=> ($a['_ts'] ?? 0));
+    });
+
+    $matchesByTeam = [];
+    foreach ($allMatches as $match) {
+        $home = trim($match['home_team'] ?? '');
+        $away = trim($match['away_team'] ?? '');
+        if ($home !== '') $matchesByTeam[$home][] = $match;
+        if ($away !== '') $matchesByTeam[$away][] = $match;
+    }
+
+    $rows = [];
+    foreach ($allTeams as $team => $matchCount) {
+        $teamMatches = $matchesByTeam[$team] ?? [];
+        if (count($teamMatches) < 3) {
+            continue;
+        }
+
+        $streak = calculateWinStreak($teamMatches, $team, $threshold);
+        if (($streak['finished_count'] ?? 0) < 3) {
+            continue;
+        }
+
+        $rows[] = [
+            'team' => $team,
+            'match_count' => $matchCount,
+            'current_streak' => $streak['current'],
+            'max_streak' => $streak['max'],
+            'last_matches' => $streak['last_matches'],
+            'next_match' => findNextMatchFromTeamMatches($team, $teamMatches),
+        ];
+    }
+
+    return $rows;
 }
 
-// Sort matches by real datetime
-usort($allMatches, function($a, $b) {
-    $ta = strtotime($a['match_time'] ?? '') ?: 0;
-    $tb = strtotime($b['match_time'] ?? '') ?: 0;
-    return $tb <=> $ta;
-});
+function loadWinStreakBaseRowsFromCache(string $csvPath, string $marketKey, int $threshold): array {
+    $cacheDir = __DIR__ . '/cache';
+    if (!is_dir($cacheDir)) {
+        @mkdir($cacheDir, 0775, true);
+    }
 
-// Index matches once per team. The previous implementation scanned the full CSV
-// for every team, which can make the page wait 20+ seconds and look blank.
-$matchesByTeam = [];
-foreach ($allMatches as $match) {
-    $home = trim($match['home_team'] ?? '');
-    $away = trim($match['away_team'] ?? '');
-    if ($home !== '') $matchesByTeam[$home][] = $match;
-    if ($away !== '') $matchesByTeam[$away][] = $match;
+    $cacheFile = $cacheDir . '/win_streak_base_' . str_replace('.', '_', $marketKey) . '.json';
+    $csvMtime = is_file($csvPath) ? (filemtime($csvPath) ?: 0) : 0;
+
+    if (is_readable($cacheFile)) {
+        $raw = file_get_contents($cacheFile);
+        if ($raw !== false) {
+            $cached = json_decode($raw, true);
+            if (
+                is_array($cached)
+                && ($cached['csv_mtime'] ?? -1) === $csvMtime
+                && ($cached['market'] ?? '') === $marketKey
+                && isset($cached['rows'])
+                && is_array($cached['rows'])
+            ) {
+                return $cached['rows'];
+            }
+        }
+    }
+
+    $rows = buildWinStreakBaseRows($csvPath, $threshold);
+    $payload = [
+        'generated_at' => date('c'),
+        'csv_mtime' => $csvMtime,
+        'market' => $marketKey,
+        'rows' => $rows,
+    ];
+
+    $json = json_encode($payload, JSON_INVALID_UTF8_SUBSTITUTE);
+    if ($json !== false) {
+        @file_put_contents($cacheFile, $json, LOCK_EX);
+    }
+
+    return $rows;
 }
 
-// Process each team
-$streakData = [];
 $searchTerm = trim($_GET['search'] ?? '');
 $minStreak = max(0, (int)($_GET['min_streak'] ?? 2));
 $sortBy = $_GET['sort'] ?? 'current';
 $order = $_GET['order'] ?? 'desc';
 
-foreach ($allTeams as $team => $matchCount) {
-    // Filter by search
-    if ($searchTerm && stripos($team, $searchTerm) === false) {
-        continue;
-    }
-    
-    $teamMatches = $matchesByTeam[$team] ?? [];
-    if (count($teamMatches) < 3) continue; // Minimum 3 total matches
-    
-    $streak = calculateWinStreak($teamMatches, $team, $marketConfig['threshold']);
-    
-    // Skip teams without enough completed matches
-    if (($streak['finished_count'] ?? 0) < 3) {
+$streakData = [];
+$streakBaseRows = loadWinStreakBaseRowsFromCache($csvPath, $selectedMarket, (int)$marketConfig['threshold']);
+foreach ($streakBaseRows as $row) {
+    $teamName = (string)($row['team'] ?? '');
+    if ($searchTerm !== '' && stripos($teamName, $searchTerm) === false) {
         continue;
     }
 
-    // Filter by min streak
-    if ($streak['current'] < $minStreak && $streak['max'] < $minStreak) {
+    $current = (int)($row['current_streak'] ?? 0);
+    $max = (int)($row['max_streak'] ?? 0);
+    if ($current < $minStreak && $max < $minStreak) {
         continue;
     }
-    
-    $streakData[] = [
-        'team' => $team,
-        'match_count' => $matchCount,
-        'current_streak' => $streak['current'],
-        'max_streak' => $streak['max'],
-        'last_matches' => $streak['last_matches'],
-        'next_match' => findNextMatchFromTeamMatches($team, $teamMatches)
-    ];
+
+    $streakData[] = $row;
 }
 
 // Sort results

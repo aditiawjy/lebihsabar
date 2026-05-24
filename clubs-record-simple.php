@@ -117,12 +117,22 @@ if (is_array($hiddenLeaguesRaw)) {
 $csvPath   = __DIR__ . '/matches.csv';
 $_csvDefaultDate = date('Y-m-d');
 
+$dateRange   = $_GET['date_range'] ?? '';
 $dateFromRaw = $_GET['date_from'] ?? '';
-$dateToRaw = $_GET['date_to'] ?? '';
+$dateToRaw   = $_GET['date_to'] ?? '';
+
+if ($dateRange !== '') {
+    $parts = explode(' to ', $dateRange);
+    $dateFromRaw = trim($parts[0] ?? '');
+    $dateToRaw = trim($parts[1] ?? $dateFromRaw);
+} elseif ($dateFromRaw !== '' && $dateToRaw !== '') {
+    $dateRange = $dateFromRaw === $dateToRaw ? $dateFromRaw : $dateFromRaw . ' to ' . $dateToRaw;
+}
+
 $dateFromValid = $dateFromRaw !== '' && strtotime($dateFromRaw) !== false;
 $dateToValid = $dateToRaw !== '' && strtotime($dateToRaw) !== false;
-$hasDateFromInput = array_key_exists('date_from', $_GET) && trim((string)$_GET['date_from']) !== '';
-$hasDateToInput = array_key_exists('date_to', $_GET) && trim((string)$_GET['date_to']) !== '';
+$hasDateFromInput = ($dateRange !== '') || (array_key_exists('date_from', $_GET) && trim((string)$_GET['date_from']) !== '');
+$hasDateToInput = ($dateRange !== '') || (array_key_exists('date_to', $_GET) && trim((string)$_GET['date_to']) !== '');
 
 // -- Filters -------------------------------------------------------------------
 $today      = date('Y-m-d');
@@ -423,11 +433,21 @@ foreach ($_allMkts as $_mk) {
         }
     }
 }
-usort($allTimeMaxMultiMarket, fn($a, $b) => $b['max_count'] <=> $a['max_count'] ?: strcmp($a['team'], $b['team']));
+usort($allTimeMaxMultiMarket, function($a, $b) {
+    $aEqual = ($a['period_max_count'] >= $a['max_count']);
+    $bEqual = ($b['period_max_count'] >= $b['max_count']);
+    if ($aEqual !== $bEqual) {
+        return $aEqual ? -1 : 1;
+    }
+    if ($b['max_count'] !== $a['max_count']) {
+        return $b['max_count'] <=> $a['max_count'];
+    }
+    return strcmp($a['team'], $b['team']);
+});
 
 // Helper: build URL preserving all current GET params
 function csvUrl(array $extra = []): string {
-    $allowedKeys = ['page', 'search', 'date_from', 'date_to', 'time_from', 'time_to', 'league', 'under', 'sort', 'order', 'pg', 'per_page', 'show_near_all_time_max'];
+    $allowedKeys = ['page', 'search', 'date_range', 'date_from', 'date_to', 'time_from', 'time_to', 'league', 'under', 'sort', 'order', 'pg', 'per_page', 'show_near_all_time_max'];
     $params = ['page' => 'clubs'];
 
     foreach ($allowedKeys as $key) {
@@ -441,6 +461,13 @@ function csvUrl(array $extra = []): string {
         }
 
         $params[$key] = (string)$value;
+    }
+
+    if (array_key_exists('date_from', $extra) || array_key_exists('date_to', $extra)) {
+        unset($params['date_range']);
+    }
+    if (array_key_exists('date_range', $extra)) {
+        unset($params['date_from'], $params['date_to']);
     }
 
     $params = array_merge($params, $extra);
@@ -524,6 +551,7 @@ $mktShort = $marketOptions[$mktParam]['short'];
 $mktClass = $marketOptions[$mktParam]['class'];
 ?>
 <div class="p-3 sm:p-4 md:p-8 space-y-4 md:space-y-6 page-fade-in">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <!-- Broadcast Header -->
     <div class="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-4 md:p-6 shadow-xl">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -545,7 +573,7 @@ $mktClass = $marketOptions[$mktParam]['class'];
     </div>
 
     <!-- Filter Form -->
-    <form method="GET" class="club-filter-card bg-white rounded-2xl p-4 md:p-5 transition-all">
+    <form id="club-filter-form" method="GET" autocomplete="off" class="club-filter-card bg-white rounded-2xl p-4 md:p-5 transition-all">
         <input type="hidden" name="page" value="clubs">
         
         <div class="club-filter-top">
@@ -554,13 +582,9 @@ $mktClass = $marketOptions[$mktParam]['class'];
                 <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
-                <input id="club-search" type="text" name="search" value="<?= htmlspecialchars($searchTerm) ?>" placeholder="Cari club..." list="club-search-options" autocomplete="off"
+                <input id="club-search" type="text" name="search" value="<?= htmlspecialchars($searchTerm) ?>" placeholder="Cari club..." autocomplete="off"
                     class="club-filter-search-input">
-                <datalist id="club-search-options">
-                    <?php foreach ($clubNameList as $clubName): ?>
-                        <option value="<?= htmlspecialchars($clubName) ?>"></option>
-                    <?php endforeach; ?>
-                </datalist>
+                <div id="club-search-dropdown" class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 hidden max-h-60 overflow-y-auto"></div>
             </div>
             <div class="club-filter-actions">
                 <?php
@@ -586,19 +610,57 @@ $mktClass = $marketOptions[$mktParam]['class'];
         <div class="club-filter-grid mt-3">
             <div class="club-filter-field">
                 <label for="club-time-from" class="club-filter-label">Jam Mulai</label>
-                <input id="club-time-from" type="time" name="time_from" value="<?= htmlspecialchars($timeFrom) ?>" placeholder="00:00" class="club-filter-control">
+                <div class="club-filter-select-wrap">
+                    <select id="club-time-from" name="time_from" autocomplete="off" class="club-filter-control club-filter-select">
+                        <?php
+                        $timeSlots = [];
+                        for ($h = 0; $h < 24; $h++) {
+                            for ($m = 0; $m < 60; $m += 30) {
+                                $hh = str_pad($h, 2, '0', STR_PAD_LEFT);
+                                $mm = str_pad($m, 2, '0', STR_PAD_LEFT);
+                                $val = "$hh:$mm";
+                                $timeSlots[] = $val;
+                            }
+                        }
+                        $timeSlots[] = '23:59';
+                        foreach ($timeSlots as $slot):
+                        ?>
+                            <option value="<?= $slot ?>" <?= $timeFrom === $slot ? 'selected' : '' ?>><?= $slot ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <svg class="club-filter-select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
             </div>
             <div class="club-filter-field">
                 <label for="club-time-to" class="club-filter-label">Jam Selesai</label>
-                <input id="club-time-to" type="time" name="time_to" value="<?= htmlspecialchars($timeTo) ?>" placeholder="23:59" class="club-filter-control">
+                <div class="club-filter-select-wrap">
+                    <select id="club-time-to" name="time_to" autocomplete="off" class="club-filter-control club-filter-select">
+                        <?php
+                        $timeSlotsTo = [];
+                        for ($h = 0; $h < 24; $h++) {
+                            for ($m = 0; $m < 60; $m += 30) {
+                                $hh = str_pad($h, 2, '0', STR_PAD_LEFT);
+                                $mm = str_pad($m, 2, '0', STR_PAD_LEFT);
+                                $val = "$hh:$mm";
+                                $timeSlotsTo[] = $val;
+                            }
+                        }
+                        $timeSlotsTo[] = '23:59';
+                        foreach ($timeSlotsTo as $slot):
+                        ?>
+                            <option value="<?= $slot ?>" <?= $timeTo === $slot ? 'selected' : '' ?>><?= $slot ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <svg class="club-filter-select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
             </div>
-            <div class="club-filter-field">
-                <label for="club-date-from" class="club-filter-label">Dari Tanggal</label>
-                <input id="club-date-from" type="date" name="date_from" value="<?= htmlspecialchars($dateFrom) ?>" class="club-filter-control">
-            </div>
-            <div class="club-filter-field">
-                <label for="club-date-to" class="club-filter-label">Sampai Tanggal</label>
-                <input id="club-date-to" type="date" name="date_to" value="<?= htmlspecialchars($dateTo) ?>" class="club-filter-control">
+            <div class="club-filter-field" style="grid-column: span 2;">
+                <label for="club-date-range" class="club-filter-label">Rentang Tanggal</label>
+                <input id="club-date-range" type="text" name="date_range" value="<?= htmlspecialchars($dateRange) ?>" class="club-filter-control" placeholder="Pilih rentang tanggal...">
             </div>
             <div class="club-filter-field">
                 <label for="club-market" class="club-filter-label">Market</label>
@@ -737,8 +799,9 @@ $mktClass = $marketOptions[$mktParam]['class'];
         <div class="grid gap-3 p-3 md:hidden">
             <?php foreach ($allTimeMaxMultiMarket as $i => $r):
                 $_rmkt = $marketOptions[$r['market']] ?? ['short'=>$r['market'],'class'=>'bg-slate-500 text-white'];
+                $isHidden = $i >= 10;
             ?>
-            <article class="rounded-xl border p-3 <?= $r['period_max_count'] >= $r['max_count'] ? 'border-emerald-200 bg-emerald-50' : 'border-indigo-100 bg-indigo-50/50' ?>">
+            <article class="rounded-xl border p-3 <?= $r['period_max_count'] >= $r['max_count'] ? 'border-emerald-200 bg-emerald-50' : 'border-indigo-100 bg-indigo-50/50' ?> all-time-max-hidden" <?= $isHidden ? 'style="display: none;"' : '' ?>>
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
@@ -784,8 +847,9 @@ $mktClass = $marketOptions[$mktParam]['class'];
             <tbody class="divide-y divide-slate-100">
             <?php foreach ($allTimeMaxMultiMarket as $i => $r):
                 $_rmkt = $marketOptions[$r['market']] ?? ['short'=>$r['market'],'class'=>'bg-slate-500 text-white'];
+                $isHidden = $i >= 10;
             ?>
-                <tr class="hover:bg-indigo-50/30 transition-all <?= $r['period_max_count'] >= $r['max_count'] ? 'bg-emerald-50' : '' ?>">
+                <tr class="hover:bg-indigo-50/30 transition-all <?= $r['period_max_count'] >= $r['max_count'] ? 'bg-emerald-50' : '' ?> all-time-max-hidden" <?= $isHidden ? 'style="display: none;"' : '' ?>>
                     <td class="px-4 py-3 text-slate-400 font-medium"><?= $i + 1 ?></td>
                     <td class="px-4 py-3 min-w-[220px]">
                         <div class="font-bold text-slate-900"><?= htmlspecialchars($r['team']) ?></div>
@@ -820,6 +884,16 @@ $mktClass = $marketOptions[$mktParam]['class'];
             </tbody>
         </table>
         </div>
+        <?php if (count($allTimeMaxMultiMarket) > 10): ?>
+        <div class="px-5 py-4 border-t border-slate-100 text-center bg-slate-50/50">
+            <button type="button" id="btn-toggle-all-time-max" data-count="<?= count($allTimeMaxMultiMarket) - 10 ?>" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold transition-all text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                <span id="btn-toggle-all-time-max-text">Tampilkan Semua (<?= count($allTimeMaxMultiMarket) - 10 ?> Lainnya)</span>
+                <svg id="btn-toggle-all-time-max-icon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+        </div>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 
@@ -835,8 +909,10 @@ $mktClass = $marketOptions[$mktParam]['class'];
             <span class="text-xs text-rose-100"><?= count($recordBreakers) ?> clubs</span>
         </div>
         <div class="grid gap-3 p-3 md:hidden">
-            <?php foreach ($recordBreakers as $i => $r): ?>
-            <article class="rounded-xl border border-rose-100 bg-rose-50/50 p-3">
+            <?php foreach ($recordBreakers as $i => $r): 
+                $isHidden = $i >= 10;
+            ?>
+            <article class="rounded-xl border border-rose-100 bg-rose-50/50 p-3 record-breakers-hidden" <?= $isHidden ? 'style="display: none;"' : '' ?>>
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
@@ -884,8 +960,10 @@ $mktClass = $marketOptions[$mktParam]['class'];
                         </tr>
                     </thead>
             <tbody class="divide-y divide-slate-100">
-            <?php foreach ($recordBreakers as $i => $r): ?>
-                <tr class="hover:bg-rose-50/30 transition-all">
+            <?php foreach ($recordBreakers as $i => $r): 
+                $isHidden = $i >= 10;
+            ?>
+                <tr class="hover:bg-rose-50/30 transition-all record-breakers-hidden" <?= $isHidden ? 'style="display: none;"' : '' ?>>
                     <td class="px-4 py-3 text-slate-400 font-medium"><?= $i + 1 ?></td>
                     <td class="px-4 py-3"><span class="px-2 py-1 rounded-lg text-[10px] font-bold <?= $mktClass ?>"><?= $mktShort ?></span></td>
                     <td class="px-4 py-3 min-w-[220px]">
@@ -922,6 +1000,16 @@ $mktClass = $marketOptions[$mktParam]['class'];
             </tbody>
         </table>
         </div>
+        <?php if (count($recordBreakers) > 10): ?>
+        <div class="px-5 py-4 border-t border-slate-100 text-center bg-slate-50/50">
+            <button type="button" id="btn-toggle-record-breakers" data-count="<?= count($recordBreakers) - 10 ?>" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold transition-all text-xs focus:outline-none focus:ring-2 focus:ring-rose-500/50">
+                <span id="btn-toggle-record-breakers-text">Tampilkan Semua (<?= count($recordBreakers) - 10 ?> Lainnya)</span>
+                <svg id="btn-toggle-record-breakers-icon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+        </div>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 
@@ -956,8 +1044,10 @@ $mktClass = $marketOptions[$mktParam]['class'];
                     Tidak ada data untuk filter ini.
                 </div>
             <?php else: ?>
-                <?php foreach ($pageRows as $i => $r): ?>
-                <article class="rounded-xl border <?= $r['is_max'] ? 'border-rose-100 bg-rose-50/40' : 'border-slate-100 bg-white' ?> p-3 shadow-sm">
+                <?php foreach ($pageRows as $i => $r): 
+                    $isHidden = $i >= 10;
+                ?>
+                <article class="rounded-xl border <?= $r['is_max'] ? 'border-rose-100 bg-rose-50/40' : 'border-slate-100 bg-white' ?> p-3 shadow-sm main-clubs-hidden" <?= $isHidden ? 'style="display: none;"' : '' ?>>
                     <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0">
                             <div class="flex items-center gap-2">
@@ -1038,8 +1128,10 @@ $mktClass = $marketOptions[$mktParam]['class'];
                     Tidak ada data untuk filter ini.
                 </td></tr>
             <?php else: ?>
-                <?php foreach ($pageRows as $i => $r): ?>
-                <tr class="hover:bg-blue-50/30 transition-all duration-200 <?= $r['is_max'] ? 'bg-rose-50/30' : '' ?>">
+                <?php foreach ($pageRows as $i => $r): 
+                    $isHidden = $i >= 10;
+                ?>
+                <tr class="hover:bg-blue-50/30 transition-all duration-200 <?= $r['is_max'] ? 'bg-rose-50/30' : '' ?> main-clubs-hidden" <?= $isHidden ? 'style="display: none;"' : '' ?>>
                     <td class="px-4 py-3 text-slate-500 font-medium"><?= $offset + $i + 1 ?></td>
                     <td class="px-4 py-3 min-w-[220px]">
                         <div class="font-bold text-slate-900"><?= htmlspecialchars($r['team']) ?></div>
@@ -1084,6 +1176,16 @@ $mktClass = $marketOptions[$mktParam]['class'];
             </tbody>
         </table>
         </div>
+        <?php if (count($pageRows) > 10): ?>
+        <div class="px-5 py-4 border-t border-slate-100 text-center bg-slate-50/50">
+            <button type="button" id="btn-toggle-main-clubs" data-count="<?= count($pageRows) - 10 ?>" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold transition-all text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/50">
+                <span id="btn-toggle-main-clubs-text">Tampilkan Semua (<?= count($pageRows) - 10 ?> Lainnya)</span>
+                <svg id="btn-toggle-main-clubs-icon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+        </div>
+        <?php endif; ?>
 
         <!-- Pagination -->
         <?php if ($totalPages > 1): ?>
@@ -1104,3 +1206,246 @@ $mktClass = $marketOptions[$mktParam]['class'];
         <?php endif; ?>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. All-Time Max Toggle
+    const btnAllTimeMax = document.getElementById('btn-toggle-all-time-max');
+    if (btnAllTimeMax) {
+        const textSpan = document.getElementById('btn-toggle-all-time-max-text');
+        const iconSvg = document.getElementById('btn-toggle-all-time-max-icon');
+        const hiddenItems = document.querySelectorAll('.all-time-max-hidden');
+        let isExpanded = false;
+        const totalHidden = btnAllTimeMax.dataset.count;
+
+        btnAllTimeMax.addEventListener('click', function() {
+            isExpanded = !isExpanded;
+            hiddenItems.forEach(el => {
+                if (isExpanded) {
+                    el.style.display = el.tagName === 'TR' ? 'table-row' : '';
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+            if (isExpanded) {
+                textSpan.textContent = 'Tampilkan Lebih Sedikit';
+                iconSvg.classList.add('rotate-180');
+            } else {
+                textSpan.textContent = 'Tampilkan Semua (' + totalHidden + ' Lainnya)';
+                iconSvg.classList.remove('rotate-180');
+                btnAllTimeMax.closest('.bg-white').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
+
+    // 2. Record Breakers Toggle
+    const btnRecordBreakers = document.getElementById('btn-toggle-record-breakers');
+    if (btnRecordBreakers) {
+        const textSpan = document.getElementById('btn-toggle-record-breakers-text');
+        const iconSvg = document.getElementById('btn-toggle-record-breakers-icon');
+        const hiddenItems = document.querySelectorAll('.record-breakers-hidden');
+        let isExpanded = false;
+        const totalHidden = btnRecordBreakers.dataset.count;
+
+        btnRecordBreakers.addEventListener('click', function() {
+            isExpanded = !isExpanded;
+            hiddenItems.forEach(el => {
+                if (isExpanded) {
+                    el.style.display = el.tagName === 'TR' ? 'table-row' : '';
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+            if (isExpanded) {
+                textSpan.textContent = 'Tampilkan Lebih Sedikit';
+                iconSvg.classList.add('rotate-180');
+            } else {
+                textSpan.textContent = 'Tampilkan Semua (' + totalHidden + ' Lainnya)';
+                iconSvg.classList.remove('rotate-180');
+                btnRecordBreakers.closest('.bg-white').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
+
+    // 3. Main Clubs Toggle
+    const btnMainClubs = document.getElementById('btn-toggle-main-clubs');
+    if (btnMainClubs) {
+        const textSpan = document.getElementById('btn-toggle-main-clubs-text');
+        const iconSvg = document.getElementById('btn-toggle-main-clubs-icon');
+        const hiddenItems = document.querySelectorAll('.main-clubs-hidden');
+        let isExpanded = false;
+        const totalHidden = btnMainClubs.dataset.count;
+
+        btnMainClubs.addEventListener('click', function() {
+            isExpanded = !isExpanded;
+            hiddenItems.forEach(el => {
+                if (isExpanded) {
+                    el.style.display = el.tagName === 'TR' ? 'table-row' : '';
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+            if (isExpanded) {
+                textSpan.textContent = 'Tampilkan Lebih Sedikit';
+                iconSvg.classList.add('rotate-180');
+            } else {
+                textSpan.textContent = 'Tampilkan Semua (' + totalHidden + ' Lainnya)';
+                iconSvg.classList.remove('rotate-180');
+                btnMainClubs.closest('.bg-white').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
+
+    // Loader indicator function
+    function showLoader() {
+        const pageLoader = document.getElementById('pageLoader');
+        if (pageLoader) {
+            pageLoader.classList.remove('hidden');
+        }
+    }
+
+    // Show loader on page navigation/filter/sorting/pagination links
+    document.querySelectorAll('.page-fade-in a').forEach(function(link) {
+        const href = link.getAttribute('href');
+        if (href && (href.startsWith('index.php') || href.includes('page='))) {
+            link.addEventListener('click', showLoader);
+        }
+    });
+
+    // Hook submit event on the filter form
+    const filterForm = document.getElementById('club-filter-form');
+    if (filterForm) {
+        filterForm.addEventListener('submit', showLoader);
+    }
+
+    // Auto-submit dropdowns with loading state
+    const marketSelect = document.getElementById('club-market');
+    const leagueSelect = document.getElementById('club-league');
+    const timeFromSelect = document.getElementById('club-time-from');
+    const timeToSelect   = document.getElementById('club-time-to');
+    if (marketSelect && filterForm) {
+        marketSelect.addEventListener('change', function() {
+            showLoader();
+            filterForm.submit();
+        });
+    }
+    if (leagueSelect && filterForm) {
+        leagueSelect.addEventListener('change', function() {
+            showLoader();
+            filterForm.submit();
+        });
+    }
+    if (timeFromSelect && filterForm) {
+        timeFromSelect.addEventListener('change', function() {
+            showLoader();
+            filterForm.submit();
+        });
+    }
+    if (timeToSelect && filterForm) {
+        timeToSelect.addEventListener('change', function() {
+            showLoader();
+            filterForm.submit();
+        });
+    }
+
+    // 4. Custom Autocomplete Suggestion Logic
+    const clubNames = <?= json_encode($clubNameList) ?>;
+    const searchInput = document.getElementById('club-search');
+    const dropdown = document.getElementById('club-search-dropdown');
+    let activeIndex = -1;
+
+    function closeDropdown() {
+        if (dropdown) {
+            dropdown.classList.add('hidden');
+            dropdown.innerHTML = '';
+        }
+        activeIndex = -1;
+    }
+
+    if (searchInput && dropdown) {
+        searchInput.addEventListener('input', function() {
+            const val = this.value.trim().toLowerCase();
+            if (!val) {
+                closeDropdown();
+                return;
+            }
+            
+            const matches = clubNames.filter(name => name.toLowerCase().includes(val)).slice(0, 10);
+            if (matches.length === 0) {
+                closeDropdown();
+                return;
+            }
+            
+            dropdown.innerHTML = '';
+            dropdown.classList.remove('hidden');
+            
+            matches.forEach((name, idx) => {
+                const item = document.createElement('div');
+                item.className = 'px-4 py-2.5 hover:bg-slate-100 cursor-pointer text-slate-800 text-xs font-semibold transition-colors duration-150';
+                item.textContent = name;
+                item.addEventListener('click', function() {
+                    searchInput.value = name;
+                    closeDropdown();
+                    showLoader();
+                    searchInput.form.submit();
+                });
+                dropdown.appendChild(item);
+            });
+        });
+
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target !== searchInput && e.target !== dropdown) {
+                closeDropdown();
+            }
+        });
+
+        // Keyboard navigation
+        searchInput.addEventListener('keydown', function(e) {
+            const items = dropdown.querySelectorAll('div');
+            if (dropdown.classList.contains('hidden') || items.length === 0) return;
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                activeIndex = (activeIndex + 1) % items.length;
+                highlightItem(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                activeIndex = (activeIndex - 1 + items.length) % items.length;
+                highlightItem(items);
+            } else if (e.key === 'Enter') {
+                if (activeIndex > -1) {
+                    e.preventDefault();
+                    items[activeIndex].click();
+                }
+            } else if (e.key === 'Escape') {
+                closeDropdown();
+            }
+        });
+    }
+
+    function highlightItem(items) {
+        items.forEach((item, idx) => {
+            if (idx === activeIndex) {
+                item.classList.add('bg-slate-100');
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.classList.remove('bg-slate-100');
+            }
+        });
+    }
+
+    // 5. Flatpickr Date Range Picker Initialization
+    flatpickr("#club-date-range", {
+        mode: "range",
+        dateFormat: "Y-m-d",
+        onClose: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length === 2) {
+                showLoader();
+                instance.element.form.submit();
+            }
+        }
+    });
+});
+</script>

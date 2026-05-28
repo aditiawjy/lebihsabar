@@ -37,23 +37,16 @@ function csvNormalizeTime(string $value, string $fallback): string {
     return preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $value) ? $value : $fallback;
 }
 
+function csvTimeInRange(string $time, string $from, string $to): bool {
+    if ($from <= $to) {
+        return $time >= $from && $time <= $to;
+    }
+    return $time >= $from || $time <= $to;
+}
+
 function csvDateTimeTimestamp(string $date, string $time): ?int {
     $ts = strtotime($date . ' ' . $time . ':00');
     return $ts === false ? null : $ts;
-}
-
-function csvBuildDateTimeWindow(string $dateFrom, string $timeFrom, string $dateTo, string $timeTo): array {
-    $startTs = csvDateTimeTimestamp($dateFrom, $timeFrom) ?? time();
-    $endTs = csvDateTimeTimestamp($dateTo, $timeTo) ?? $startTs;
-    if ($endTs < $startTs) {
-        $endTs = strtotime('+1 day', $endTs);
-    }
-
-    return [
-        'start_ts' => $startTs,
-        'end_ts' => $endTs,
-        'duration_seconds' => max(0, $endTs - $startTs),
-    ];
 }
 
 function csvTimestampInRange(?int $ts, int $startTs, int $endTs): bool {
@@ -68,34 +61,117 @@ function csvBumpDailyMax(array &$dailyCounts, array &$maxByKey, string $key, str
     }
 }
 
-function csvRangeMaxFromEventTimes(array $eventTimes, int $durationSeconds): array {
+function csvDateSpanDays(string $from, string $to): int {
+    $fromTs = strtotime($from . ' 00:00:00');
+    $toTs = strtotime($to . ' 00:00:00');
+    if ($fromTs === false || $toTs === false) {
+        return 1;
+    }
+    return max(1, (int)floor(abs($toTs - $fromTs) / 86400) + 1);
+}
+
+function csvRangeMaxFromDailyCounts(array $dailyCounts, int $windowDays): array {
+    $windowDays = max(1, $windowDays);
+    if (!$dailyCounts) {
+        return ['count' => 0, 'date' => '', 'end_date' => '', 'times' => 0];
+    }
+
+    ksort($dailyCounts);
+    $items = [];
+    foreach ($dailyCounts as $date => $count) {
+        $ts = strtotime($date . ' 00:00:00');
+        if ($ts === false || (int)$count <= 0) {
+            continue;
+        }
+        $items[] = ['date' => $date, 'ts' => $ts, 'count' => (int)$count];
+    }
+
+    $maxCount = 0;
+    $maxStart = '';
+    $maxEnd = '';
+    $maxTimes = 0;
+    foreach ($items as $start) {
+        $endTs = strtotime('+' . ($windowDays - 1) . ' days', $start['ts']);
+        if ($endTs === false) {
+            continue;
+        }
+        $sum = 0;
+        foreach ($items as $item) {
+            if ($item['ts'] < $start['ts']) {
+                continue;
+            }
+            if ($item['ts'] > $endTs) {
+                break;
+            }
+            $sum += $item['count'];
+        }
+
+        if ($sum > $maxCount) {
+            $maxCount = $sum;
+            $maxStart = $start['date'];
+            $maxEnd = date('Y-m-d', $endTs);
+            $maxTimes = 1;
+        } elseif ($sum === $maxCount) {
+            $maxStart = $start['date'];
+            $maxEnd = date('Y-m-d', $endTs);
+            $maxTimes++;
+        }
+    }
+
+    return ['count' => $maxCount, 'date' => $maxStart, 'end_date' => $maxEnd, 'times' => $maxTimes];
+}
+
+function csvAnchoredRangeMaxFromEventTimes(array $eventTimes, string $anchorTime, int $durationSeconds): array {
     if (!$eventTimes) {
         return ['count' => 0, 'date' => '', 'end_date' => '', 'start_at' => '', 'end_at' => '', 'times' => 0];
     }
 
     sort($eventTimes, SORT_NUMERIC);
     $durationSeconds = max(0, $durationSeconds);
+    $candidateStarts = [];
+    foreach ($eventTimes as $ts) {
+        $date = date('Y-m-d', $ts);
+        $sameDayStart = strtotime($date . ' ' . $anchorTime . ':00');
+        $prevDayStart = strtotime('-1 day', $sameDayStart);
+        if ($sameDayStart !== false) {
+            $candidateStarts[$sameDayStart] = true;
+        }
+        if ($prevDayStart !== false) {
+            $candidateStarts[$prevDayStart] = true;
+        }
+    }
+
+    $starts = array_keys($candidateStarts);
+    sort($starts, SORT_NUMERIC);
     $maxCount = 0;
     $maxStartTs = null;
     $maxEndTs = null;
     $maxTimes = 0;
     $left = 0;
+    $right = 0;
     $n = count($eventTimes);
 
-    for ($right = 0; $right < $n; $right++) {
-        while ($left <= $right && ($eventTimes[$right] - $eventTimes[$left]) > $durationSeconds) {
+    foreach ($starts as $startTs) {
+        $endTs = $startTs + $durationSeconds;
+        while ($left < $n && $eventTimes[$left] < $startTs) {
             $left++;
         }
+        if ($right < $left) {
+            $right = $left;
+        }
+        while ($right < $n && $eventTimes[$right] <= $endTs) {
+            $right++;
+        }
+        $count = $right - $left;
 
-        $count = $right - $left + 1;
         if ($count > $maxCount) {
             $maxCount = $count;
-            $maxStartTs = $eventTimes[$left];
-            $maxEndTs = $eventTimes[$left] + $durationSeconds;
+            $maxStartTs = $startTs;
+            $maxEndTs = $endTs;
             $maxTimes = 1;
-        } elseif ($count === $maxCount) {
-            $maxStartTs = $eventTimes[$left];
-            $maxEndTs = $eventTimes[$left] + $durationSeconds;
+        } elseif ($count === $maxCount && $count > 0) {
+            $maxStartTs = $startTs;
+            $maxEndTs = $endTs;
             $maxTimes++;
         }
     }
@@ -108,11 +184,6 @@ function csvRangeMaxFromEventTimes(array $eventTimes, int $durationSeconds): arr
         'end_at' => $maxEndTs === null ? '' : date('Y-m-d H:i', $maxEndTs),
         'times' => $maxTimes,
     ];
-}
-
-function csvDurationLabel(int $durationSeconds): string {
-    $hours = max(1, (int)ceil($durationSeconds / 3600));
-    return $hours . ' Jam';
 }
 
 function csvReadMatches(string $csvPath, callable $onMatch): void {
@@ -227,10 +298,14 @@ if (!strtotime($dateTo)) {
     $dateTo = $_csvDefaultDate;
 }
 if ($dateFrom > $dateTo) [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
-$rangeWindow = csvBuildDateTimeWindow($dateFrom, $timeFrom, $dateTo, $timeTo);
-$rangeStartTs = $rangeWindow['start_ts'];
-$rangeEndTs = $rangeWindow['end_ts'];
-$rangeDurationSeconds = $rangeWindow['duration_seconds'];
+$rangeDays = csvDateSpanDays($dateFrom, $dateTo);
+$useContinuousWindow = $dateFrom !== $dateTo && $timeFrom === $timeTo;
+$rangeStartTs = csvDateTimeTimestamp($dateFrom, $timeFrom) ?? time();
+$rangeEndTs = csvDateTimeTimestamp($dateTo, $timeTo) ?? $rangeStartTs;
+if ($rangeEndTs < $rangeStartTs) {
+    $rangeEndTs = strtotime('+1 day', $rangeEndTs);
+}
+$rangeDurationSeconds = max(0, $rangeEndTs - $rangeStartTs);
 
 // -- Single pass CSV scan: track all markets simultaneously to optimize performance -
 $_allMkts = array_keys($marketOptions);
@@ -239,7 +314,7 @@ $_mmDaily     = []; // mkt => key => [date => count]
 $_mmPeriod    = []; // mkt => key => ['count','date']
 $_mmPeriodDly = []; // mkt => key => [date => count]
 $_mmPeriodTotal = []; // mkt => key => total count across the selected range
-$_mmEvents = []; // mkt => key => scored match timestamps
+$_mmEvents = []; // mkt => key => scored match timestamps for continuous same-time windows
 foreach ($_allMkts as $_mk) {
     $_mmAllTime[$_mk] = [];
     $_mmDaily[$_mk]   = [];
@@ -264,6 +339,11 @@ csvReadMatches($csvPath, function(array $m) use (
     $today,
     $mktParam,
     $hiddenLeagues,
+    $dateFrom,
+    $dateTo,
+    $timeFrom,
+    $timeTo,
+    $useContinuousWindow,
     $rangeStartTs,
     $rangeEndTs,
     $_allMkts,
@@ -289,23 +369,26 @@ csvReadMatches($csvPath, function(array $m) use (
     $hKey = $m['home'].'|'.$m['league'];
     $aKey = $m['away'].'|'.$m['league'];
     $matchTs = csvDateTimeTimestamp($m['date'], $m['time']);
+    $inSelectedTime = csvTimeInRange($m['time'], $timeFrom, $timeTo);
+    $inSelectedPeriod = $useContinuousWindow
+        ? csvTimestampInRange($matchTs, $rangeStartTs, $rangeEndTs)
+        : ($m['date'] >= $dateFrom && $m['date'] <= $dateTo && $inSelectedTime);
 
     // 1. Process all-time and period stats for all markets (equivalent to scan #2)
     $hasFT = csvHasFT($m);
     if ($hasFT) {
         if (!($lgFilter && $m['league'] !== $lgFilter)) {
-            $inPeriod = csvTimestampInRange($matchTs, $rangeStartTs, $rangeEndTs);
             foreach ($_allMkts as $_mk) {
                 // If it is 2.5 market and the league is hidden, skip it
                 if ($_mk === '2.5' && isset($hiddenLeagues[$m['league']])) continue;
-                if (!csvCheckMarket($m, $_mk)) continue;
+                if (!csvCheckMarket($m, $_mk) || (!$useContinuousWindow && !$inSelectedTime)) continue;
                 
                 foreach ([$hKey, $aKey] as $key) {
                     csvBumpDailyMax($_mmDaily[$_mk], $_mmAllTime[$_mk], $key, $m['date']);
-                    if ($matchTs !== null) {
+                    if ($useContinuousWindow && $matchTs !== null) {
                         $_mmEvents[$_mk][$key][] = $matchTs;
                     }
-                    if ($inPeriod) {
+                    if ($inSelectedPeriod) {
                         csvBumpDailyMax($_mmPeriodDly[$_mk], $_mmPeriod[$_mk], $key, $m['date']);
                         $_mmPeriodTotal[$_mk][$key] = ($_mmPeriodTotal[$_mk][$key] ?? 0) + 1;
                     }
@@ -351,8 +434,7 @@ csvReadMatches($csvPath, function(array $m) use (
         }
 
         // Track $inRange count for active market (under_count)
-        $inPeriod = csvTimestampInRange($matchTs, $rangeStartTs, $rangeEndTs);
-        if ($inPeriod && csvCheckMarket($m, $mktParam)) {
+        if ($inSelectedPeriod && csvCheckMarket($m, $mktParam)) {
             $teamsToAdd = [$hKey => $m['home'], $aKey => $m['away']];
             foreach ($teamsToAdd as $key => $team) {
                 if (!isset($inRange[$key])) {
@@ -365,9 +447,8 @@ csvReadMatches($csvPath, function(array $m) use (
     }
 
     if (
-        $matchTs === null ||
         $m['date'] < $today ||
-        !csvTimestampInRange($matchTs, $rangeStartTs, $rangeEndTs)
+        !$inSelectedPeriod
     ) {
         return;
     }
@@ -386,8 +467,14 @@ csvReadMatches($csvPath, function(array $m) use (
 $_mmRangeMax = [];
 foreach ($_allMkts as $_mk) {
     $_mmRangeMax[$_mk] = [];
-    foreach ($_mmEvents[$_mk] as $key => $eventTimes) {
-        $_mmRangeMax[$_mk][$key] = csvRangeMaxFromEventTimes($eventTimes, $rangeDurationSeconds);
+    if ($useContinuousWindow) {
+        foreach ($_mmEvents[$_mk] as $key => $eventTimes) {
+            $_mmRangeMax[$_mk][$key] = csvAnchoredRangeMaxFromEventTimes($eventTimes, $timeFrom, $rangeDurationSeconds);
+        }
+    } else {
+        foreach ($_mmDaily[$_mk] as $key => $dailyCounts) {
+            $_mmRangeMax[$_mk][$key] = csvRangeMaxFromDailyCounts($dailyCounts, $rangeDays);
+        }
     }
 }
 
@@ -640,6 +727,13 @@ function csvShortDateTimeRange(?string $startAt, ?string $endAt): string {
     return date('d/m/y H:i', $startTs) . ' - ' . date('d/m/y H:i', $endTs);
 }
 
+function csvRecordWindowText(array $row, string $dateFormat = 'd/m/y'): string {
+    if (($row['max_start_at'] ?? '') !== '') {
+        return csvShortDateTimeRange($row['max_start_at'], $row['max_end_at'] ?? null);
+    }
+    return csvShortDateRange($row['max_date'] ?? null, $row['max_end_date'] ?? ($row['max_date'] ?? null), $dateFormat);
+}
+
 function csvDaysSince(?string $date): string {
     if (!$date || strtotime($date) === false) return '';
     $days = (int)floor((time() - strtotime($date)) / 86400);
@@ -674,7 +768,9 @@ function csvDisplayTimeMinusOneHour(string $date, string $time): string {
 $mktLabel = $marketOptions[$mktParam]['label'];
 $mktShort = $marketOptions[$mktParam]['short'];
 $mktClass = $marketOptions[$mktParam]['class'];
-$recordRangeLabel = 'Record ' . csvDurationLabel($rangeDurationSeconds);
+$recordRangeLabel = $useContinuousWindow
+    ? 'Record ' . max(1, (int)ceil($rangeDurationSeconds / 3600)) . ' Jam ' . $timeFrom . '-' . $timeTo
+    : (($rangeDays > 1 ? 'Record '.$rangeDays.' Hari' : 'Record Harian') . ' ' . $timeFrom . '-' . $timeTo);
 ?>
 <div class="p-3 sm:p-4 md:p-8 space-y-4 md:space-y-6 page-fade-in">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -945,7 +1041,7 @@ $recordRangeLabel = 'Record ' . csvDurationLabel($rangeDurationSeconds);
                 <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
                     <div class="rounded-lg bg-white p-2">
                         <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Tgl Max</span>
-                        <strong class="block text-slate-700"><?= htmlspecialchars(csvShortDateTimeRange($r['max_start_at'] ?? null, $r['max_end_at'] ?? null)) ?></strong>
+                        <strong class="block text-slate-700"><?= htmlspecialchars(csvRecordWindowText($r)) ?></strong>
                         <?php if ($r['max_date']): ?><span class="text-[10px] text-slate-400"><?= csvDaysSince($r['max_date']) ?></span><?php endif; ?>
                     </div>
                     <div class="rounded-lg bg-white p-2">
@@ -989,7 +1085,7 @@ $recordRangeLabel = 'Record ' . csvDurationLabel($rangeDurationSeconds);
                         <?php if (($r['period_max_count'] ?? 0) > 0): ?><div class="mt-1 text-[10px] text-slate-400">Max harian range <?= $r['period_max_count'] ?></div><?php endif; ?>
                     </td>
                     <td class="px-4 py-3 text-center text-slate-600 font-medium">
-                        <?= htmlspecialchars(csvShortDateTimeRange($r['max_start_at'] ?? null, $r['max_end_at'] ?? null)) ?>
+                        <?= htmlspecialchars(csvRecordWindowText($r)) ?>
                         <?php if ($r['max_date']): ?><div class="text-[10px] text-slate-400"><?= csvDaysSince($r['max_date']) ?></div><?php endif; ?>
                     </td>
                     <td class="px-4 py-3 text-center text-slate-600 <?= ($r['last_match'] ?? null) ? 'bg-sky-50/70 border-l border-sky-100' : '' ?>">
@@ -1107,7 +1203,7 @@ $recordRangeLabel = 'Record ' . csvDurationLabel($rangeDurationSeconds);
                                 <?= htmlspecialchars(csvFormatRatio($r['hits_ratio'])) ?>
                             </span>
                         </td>
-                        <td class="px-4 py-3 text-center text-slate-600 font-medium"><?= htmlspecialchars(csvShortDateTimeRange($r['max_start_at'] ?? null, $r['max_end_at'] ?? null)) ?></td>
+                        <td class="px-4 py-3 text-center text-slate-600 font-medium"><?= htmlspecialchars(csvRecordWindowText($r, 'd-m-y')) ?></td>
                         <td class="px-4 py-3 text-center text-slate-600 <?= ($r['last_match'] ?? null) ? 'bg-sky-50/70 border-l border-sky-100' : '' ?>">
                         <?php if ($r['last_match'] ?? null): ?>
                             <div class="inline-block rounded-lg px-2 py-1">
@@ -1204,7 +1300,7 @@ $recordRangeLabel = 'Record ' . csvDurationLabel($rangeDurationSeconds);
                         </div>
                         <div class="rounded-lg bg-slate-50 p-2">
                             <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Tgl Max</span>
-                            <strong class="text-sm text-slate-700"><?= htmlspecialchars(csvShortDateTimeRange($r['max_start_at'] ?? null, $r['max_end_at'] ?? null)) ?></strong>
+                            <strong class="text-sm text-slate-700"><?= htmlspecialchars(csvRecordWindowText($r)) ?></strong>
                             <?php if ($r['max_date']): ?><span class="text-[10px] text-slate-400"><?= csvDaysSince($r['max_date']) ?></span><?php endif; ?>
                         </div>
                     </div>
@@ -1280,7 +1376,7 @@ $recordRangeLabel = 'Record ' . csvDurationLabel($rangeDurationSeconds);
                         ><?= htmlspecialchars(csvFormatRatio($r['hits_ratio'])) ?></span>
                     </td>
                     <td class="px-4 py-3 text-center text-slate-600 font-medium">
-                        <?= htmlspecialchars(csvShortDateTimeRange($r['max_start_at'] ?? null, $r['max_end_at'] ?? null)) ?>
+                        <?= htmlspecialchars(csvRecordWindowText($r, 'd-m-y')) ?>
                         <?php if ($r['max_date']): ?><div class="text-[10px] text-slate-400"><?= csvDaysSince($r['max_date']) ?></div><?php endif; ?>
                     </td>
                     <td class="px-4 py-3 text-center text-slate-600 <?= ($r['last_match'] ?? null) ? 'bg-sky-50/70 border-l border-sky-100' : '' ?>">

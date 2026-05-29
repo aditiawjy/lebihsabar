@@ -13,11 +13,6 @@
     },
     {
       "type": "file",
-      "name": "assets/app.css",
-      "file": "assets/app.css"
-    },
-    {
-      "type": "file",
       "name": "msports-parser/background.js",
       "file": "msports-parser/background.js"
     },
@@ -98,6 +93,11 @@
     },
     {
       "type": "file",
+      "name": "assets/app.css",
+      "file": "assets/app.css"
+    },
+    {
+      "type": "file",
       "name": "scratch/chrome-profile/WasmTtsEngine/20260514.1/background_compiled.js",
       "file": "scratch/chrome-profile/WasmTtsEngine/20260514.1/background_compiled.js"
     },
@@ -115,6 +115,26 @@
       "type": "file",
       "name": "scratch/chrome-profile/WasmTtsEngine/20260514.1/streaming_worklet_processor.js",
       "file": "scratch/chrome-profile/WasmTtsEngine/20260514.1/streaming_worklet_processor.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/service-worker.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/service-worker.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/background.js",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/background.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_background.js",
+      "file": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_background.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_window.js",
+      "file": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_window.js"
     },
     {
       "type": "file",
@@ -148,11 +168,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/service-worker.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/service-worker.js"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/offscreendocument_main.js",
       "file": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/offscreendocument_main.js"
     },
@@ -165,21 +180,6 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/service_worker_bin_prod.js",
       "file": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/service_worker_bin_prod.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/background.js",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/background.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_background.js",
-      "file": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_background.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_window.js",
-      "file": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_window.js"
     },
     {
       "type": "file",
@@ -293,6 +293,121 @@
     },
     {
       "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.min.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.min.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/lottie-light-esm.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/lottie-light-esm.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/readability.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/readability.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/610.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/610.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_gmail_native-viewer-pdf-tools-module_js.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_gmail_native-viewer-pdf-tools-module_js.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_fte-utils_js.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_fte-utils_js.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_util_js.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_util_js.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/CompressPDFMessageView.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/CompressPDFMessageView.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/FloatingActionButton.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/FloatingActionButton.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/otherVendors.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/otherVendors.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PdfToolsDropdown.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PdfToolsDropdown.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.css",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ProgressCircle.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ProgressCircle.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/SheetsSettingModal.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/SheetsSettingModal.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.css",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.css",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilotEmbeddings.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilotEmbeddings.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ToastManager.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ToastManager.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/vendor.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/vendor.js"
+    },
+    {
+      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/acrobat-content-script.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/acrobat-content-script.js"
     },
@@ -398,118 +513,33 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/610.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/610.js"
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/adaware.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/adaware.css"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_gmail_native-viewer-pdf-tools-module_js.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_gmail_native-viewer-pdf-tools-module_js.js"
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/common.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/common.css"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_fte-utils_js.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_fte-utils_js.js"
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/document-blocked.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/document-blocked.css"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_util_js.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_util_js.js"
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/flexbox.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/flexbox.css"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/CompressPDFMessageView.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/CompressPDFMessageView.js"
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/loading-page.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/loading-page.css"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/FloatingActionButton.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/FloatingActionButton.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/otherVendors.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/otherVendors.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PdfToolsDropdown.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PdfToolsDropdown.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.css",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ProgressCircle.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ProgressCircle.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/SheetsSettingModal.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/SheetsSettingModal.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.css",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.css",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilotEmbeddings.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilotEmbeddings.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ToastManager.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ToastManager.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/vendor.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/vendor.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.min.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.min.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/lottie-light-esm.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/lottie-light-esm.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/readability.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/readability.js"
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/normalize.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/normalize.css"
     },
     {
       "type": "file",
@@ -843,36 +873,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/adaware.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/adaware.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/common.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/common.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/document-blocked.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/document-blocked.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/flexbox.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/flexbox.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/loading-page.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/loading-page.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/normalize.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/normalize.css"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/js/acs.js",
       "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/js/acs.js"
     },
@@ -1093,41 +1093,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-convert-to-pdf-fte-service.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-convert-to-pdf-fte-service.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-convert-to-pdf.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-convert-to-pdf.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-convert-to-pdf-fte.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-convert-to-pdf-fte.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-convert-to-pdf.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-convert-to-pdf.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-sanitize-html-styles.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-sanitize-html-styles.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/state.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/state.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/addWebpage/KWEligibilityService.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/addWebpage/KWEligibilityService.js"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/ch-settings.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/ch-settings.js"
     },
@@ -1243,6 +1208,116 @@
     },
     {
       "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/addWebpage/KWEligibilityService.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/addWebpage/KWEligibilityService.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-convert-to-pdf-fte-service.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-convert-to-pdf-fte-service.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-convert-to-pdf.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-convert-to-pdf.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-convert-to-pdf-fte.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-convert-to-pdf-fte.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-convert-to-pdf.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-convert-to-pdf.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-sanitize-html-styles.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-sanitize-html-styles.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/state.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/state.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point-event-listener.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point-event-listener.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/EmbeddedPDFTouchPointCoachMark.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/EmbeddedPDFTouchPointCoachMark.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-content-script.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-content-script.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-cta-tooltip.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-cta-tooltip.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-fte.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-fte.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-hover-cta.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-hover-cta.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-precaching.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-precaching.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-utils.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-utils.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/image-tools-dropdown.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/image-tools-dropdown.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/responsive-button-handler.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/responsive-button-handler.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/single-click-cta.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/single-click-cta.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-content-script.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-content-script.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-fetch-interceptor.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-fetch-interceptor.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-fte.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-fte.js"
+    },
+    {
+      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdrive/api-parsing-util.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdrive/api-parsing-util.js"
     },
@@ -1298,81 +1373,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-content-script.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-content-script.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-fetch-interceptor.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-fetch-interceptor.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-fte.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-fte.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-content-script.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-content-script.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-cta-tooltip.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-cta-tooltip.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-fte.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-fte.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-hover-cta.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-hover-cta.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-precaching.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-precaching.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-utils.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-utils.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/image-tools-dropdown.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/image-tools-dropdown.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/responsive-button-handler.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/responsive-button-handler.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/single-click-cta.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/single-click-cta.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point-event-listener.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point-event-listener.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/EmbeddedPDFTouchPointCoachMark.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/EmbeddedPDFTouchPointCoachMark.js"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gemini/gemini-api-response-service.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gemini/gemini-api-response-service.js"
     },
@@ -1420,66 +1420,6 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gemini/state.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gemini/state.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-content-script.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-content-script.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-fte-service.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-fte-service.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-fte.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-fte.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-inject.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-inject.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-response-service.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-response-service.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/state.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/state.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-content-script.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-content-script.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-error-toast-service.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-error-toast-service.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-fte-service.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-fte-service.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-fte.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-fte.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-inject.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-inject.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/state.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/state.js"
     },
     {
       "type": "file",
@@ -1598,48 +1538,63 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/prompts/ShowOneChild.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/prompts/ShowOneChild.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-content-script.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-content-script.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/ToastManager/styles-inline.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/ToastManager/styles-inline.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-fte-service.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-fte-service.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/ActionableCoachmark.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/ActionableCoachmark.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-fte.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-fte.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/AnimateCannedQuestions.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/AnimateCannedQuestions.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-inject.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-inject.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/AttributionManager.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/AttributionManager.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-response-service.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-response-service.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FABManager.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FABManager.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/state.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/state.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/GenAIWebpageBlocklist.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/GenAIWebpageBlocklist.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-content-script.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-content-script.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/GenAIWebpageEligibilityService.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/GenAIWebpageEligibilityService.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-error-toast-service.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-error-toast-service.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/Viewport.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/Viewport.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-fte-service.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-fte-service.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-fte.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-fte.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-inject.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-inject.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/state.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/state.js"
     },
     {
       "type": "file",
@@ -1678,13 +1633,48 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/touchpoint-base.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/touchpoint-base.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/ActionableCoachmark.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/ActionableCoachmark.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/verb-execution-service.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/verb-execution-service.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/AnimateCannedQuestions.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/AnimateCannedQuestions.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/AttributionManager.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/AttributionManager.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FABManager.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FABManager.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/GenAIWebpageBlocklist.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/GenAIWebpageBlocklist.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/GenAIWebpageEligibilityService.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/GenAIWebpageEligibilityService.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/Viewport.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/Viewport.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/ToastManager/styles-inline.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/ToastManager/styles-inline.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/prompts/ShowOneChild.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/prompts/ShowOneChild.js"
     },
     {
       "type": "file",
@@ -1695,6 +1685,11 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/extractWebpageHTML.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/extractWebpageHTML.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/chromeOS/handler.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/chromeOS/handler.js"
     },
     {
       "type": "file",
@@ -1715,11 +1710,6 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/utils/util.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/utils/util.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/chromeOS/handler.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/chromeOS/handler.js"
     },
     {
       "type": "file",
@@ -1748,13 +1738,13 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/gsuite/google-docs-module.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/gsuite/google-docs-module.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/touchpoint-base.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/touchpoint-base.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/gsuite/util.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/gsuite/util.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/verb-execution-service.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/verb-execution-service.js"
     },
     {
       "type": "file",
@@ -1765,6 +1755,16 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/express/express-enablement.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/express/express-enablement.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/gsuite/google-docs-module.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/gsuite/google-docs-module.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/gsuite/util.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/gsuite/util.js"
     },
     {
       "type": "file",
@@ -1820,6 +1820,31 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/offscreen/sidePanelCSSSRService.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/offscreen/sidePanelCSSSRService.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/condition-evaluator.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/condition-evaluator.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/config-loader.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/config-loader.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/default-value-evaluator.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/default-value-evaluator.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/preference-utils.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/preference-utils.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/state-manager.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/state-manager.js"
     },
     {
       "type": "file",
@@ -1913,41 +1938,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdrive/fte/gdrive-convert-attachment-card-fte.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdrive/fte/gdrive-convert-attachment-card-fte.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/condition-evaluator.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/condition-evaluator.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/config-loader.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/config-loader.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/default-value-evaluator.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/default-value-evaluator.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/preference-utils.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/preference-utils.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/state-manager.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/state-manager.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/SheetsSettingModal/styles-inline.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/SheetsSettingModal/styles-inline.js"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/browser-image-viewer/browser-image-viewer-content-script.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/browser-image-viewer/browser-image-viewer-content-script.js"
     },
@@ -1983,6 +1973,11 @@
     },
     {
       "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/facebook/facebook-content-script.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/facebook/facebook-content-script.js"
+    },
+    {
+      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express_whatsapp/whatsapp-content-script.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express_whatsapp/whatsapp-content-script.js"
     },
@@ -2003,8 +1998,8 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/facebook/facebook-content-script.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/facebook/facebook-content-script.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/fte/express-contextual-fte.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/fte/express-contextual-fte.js"
     },
     {
       "type": "file",
@@ -2020,11 +2015,6 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/gdrive/image-gdrive-touchpoint-service.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/gdrive/image-gdrive-touchpoint-service.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/fte/express-contextual-fte.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/fte/express-contextual-fte.js"
     },
     {
       "type": "file",
@@ -2098,13 +2088,18 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/pillsConfig.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/pillsConfig.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/SheetsSettingModal/styles-inline.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/SheetsSettingModal/styles-inline.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/styles-inline.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/styles-inline.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdrive/fte/gdrive-convert-attachment-card-fte.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdrive/fte/gdrive-convert-attachment-card-fte.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/styles-inline.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/styles-inline.js"
     },
     {
       "type": "file",
@@ -2123,13 +2118,23 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/styles-inline.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/styles-inline.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/PdfToolsDropdown/styles-inline.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/PdfToolsDropdown/styles-inline.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/PdfToolsDropdown/styles-inline.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/PdfToolsDropdown/styles-inline.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/pillsConfig.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/pillsConfig.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/styles-inline.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/styles-inline.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/utils/compressPDFUtils.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/utils/compressPDFUtils.js"
     },
     {
       "type": "file",
@@ -2175,11 +2180,6 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/utils/fabUtils.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/utils/fabUtils.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/utils/compressPDFUtils.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/utils/compressPDFUtils.js"
     }
   ],
   "unusedExports": [],
@@ -2196,11 +2196,6 @@
     },
     {
       "type": "file",
-      "name": "assets/app.css",
-      "file": "assets/app.css"
-    },
-    {
-      "type": "file",
       "name": "msports-parser/background.js",
       "file": "msports-parser/background.js"
     },
@@ -2281,6 +2276,11 @@
     },
     {
       "type": "file",
+      "name": "assets/app.css",
+      "file": "assets/app.css"
+    },
+    {
+      "type": "file",
       "name": "scratch/chrome-profile/WasmTtsEngine/20260514.1/background_compiled.js",
       "file": "scratch/chrome-profile/WasmTtsEngine/20260514.1/background_compiled.js"
     },
@@ -2298,6 +2298,26 @@
       "type": "file",
       "name": "scratch/chrome-profile/WasmTtsEngine/20260514.1/streaming_worklet_processor.js",
       "file": "scratch/chrome-profile/WasmTtsEngine/20260514.1/streaming_worklet_processor.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/service-worker.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/service-worker.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/background.js",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/background.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_background.js",
+      "file": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_background.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_window.js",
+      "file": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_window.js"
     },
     {
       "type": "file",
@@ -2331,11 +2351,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/service-worker.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/service-worker.js"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/offscreendocument_main.js",
       "file": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/offscreendocument_main.js"
     },
@@ -2348,21 +2363,6 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/service_worker_bin_prod.js",
       "file": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/service_worker_bin_prod.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/background.js",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/background.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_background.js",
-      "file": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_background.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_window.js",
-      "file": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_window.js"
     },
     {
       "type": "file",
@@ -2476,6 +2476,121 @@
     },
     {
       "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.min.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.min.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/lottie-light-esm.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/lottie-light-esm.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/readability.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/readability.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/610.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/610.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_gmail_native-viewer-pdf-tools-module_js.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_gmail_native-viewer-pdf-tools-module_js.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_fte-utils_js.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_fte-utils_js.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_util_js.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_util_js.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/CompressPDFMessageView.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/CompressPDFMessageView.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/FloatingActionButton.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/FloatingActionButton.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/otherVendors.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/otherVendors.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PdfToolsDropdown.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PdfToolsDropdown.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.css",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ProgressCircle.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ProgressCircle.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/SheetsSettingModal.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/SheetsSettingModal.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.css",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.css",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilotEmbeddings.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilotEmbeddings.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ToastManager.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ToastManager.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/vendor.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/vendor.js"
+    },
+    {
+      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/acrobat-content-script.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/acrobat-content-script.js"
     },
@@ -2581,118 +2696,33 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/610.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/610.js"
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/adaware.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/adaware.css"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_gmail_native-viewer-pdf-tools-module_js.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_gmail_native-viewer-pdf-tools-module_js.js"
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/common.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/common.css"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_fte-utils_js.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_fte-utils_js.js"
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/document-blocked.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/document-blocked.css"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_util_js.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_util_js.js"
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/flexbox.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/flexbox.css"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/CompressPDFMessageView.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/CompressPDFMessageView.js"
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/loading-page.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/loading-page.css"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/FloatingActionButton.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/FloatingActionButton.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/otherVendors.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/otherVendors.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PdfToolsDropdown.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PdfToolsDropdown.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.css",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ProgressCircle.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ProgressCircle.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/SheetsSettingModal.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/SheetsSettingModal.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.css",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.css",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilotEmbeddings.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilotEmbeddings.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ToastManager.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ToastManager.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/vendor.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/vendor.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.min.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.min.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/lottie-light-esm.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/lottie-light-esm.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/readability.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/readability.js"
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/normalize.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/normalize.css"
     },
     {
       "type": "file",
@@ -3026,36 +3056,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/adaware.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/adaware.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/common.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/common.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/document-blocked.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/document-blocked.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/flexbox.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/flexbox.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/loading-page.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/loading-page.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/normalize.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/normalize.css"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/js/acs.js",
       "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/js/acs.js"
     },
@@ -3276,41 +3276,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-convert-to-pdf-fte-service.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-convert-to-pdf-fte-service.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-convert-to-pdf.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-convert-to-pdf.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-convert-to-pdf-fte.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-convert-to-pdf-fte.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-convert-to-pdf.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-convert-to-pdf.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-sanitize-html-styles.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-sanitize-html-styles.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/state.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/state.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/addWebpage/KWEligibilityService.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/addWebpage/KWEligibilityService.js"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/ch-settings.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/ch-settings.js"
     },
@@ -3426,6 +3391,116 @@
     },
     {
       "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/addWebpage/KWEligibilityService.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/addWebpage/KWEligibilityService.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-convert-to-pdf-fte-service.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-convert-to-pdf-fte-service.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-convert-to-pdf.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-convert-to-pdf.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-convert-to-pdf-fte.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-convert-to-pdf-fte.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-convert-to-pdf.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-convert-to-pdf.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-sanitize-html-styles.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/chatgpt-deep-research-sanitize-html-styles.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/state.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/chatgpt/state.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point-event-listener.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point-event-listener.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/EmbeddedPDFTouchPointCoachMark.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/EmbeddedPDFTouchPointCoachMark.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-content-script.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-content-script.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-cta-tooltip.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-cta-tooltip.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-fte.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-fte.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-hover-cta.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-hover-cta.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-precaching.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-precaching.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-utils.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-utils.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/image-tools-dropdown.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/image-tools-dropdown.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/responsive-button-handler.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/responsive-button-handler.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/single-click-cta.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/single-click-cta.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-content-script.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-content-script.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-fetch-interceptor.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-fetch-interceptor.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-fte.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-fte.js"
+    },
+    {
+      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdrive/api-parsing-util.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdrive/api-parsing-util.js"
     },
@@ -3481,81 +3556,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-content-script.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-content-script.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-fetch-interceptor.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-fetch-interceptor.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-fte.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/google-docs-fte.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-content-script.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-content-script.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-cta-tooltip.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-cta-tooltip.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-fte.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-fte.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-hover-cta.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-hover-cta.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-precaching.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-precaching.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-utils.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-utils.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/image-tools-dropdown.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/image-tools-dropdown.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/responsive-button-handler.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/responsive-button-handler.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/single-click-cta.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/single-click-cta.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point-event-listener.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point-event-listener.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/EmbeddedPDFTouchPointCoachMark.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/EmbeddedPDFTouchPointCoachMark.js"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gemini/gemini-api-response-service.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gemini/gemini-api-response-service.js"
     },
@@ -3603,66 +3603,6 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gemini/state.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gemini/state.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-content-script.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-content-script.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-fte-service.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-fte-service.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-fte.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-fte.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-inject.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-inject.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-response-service.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-response-service.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/state.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/state.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-content-script.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-content-script.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-error-toast-service.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-error-toast-service.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-fte-service.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-fte-service.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-fte.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-fte.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-inject.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-inject.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/state.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/state.js"
     },
     {
       "type": "file",
@@ -3781,48 +3721,63 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/prompts/ShowOneChild.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/prompts/ShowOneChild.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-content-script.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-content-script.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/ToastManager/styles-inline.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/ToastManager/styles-inline.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-fte-service.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-fte-service.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/ActionableCoachmark.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/ActionableCoachmark.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-fte.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-fte.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/AnimateCannedQuestions.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/AnimateCannedQuestions.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-inject.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-inject.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/AttributionManager.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/AttributionManager.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-response-service.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/linkedin-response-service.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FABManager.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FABManager.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/state.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/linkedin/state.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/GenAIWebpageBlocklist.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/GenAIWebpageBlocklist.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-content-script.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-content-script.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/GenAIWebpageEligibilityService.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/GenAIWebpageEligibilityService.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-error-toast-service.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-error-toast-service.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/Viewport.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/Viewport.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-fte-service.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-fte-service.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-fte.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-fte.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-inject.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/outlook-inject.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/state.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/outlook/state.js"
     },
     {
       "type": "file",
@@ -3861,13 +3816,48 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/touchpoint-base.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/touchpoint-base.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/ActionableCoachmark.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/ActionableCoachmark.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/verb-execution-service.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/verb-execution-service.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/AnimateCannedQuestions.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/AnimateCannedQuestions.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/AttributionManager.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/AttributionManager.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FABManager.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FABManager.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/GenAIWebpageBlocklist.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/GenAIWebpageBlocklist.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/GenAIWebpageEligibilityService.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/GenAIWebpageEligibilityService.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/Viewport.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/Viewport.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/ToastManager/styles-inline.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/ToastManager/styles-inline.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/prompts/ShowOneChild.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/prompts/ShowOneChild.js"
     },
     {
       "type": "file",
@@ -3878,6 +3868,11 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/extractWebpageHTML.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/extractWebpageHTML.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/chromeOS/handler.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/chromeOS/handler.js"
     },
     {
       "type": "file",
@@ -3898,11 +3893,6 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/utils/util.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/utils/util.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/chromeOS/handler.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/chromeOS/handler.js"
     },
     {
       "type": "file",
@@ -3931,13 +3921,13 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/gsuite/google-docs-module.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/gsuite/google-docs-module.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/touchpoint-base.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/touchpoint-base.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/gsuite/util.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/gsuite/util.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/verb-execution-service.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/verb-execution-service.js"
     },
     {
       "type": "file",
@@ -3948,6 +3938,16 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/express/express-enablement.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/express/express-enablement.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/gsuite/google-docs-module.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/gsuite/google-docs-module.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/gsuite/util.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/gsuite/util.js"
     },
     {
       "type": "file",
@@ -4003,6 +4003,31 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/offscreen/sidePanelCSSSRService.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/offscreen/sidePanelCSSSRService.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/condition-evaluator.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/condition-evaluator.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/config-loader.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/config-loader.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/default-value-evaluator.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/default-value-evaluator.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/preference-utils.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/preference-utils.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/state-manager.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/state-manager.js"
     },
     {
       "type": "file",
@@ -4096,41 +4121,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdrive/fte/gdrive-convert-attachment-card-fte.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdrive/fte/gdrive-convert-attachment-card-fte.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/condition-evaluator.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/condition-evaluator.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/config-loader.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/config-loader.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/default-value-evaluator.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/default-value-evaluator.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/preference-utils.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/preference-utils.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/state-manager.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/browser/js/preferences/state-manager.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/SheetsSettingModal/styles-inline.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/SheetsSettingModal/styles-inline.js"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/browser-image-viewer/browser-image-viewer-content-script.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/browser-image-viewer/browser-image-viewer-content-script.js"
     },
@@ -4166,6 +4156,11 @@
     },
     {
       "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/facebook/facebook-content-script.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/facebook/facebook-content-script.js"
+    },
+    {
+      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express_whatsapp/whatsapp-content-script.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express_whatsapp/whatsapp-content-script.js"
     },
@@ -4186,8 +4181,8 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/facebook/facebook-content-script.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/facebook/facebook-content-script.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/fte/express-contextual-fte.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/fte/express-contextual-fte.js"
     },
     {
       "type": "file",
@@ -4203,11 +4198,6 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/gdrive/image-gdrive-touchpoint-service.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/gdrive/image-gdrive-touchpoint-service.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/fte/express-contextual-fte.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/fte/express-contextual-fte.js"
     },
     {
       "type": "file",
@@ -4281,13 +4271,18 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/pillsConfig.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/pillsConfig.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/SheetsSettingModal/styles-inline.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdocs/SheetsSettingModal/styles-inline.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/styles-inline.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/styles-inline.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdrive/fte/gdrive-convert-attachment-card-fte.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gdrive/fte/gdrive-convert-attachment-card-fte.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/styles-inline.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/styles-inline.js"
     },
     {
       "type": "file",
@@ -4306,13 +4301,23 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/styles-inline.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/styles-inline.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/PdfToolsDropdown/styles-inline.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/PdfToolsDropdown/styles-inline.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/PdfToolsDropdown/styles-inline.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/PdfToolsDropdown/styles-inline.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/pillsConfig.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/pillsConfig.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/styles-inline.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/styles-inline.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/utils/compressPDFUtils.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/utils/compressPDFUtils.js"
     },
     {
       "type": "file",
@@ -4358,11 +4363,6 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/utils/fabUtils.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/SidePanel/FloatingActionButton/utils/fabUtils.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/utils/compressPDFUtils.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/utils/compressPDFUtils.js"
     }
   ],
   "unusedDeps": [],

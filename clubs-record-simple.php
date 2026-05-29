@@ -3,15 +3,16 @@ date_default_timezone_set('Asia/Jakarta');
 
 // -- Market options ------------------------------------------------------------
 $marketOptions = [
-    '0.5'       => ['label' => 'Under 0.5',       'short' => 'U0.5',  'class' => 'bg-blue-500 text-white'],
-    '1.5'       => ['label' => 'Under 1.5',       'short' => 'U1.5',  'class' => 'bg-sky-500 text-white'],
-    '2.5'       => ['label' => 'Under 2.5',       'short' => 'U2.5',  'class' => 'bg-cyan-500 text-white'],
-    'fhg0.5'    => ['label' => 'FHG Under 0.5',   'short' => 'FHG',   'class' => 'bg-violet-500 text-white'],
-    'shg0.5'    => ['label' => 'SHG Under 0.5',   'short' => 'SHG',   'class' => 'bg-fuchsia-500 text-white'],
-    'odd_goal'  => ['label' => 'Odd Goal',        'short' => 'ODD',   'class' => 'bg-orange-500 text-white'],
-    'even_goal' => ['label' => 'Even Goal',       'short' => 'EVEN',  'class' => 'bg-emerald-500 text-white'],
-    '!2-3'      => ['label' => '!2-3 Goal',        'short' => '!2-3',  'class' => 'bg-red-600 text-white'],
-    '2h_gt_1h'  => ['label' => '2H > 1H',          'short' => '2H>1H', 'class' => 'bg-teal-600 text-white'],
+    '0.5'       => ['label' => 'Under 0.5',       'short' => 'U0.5',  'class' => 'text-white', 'style' => 'background:#3b82f6;color:#fff;'],
+    '1.5'       => ['label' => 'Under 1.5',       'short' => 'U1.5',  'class' => 'text-white', 'style' => 'background:#0ea5e9;color:#fff;'],
+    '2.5'       => ['label' => 'Under 2.5',       'short' => 'U2.5',  'class' => 'text-white', 'style' => 'background:#06b6d4;color:#fff;'],
+    'fhg0.5'    => ['label' => 'FHG Under 0.5',   'short' => 'FHG',   'class' => 'text-white', 'style' => 'background:#8b5cf6;color:#fff;'],
+    'shg0.5'    => ['label' => 'SHG Under 0.5',   'short' => 'SHG',   'class' => 'text-white', 'style' => 'background:#d946ef;color:#fff;'],
+    'odd_goal'  => ['label' => 'Odd Goal',        'short' => 'ODD',   'class' => 'text-white', 'style' => 'background:#f97316;color:#fff;'],
+    'even_goal' => ['label' => 'Even Goal',       'short' => 'EVEN',  'class' => 'text-white', 'style' => 'background:#10b981;color:#fff;'],
+    '!2-3'      => ['label' => '!2-3 Goal',        'short' => '!2-3',  'class' => 'text-white', 'style' => 'background:#dc2626;color:#fff;'],
+    '2h_gt_1h'  => ['label' => '2H > 1H',          'short' => '2H>1H', 'class' => 'text-white', 'style' => 'background:#0f766e;color:#fff;min-width:44px;text-align:center;'],
+    '1h0_ftover'=> ['label' => '1H=0 & FT Over',   'short' => 'LATE',  'class' => 'text-white', 'style' => 'background:#0f172a;color:#fff;min-width:44px;text-align:center;'],
 ];
 
 function csvCheckMarket(array $m, string $mkt): bool {
@@ -27,6 +28,7 @@ function csvCheckMarket(array $m, string $mkt): bool {
         'even_goal' => ($ftH + $ftA) % 2 === 0,
         '!2-3'      => ($ftH + $ftA) !== 2 && ($ftH + $ftA) !== 3,
         '2h_gt_1h'  => (($ftH - $fhH) + ($ftA - $fhA)) > ($fhH + $fhA),
+        '1h0_ftover'=> ($fhH + $fhA) === 0 && ($ftH + $ftA) > 0,
         default     => false,
     };
 }
@@ -301,7 +303,7 @@ if (!strtotime($dateTo)) {
 }
 if ($dateFrom > $dateTo) [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
 $rangeDays = csvDateSpanDays($dateFrom, $dateTo);
-$useContinuousWindow = $dateFrom !== $dateTo && $timeFrom === $timeTo;
+$useContinuousWindow = $dateFrom !== $dateTo;
 $rangeStartTs = csvDateTimeTimestamp($dateFrom, $timeFrom) ?? time();
 $rangeEndTs = csvDateTimeTimestamp($dateTo, $timeTo) ?? $rangeStartTs;
 if ($rangeEndTs < $rangeStartTs) {
@@ -770,6 +772,7 @@ function csvDisplayTimeMinusOneHour(string $date, string $time): string {
 $mktLabel = $marketOptions[$mktParam]['label'];
 $mktShort = $marketOptions[$mktParam]['short'];
 $mktClass = $marketOptions[$mktParam]['class'];
+$mktStyle = $marketOptions[$mktParam]['style'] ?? '';
 $recordRangeLabel = $useContinuousWindow
     ? 'Record ' . max(1, (int)ceil($rangeDurationSeconds / 3600)) . ' Jam ' . $timeFrom . '-' . $timeTo
     : (($rangeDays > 1 ? 'Record '.$rangeDays.' Hari' : 'Record Harian') . ' ' . $timeFrom . '-' . $timeTo);
@@ -1022,7 +1025,7 @@ $recordRangeLabel = $useContinuousWindow
         </div>
         <div class="grid gap-3 p-3 md:hidden">
             <?php foreach ($allTimeMaxMultiMarket as $i => $r):
-                $_rmkt = $marketOptions[$r['market']] ?? ['short'=>$r['market'],'class'=>'bg-slate-500 text-white'];
+                $_rmkt = $marketOptions[$r['market']] ?? ['short'=>$r['market'],'class'=>'text-white','style'=>'background:#64748b;color:#fff;'];
                 $isHidden = $i >= 10;
             ?>
             <article class="rounded-xl border p-3 <?= $r['period_count'] >= $r['max_count'] ? 'border-emerald-200 bg-emerald-50' : 'border-indigo-100 bg-indigo-50/50' ?> all-time-max-hidden" <?= $isHidden ? 'style="display: none;"' : '' ?>>
@@ -1030,7 +1033,7 @@ $recordRangeLabel = $useContinuousWindow
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
                             <span class="text-[10px] font-black text-indigo-600">#<?= $i + 1 ?></span>
-                            <span class="px-2 py-1 rounded-lg text-[10px] font-bold <?= $_rmkt['class'] ?>"><?= htmlspecialchars($_rmkt['short']) ?></span>
+                            <span class="px-2 py-1 rounded-lg text-[10px] font-bold <?= $_rmkt['class'] ?>" style="<?= htmlspecialchars($_rmkt['style'] ?? '') ?>"><?= htmlspecialchars($_rmkt['short']) ?></span>
                         </div>
                         <h2 class="mt-2 text-base font-black text-slate-900"><?= htmlspecialchars($r['team']) ?></h2>
                         <p class="mt-0.5 text-[10px] uppercase tracking-wide text-slate-500"><?= htmlspecialchars($r['league']) ?></p>
@@ -1071,7 +1074,7 @@ $recordRangeLabel = $useContinuousWindow
             </thead>
             <tbody class="divide-y divide-slate-100">
             <?php foreach ($allTimeMaxMultiMarket as $i => $r):
-                $_rmkt = $marketOptions[$r['market']] ?? ['short'=>$r['market'],'class'=>'bg-slate-500 text-white'];
+                $_rmkt = $marketOptions[$r['market']] ?? ['short'=>$r['market'],'class'=>'text-white','style'=>'background:#64748b;color:#fff;'];
                 $isHidden = $i >= 10;
             ?>
                 <tr class="hover:bg-indigo-50/30 transition-all <?= $r['period_count'] >= $r['max_count'] ? 'bg-emerald-50' : '' ?> all-time-max-hidden" <?= $isHidden ? 'style="display: none;"' : '' ?>>
@@ -1080,7 +1083,7 @@ $recordRangeLabel = $useContinuousWindow
                         <div class="font-bold text-slate-900"><?= htmlspecialchars($r['team']) ?></div>
                         <div class="text-[10px] text-slate-500"><?= htmlspecialchars($r['league']) ?></div>
                     </td>
-                    <td class="px-4 py-3 text-center"><span class="px-2 py-1 rounded-lg text-[10px] font-bold <?= $_rmkt['class'] ?>"><?= htmlspecialchars($_rmkt['short']) ?></span></td>
+                    <td class="px-4 py-3 text-center"><span class="px-2 py-1 rounded-lg text-[10px] font-bold <?= $_rmkt['class'] ?>" style="<?= htmlspecialchars($_rmkt['style'] ?? '') ?>"><?= htmlspecialchars($_rmkt['short']) ?></span></td>
                     <td class="px-4 py-3 text-center"><span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 font-black text-sm"><?= $r['period_count'] ?></span></td>
                     <td class="px-4 py-3 text-center">
                         <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-black text-sm"><?= $r['max_count'] ?><?= ($r['max_times'] ?? 0) > 1 ? ' <span class="text-[10px] font-normal opacity-70">('.$r['max_times'].'x)</span>' : '' ?></span>
@@ -1145,7 +1148,7 @@ $recordRangeLabel = $useContinuousWindow
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
                             <span class="text-[10px] font-black text-rose-600">#<?= $i + 1 ?></span>
-                            <span class="px-2 py-1 rounded-lg text-[10px] font-bold <?= $mktClass ?>"><?= $mktShort ?></span>
+                            <span class="px-2 py-1 rounded-lg text-[10px] font-bold <?= $mktClass ?>" style="<?= htmlspecialchars($mktStyle) ?>"><?= $mktShort ?></span>
                             <span class="px-2 py-1 rounded-full text-[10px] font-black <?= csvRatioBadgeClass($r['hits_ratio']) ?>"><?= htmlspecialchars(csvFormatRatio($r['hits_ratio'])) ?></span>
                         </div>
                         <h2 class="mt-2 text-base font-black text-slate-900"><?= htmlspecialchars($r['team']) ?></h2>
@@ -1193,7 +1196,7 @@ $recordRangeLabel = $useContinuousWindow
             ?>
                 <tr class="hover:bg-rose-50/30 transition-all record-breakers-hidden" <?= $isHidden ? 'style="display: none;"' : '' ?>>
                     <td class="px-4 py-3 text-slate-400 font-medium"><?= $i + 1 ?></td>
-                    <td class="px-4 py-3"><span class="px-2 py-1 rounded-lg text-[10px] font-bold <?= $mktClass ?>"><?= $mktShort ?></span></td>
+                    <td class="px-4 py-3"><span class="px-2 py-1 rounded-lg text-[10px] font-bold <?= $mktClass ?>" style="<?= htmlspecialchars($mktStyle) ?>"><?= $mktShort ?></span></td>
                     <td class="px-4 py-3 min-w-[220px]">
                         <div class="font-bold text-slate-900"><?= htmlspecialchars($r['team']) ?></div>
                         <div class="text-[10px] text-slate-500"><?= htmlspecialchars($r['league']) ?></div>

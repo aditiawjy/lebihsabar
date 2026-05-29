@@ -13,6 +13,8 @@ $marketOptions = [
     '!2-3'      => ['label' => '!2-3 Goal',        'short' => '!2-3',  'class' => 'text-white', 'style' => 'background:#dc2626;color:#fff;'],
     '2h_gt_1h'  => ['label' => '2H > 1H',          'short' => '2H>1H', 'class' => 'text-white', 'style' => 'background:#0f766e;color:#fff;min-width:44px;text-align:center;'],
     '1h0_ftover'=> ['label' => '1H=0 & FT Over',   'short' => 'LATE',  'class' => 'text-white', 'style' => 'background:#0f172a;color:#fff;min-width:44px;text-align:center;'],
+    'o1.5'      => ['label' => 'Over 1.5',         'short' => 'O1.5',  'class' => 'text-white', 'style' => 'background:#16a34a;color:#fff;min-width:44px;text-align:center;'],
+    'o2.5'      => ['label' => 'Over 2.5',         'short' => 'O2.5',  'class' => 'text-white', 'style' => 'background:#15803d;color:#fff;min-width:44px;text-align:center;'],
 ];
 
 function csvCheckMarket(array $m, string $mkt): bool {
@@ -29,6 +31,8 @@ function csvCheckMarket(array $m, string $mkt): bool {
         '!2-3'      => ($ftH + $ftA) !== 2 && ($ftH + $ftA) !== 3,
         '2h_gt_1h'  => (($ftH - $fhH) + ($ftA - $fhA)) > ($fhH + $fhA),
         '1h0_ftover'=> ($fhH + $fhA) === 0 && ($ftH + $ftA) > 0,
+        'o1.5'      => ($ftH + $ftA) > 1,
+        'o2.5'      => ($ftH + $ftA) > 2,
         default     => false,
     };
 }

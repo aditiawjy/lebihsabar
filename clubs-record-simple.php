@@ -8,8 +8,8 @@ $marketOptions = [
     '2.5'       => ['label' => 'Under 2.5',       'short' => 'U2.5',  'class' => 'bg-cyan-500 text-white'],
     'fhg0.5'    => ['label' => 'FHG Under 0.5',   'short' => 'FHG',   'class' => 'bg-violet-500 text-white'],
     'shg0.5'    => ['label' => 'SHG Under 0.5',   'short' => 'SHG',   'class' => 'bg-fuchsia-500 text-white'],
-    'draw_ft'   => ['label' => 'Draw FT',          'short' => 'DRAW',  'class' => 'bg-indigo-500 text-white'],
-    'no_draw'   => ['label' => 'No Draw',          'short' => 'NODRAW','class' => 'bg-amber-500 text-white'],
+    'odd_goal'  => ['label' => 'Odd Goal',        'short' => 'ODD',   'class' => 'bg-orange-500 text-white'],
+    'even_goal' => ['label' => 'Even Goal',       'short' => 'EVEN',  'class' => 'bg-emerald-500 text-white'],
     '!2-3'      => ['label' => '!2-3 Goal',        'short' => '!2-3',  'class' => 'bg-red-600 text-white'],
 ];
 
@@ -17,15 +17,15 @@ function csvCheckMarket(array $m, string $mkt): bool {
     $ftH = (int)$m['ft_home']; $ftA = (int)$m['ft_away'];
     $fhH = (int)$m['fh_home']; $fhA = (int)$m['fh_away'];
     return match($mkt) {
-        '0.5'     => ($ftH + $ftA) < 1,
-        '1.5'     => ($ftH + $ftA) < 2,
-        '2.5'     => ($ftH + $ftA) < 3,
-        'fhg0.5'  => ($fhH + $fhA) < 1,
-        'shg0.5'  => (($ftH - $fhH) + ($ftA - $fhA)) < 1,
-        'draw_ft'  => $ftH === $ftA,
-        'no_draw' => $ftH !== $ftA,
-        '!2-3'    => ($ftH + $ftA) !== 2 && ($ftH + $ftA) !== 3,
-        default    => false,
+        '0.5'       => ($ftH + $ftA) < 1,
+        '1.5'       => ($ftH + $ftA) < 2,
+        '2.5'       => ($ftH + $ftA) < 3,
+        'fhg0.5'    => ($fhH + $fhA) < 1,
+        'shg0.5'    => (($ftH - $fhH) + ($ftA - $fhA)) < 1,
+        'odd_goal'  => ($ftH + $ftA) % 2 !== 0,
+        'even_goal' => ($ftH + $ftA) % 2 === 0,
+        '!2-3'      => ($ftH + $ftA) !== 2 && ($ftH + $ftA) !== 3,
+        default     => false,
     };
 }
 function csvHasFT(array $m): bool {
@@ -282,7 +282,7 @@ $pg         = max(1, (int)($_GET['pg'] ?? 1));
 $perPageOpt = [25, 50, 100, 200];
 $perPageRaw = (int)($_GET['per_page'] ?? 50);
 $perPage    = in_array($perPageRaw, $perPageOpt) ? $perPageRaw : 50;
-$showNearAllTimeMax = isset($_GET['show_near_all_time_max']) && $_GET['show_near_all_time_max'] === '1';
+$showNearAllTimeMax = false; // Disabled sementara waktu
 
 if (!in_array($sortCol, ['team', 'under_count', 'max_count', 'max_date', 'hits_ratio'], true)) {
     $sortCol = 'hits_ratio';
@@ -918,9 +918,9 @@ $recordRangeLabel = $useContinuousWindow
         </div>
         
         <div class="club-filter-extra">
-            <div class="flex items-center gap-2">
-                <input type="checkbox" name="show_near_all_time_max" value="1" id="show_near_all_time_max" <?= $showNearAllTimeMax ? 'checked' : '' ?> class="club-filter-checkbox">
-                <label for="show_near_all_time_max" class="text-sm text-slate-600 cursor-pointer">Tampilkan juga All-Time Max - 1</label>
+            <div class="flex items-center gap-2 opacity-50 cursor-not-allowed">
+                <input type="checkbox" name="show_near_all_time_max" value="1" id="show_near_all_time_max" disabled class="club-filter-checkbox cursor-not-allowed">
+                <label for="show_near_all_time_max" class="text-sm text-slate-600 cursor-not-allowed">Tampilkan juga All-Time Max - 1 (Disabled sementara)</label>
             </div>
         </div>
     </form>

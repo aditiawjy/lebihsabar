@@ -11,6 +11,7 @@ $marketOptions = [
     'odd_goal'  => ['label' => 'Odd Goal',        'short' => 'ODD',   'class' => 'bg-orange-500 text-white'],
     'even_goal' => ['label' => 'Even Goal',       'short' => 'EVEN',  'class' => 'bg-emerald-500 text-white'],
     '!2-3'      => ['label' => '!2-3 Goal',        'short' => '!2-3',  'class' => 'bg-red-600 text-white'],
+    '2h_gt_1h'  => ['label' => '2H > 1H',          'short' => '2H>1H', 'class' => 'bg-teal-600 text-white'],
 ];
 
 function csvCheckMarket(array $m, string $mkt): bool {
@@ -25,6 +26,7 @@ function csvCheckMarket(array $m, string $mkt): bool {
         'odd_goal'  => ($ftH + $ftA) % 2 !== 0,
         'even_goal' => ($ftH + $ftA) % 2 === 0,
         '!2-3'      => ($ftH + $ftA) !== 2 && ($ftH + $ftA) !== 3,
+        '2h_gt_1h'  => (($ftH - $fhH) + ($ftA - $fhA)) > ($fhH + $fhA),
         default     => false,
     };
 }

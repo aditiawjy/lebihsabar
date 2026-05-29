@@ -1,3 +1,214 @@
 {
-  "items": []
+  "items": [
+    {
+      "type": "TODO",
+      "message": "identify versions",
+      "file": "scratch\\chrome-profile\\Default\\Extensions\\efaidnbmnnnibpcajpcglclefindmkaj\\26.5.1.0_0\\libs\\jquery-3.1.1.js",
+      "line": 798,
+      "column": 10
+    },
+    {
+      "type": "TODO",
+      "message": "identify versions",
+      "file": "scratch\\chrome-profile\\Default\\Extensions\\efaidnbmnnnibpcajpcglclefindmkaj\\26.5.1.0_0\\libs\\jquery-3.1.1.js",
+      "line": 812,
+      "column": 9
+    },
+    {
+      "type": "TODO",
+      "message": "Drop _data, _removeData)",
+      "file": "scratch\\chrome-profile\\Default\\Extensions\\efaidnbmnnnibpcajpcglclefindmkaj\\26.5.1.0_0\\libs\\jquery-3.1.1.js",
+      "line": 4186,
+      "column": 50
+    },
+    {
+      "type": "TODO",
+      "message": "Now that all calls to _data and _removeData have been replaced",
+      "file": "scratch\\chrome-profile\\Default\\Extensions\\efaidnbmnnnibpcajpcglclefindmkaj\\26.5.1.0_0\\libs\\jquery-3.1.1.js",
+      "line": 4254,
+      "column": 4
+    },
+    {
+      "type": "TODO",
+      "message": "Test if getElementsByTagName(*) is faster.",
+      "file": "scratch\\chrome-profile\\Default\\Extensions\\efaidnbmnnnibpcajpcglclefindmkaj\\26.5.1.0_0\\libs\\readability.js",
+      "line": 1582,
+      "column": 7
+    },
+    {
+      "type": "XXX",
+      "message": "implement _reduceNodeList?",
+      "file": "scratch\\chrome-profile\\Default\\Extensions\\efaidnbmnnnibpcajpcglclefindmkaj\\26.5.1.0_0\\libs\\readability.js",
+      "line": 1616,
+      "column": 9
+    },
+    {
+      "type": "TODO",
+      "message": "Consider taking into account original contentScore here.",
+      "file": "scratch\\chrome-profile\\Default\\Extensions\\efaidnbmnnnibpcajpcglclefindmkaj\\26.5.1.0_0\\libs\\readability.js",
+      "line": 1876,
+      "column": 9
+    },
+    {
+      "type": "TODO",
+      "message": "Avoid possible duplicates",
+      "file": "scratch\\chrome-profile\\Default\\Extensions\\mfhcmdonhekjhfbjmeacdjbhlfgpjabp\\2.0.0_0\\js\\udom.js",
+      "line": 265,
+      "column": 7
+    },
+    {
+      "type": "TODO",
+      "message": "Won't work for delegated handlers. Need to figure",
+      "file": "scratch\\chrome-profile\\Default\\Extensions\\mfhcmdonhekjhfbjmeacdjbhlfgpjabp\\2.0.0_0\\js\\udom.js",
+      "line": 665,
+      "column": 7
+    },
+    {
+      "type": "TODO",
+      "message": "sbc): Make this the default even without STRICT enabled.",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 284,
+      "column": 3
+    },
+    {
+      "type": "TODO",
+      "message": "sbc): Unify with err/out implementation in shell.sh.",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 355,
+      "column": 7
+    },
+    {
+      "type": "TODO",
+      "message": "sbc): Make this configurable somehow.  Its not always convenient for",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 369,
+      "column": 12
+    },
+    {
+      "type": "TODO",
+      "message": "sbc): Should we remove printing and leave it up to whoever",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 693,
+      "column": 5
+    },
+    {
+      "type": "FIXME",
+      "message": "This approach does not work in Wasm EH because it currently does not assume",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 700,
+      "column": 5
+    },
+    {
+      "type": "TODO",
+      "message": "Make a JS API that",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 703,
+      "column": 58
+    },
+    {
+      "type": "TODO",
+      "message": "https://github.com/google/closure-compiler/pull/3913): Remove if/when upstream closure gets fixed.",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 708,
+      "column": 5
+    },
+    {
+      "type": "TODO",
+      "message": "pack this?",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 1040,
+      "column": 39
+    },
+    {
+      "type": "TODO",
+      "message": "we should allow people to just pass in a complete filename instead",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 2799,
+      "column": 5
+    },
+    {
+      "type": "TODO",
+      "message": "check for O_SEARCH? (== search for dir only)",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 3161,
+      "column": 9
+    },
+    {
+      "type": "TODO",
+      "message": "deprecate the old functionality of a single",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 4082,
+      "column": 7
+    },
+    {
+      "type": "TODO",
+      "message": "Use mozResponseArrayBuffer, responseStream, etc. if available.",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 4331,
+      "column": 13
+    },
+    {
+      "type": "TODO",
+      "message": "in theory we should write to the winsize struct that gets",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 4852,
+      "column": 11
+    },
+    {
+      "type": "TODO",
+      "message": "technically, this ioctl call should change the window size.",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 4866,
+      "column": 11
+    },
+    {
+      "type": "TODO",
+      "message": "assert if anything else is given?",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 5400,
+      "column": 7
+    },
+    {
+      "type": "TODO",
+      "message": "https://github.com/emscripten-core/emscripten/issues/25076):",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 5442,
+      "column": 11
+    },
+    {
+      "type": "TODO",
+      "message": "https://github.com/emscripten-core/emscripten/issues/25076)",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 5489,
+      "column": 5
+    },
+    {
+      "type": "TODO",
+      "message": "Use (malleable) environment variables instead of system settings.",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 5612,
+      "column": 5
+    },
+    {
+      "type": "TODO",
+      "message": "sbc): Move writeStackCookie to native to to avoid this.",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\bindings_main.js",
+      "line": 6715,
+      "column": 5
+    },
+    {
+      "type": "TODO",
+      "message": "add type annotations",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\streaming_worklet_processor.js",
+      "line": 21,
+      "column": 7
+    },
+    {
+      "type": "TODO",
+      "message": "find externs so we can use @override.",
+      "file": "scratch\\chrome-profile\\WasmTtsEngine\\20260514.1\\streaming_worklet_processor.js",
+      "line": 30,
+      "column": 5
+    }
+  ]
 }

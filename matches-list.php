@@ -149,181 +149,80 @@ function matchesBuildQuery(array $overrides = []): string {
     return 'index.php?' . http_build_query($query);
 }
 
-function matchesBuildH2hTimeSummary(array $allMatches, array $targetMatch): array {
-    $homeTeam = trim((string)($targetMatch['home_team'] ?? ''));
-    $awayTeam = trim((string)($targetMatch['away_team'] ?? ''));
-    $matchDatetime = (string)($targetMatch['match_time'] ?? '');
-    $kickoffTime = strlen($matchDatetime) >= 16 ? substr($matchDatetime, 11, 5) : '';
-
-    $summary = [
-        'time' => $kickoffTime,
-        'total_meetings' => 0,
-        'finished_meetings' => 0,
-        'under_05' => 0,
-        'under_25' => 0,
-        'fhg_over_05' => 0,
-        'shg_over_05' => 0,
-        'over_05' => 0,
-        'over_15' => 0,
-        'over_25' => 0,
-        'btts' => 0,
-        'no_btts' => 0,
-        'w1' => 0,
-        'x' => 0,
-        'w2' => 0,
-    ];
-
-    if ($homeTeam === '' || $awayTeam === '' || $kickoffTime === '') {
-        return $summary;
+/**
+ * Bandingkan waktu "HH:MM" terhadap rentang [from,to], mendukung rentang lewat tengah malam.
+ */
+function matchesTimeInRange(string $time, string $from, string $to): bool {
+    if ($time === '') {
+        return true;
     }
-
-    foreach ($allMatches as $match) {
-        $candidateHome = trim((string)($match['home_team'] ?? ''));
-        $candidateAway = trim((string)($match['away_team'] ?? ''));
-        $candidateDatetime = (string)($match['match_time'] ?? '');
-        $candidateTime = strlen($candidateDatetime) >= 16 ? substr($candidateDatetime, 11, 5) : '';
-
-        $sameOrder = strcasecmp($candidateHome, $homeTeam) === 0 && strcasecmp($candidateAway, $awayTeam) === 0;
-        $reverseOrder = strcasecmp($candidateHome, $awayTeam) === 0 && strcasecmp($candidateAway, $homeTeam) === 0;
-        if ((!$sameOrder && !$reverseOrder) || $candidateTime !== $kickoffTime) {
-            continue;
-        }
-
-        $summary['total_meetings']++;
-
-        if (($match['ft_home'] ?? null) === null || ($match['ft_away'] ?? null) === null) {
-            continue;
-        }
-
-        $summary['finished_meetings']++;
-        $ftHome = (int)$match['ft_home'];
-        $ftAway = (int)$match['ft_away'];
-        $fhHome = (int)($match['fh_home'] ?? 0);
-        $fhAway = (int)($match['fh_away'] ?? 0);
-        $totalGoals = $ftHome + $ftAway;
-        $firstHalfGoals = $fhHome + $fhAway;
-        $secondHalfGoals = max(0, ($ftHome - $fhHome) + ($ftAway - $fhAway));
-
-        $team1Goals = strcasecmp($candidateHome, $homeTeam) === 0 ? $ftHome : $ftAway;
-        $team2Goals = strcasecmp($candidateAway, $awayTeam) === 0 ? $ftAway : $ftHome;
-        if ($team1Goals > $team2Goals) {
-            $summary['w1']++;
-        } elseif ($team1Goals < $team2Goals) {
-            $summary['w2']++;
-        } else {
-            $summary['x']++;
-        }
-
-        if ($totalGoals === 0) {
-            $summary['under_05']++;
-        }
-        if ($totalGoals < 3) {
-            $summary['under_25']++;
-        }
-        if ($firstHalfGoals > 0) {
-            $summary['fhg_over_05']++;
-        }
-        if ($secondHalfGoals > 0) {
-            $summary['shg_over_05']++;
-        }
-        if ($totalGoals > 0) {
-            $summary['over_05']++;
-        }
-        if ($totalGoals > 1) {
-            $summary['over_15']++;
-        }
-        if ($totalGoals > 2) {
-            $summary['over_25']++;
-        }
-        if ($ftHome > 0 && $ftAway > 0) {
-            $summary['btts']++;
-        } else {
-            $summary['no_btts']++;
-        }
+    if ($from <= $to) {
+        return $time >= $from && $time <= $to;
     }
-
-    return $summary;
+    // overnight range
+    return !($time < $from && $time > $to);
 }
 
-function matchesBuildH2hDayTimeOverSummary(array $allMatches, array $targetMatch): array {
-    $homeTeam = trim((string)($targetMatch['home_team'] ?? ''));
-    $awayTeam = trim((string)($targetMatch['away_team'] ?? ''));
-    $matchDatetime = (string)($targetMatch['match_time'] ?? '');
-    $kickoffTime = strlen($matchDatetime) >= 16 ? substr($matchDatetime, 11, 5) : '';
-    $matchDayOfWeek = '';
 
-    try {
-        $targetDate = new DateTime($matchDatetime);
-        $matchDayOfWeek = $targetDate->format('N');
-    } catch (\Exception $e) {
-        $matchDayOfWeek = '';
-    }
-
-    $summary = [
-        'total_meetings' => 0,
-        'finished_meetings' => 0,
-        'under_25' => 0,
-        'over_05' => 0,
-        'over_15' => 0,
-        'over_25' => 0,
-    ];
-
-    if ($homeTeam === '' || $awayTeam === '' || $kickoffTime === '' || $matchDayOfWeek === '') {
-        return $summary;
-    }
-
-    foreach ($allMatches as $match) {
-        $candidateHome = trim((string)($match['home_team'] ?? ''));
-        $candidateAway = trim((string)($match['away_team'] ?? ''));
-        $candidateDatetime = (string)($match['match_time'] ?? '');
-        $candidateTime = strlen($candidateDatetime) >= 16 ? substr($candidateDatetime, 11, 5) : '';
-
-        try {
-            $candidateDate = new DateTime($candidateDatetime);
-            $candidateDayOfWeek = $candidateDate->format('N');
-        } catch (\Exception $e) {
-            $candidateDayOfWeek = '';
-        }
-
-        $sameOrder = strcasecmp($candidateHome, $homeTeam) === 0 && strcasecmp($candidateAway, $awayTeam) === 0;
-        $reverseOrder = strcasecmp($candidateHome, $awayTeam) === 0 && strcasecmp($candidateAway, $homeTeam) === 0;
-        if ((!$sameOrder && !$reverseOrder) || $candidateTime !== $kickoffTime || $candidateDayOfWeek !== $matchDayOfWeek) {
-            continue;
-        }
-
-        if (($match['ft_home'] ?? null) === null || ($match['ft_away'] ?? null) === null) {
-            continue;
-        }
-
-        $summary['total_meetings']++;
-        $summary['finished_meetings']++;
-        $totalGoals = (int)$match['ft_home'] + (int)$match['ft_away'];
-        if ($totalGoals < 3) {
-            $summary['under_25']++;
-        }
-        if ($totalGoals > 0) {
-            $summary['over_05']++;
-        }
-        if ($totalGoals > 1) {
-            $summary['over_15']++;
-        }
-        if ($totalGoals > 2) {
-            $summary['over_25']++;
-        }
-    }
-
-    return $summary;
-}
-
+// ──────────────────────────────────────────────────────────────────────────
+// SINGLE-PASS DATA LOADER
+//
+// Sebelumnya seluruh matches.csv (±126k baris) dimuat ke memory lalu di-scan
+// berkali-kali (filter, leagues, teams, dates, quick-stats, H2H, HT-checker).
+// Sekarang cukup SATU kali baca file: setiap baris langsung diarahkan ke
+// agregat yang relevan, dan hanya baris yang lolos filter yang disimpan.
+// Hasil di layar identik, tetapi memory & CPU jauh lebih hemat.
+// ──────────────────────────────────────────────────────────────────────────
 
 $csvPath = __DIR__ . '/matches.csv';
-$allMatches = [];
+
+$filteredMatches = [];          // hanya baris yang lolos filter utama
+$leaguesSet = [];               // liga unik (dropdown)
+$teamsSet = [];                 // tim unik (autocomplete)
+$datesWithData = [];            // tanggal unik (date pagination)
+
+$today = date('Y-m-d');
+$totalToday = 0;
+$finishedToday = 0;
+$pendingToday = 0;
+
+// Pra-hitung kondisi H2H & HT-checker dari input (sekali saja).
+$h2hActive = $h2hHomeFilter !== '' && $h2hAwayFilter !== '';
+
+$htCheckHome     = isset($_GET['ht_home']) && $_GET['ht_home'] !== '' ? (int)$_GET['ht_home'] : null;
+$htCheckAway     = isset($_GET['ht_away']) && $_GET['ht_away'] !== '' ? (int)$_GET['ht_away'] : null;
+$htCheckTeamHome = trim((string)($_GET['ht_team_home'] ?? ''));
+$htCheckTeamAway = trim((string)($_GET['ht_team_away'] ?? ''));
+$htCheckActive   = $htCheckHome !== null && $htCheckAway !== null && $htCheckTeamHome !== '' && $htCheckTeamAway !== '';
+
+$h2hStats = [
+    'active' => $h2hActive,
+    'home' => $h2hHomeFilter,
+    'away' => $h2hAwayFilter,
+    'total_meetings' => 0,
+    'finished_meetings' => 0,
+    'over_05' => 0,
+    'over_15' => 0,
+    'over_25' => 0,
+    'w1' => 0,
+    'x' => 0,
+    'w2' => 0,
+];
+$h2hMatches = [];
+
+$htCheckResult = [
+    'total'      => 0,
+    'shg_over05' => 0,
+    'shg_pct'    => null,
+    'matches'    => [],
+];
 
 if (is_readable($csvPath) && ($handle = fopen($csvPath, 'r')) !== false) {
     $headers = fgetcsv($handle);
     if (is_array($headers)) {
+        $headerCount = count($headers);
         while (($row = fgetcsv($handle)) !== false) {
-            if (count($row) !== count($headers)) {
+            if (count($row) !== $headerCount) {
                 continue;
             }
 
@@ -340,76 +239,115 @@ if (is_readable($csvPath) && ($handle = fopen($csvPath, 'r')) !== false) {
                 }
             }
 
-            $allMatches[] = $match;
+            $home = trim((string)($match['home_team'] ?? ''));
+            $away = trim((string)($match['away_team'] ?? ''));
+            $league = trim((string)($match['league'] ?? ''));
+            $matchDatetime = (string)($match['match_time'] ?? '');
+            $matchDate = substr($matchDatetime, 0, 10);
+            $matchTime = strlen($matchDatetime) >= 16 ? substr($matchDatetime, 11, 5) : '';
+            $hasFt = $match['ft_home'] !== null && $match['ft_away'] !== null;
+
+            // ── Agregat global (independen dari filter) ──
+            if ($league !== '') {
+                $leaguesSet[$league] = true;
+            }
+            if ($home !== '') {
+                $teamsSet[$home] = true;
+            }
+            if ($away !== '') {
+                $teamsSet[$away] = true;
+            }
+            if ($matchDate !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $matchDate)) {
+                $datesWithData[$matchDate] = true;
+            }
+            if ($matchDate === $today) {
+                $totalToday++;
+                if ($hasFt) $finishedToday++;
+                else $pendingToday++;
+            }
+
+            // ── H2H pair scan (mengikuti filter liga/tanggal/jam/status) ──
+            if ($h2hActive) {
+                $passH2hContext = true;
+                if ($leagueFilter !== '' && $league !== $leagueFilter) $passH2hContext = false;
+                if ($passH2hContext && !empty($date_from) && $matchDate < $date_from) $passH2hContext = false;
+                if ($passH2hContext && !empty($date_to) && $matchDate > $date_to) $passH2hContext = false;
+                if ($passH2hContext && ($timeFrom !== '' || $timeTo !== '') && $matchTime !== '') {
+                    $tf = $timeFrom !== '' ? $timeFrom : '00:00';
+                    $tt = $timeTo   !== '' ? $timeTo   : '23:59';
+                    if (!matchesTimeInRange($matchTime, $tf, $tt)) $passH2hContext = false;
+                }
+                if ($passH2hContext && $statusFilter !== '') {
+                    if ($statusFilter === 'finished' && !$hasFt) $passH2hContext = false;
+                    if ($statusFilter === 'upcoming' && $hasFt) $passH2hContext = false;
+                }
+
+                if ($passH2hContext) {
+                    $sameOrder = strcasecmp($home, $h2hHomeFilter) === 0 && strcasecmp($away, $h2hAwayFilter) === 0;
+                    $reverseOrder = strcasecmp($home, $h2hAwayFilter) === 0 && strcasecmp($away, $h2hHomeFilter) === 0;
+                    if ($sameOrder || $reverseOrder) {
+                        $h2hStats['total_meetings']++;
+                        $h2hMatches[] = $match;
+                        if ($hasFt) {
+                            $h2hStats['finished_meetings']++;
+                            $ftHome = (int)$match['ft_home'];
+                            $ftAway = (int)$match['ft_away'];
+                            $totalGoals = $ftHome + $ftAway;
+                            $team1Goals = strcasecmp($home, $h2hHomeFilter) === 0 ? $ftHome : $ftAway;
+                            $team2Goals = strcasecmp($away, $h2hAwayFilter) === 0 ? $ftAway : $ftHome;
+                            if ($team1Goals > $team2Goals) $h2hStats['w1']++;
+                            elseif ($team1Goals < $team2Goals) $h2hStats['w2']++;
+                            else $h2hStats['x']++;
+                            if ($totalGoals > 0) $h2hStats['over_05']++;
+                            if ($totalGoals > 1) $h2hStats['over_15']++;
+                            if ($totalGoals > 2) $h2hStats['over_25']++;
+                        }
+                    }
+                }
+            }
+
+            // ── HT-checker scan ──
+            if ($htCheckActive
+                && $match['fh_home'] !== null && $match['fh_away'] !== null
+                && $match['ft_home'] !== null && $match['ft_away'] !== null) {
+                $sameTeam    = strcasecmp($home, $htCheckTeamHome) === 0 && strcasecmp($away, $htCheckTeamAway) === 0;
+                $reverseTeam = strcasecmp($home, $htCheckTeamAway) === 0 && strcasecmp($away, $htCheckTeamHome) === 0;
+                if ($sameTeam || $reverseTeam) {
+                    $htHomeNorm = $sameTeam ? (int)$match['fh_home'] : (int)$match['fh_away'];
+                    $htAwayNorm = $sameTeam ? (int)$match['fh_away'] : (int)$match['fh_home'];
+                    if ($htHomeNorm === $htCheckHome && $htAwayNorm === $htCheckAway) {
+                        $htCheckResult['total']++;
+                        $shGoals = max(0, ((int)$match['ft_home'] - (int)$match['fh_home']) + ((int)$match['ft_away'] - (int)$match['fh_away']));
+                        if ($shGoals > 0) {
+                            $htCheckResult['shg_over05']++;
+                        }
+                        $htCheckResult['matches'][] = array_merge($match, ['_sh_goals' => $shGoals]);
+                    }
+                }
+            }
+
+            // ── Filter utama untuk daftar pertandingan ──
+            if ($leagueFilter !== '' && $league !== $leagueFilter) continue;
+            if ($searchFilter !== '' && stripos($home, $searchFilter) === false && stripos($away, $searchFilter) === false) continue;
+            if ($homeTeamFilter !== '' && stripos($home, $homeTeamFilter) === false) continue;
+            if ($awayTeamFilter !== '' && stripos($away, $awayTeamFilter) === false) continue;
+            if (!empty($date_from) && $matchDate < $date_from) continue;
+            if (!empty($date_to) && $matchDate > $date_to) continue;
+            if ($statusFilter === 'finished' && !$hasFt) continue;
+            if ($statusFilter === 'upcoming' && $hasFt) continue;
+            if (($timeFrom !== '' || $timeTo !== '') && $matchTime !== '') {
+                $tf = $timeFrom !== '' ? $timeFrom : '00:00';
+                $tt = $timeTo   !== '' ? $timeTo   : '23:59';
+                if (!matchesTimeInRange($matchTime, $tf, $tt)) continue;
+            }
+
+            $filteredMatches[] = $match;
         }
     }
     fclose($handle);
 }
 
-$filteredMatches = array_filter($allMatches, function ($match) use ($date_from, $date_to, $statusFilter, $timeFrom, $timeTo, $leagueFilter, $searchFilter, $homeTeamFilter, $awayTeamFilter) {
-    if ($leagueFilter !== '' && ($match['league'] ?? '') !== $leagueFilter) {
-        return false;
-    }
-
-    if ($searchFilter !== '') {
-        $search = $searchFilter;
-        $home = $match['home_team'] ?? '';
-        $away = $match['away_team'] ?? '';
-        if (stripos($home, $search) === false && stripos($away, $search) === false) {
-            return false;
-        }
-    }
-
-    if ($homeTeamFilter !== '') {
-        $home = $match['home_team'] ?? '';
-        if (stripos($home, $homeTeamFilter) === false) {
-            return false;
-        }
-    }
-
-    if ($awayTeamFilter !== '') {
-        $away = $match['away_team'] ?? '';
-        if (stripos($away, $awayTeamFilter) === false) {
-            return false;
-        }
-    }
-
-    $matchDatetime = (string)($match['match_time'] ?? '');
-    $matchDate = substr($matchDatetime, 0, 10);
-    if (!empty($date_from) && $matchDate < $date_from) {
-        return false;
-    }
-    if (!empty($date_to) && $matchDate > $date_to) {
-        return false;
-    }
-
-    // Status filter
-    if ($statusFilter !== '') {
-        $hasFt = $match['ft_home'] !== null && $match['ft_away'] !== null;
-        if ($statusFilter === 'finished' && !$hasFt) return false;
-        if ($statusFilter === 'upcoming' && $hasFt) return false;
-    }
-
-    // Time filter (HH:MM from match_time column, e.g. "2025-10-15 13:30:00")
-    if ($timeFrom !== '' || $timeTo !== '') {
-        $matchTime = strlen($matchDatetime) >= 16 ? substr($matchDatetime, 11, 5) : '';
-        if ($matchTime !== '') {
-            $tf = $timeFrom !== '' ? $timeFrom : '00:00';
-            $tt = $timeTo   !== '' ? $timeTo   : '23:59';
-            if ($tf <= $tt) {
-                if ($matchTime < $tf || $matchTime > $tt) return false;
-            } else {
-                // overnight range
-                if ($matchTime < $tf && $matchTime > $tt) return false;
-            }
-        }
-    }
-
-    return true;
-});
-
-$filteredMatches = array_values($filteredMatches);
-
+// Urutkan hasil filter sesuai kolom & arah yang dipilih.
 usort($filteredMatches, function ($left, $right) use ($sort, $order) {
     $a = $left[$sort] ?? '';
     $b = $right[$sort] ?? '';
@@ -436,118 +374,15 @@ $p = min($p, $totalPages);
 $offset = ($p - 1) * $perPage;
 $pagedMatches = array_slice($filteredMatches, $offset, $perPage);
 
-// Get unique leagues for filter
-$leagues = [];
-foreach ($allMatches as $match) {
-    $league = trim((string)($match['league'] ?? ''));
-    if ($league !== '') {
-        $leagues[$league] = true;
-    }
-}
-$leagues = array_keys($leagues);
+// Liga & tim unik sudah dikumpulkan saat single-pass load di atas.
+$leagues = array_keys($leaguesSet);
 sort($leagues);
 
-// Get unique teams for autocomplete
-$teams = [];
-foreach ($allMatches as $match) {
-    $home = trim((string)($match['home_team'] ?? ''));
-    $away = trim((string)($match['away_team'] ?? ''));
-    if ($home !== '') $teams[$home] = true;
-    if ($away !== '') $teams[$away] = true;
-}
-$teams = array_keys($teams);
+$teams = array_keys($teamsSet);
 sort($teams);
 
-$h2hStats = [
-    'active' => $h2hHomeFilter !== '' && $h2hAwayFilter !== '',
-    'home' => $h2hHomeFilter,
-    'away' => $h2hAwayFilter,
-    'total_meetings' => 0,
-    'finished_meetings' => 0,
-    'over_05' => 0,
-    'over_15' => 0,
-    'over_25' => 0,
-    'w1' => 0,
-    'x' => 0,
-    'w2' => 0,
-];
-$h2hMatches = [];
-
-if ($h2hStats['active']) {
-    foreach ($allMatches as $match) {
-        $home = trim((string)($match['home_team'] ?? ''));
-        $away = trim((string)($match['away_team'] ?? ''));
-        $matchDatetime = (string)($match['match_time'] ?? '');
-        $matchDate = substr($matchDatetime, 0, 10);
-
-        if ($leagueFilter !== '' && ($match['league'] ?? '') !== $leagueFilter) {
-            continue;
-        }
-
-        if (!empty($date_from) && $matchDate < $date_from) {
-            continue;
-        }
-        if (!empty($date_to) && $matchDate > $date_to) {
-            continue;
-        }
-
-        if ($timeFrom !== '' || $timeTo !== '') {
-            $matchTime = strlen($matchDatetime) >= 16 ? substr($matchDatetime, 11, 5) : '';
-            if ($matchTime !== '') {
-                $tf = $timeFrom !== '' ? $timeFrom : '00:00';
-                $tt = $timeTo   !== '' ? $timeTo   : '23:59';
-                if ($tf <= $tt) {
-                    if ($matchTime < $tf || $matchTime > $tt) {
-                        continue;
-                    }
-                } else {
-                    if ($matchTime < $tf && $matchTime > $tt) {
-                        continue;
-                    }
-                }
-            }
-        }
-
-        if ($statusFilter !== '') {
-            $hasFt = $match['ft_home'] !== null && $match['ft_away'] !== null;
-            if ($statusFilter === 'finished' && !$hasFt) continue;
-            if ($statusFilter === 'upcoming' && $hasFt) continue;
-        }
-
-        $sameOrder = strcasecmp($home, $h2hHomeFilter) === 0 && strcasecmp($away, $h2hAwayFilter) === 0;
-        $reverseOrder = strcasecmp($home, $h2hAwayFilter) === 0 && strcasecmp($away, $h2hHomeFilter) === 0;
-        if (!$sameOrder && !$reverseOrder) {
-            continue;
-        }
-
-        $h2hStats['total_meetings']++;
-        $h2hMatches[] = $match;
-        if ($match['ft_home'] === null || $match['ft_away'] === null) {
-            continue;
-        }
-
-        $h2hStats['finished_meetings']++;
-        $ftHome = (int)$match['ft_home'];
-        $ftAway = (int)$match['ft_away'];
-        $totalGoals = $ftHome + $ftAway;
-
-        // W1/X/W2 dihitung relatif terhadap urutan tim yang dipilih (Home filter = W1, Away filter = W2).
-        $team1Goals = strcasecmp($home, $h2hHomeFilter) === 0 ? $ftHome : $ftAway;
-        $team2Goals = strcasecmp($away, $h2hAwayFilter) === 0 ? $ftAway : $ftHome;
-        if ($team1Goals > $team2Goals) {
-            $h2hStats['w1']++;
-        } elseif ($team1Goals < $team2Goals) {
-            $h2hStats['w2']++;
-        } else {
-            $h2hStats['x']++;
-        }
-
-        if ($totalGoals > 0) $h2hStats['over_05']++;
-        if ($totalGoals > 1) $h2hStats['over_15']++;
-        if ($totalGoals > 2) $h2hStats['over_25']++;
-    }
-}
-
+// H2H & HT-checker juga sudah dihitung saat single-pass load.
+// Tinggal sortir hasilnya (terbaru dulu) dan hitung persentase.
 if (!empty($h2hMatches)) {
     usort($h2hMatches, function ($left, $right) {
         $a = strtotime((string)($left['match_time'] ?? '')) ?: 0;
@@ -561,82 +396,24 @@ $h2hPctOver05 = $h2hStats['finished_meetings'] > 0 ? round(($h2hStats['over_05']
 $h2hPctOver15 = $h2hStats['finished_meetings'] > 0 ? round(($h2hStats['over_15'] / $h2hFinishedDenominator) * 100, 1) : 0;
 $h2hPctOver25 = $h2hStats['finished_meetings'] > 0 ? round(($h2hStats['over_25'] / $h2hFinishedDenominator) * 100, 1) : 0;
 
-// ── HT Score Input → H2H 2H Over 0.5 checker ──────────────────────────────
-$htCheckHome     = isset($_GET['ht_home']) && $_GET['ht_home'] !== '' ? (int)$_GET['ht_home'] : null;
-$htCheckAway     = isset($_GET['ht_away']) && $_GET['ht_away'] !== '' ? (int)$_GET['ht_away'] : null;
-$htCheckTeamHome = trim((string)($_GET['ht_team_home'] ?? ''));
-$htCheckTeamAway = trim((string)($_GET['ht_team_away'] ?? ''));
-$htCheckActive   = $htCheckHome !== null && $htCheckAway !== null && $htCheckTeamHome !== '' && $htCheckTeamAway !== '';
-
-$htCheckResult = [
-    'total'      => 0,
-    'shg_over05' => 0,
-    'shg_pct'    => null,
-    'matches'    => [],
-];
-
 if ($htCheckActive) {
-    foreach ($allMatches as $hm) {
-        $hmHome   = trim((string)($hm['home_team'] ?? ''));
-        $hmAway   = trim((string)($hm['away_team'] ?? ''));
-        $hmFhHome = $hm['fh_home'];
-        $hmFhAway = $hm['fh_away'];
-        $hmFtHome = $hm['ft_home'];
-        $hmFtAway = $hm['ft_away'];
-
-        // Must have HT and FT data
-        if ($hmFhHome === null || $hmFhAway === null || $hmFtHome === null || $hmFtAway === null) {
-            continue;
-        }
-
-        // Match team pair (same or reverse order)
-        $sameTeam    = strcasecmp($hmHome, $htCheckTeamHome) === 0 && strcasecmp($hmAway, $htCheckTeamAway) === 0;
-        $reverseTeam = strcasecmp($hmHome, $htCheckTeamAway) === 0 && strcasecmp($hmAway, $htCheckTeamHome) === 0;
-        if (!$sameTeam && !$reverseTeam) {
-            continue;
-        }
-
-        // Match HT score (normalised to same-order perspective)
-        $htHomeNorm = $sameTeam ? (int)$hmFhHome : (int)$hmFhAway;
-        $htAwayNorm = $sameTeam ? (int)$hmFhAway : (int)$hmFhHome;
-        if ($htHomeNorm !== $htCheckHome || $htAwayNorm !== $htCheckAway) {
-            continue;
-        }
-
-        $htCheckResult['total']++;
-        $shGoals = max(0, ((int)$hmFtHome - (int)$hmFhHome) + ((int)$hmFtAway - (int)$hmFhAway));
-        if ($shGoals > 0) {
-            $htCheckResult['shg_over05']++;
-        }
-        $htCheckResult['matches'][] = array_merge($hm, ['_sh_goals' => $shGoals]);
-    }
-
     if ($htCheckResult['total'] > 0) {
         $htCheckResult['shg_pct'] = round(($htCheckResult['shg_over05'] / $htCheckResult['total']) * 100);
     }
-
     // Sort newest first
     usort($htCheckResult['matches'], function ($a, $b) {
         return (strtotime((string)($b['match_time'] ?? '')) ?: 0) <=> (strtotime((string)($a['match_time'] ?? '')) ?: 0);
     });
 }
 
-// Build date pagination: collect all unique dates with data, then group by year-month
-$datesWithData = [];
-foreach ($allMatches as $match) {
-    $d = substr((string)($match['match_time'] ?? ''), 0, 10);
-    if ($d && preg_match('/^\d{4}-\d{2}-\d{2}$/', $d)) {
-        $datesWithData[$d] = true;
-    }
-}
+// Susun date-pagination dari tanggal unik yang sudah dikumpulkan.
 ksort($datesWithData);
-// Group by year-month
 $datesByMonth = [];
 foreach (array_keys($datesWithData) as $d) {
     $ym = substr($d, 0, 7);
     $datesByMonth[$ym][] = $d;
 }
-// Determine which month to display: prefer month of current date_from, fallback to latest month
+// Tentukan bulan yang ditampilkan: prefer bulan dari date_from, fallback ke bulan terakhir.
 $activeDateYm = substr($date_from, 0, 7);
 if (!isset($datesByMonth[$activeDateYm])) {
     $activeDateYm = array_key_last($datesByMonth) ?? '';
@@ -646,22 +423,7 @@ $monthKeys = array_keys($datesByMonth);
 
 <div class="p-4 md:p-8 space-y-6 page-fade-in">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <?php
-    // Calculate quick stats
-    $today = date('Y-m-d');
-    $totalToday = 0;
-    $finishedToday = 0;
-    $pendingToday = 0;
-    foreach ($allMatches as $m) {
-        $mDate = substr($m['match_time'] ?? '', 0, 10);
-        if ($mDate === $today) {
-            $totalToday++;
-            $hasFt = ($m['ft_home'] ?? '') !== '' && ($m['ft_away'] ?? '') !== '';
-            if ($hasFt) $finishedToday++;
-            else $pendingToday++;
-        }
-    }
-    ?>
+    <?php // Quick stats (totalToday/finishedToday/pendingToday) sudah dihitung saat single-pass load. ?>
     
     <!-- Quick Stats Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">

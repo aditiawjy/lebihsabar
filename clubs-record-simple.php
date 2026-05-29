@@ -776,6 +776,20 @@ function csvNextMatchText(?array $match): string {
     return $match['vs'].' - '.csvShortDate($match['date'], 'd/m').' '.$match['time'];
 }
 
+function csvDurationText(int $seconds): string {
+    $minutes = max(0, (int)round($seconds / 60));
+    $hours = intdiv($minutes, 60);
+    $remainingMinutes = $minutes % 60;
+
+    if ($hours > 0 && $remainingMinutes > 0) {
+        return $hours . ' jam ' . $remainingMinutes . ' menit';
+    }
+    if ($hours > 0) {
+        return $hours . ' jam';
+    }
+    return $remainingMinutes . ' menit';
+}
+
 function csvDisplayTimeMinusOneHour(string $date, string $time): string {
     $timestamp = strtotime(trim($date.' '.$time));
     if ($timestamp === false) {
@@ -792,6 +806,7 @@ $mktStyle = $marketOptions[$mktParam]['style'] ?? '';
 $recordRangeLabel = $useContinuousWindow
     ? 'Record ' . max(1, (int)ceil($rangeDurationSeconds / 3600)) . ' Jam ' . $timeFrom . '-' . $timeTo
     : (($rangeDays > 1 ? 'Record '.$rangeDays.' Hari' : 'Record Harian') . ' ' . $timeFrom . '-' . $timeTo);
+$rangeInfoLabel = date('Y-m-d H:i', $rangeStartTs) . ' sampai ' . date('Y-m-d H:i', $rangeEndTs) . ' = total ' . csvDurationText($rangeDurationSeconds);
 ?>
 <div class="p-3 sm:p-4 md:p-8 space-y-4 md:space-y-6 page-fade-in">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -936,6 +951,13 @@ $recordRangeLabel = $useContinuousWindow
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
                 Filter
             </button>
+        </div>
+
+        <div class="mt-3 inline-flex max-w-full items-center gap-2 rounded-xl border border-sky-100 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-800">
+            <svg class="h-4 w-4 shrink-0 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="truncate">Rentang aktif: <?= htmlspecialchars($rangeInfoLabel) ?></span>
         </div>
         
         <div class="club-filter-extra">

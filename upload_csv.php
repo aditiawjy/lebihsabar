@@ -4,6 +4,9 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
+require_once __DIR__ . '/auth_guard.php';
+guard_same_origin_request(['POST']); // anti-CSRF; upload hanya dari frontend sendiri
+
 $TARGET_CSV = __DIR__ . '/matches.csv';
 $MAX_UPLOAD_BYTES = (int)(getenv('MAX_CSV_UPLOAD_BYTES') ?: 5242880); // 5MB default
 $MAX_CSV_BACKUPS = (int)(getenv('MAX_CSV_BACKUPS') ?: 20);

@@ -1,13 +1,21 @@
 <?php
 /**
  * Ultra Fast Bulk Import - No Safety, Just Speed!
+ *
+ * PERINGATAN: endpoint ini meng-TRUNCATE tabel matches lalu mengimpor ulang
+ * dari matches.csv. Sangat destruktif. Wajib API key.
  */
+
+require_once __DIR__ . '/auth_guard.php';
+guard_request(['POST']); // butuh X-API-Key + method POST
 
 // Disable all limits
 set_time_limit(0);
 ini_set('memory_limit', '-1');
 ini_set('display_errors', 0);
 error_reporting(0);
+
+header('Content-Type: text/plain; charset=utf-8');
 
 require_once 'koneksi.php';
 

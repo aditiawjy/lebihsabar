@@ -1,6 +1,8 @@
 <?php
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
+
+require_once __DIR__ . '/auth_guard.php';
+guard_same_origin_request(['GET', 'POST']); // anti-CSRF, dipanggil dari frontend
 
 function apiStatusOnline(): bool {
     $context = stream_context_create([

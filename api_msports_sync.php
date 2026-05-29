@@ -112,6 +112,40 @@ function sabar_query($conn, $sql) {
     return [$conn, $result];
 }
 
+/**
+ * Jalankan prepared statement dengan retry saat koneksi putus (2006/2013).
+ *
+ * @param string $types  string tipe bind_param (mis. 'sssii')
+ * @param array  $params nilai parameter (urut sesuai '?')
+ * @return array [$conn, $stmt|false]  $stmt sudah di-execute bila berhasil
+ */
+function sabar_stmt($conn, $sql, $types = '', array $params = []) {
+    $run = function ($conn) use ($sql, $types, $params) {
+        $stmt = $conn->prepare($sql);
+        if ($stmt === false) {
+            return false;
+        }
+        if ($types !== '') {
+            // bind_param butuh referensi; bangun array referensi dari $params.
+            $bind = [];
+            $bind[] = $types;
+            foreach ($params as $i => $v) {
+                $bind[] = &$params[$i];
+            }
+            call_user_func_array([$stmt, 'bind_param'], $bind);
+        }
+        return $stmt->execute() ? $stmt : false;
+    };
+
+    $stmt = $run($conn);
+    if ($stmt === false && in_array($conn->errno, [2006, 2013], true)) {
+        $conn = ensure_db_connection($conn);
+        $stmt = $run($conn);
+    }
+
+    return [$conn, $stmt];
+}
+
 function normalize_team_key($team) {
     $value = strtolower(trim((string)$team));
     return preg_replace('/\s+/', ' ', $value);
@@ -287,9 +321,6 @@ try {
             }
             
             // --- DB OPERATIONS ---
-            $home_team_esc = $conn->real_escape_string($home_team);
-            $away_team_esc = $conn->real_escape_string($away_team);
-            $league_esc = $conn->real_escape_string($league);
             $lockKey = build_match_lock_key($home_team, $away_team, $datetime);
 
             [$conn, $lockAcquired] = acquire_match_lock($conn, $lockKey, 2);
@@ -306,26 +337,32 @@ try {
                 // 10 menit cukup untuk toleransi perbedaan waktu parsing
                 $check_sql = "SELECT id, match_time, ft_home, ft_away, fh_home, fh_away
                               FROM matches
-                              WHERE ((home_team = '$home_team_esc' AND away_team = '$away_team_esc')
-                                   OR (home_team = '$away_team_esc' AND away_team = '$home_team_esc'))
-                              AND match_time >= DATE_SUB('$datetime', INTERVAL 10 MINUTE)
-                              AND match_time <= DATE_ADD('$datetime', INTERVAL 10 MINUTE)
-                              ORDER BY ABS(TIMESTAMPDIFF(SECOND, match_time, '$datetime')) ASC
+                              WHERE ((home_team = ? AND away_team = ?)
+                                   OR (home_team = ? AND away_team = ?))
+                              AND match_time >= DATE_SUB(?, INTERVAL 10 MINUTE)
+                              AND match_time <= DATE_ADD(?, INTERVAL 10 MINUTE)
+                              ORDER BY ABS(TIMESTAMPDIFF(SECOND, match_time, ?)) ASC
                               LIMIT 1";
 
-                [$conn, $result] = sabar_query($conn, $check_sql);
+                [$conn, $checkStmt] = sabar_stmt(
+                    $conn,
+                    $check_sql,
+                    'sssssss',
+                    [$home_team, $away_team, $away_team, $home_team, $datetime, $datetime, $datetime]
+                );
 
-                if (!$result) {
+                if ($checkStmt === false) {
                     sabar_log("SQL Error (Check): " . $conn->error);
                     $errors++;
                     continue;
                 }
 
-                $formatVal = function($val) { return ($val === null) ? 'NULL' : (int)$val; };
+                $result = $checkStmt->get_result();
 
-                if ($result->num_rows > 0) {
+                if ($result && $result->num_rows > 0) {
                     // UPDATE
                     $existing = $result->fetch_assoc();
+                    $checkStmt->close();
 
                     $fields = [
                         'fh_home' => $fh_home, 'fh_away' => $fh_away,
@@ -343,17 +380,21 @@ try {
                     }
 
                     if ($should_update) {
-                        $sql = "UPDATE matches SET " .
-                               "fh_home = " . $formatVal($fh_home) . ", " .
-                               "fh_away = " . $formatVal($fh_away) . ", " .
-                               "ft_home = " . $formatVal($ft_home) . ", " .
-                               "ft_away = " . $formatVal($ft_away) . ", " .
-                               "league = '$league_esc', " .
-                               "updated_at = NOW() " .
-                               "WHERE id = " . $existing['id'];
+                        $update_sql = "UPDATE matches
+                                       SET fh_home = ?, fh_away = ?, ft_home = ?, ft_away = ?,
+                                           league = ?, updated_at = NOW()
+                                       WHERE id = ?";
 
-                        [$conn, $updateResult] = sabar_query($conn, $sql);
-                        if ($updateResult) {
+                        // Skor bisa NULL -> mysqli bind 'i' mengirim NULL bila value null.
+                        [$conn, $updateStmt] = sabar_stmt(
+                            $conn,
+                            $update_sql,
+                            'iiiisi',
+                            [$fh_home, $fh_away, $ft_home, $ft_away, $league, (int)$existing['id']]
+                        );
+
+                        if ($updateStmt !== false) {
+                            $updateStmt->close();
                             $updated++;
                         } else {
                             sabar_log("SQL Error (Update): " . $conn->error);
@@ -364,13 +405,23 @@ try {
                     }
                 } else {
                     // INSERT
-                    $sql = "INSERT INTO matches (match_time, home_team, away_team, league, fh_home, fh_away, ft_home, ft_away) VALUES " .
-                           "('$datetime', '$home_team_esc', '$away_team_esc', '$league_esc', " .
-                           $formatVal($fh_home) . ", " . $formatVal($fh_away) . ", " .
-                           $formatVal($ft_home) . ", " . $formatVal($ft_away) . ")";
+                    if ($checkStmt) {
+                        $checkStmt->close();
+                    }
 
-                    [$conn, $insertResult] = sabar_query($conn, $sql);
-                    if ($insertResult) {
+                    $insert_sql = "INSERT INTO matches
+                                   (match_time, home_team, away_team, league, fh_home, fh_away, ft_home, ft_away)
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+                    [$conn, $insertStmt] = sabar_stmt(
+                        $conn,
+                        $insert_sql,
+                        'ssssiiii',
+                        [$datetime, $home_team, $away_team, $league, $fh_home, $fh_away, $ft_home, $ft_away]
+                    );
+
+                    if ($insertStmt !== false) {
+                        $insertStmt->close();
                         $inserted++;
                     } else {
                         sabar_log("SQL Error (Insert): " . $conn->error);

@@ -5,6 +5,9 @@ error_reporting(E_ALL);
 ob_start();
 header('Content-Type: application/json');
 
+require_once __DIR__ . '/auth_guard.php';
+guard_same_origin_request(['POST']); // anti-CSRF, dipanggil dari frontend parser
+
 $CSV_FILE = getenv('MATCHES_CSV_FILE') ?: (__DIR__ . '/matches.csv');
 $MAX_MATCHES_PER_REQUEST = (int)(getenv('MAX_MATCHES_PER_REQUEST') ?: 5000);
 $MAX_CSV_BACKUPS = (int)(getenv('MAX_CSV_BACKUPS') ?: 20);

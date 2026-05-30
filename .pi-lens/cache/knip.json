@@ -13,6 +13,11 @@
     },
     {
       "type": "file",
+      "name": "assets/app.css",
+      "file": "assets/app.css"
+    },
+    {
+      "type": "file",
       "name": "msports-parser/background.js",
       "file": "msports-parser/background.js"
     },
@@ -93,11 +98,6 @@
     },
     {
       "type": "file",
-      "name": "assets/app.css",
-      "file": "assets/app.css"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/WasmTtsEngine/20260514.1/background_compiled.js",
       "file": "scratch/chrome-profile/WasmTtsEngine/20260514.1/background_compiled.js"
     },
@@ -123,18 +123,23 @@
     },
     {
       "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/offscreendocument_main.js",
+      "file": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/offscreendocument_main.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/page_embed_script.js",
+      "file": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/page_embed_script.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/service_worker_bin_prod.js",
+      "file": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/service_worker_bin_prod.js"
+    },
+    {
+      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/background.js",
       "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/background.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_background.js",
-      "file": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_background.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_window.js",
-      "file": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_window.js"
     },
     {
       "type": "file",
@@ -168,18 +173,13 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/offscreendocument_main.js",
-      "file": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/offscreendocument_main.js"
+      "name": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_background.js",
+      "file": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_background.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/page_embed_script.js",
-      "file": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/page_embed_script.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/service_worker_bin_prod.js",
-      "file": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/service_worker_bin_prod.js"
+      "name": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_window.js",
+      "file": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_window.js"
     },
     {
       "type": "file",
@@ -293,121 +293,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.min.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.min.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/lottie-light-esm.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/lottie-light-esm.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/readability.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/readability.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/610.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/610.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_gmail_native-viewer-pdf-tools-module_js.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_gmail_native-viewer-pdf-tools-module_js.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_fte-utils_js.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_fte-utils_js.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_util_js.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_util_js.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/CompressPDFMessageView.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/CompressPDFMessageView.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/FloatingActionButton.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/FloatingActionButton.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/otherVendors.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/otherVendors.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PdfToolsDropdown.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PdfToolsDropdown.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.css",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ProgressCircle.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ProgressCircle.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/SheetsSettingModal.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/SheetsSettingModal.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.css",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.css",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilotEmbeddings.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilotEmbeddings.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ToastManager.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ToastManager.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/vendor.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/vendor.js"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/acrobat-content-script.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/acrobat-content-script.js"
     },
@@ -513,33 +398,118 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/adaware.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/adaware.css"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/610.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/610.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/common.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/common.css"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_gmail_native-viewer-pdf-tools-module_js.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_gmail_native-viewer-pdf-tools-module_js.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/document-blocked.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/document-blocked.css"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_fte-utils_js.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_fte-utils_js.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/flexbox.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/flexbox.css"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_util_js.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_util_js.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/loading-page.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/loading-page.css"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/CompressPDFMessageView.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/CompressPDFMessageView.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/normalize.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/normalize.css"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/FloatingActionButton.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/FloatingActionButton.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/otherVendors.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/otherVendors.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PdfToolsDropdown.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PdfToolsDropdown.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.css",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ProgressCircle.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ProgressCircle.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/SheetsSettingModal.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/SheetsSettingModal.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.css",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.css",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilotEmbeddings.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilotEmbeddings.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ToastManager.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ToastManager.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/vendor.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/vendor.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.min.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.min.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/lottie-light-esm.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/lottie-light-esm.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/readability.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/readability.js"
     },
     {
       "type": "file",
@@ -870,6 +840,36 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/whats-new-handler.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/whats-new-handler.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/adaware.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/adaware.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/common.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/common.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/document-blocked.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/document-blocked.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/flexbox.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/flexbox.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/loading-page.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/loading-page.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/normalize.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/normalize.css"
     },
     {
       "type": "file",
@@ -1243,21 +1243,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point-event-listener.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point-event-listener.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/EmbeddedPDFTouchPointCoachMark.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/EmbeddedPDFTouchPointCoachMark.js"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-content-script.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-content-script.js"
     },
@@ -1300,6 +1285,21 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/single-click-cta.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/single-click-cta.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point-event-listener.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point-event-listener.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/EmbeddedPDFTouchPointCoachMark.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/EmbeddedPDFTouchPointCoachMark.js"
     },
     {
       "type": "file",
@@ -1598,6 +1598,11 @@
     },
     {
       "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/prompts/ShowOneChild.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/prompts/ShowOneChild.js"
+    },
+    {
+      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/remote-execution/dom-operations.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/remote-execution/dom-operations.js"
     },
@@ -1673,23 +1678,13 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/prompts/ShowOneChild.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/prompts/ShowOneChild.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/touchpoint-base.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/touchpoint-base.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/addWebpage.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/addWebpage.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/extractWebpageHTML.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/extractWebpageHTML.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/chromeOS/handler.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/chromeOS/handler.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/verb-execution-service.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/verb-execution-service.js"
     },
     {
       "type": "file",
@@ -1710,6 +1705,21 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/utils/util.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/utils/util.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/addWebpage.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/addWebpage.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/extractWebpageHTML.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/extractWebpageHTML.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/chromeOS/handler.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/chromeOS/handler.js"
     },
     {
       "type": "file",
@@ -1735,16 +1745,6 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/SidePanel/upsellService.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/SidePanel/upsellService.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/touchpoint-base.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/touchpoint-base.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/verb-execution-service.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/verb-execution-service.js"
     },
     {
       "type": "file",
@@ -1973,11 +1973,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/facebook/facebook-content-script.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/facebook/facebook-content-script.js"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express_whatsapp/whatsapp-content-script.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express_whatsapp/whatsapp-content-script.js"
     },
@@ -1995,6 +1990,11 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express_whatsapp/whatsapp-image-preview.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express_whatsapp/whatsapp-image-preview.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/facebook/facebook-content-script.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/facebook/facebook-content-script.js"
     },
     {
       "type": "file",
@@ -2098,11 +2098,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/styles-inline.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/styles-inline.js"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/fte/gmail-convert-attachment-card-fte.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/fte/gmail-convert-attachment-card-fte.js"
     },
@@ -2115,6 +2110,11 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/fte/gmail-email-pdf-fte.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/fte/gmail-email-pdf-fte.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/styles-inline.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/styles-inline.js"
     },
     {
       "type": "file",
@@ -2196,6 +2196,11 @@
     },
     {
       "type": "file",
+      "name": "assets/app.css",
+      "file": "assets/app.css"
+    },
+    {
+      "type": "file",
       "name": "msports-parser/background.js",
       "file": "msports-parser/background.js"
     },
@@ -2276,11 +2281,6 @@
     },
     {
       "type": "file",
-      "name": "assets/app.css",
-      "file": "assets/app.css"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/WasmTtsEngine/20260514.1/background_compiled.js",
       "file": "scratch/chrome-profile/WasmTtsEngine/20260514.1/background_compiled.js"
     },
@@ -2306,18 +2306,23 @@
     },
     {
       "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/offscreendocument_main.js",
+      "file": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/offscreendocument_main.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/page_embed_script.js",
+      "file": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/page_embed_script.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/service_worker_bin_prod.js",
+      "file": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/service_worker_bin_prod.js"
+    },
+    {
+      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/background.js",
       "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/background.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_background.js",
-      "file": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_background.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_window.js",
-      "file": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_window.js"
     },
     {
       "type": "file",
@@ -2351,18 +2356,13 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/offscreendocument_main.js",
-      "file": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/offscreendocument_main.js"
+      "name": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_background.js",
+      "file": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_background.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/page_embed_script.js",
-      "file": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/page_embed_script.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/service_worker_bin_prod.js",
-      "file": "scratch/chrome-profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.106.1_0/service_worker_bin_prod.js"
+      "name": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_window.js",
+      "file": "scratch/chrome-profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/craw_window.js"
     },
     {
       "type": "file",
@@ -2476,121 +2476,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.min.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.min.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/lottie-light-esm.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/lottie-light-esm.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/readability.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/readability.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/610.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/610.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_gmail_native-viewer-pdf-tools-module_js.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_gmail_native-viewer-pdf-tools-module_js.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_fte-utils_js.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_fte-utils_js.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_util_js.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_util_js.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/CompressPDFMessageView.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/CompressPDFMessageView.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/FloatingActionButton.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/FloatingActionButton.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/otherVendors.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/otherVendors.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PdfToolsDropdown.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PdfToolsDropdown.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.css",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ProgressCircle.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ProgressCircle.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/SheetsSettingModal.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/SheetsSettingModal.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.css",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.css",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.css"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilotEmbeddings.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilotEmbeddings.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ToastManager.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ToastManager.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/vendor.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/vendor.js"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/acrobat-content-script.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/acrobat-content-script.js"
     },
@@ -2696,33 +2581,118 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/adaware.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/adaware.css"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/610.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/610.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/common.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/common.css"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_gmail_native-viewer-pdf-tools-module_js.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_gmail_native-viewer-pdf-tools-module_js.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/document-blocked.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/document-blocked.css"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_fte-utils_js.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_fte-utils_js.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/flexbox.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/flexbox.css"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_util_js.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/chrome_content_scripts_utils_util_js.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/loading-page.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/loading-page.css"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/CompressPDFMessageView.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/CompressPDFMessageView.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/normalize.css",
-      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/normalize.css"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/FloatingActionButton.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/FloatingActionButton.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/otherVendors.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/otherVendors.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PdfToolsDropdown.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PdfToolsDropdown.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.css",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/PreferencePage.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ProgressCircle.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ProgressCircle.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/SheetsSettingModal.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/SheetsSettingModal.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.css",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/spectrum.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.css",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilot.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilotEmbeddings.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/TabPilotEmbeddings.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ToastManager.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/ToastManager.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/vendor.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/dist/vendor.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.min.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/jquery-3.1.1.min.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/lottie-light-esm.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/lottie-light-esm.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/readability.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/libs/readability.js"
     },
     {
       "type": "file",
@@ -3053,6 +3023,36 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/whats-new-handler.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/sw_modules/whats-new-handler.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/adaware.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/adaware.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/common.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/common.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/document-blocked.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/document-blocked.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/flexbox.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/flexbox.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/loading-page.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/loading-page.css"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/normalize.css",
+      "file": "scratch/chrome-profile/Default/Extensions/mfhcmdonhekjhfbjmeacdjbhlfgpjabp/2.0.0_0/css/normalize.css"
     },
     {
       "type": "file",
@@ -3426,21 +3426,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point-event-listener.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point-event-listener.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/EmbeddedPDFTouchPointCoachMark.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/EmbeddedPDFTouchPointCoachMark.js"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-content-script.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express-content-script.js"
     },
@@ -3483,6 +3468,21 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/single-click-cta.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/single-click-cta.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point-event-listener.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point-event-listener.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/embedded-pdf-touch-point.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/EmbeddedPDFTouchPointCoachMark.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/embeddedpdfs/EmbeddedPDFTouchPointCoachMark.js"
     },
     {
       "type": "file",
@@ -3781,6 +3781,11 @@
     },
     {
       "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/prompts/ShowOneChild.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/prompts/ShowOneChild.js"
+    },
+    {
+      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/remote-execution/dom-operations.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/remote-execution/dom-operations.js"
     },
@@ -3856,23 +3861,13 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/prompts/ShowOneChild.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/prompts/ShowOneChild.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/touchpoint-base.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/touchpoint-base.js"
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/addWebpage.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/addWebpage.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/extractWebpageHTML.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/extractWebpageHTML.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/chromeOS/handler.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/chromeOS/handler.js"
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/verb-execution-service.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/verb-execution-service.js"
     },
     {
       "type": "file",
@@ -3893,6 +3888,21 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/utils/util.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/utils/util.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/addWebpage.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/addWebpage.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/extractWebpageHTML.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/addWebpage/extractWebpageHTML.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/chromeOS/handler.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/chromeOS/handler.js"
     },
     {
       "type": "file",
@@ -3918,16 +3928,6 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/SidePanel/upsellService.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/resources/SidePanel/upsellService.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/touchpoint-base.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/touchpoint-base.js"
-    },
-    {
-      "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/verb-execution-service.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/touchpoints/verb-execution-service.js"
     },
     {
       "type": "file",
@@ -4156,11 +4156,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/facebook/facebook-content-script.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/facebook/facebook-content-script.js"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express_whatsapp/whatsapp-content-script.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express_whatsapp/whatsapp-content-script.js"
     },
@@ -4178,6 +4173,11 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express_whatsapp/whatsapp-image-preview.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/express_whatsapp/whatsapp-image-preview.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/facebook/facebook-content-script.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/express/facebook/facebook-content-script.js"
     },
     {
       "type": "file",
@@ -4281,11 +4281,6 @@
     },
     {
       "type": "file",
-      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/styles-inline.js",
-      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/styles-inline.js"
-    },
-    {
-      "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/fte/gmail-convert-attachment-card-fte.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/fte/gmail-convert-attachment-card-fte.js"
     },
@@ -4298,6 +4293,11 @@
       "type": "file",
       "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/fte/gmail-email-pdf-fte.js",
       "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/fte/gmail-email-pdf-fte.js"
+    },
+    {
+      "type": "file",
+      "name": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/styles-inline.js",
+      "file": "scratch/chrome-profile/Default/Extensions/efaidnbmnnnibpcajpcglclefindmkaj/26.5.1.0_0/content_scripts/gmail/CompressPDFMessageView/styles-inline.js"
     },
     {
       "type": "file",

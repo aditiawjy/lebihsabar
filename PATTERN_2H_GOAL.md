@@ -202,10 +202,10 @@
 ---
 
 ### P26: HT Total Ganjil, League 16min
-**Record: 21/23 = 91%**
-**Kondisi:** Jumlah total gol 1H ganjil (1, 3, 5...) di league 16min.
-**Logika:** Skor ganjil = ada satu tim yang unggul, pihak yang kalah termotivasi penuh di 2H.
-**Contoh:** HT 1-0, 0-1, 2-1, 1-2 → 91% ada gol 2H di 16min.
+**Record: 11/11 = 100%**
+**Kondisi:** Jumlah total gol 1H ganjil (1, 3, 5...) di league 16min, last mnt >=6, gol 1H >=2, away unggul, max_run<=2, (first!=1 atau max_gap>=4); kecuali struktur HAA 1-2 mnt 3-8/5-8 dan AHA 1-2 mnt 4-7.
+**Logika:** Skor ganjil = ada satu tim yang unggul, pihak yang kalah termotivasi penuh di 2H. Struktur AHA 1-2 mnt 4-7 (gol rapat tanpa jeda) dikecualikan karena jadi satu-satunya miss.
+**Contoh:** HT 1-0, 0-1, 2-1, 1-2 → ada gol 2H di 16min.
 
 ---
 
@@ -283,6 +283,6 @@
 | P23 | 1 gol 1H, mnt pertama >=3, 16min | 13/14 | **93%** |
 | P24 | Team HOME 15min: Arminia/Osasuna/FC Koln/dll | 40/40 | **100%** |
 | P25 | Team AWAY: Real Sociedad/France/Netherlands/Ukraine | 30/30 | **100%** |
-| P26 | HT total ganjil, 16min | 21/23 | **91%** |
+| P26 | HT total ganjil, 16min | 11/11 | **100%** |
 | P27 | Last scorer AWAY, 16min | 19/21 | **90%** |
 | P28 | Croatia atau France + last>=3 + span>=3 + switches>=1 + (target team away atau first>=2) | 19/19 | **100%** |

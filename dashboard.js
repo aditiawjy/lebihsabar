@@ -4421,6 +4421,13 @@
 						arrayEqualsJS(s.h1s, ["H", "A", "A"]) &&
 						s.sc_h === 1 &&
 						s.sc_a === 2
+					) &&
+					!(
+						s.h1_first === 4 &&
+						s.h1_last === 7 &&
+						arrayEqualsJS(s.h1s, ["A", "H", "A"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 2
 					)
 				);
 			case "P27":

@@ -32,6 +32,8 @@ find_patterns.py
 # Local CSV backup snapshots
 csv_backups/
 
+# Local Telegram tokens
+live-scraper/apitoken/
 
 # OMC / Claude tools
 .omc/

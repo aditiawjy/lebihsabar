@@ -4929,6 +4929,13 @@
 						s.sc_a === 4 &&
 						s.min_gap === 0 &&
 						s.max_run === 3
+					) &&
+					!(
+						s.h1_first === 4 &&
+						s.h1_last === 7 &&
+						arrayEqualsJS(s.h1s, ["A", "H", "A"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 2
 					)
 				);
 			case "P52":
@@ -5264,6 +5271,14 @@
 						s.league === "16min" &&
 						s.h1_first === 3 &&
 						s.h1_last === 8 &&
+						arrayEqualsJS(s.h1s, ["A", "H"]) &&
+						s.sc_h === 1 &&
+						s.sc_a === 1
+					) &&
+					!(
+						s.league === "16min" &&
+						s.h1_first === 1 &&
+						s.h1_last === 6 &&
 						arrayEqualsJS(s.h1s, ["A", "H"]) &&
 						s.sc_h === 1 &&
 						s.sc_a === 1
@@ -5744,6 +5759,14 @@
 						s.league === "20min" &&
 						s.h1_first === 0 &&
 						s.h1_last === 5 &&
+						arrayEqualsJS(s.h1s, ["H", "A", "A", "H"]) &&
+						s.sc_h === 2 &&
+						s.sc_a === 2
+					) &&
+					!(
+						s.league === "15min" &&
+						s.h1_first === 1 &&
+						s.h1_last === 6 &&
 						arrayEqualsJS(s.h1s, ["H", "A", "A", "H"]) &&
 						s.sc_h === 2 &&
 						s.sc_a === 2

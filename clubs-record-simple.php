@@ -15,8 +15,6 @@ $marketOptions = [
     '1h0_ftover'=> ['label' => '1H=0 & FT Over',   'short' => 'LATE',  'class' => 'text-white', 'style' => 'background:#0f172a;color:#fff;min-width:44px;text-align:center;'],
     'btts'      => ['label' => 'BTTS',             'short' => 'BTTS',  'class' => 'text-white', 'style' => 'background:#db2777;color:#fff;min-width:44px;text-align:center;'],
     'no_btts'   => ['label' => 'No BTTS',          'short' => 'NoBTTS','class' => 'text-white', 'style' => 'background:#9d174d;color:#fff;min-width:44px;text-align:center;'],
-    'draw'      => ['label' => 'Draw',             'short' => 'DRAW',  'class' => 'text-white', 'style' => 'background:#ca8a04;color:#fff;min-width:44px;text-align:center;'],
-    'no_draw'   => ['label' => 'No Draw',          'short' => 'NoDRAW','class' => 'text-white', 'style' => 'background:#854d0e;color:#fff;min-width:44px;text-align:center;'],
     'ht1.5'     => ['label' => 'Under 1.5 HT',     'short' => 'HT U1.5','class' => 'text-white', 'style' => 'background:#7c3aed;color:#fff;min-width:44px;text-align:center;'],
     'sh1.5'     => ['label' => 'Under 1.5 2H',     'short' => '2H U1.5','class' => 'text-white', 'style' => 'background:#6d28d9;color:#fff;min-width:44px;text-align:center;'],
 ];
@@ -37,8 +35,6 @@ function csvCheckMarket(array $m, string $mkt): bool {
         '1h0_ftover'=> ($fhH + $fhA) === 0 && ($ftH + $ftA) > 0,
         'btts'      => $ftH > 0 && $ftA > 0,
         'no_btts'   => $ftH === 0 || $ftA === 0,
-        'draw'      => $ftH === $ftA,
-        'no_draw'   => $ftH !== $ftA,
         'ht1.5'     => ($fhH + $fhA) < 2,
         'sh1.5'     => (($ftH - $fhH) + ($ftA - $fhA)) < 2,
         default     => false,

@@ -1243,9 +1243,11 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                         if (p.samp < (MIN_SAMP[mk] || 15)) return;
                         const hits = Math.round(p.over * p.samp / 100);
                         const miss = p.samp - hits; // berapa kali meleset
-                        // syarat mutlak: meleset maks 2x; meleset 2x hanya boleh bila sampel > 40
+                        // syarat mutlak: meleset maks 2x; meleset 2x hanya boleh bila total sampel > 100
                         if (miss > 2) return;
-                        if (miss === 2 && p.samp <= 40) return;
+                        if (miss === 2 && p.samp <= 100) return;
+                        if (miss === 1 && p.samp <= 50) return;
+                        if (miss === 0 && p.samp < 30) return;
                         if (p.over < 99 && p.samp <= 20) return;
                         d.push({ t: r.t, mk: MODE_TEXT[mk] || mk, outT: o.t, l: r.l, cur: cur,
                             over: p.over, samp: p.samp, hits: hits, miss: miss,

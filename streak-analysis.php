@@ -673,7 +673,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
     <!-- Tabel peluang 100% (semua market & semua hasil) -->
     <div class="rounded-2xl border border-amber-300 bg-amber-50/40 p-4 space-y-3">
         <div class="flex flex-wrap items-center gap-3">
-            <h3 class="text-lg font-extrabold text-amber-700">🎯 Peluang ≥ 99% / meleset maks 2 — semua pilihan</h3>
+            <h3 class="text-lg font-extrabold text-amber-700">🎯 Peluang 100% / meleset maks 3x — semua pilihan</h3>
             <span class="text-xs text-slate-500">Otomatis dari semua market & hasil, tanpa buka dropdown.</span>
             <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer select-none ml-auto">
                 <input id="stk100Cur" type="checkbox" checked class="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500">
@@ -702,7 +702,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                 <tbody id="stk100Body"></tbody>
             </table>
         </div>
-        <p class="text-[11px] text-slate-400">Syarat tampil: meleset maksimal 2x — meleset 2x hanya boleh bila total sampel > 40 (mis. 39/41); meleset ≤ 1x tetap butuh peluang ≥ 99% atau sampel > 20. Urutkan kolom "Keandalan" untuk memilah. Ikut filter "Cari tim/liga" & "liga" di bawah.</p>
+        <p class="text-[11px] text-slate-400">Syarat tampil: meleset 0x butuh total sampel > 10; meleset 1x butuh > 100; meleset 2x butuh > 200; meleset 3x butuh > 300. Urutkan kolom "Keandalan" untuk memilah. Ikut filter "Cari tim/liga" & "liga" di bawah.</p>
     </div>
 
     <!-- Pilihan utama -->
@@ -889,7 +889,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
         </label>
         <label class="flex flex-col gap-1">
             <span class="text-[11px] uppercase tracking-wide text-slate-400 font-bold" title="Baris hanya tampil bila sampel kondisi (angka di kolom Sampel, mis. 14/14) lebih dari angka ini.">Min Sampel</span>
-            <input id="stkMinN" type="number" min="0" step="1" value="25"
+            <input id="stkMinN" type="number" min="0" step="1" value="5"
                 class="px-3 py-3 rounded-xl border border-slate-300 text-sm font-semibold bg-white w-24">
         </label>
         <input id="stkSearch" type="search" placeholder="Cari tim / liga…"
@@ -956,6 +956,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
     <p class="text-[11px] text-slate-400">
         Dihitung: <?= htmlspecialchars($payload['builtAt']) ?>. ⚠️ Sampel kecil (terutama pilihan 3x) = angka lebih berisik.
         "Streak skrg" = sudah berapa kali tim Under 1.5 beruntun sampai saat ini.
+        Syarat tampil: meleset 0x butuh total sampel > 5; meleset 1x butuh > 100; meleset 2x butuh > 200; meleset 3x butuh > 300 (kecuali diisi manual lewat "Min Peluang %").
     </p>
 
     <script>
@@ -1162,14 +1163,26 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                 if (nextOnly.checked && !r.next) return;
                 modesList.forEach(mk => {
                     const p = pick(r, mk, out);
-                    if (!overOK(p.over)) return;
+                    if (p.over === null) return;
                     if (minN > 0 && !(p.samp > minN)) return; // sampel kondisi harus > Min Sampel
-                    if (p.samp < (MIN_SAMP[mk] || 15)) return;
+                    const hits = Math.round(p.over * p.samp / 100);
+                    const miss = p.samp - hits; // berapa kali meleset
+                    if (minOverV !== null && !isNaN(minOverV)) {
+                        // "Min Peluang %" diisi manual -> pakai ambang manual ini, tanpa toleransi meleset.
+                        if (!overOK(p.over)) return;
+                    } else {
+                        // syarat mutlak: meleset 0x > sampel 5; 1x > sampel 100; 2x > sampel 200; 3x > sampel 300
+                        if (miss === 0 && p.samp <= 5) return;
+                        else if (miss === 1 && p.samp <= 100) return;
+                        else if (miss === 2 && p.samp <= 200) return;
+                        else if (miss === 3 && p.samp <= 300) return;
+                        else if (miss > 3) return;
+                    }
                     const cur = curOf(r, mk);
                     const need = STREAK_LEN[mk] || 1;
                     if (curOnly.checked && cur < need) return;
                     const baseV = BASE_OUT[out] ?? null;
-                    d.push({ t: r.t, mk: MODE_TEXT[mk] || mk, l: r.l, cur: cur, over: p.over, samp: p.samp, hits: Math.round(p.over * p.samp / 100),
+                    d.push({ t: r.t, mk: MODE_TEXT[mk] || mk, l: r.l, cur: cur, over: p.over, samp: p.samp, hits: hits, miss: miss,
                         lift: baseV === null || p.over === null ? null : Math.round((p.over - baseV) * 10) / 10,
                         lb: wilsonLB(p.over, p.samp), tu15: r.tu15 || 0, oppOver: oppOver, teamOver: teamOver, next: r.next });
                 });
@@ -1240,15 +1253,14 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                         const p = pick(r, mk, o.k);
                         if (p.over === null) return;
                         if (minN > 0 && !(p.samp > minN)) return; // sampel kondisi harus > Min Sampel
-                        if (p.samp < (MIN_SAMP[mk] || 15)) return;
                         const hits = Math.round(p.over * p.samp / 100);
                         const miss = p.samp - hits; // berapa kali meleset
-                        // syarat mutlak: meleset maks 2x; meleset 2x hanya boleh bila total sampel > 100
-                        if (miss > 2) return;
-                        if (miss === 2 && p.samp <= 100) return;
-                        if (miss === 1 && p.samp <= 50) return;
-                        if (miss === 0 && p.samp < 30) return;
-                        if (p.over < 99 && p.samp <= 20) return;
+                        // syarat mutlak: meleset 0x > sampel 10; meleset 1x > sampel 100; meleset 2x > sampel 200; meleset 3x > sampel 300
+                        if (miss === 0 && p.samp <= 10) return;
+                        if (miss === 1 && p.samp <= 100) return;
+                        if (miss === 2 && p.samp <= 200) return;
+                        if (miss === 3 && p.samp <= 300) return;
+                        if (miss > 3) return;
                         d.push({ t: r.t, mk: MODE_TEXT[mk] || mk, outT: o.t, l: r.l, cur: cur,
                             over: p.over, samp: p.samp, hits: hits, miss: miss,
                             lb: wilsonLB(p.over, p.samp), next: r.next });

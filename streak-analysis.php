@@ -702,7 +702,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                 <tbody id="stk100Body"></tbody>
             </table>
         </div>
-        <p class="text-[11px] text-slate-400">Syarat tampil: meleset 0x butuh total sampel > 10; meleset 1x butuh > 100; meleset 2x butuh > 200; meleset 3x butuh > 300. Urutkan kolom "Keandalan" untuk memilah. Ikut filter "Cari tim/liga" & "liga" di bawah.</p>
+        <p class="text-[11px] text-slate-400">Syarat tampil: peluang 100% (meleset 0x) tampil tanpa batas sampel; meleset 1x butuh sampel > 100; meleset 2x butuh > 200; meleset 3x butuh > 300. Urutkan kolom "Keandalan" untuk memilah. Ikut filter "Cari tim/liga" & "liga" di bawah.</p>
     </div>
 
     <!-- Pilihan utama -->
@@ -719,6 +719,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                 <option value="kl_3">Kalah 3x beruntun</option>
                 <option value="mn_2">Menang 2x beruntun</option>
                 <option value="dr_3">Draw 3x beruntun</option>
+                <option value="dr_4">Draw 4x beruntun</option>
                 <option value="od_4">Odd 4x beruntun</option>
                 <option value="od_5">Odd 5x beruntun</option>
                 <option value="ev_4">Even 4x beruntun</option>
@@ -750,7 +751,6 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                     <option value="kl_5">Kalah 5x beruntun</option>
                     <option value="mn_4">Menang 4x beruntun</option>
                     <option value="mn_5">Menang 5x beruntun</option>
-                    <option value="dr_4">Draw 4x beruntun</option>
                     <option value="o15s4">Over 1.5 4x beruntun (momentum)</option>
                     <option value="o15s5">Over 1.5 5x beruntun (momentum)</option>
                     <option value="o25s4">Over 2.5 4x beruntun (momentum)</option>
@@ -1256,10 +1256,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                         if (minN > 0 && !(p.samp > minN)) return; // sampel kondisi harus > Min Sampel
                         const hits = Math.round(p.over * p.samp / 100);
                         const miss = p.samp - hits; // berapa kali meleset
-                        // kombinasi >3 pilihan (cm_) utk Over 0.5: bila 100% cukup total >= 3
-                        const combo05 = (o.k === 'o05' && mk.indexOf('cm_') === 0);
-                        // syarat mutlak: meleset 0x > sampel 10; meleset 1x > sampel 100; meleset 2x > sampel 200; meleset 3x > sampel 300
-                        if (miss === 0 && p.samp < (combo05 ? 3 : 11)) return;
+                        // syarat mutlak: meleset 0x (peluang 100%) tanpa batas sampel; meleset 1x > sampel 100; meleset 2x > sampel 200; meleset 3x > sampel 300
                         if (miss === 1 && p.samp <= 100) return;
                         if (miss === 2 && p.samp <= 200) return;
                         if (miss === 3 && p.samp <= 300) return;

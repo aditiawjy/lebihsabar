@@ -1171,8 +1171,10 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                         // "Min Peluang %" diisi manual -> pakai ambang manual ini, tanpa toleransi meleset.
                         if (!overOK(p.over)) return;
                     } else {
+                        // kombinasi >3 pilihan (cm_) utk Over 0.5: bila 100% cukup total > 1
+                        const combo05 = (out === 'o05' && mk.indexOf('cm_') === 0);
                         // syarat mutlak: meleset 0x > sampel 5; 1x > sampel 100; 2x > sampel 200; 3x > sampel 300
-                        if (miss === 0 && p.samp <= 5) return;
+                        if (miss === 0 && p.samp < (combo05 ? 3 : 6)) return;
                         else if (miss === 1 && p.samp <= 100) return;
                         else if (miss === 2 && p.samp <= 200) return;
                         else if (miss === 3 && p.samp <= 300) return;
@@ -1255,8 +1257,10 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                         if (minN > 0 && !(p.samp > minN)) return; // sampel kondisi harus > Min Sampel
                         const hits = Math.round(p.over * p.samp / 100);
                         const miss = p.samp - hits; // berapa kali meleset
+                        // kombinasi >3 pilihan (cm_) utk Over 0.5: bila 100% cukup total >= 3
+                        const combo05 = (o.k === 'o05' && mk.indexOf('cm_') === 0);
                         // syarat mutlak: meleset 0x > sampel 10; meleset 1x > sampel 100; meleset 2x > sampel 200; meleset 3x > sampel 300
-                        if (miss === 0 && p.samp <= 10) return;
+                        if (miss === 0 && p.samp < (combo05 ? 3 : 11)) return;
                         if (miss === 1 && p.samp <= 100) return;
                         if (miss === 2 && p.samp <= 200) return;
                         if (miss === 3 && p.samp <= 300) return;

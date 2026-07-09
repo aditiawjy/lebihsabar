@@ -13,7 +13,7 @@ if (!is_dir($cacheDir)) @mkdir($cacheDir, 0775, true);
 $cacheKey = md5(json_encode([
     is_file($csvPath) ? filemtime($csvPath) : 0,
     is_file($csvPath) ? filesize($csvPath) : 0,
-    'streak_v52_oos_validated',
+    'streak_v54_time_filter',
     date('Y-m-d'), // tu15 bergantung tanggal → recompute tiap hari
 ]));
 $cacheFile = $cacheDir . '/' . $cacheKey . '.cache';
@@ -196,6 +196,23 @@ if ($payload === null) {
         'c_evnb'   => [[7, true, 4], [10, false, 3]],   // Even 4x + NoBTTS 2x — genap & kering
         'c_dr3u15' => [[6, false, 3], [1, false, 3]],   // Draw 3x + U1.5 3x — seri minim gol beruntun
         'c_nfns'   => [[9, true, 3], [8, true, 3]],     // NoFHG 2x + NoSHG 2x — dua babak sama-sama seret
+    ];
+    // Kombinasi khusus U1.5 3x/4x (ide tambahan dari filter utama).
+    $newModes += [
+        'c_u15fts'      => [[1, false, 3], [12, false, 3]],
+        'c_u15nb'       => [[1, false, 3], [10, false, 3]],
+        'c_u15u35'      => [[1, false, 3], [15, false, 4]],
+        'c_u154kl'      => [[1, false, 4], [4, false, 2]],
+        'c_u154nf'      => [[1, false, 4], [9, true, 3]],
+        'c_u154ns'      => [[1, false, 4], [8, true, 3]],
+        'c_u154nb'      => [[1, false, 4], [10, false, 3]],
+        'c_u154fts'     => [[1, false, 4], [12, false, 3]],
+        'c_u154cs'      => [[1, false, 4], [11, false, 3]],
+        'c3_u154klnf'   => [[1, false, 4], [4, false, 2], [9, true, 3]],
+        'c3_u154nbns'   => [[1, false, 4], [10, false, 3], [8, true, 3]],
+        'c3_u154csnf'   => [[1, false, 4], [11, false, 3], [9, true, 3]],
+        'c4_u154gembok' => [[1, false, 4], [11, false, 3], [9, true, 3], [10, false, 3]],
+        'c4_u154krisis' => [[1, false, 4], [4, false, 2], [12, false, 3], [8, true, 3]],
     ];
     // Kombinasi 3 kondisi — batch 3.
     $newModes += [
@@ -554,7 +571,9 @@ if ($payload === null) {
             if ($nx) {
                 $ts = strtotime($nx['dt']);
                 // Tampilan dikurangi 1 jam (hanya di view, data CSV tetap)
-                $nextStr = 'vs ' . $nx['vs'] . ($ts ? ' · ' . date('d/m H:i', $ts - 3600) : '');
+                $viewTs = $ts ? $ts - 3600 : null;
+                $nextStr = 'vs ' . $nx['vs'] . ($viewTs ? ' · ' . date('d/m H:i', $viewTs) : '');
+                $nextMin = $viewTs ? ((int) date('H', $viewTs) * 60 + (int) date('i', $viewTs)) : null;
                 $oppOver = $overRateMap[$nx['vs'] . '|' . $lg] ?? null; // rate Over1.5 lawan
             }
             // tiap mode → [over15%, over05%, sampel]
@@ -564,6 +583,7 @@ if ($payload === null) {
                 'l'    => $lg,
                 'n'    => $n,
                 'next' => $nextStr,
+                'nextMin' => $nextMin,
                 'base' => round($base * 100, 1),
                 'lift2'=> $base > 0 && $a[2][0] > 0 ? round((($a[2][0] - $a[2][1]) / $a[2][0]) / $base, 2) : null,
                 'm'    => [
@@ -655,6 +675,90 @@ $gl        = $payload['global'];
 $csvError  = $payload['csvError'];
 $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
 ?>
+<style>
+    .streak-filter-panel {
+        display: grid;
+        grid-template-columns: minmax(240px, 1.5fr) minmax(200px, 1fr) minmax(120px, .65fr) minmax(120px, .65fr);
+        gap: 14px 12px;
+        align-items: end;
+        position: relative;
+        padding: 16px 16px 18px;
+        border: 1px solid rgba(148, 163, 184, .28);
+        border-radius: 16px;
+        background: linear-gradient(180deg, #fff 0%, #f8fbff 100%);
+        box-shadow: 0 10px 28px rgba(15, 23, 42, .06);
+    }
+    .streak-filter-panel .streak-field {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .streak-filter-panel .streak-field:first-child { grid-column: span 2; }
+    .streak-filter-panel .streak-field > span,
+    .streak-filter-panel > label > span:first-child {
+        color: #64748b !important;
+        font-size: 10px !important;
+        font-weight: 800 !important;
+        letter-spacing: 0 !important;
+        line-height: 1.2;
+    }
+    .streak-filter-panel select,
+    .streak-filter-panel input[type="search"],
+    .streak-filter-panel input[type="number"],
+    .streak-filter-panel input[type="time"] {
+        width: 100%;
+        min-width: 0;
+        height: 42px;
+        border-color: #cbd5e1 !important;
+        border-radius: 10px !important;
+        background: #fff;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
+    }
+    .streak-filter-panel select {
+        padding-top: 0 !important;
+        padding-bottom: 2px !important;
+        display: block;
+        line-height: 42px !important;
+    }
+    .streak-filter-panel select:focus,
+    .streak-filter-panel input:focus {
+        border-color: #2563eb !important;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .14);
+    }
+    .streak-filter-panel #stkMode { min-width: 0; }
+    .streak-filter-panel #stkLeague { grid-column: span 2; }
+    .streak-filter-panel .streak-check {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 38px;
+        padding: 8px 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #fff;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 650;
+        cursor: pointer;
+        user-select: none;
+    }
+    .streak-filter-panel .streak-check input { flex: 0 0 auto; }
+    @media (max-width: 1200px) {
+        .streak-filter-panel { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .streak-filter-panel .streak-field:first-child,
+        .streak-filter-panel .streak-field:nth-child(2),
+        .streak-filter-panel #stkLeague { grid-column: span 2; }
+    }
+    @media (max-width: 760px) {
+        .streak-filter-panel { grid-template-columns: 1fr; padding: 12px; }
+        .streak-filter-panel .streak-field:first-child,
+        .streak-filter-panel .streak-field:nth-child(2),
+        .streak-filter-panel #stkLeague { grid-column: auto; }
+
+    }
+</style>
 <div class="p-4 sm:p-6 lg:p-8 space-y-6">
     <?php if ($csvError): ?>
         <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
@@ -706,13 +810,11 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
     </div>
 
     <!-- Pilihan utama -->
-    <div class="flex flex-wrap items-end gap-3">
-        <label class="flex flex-col gap-1">
+    <div class="streak-filter-panel">
+        <label class="streak-field">
             <span class="text-[11px] uppercase tracking-wide text-slate-400 font-bold">Pilih kondisi</span>
             <select id="stkMode" class="px-4 py-3 rounded-xl border border-slate-300 text-sm font-semibold bg-white min-w-[240px]">
                 <option value="ALL" selected>★ Semua market (1 tabel)</option>
-                <option value="3">Under 1.5 3x beruntun</option>
-                <option value="4">Under 1.5 4x beruntun</option>
                 <option value="05_4">Under 0.5 4x beruntun</option>
                 <option value="05_3">Under 0.5 3x beruntun</option>
                 <option value="kl_2">Kalah 2x beruntun</option>
@@ -793,6 +895,22 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                     <option value="c_dr3u15">Draw 3x + U1.5 3x (seri minim gol)</option>
                     <option value="c_nfns">No FHG 3x + No SHG 3x (dua babak seret)</option>
                 </optgroup>
+                <optgroup label="Kombinasi U1.5 3x/4x">
+                    <option value="c_u15fts">U1.5 3x + Gagal cetak 3x</option>
+                    <option value="c_u15nb">U1.5 3x + No BTTS 3x</option>
+                    <option value="c_u15u35">U1.5 3x + Under 3.5 4x</option>
+                    <option value="c_u154kl">U1.5 4x + Kalah 2x</option>
+                    <option value="c_u154nf">U1.5 4x + No FHG 3x</option>
+                    <option value="c_u154ns">U1.5 4x + No SHG 3x</option>
+                    <option value="c_u154nb">U1.5 4x + No BTTS 3x</option>
+                    <option value="c_u154fts">U1.5 4x + Gagal cetak 3x</option>
+                    <option value="c_u154cs">U1.5 4x + Cleansheet 3x</option>
+                    <option value="c3_u154klnf">U1.5 4x + Kalah 2x + No FHG 3x</option>
+                    <option value="c3_u154nbns">U1.5 4x + No BTTS 3x + No SHG 3x</option>
+                    <option value="c3_u154csnf">U1.5 4x + Cleansheet 3x + No FHG 3x</option>
+                    <option value="c4_u154gembok">U1.5 4x + Cleansheet + No FHG + No BTTS</option>
+                    <option value="c4_u154krisis">U1.5 4x + Kalah + Gagal cetak + No SHG</option>
+                </optgroup>
                 <optgroup label="— Kombinasi 3 Kondisi —">
                     <option value="c3_u15klnf">U1.5 3x + Kalah 2x + No FHG 3x (mati gaya)</option>
                     <option value="c3_klftsnf">Kalah 2x + Gagal cetak 3x + No FHG 3x (krisis serangan)</option>
@@ -836,11 +954,11 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                 </optgroup>
             </select>
         </label>
-        <label class="flex flex-col gap-1">
+        <label class="streak-field">
             <span class="text-[11px] uppercase tracking-wide text-slate-400 font-bold">Hasil</span>
             <select id="stkOut" class="px-4 py-3 rounded-xl border border-slate-300 text-sm font-semibold bg-white">
-                <option value="o15" selected>→ Over 1.5</option>
-                <option value="o05">→ Over 0.5</option>
+                <option value="o15">→ Over 1.5</option>
+                <option value="o05" selected>→ Over 0.5</option>
                 <option value="shg">→ SHG Over 0.5 (gol babak 2)</option>
                 <option value="fhg">→ FHG Over 0.5 (gol babak 1)</option>
                 <option value="o25">→ Over 2.5 (min 3 gol)</option>
@@ -854,7 +972,6 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                     <option value="tg01">→ Total Gol 0-1</option>
                     <option value="tg23">→ Total Gol 2-3</option>
                     <option value="tg46">→ Total Gol 4-6</option>
-                    <option value="tg7">→ Total Gol 7+</option>
                 </optgroup>
                 <optgroup label="— Exactly Total Gol —">
                     <option value="eg1">→ Exactly 1 Gol</option>
@@ -881,12 +998,12 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                 </optgroup>
             </select>
         </label>
-        <label class="flex flex-col gap-1">
+        <label class="streak-field">
             <span class="text-[11px] uppercase tracking-wide text-slate-400 font-bold" title="Ambang minimal peluang agar baris tampil. Kosongkan untuk memakai ambang default per hasil.">Min Peluang %</span>
             <input id="stkMinOver" type="number" min="0" max="100" step="1" value="99"
                 class="px-3 py-3 rounded-xl border border-slate-300 text-sm font-semibold bg-white w-24">
         </label>
-        <label class="flex flex-col gap-1">
+        <label class="streak-field">
             <span class="text-[11px] uppercase tracking-wide text-slate-400 font-bold" title="Baris hanya tampil bila sampel kondisi (angka di kolom Sampel, mis. 14/14) lebih dari angka ini.">Min Sampel</span>
             <input id="stkMinN" type="number" min="0" step="1" value="5"
                 class="px-3 py-3 rounded-xl border border-slate-300 text-sm font-semibold bg-white w-24">
@@ -899,27 +1016,35 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                 <option value="<?= htmlspecialchars($lg, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($lg, ENT_QUOTES, 'UTF-8') ?></option>
             <?php endforeach; ?>
         </select>
-        <label class="flex flex-col gap-1">
+        <label class="streak-field">
+            <span class="text-[11px] uppercase tracking-wide text-slate-400 font-bold" title="Filter jam next match mulai dari waktu ini.">Dari Jam</span>
+            <input id="stkTimeFrom" type="time" class="px-3 py-3 rounded-xl border border-slate-300 text-sm font-semibold bg-white">
+        </label>
+        <label class="streak-field">
+            <span class="text-[11px] uppercase tracking-wide text-slate-400 font-bold" title="Filter jam next match sampai waktu ini.">Sampai Jam</span>
+            <input id="stkTimeTo" type="time" class="px-3 py-3 rounded-xl border border-slate-300 text-sm font-semibold bg-white">
+        </label>
+        <label class="streak-field">
             <span class="text-[11px] uppercase tracking-wide text-slate-400 font-bold" title="Saring rekor Over 1.5 lawan di next match. Terbukti dari data (BTTS 3x): Lawan>=80 & Tim>=85 -> 91.4%; Lawan>=82 & Tim>=88 -> 93.6%; Lawan>=85 & Tim>=90 -> 96.0%.">Min Lawan O1.5%</span>
             <input id="stkOppOver" type="number" min="0" max="100" step="1" value=""
                 class="px-3 py-3 rounded-xl border border-slate-300 text-sm font-semibold bg-white w-24">
         </label>
-        <label class="flex flex-col gap-1">
+        <label class="streak-field">
             <span class="text-[11px] uppercase tracking-wide text-slate-400 font-bold" title="Rekor Over 1.5 tim itu sendiri. Gabung dgn Min Lawan O1.5% (kedua tim Over) menaikkan akurasi: 82/88 -> 93.6%, 85/90 -> 96.0%.">Min Tim O1.5%</span>
             <input id="stkTeamOver" type="number" min="0" max="100" step="1" value=""
                 class="px-3 py-3 rounded-xl border border-slate-300 text-sm font-semibold bg-white w-24">
         </label>
-        <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer select-none">
+        <label class="streak-check">
             <input id="stkCurOnly" type="checkbox" checked
                 class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
             Streak skrg &ge; <span id="stkCurNeed">1</span>
         </label>
-        <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer select-none">
+        <label class="streak-check">
             <input id="stkNextOnly" type="checkbox" checked
                 class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
             Ada Next Match
         </label>
-        <span id="stkCount" class="ml-auto text-sm font-semibold text-slate-500"></span>
+
     </div>
 
     <!-- Ringkasan untuk kondisi terpilih -->
@@ -969,6 +1094,8 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
         const outSel = document.getElementById('stkOut');
         const search = document.getElementById('stkSearch');
         const leagueSel = document.getElementById('stkLeague');
+        const timeFromInp = document.getElementById('stkTimeFrom');
+        const timeToInp = document.getElementById('stkTimeTo');
         const curOnly = document.getElementById('stkCurOnly');
         const nextOnly = document.getElementById('stkNextOnly');
         const oppOverInp = document.getElementById('stkOppOver');
@@ -982,6 +1109,18 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
         const colOut = document.getElementById('stkColOut');
         let sortKey = 'over', asc = false;
 
+        const timeToMin = (v) => {
+            if (!v || !/^\d{2}:\d{2}$/.test(v)) return null;
+            const [h, m] = v.split(':').map(Number);
+            return h * 60 + m;
+        };
+        const inTimeRange = (min, from, to) => {
+            if (from === null && to === null) return true;
+            if (min === null || min === undefined) return false;
+            if (from !== null && to !== null) return from <= to ? (min >= from && min <= to) : (min >= from || min <= to);
+            if (from !== null) return min >= from;
+            return min <= to;
+        };
         // Wilson 95% lower bound dari rate(%) & sampel n. Ukuran keandalan: makin
         // tinggi makin yakin. n kecil -> LB jatuh jauh meski rate 100%.
         function wilsonLB(rate, n) {
@@ -1030,7 +1169,14 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             'c_mn3o25': ['mn_3', 'o25s3'], 'c_odbt': ['od_4', 'btts2'],
             'c_evnb': ['ev_4', 'nbtts3'], 'c_dr3u15': ['dr_3', '3'],
             'c_nfns': ['nfhg3', 'nshg3'],
-            // Kombinasi 3 kondisi — batch 3
+            // Kombinasi khusus U1.5 3x/4x
+            'c_u15fts': ['3', 'fts2'], 'c_u15nb': ['3', 'nbtts3'], 'c_u15u35': ['3', 'u35_4'],
+            'c_u154kl': ['4', 'kl_2'], 'c_u154nf': ['4', 'nfhg3'], 'c_u154ns': ['4', 'nshg3'],
+            'c_u154nb': ['4', 'nbtts3'], 'c_u154fts': ['4', 'fts2'], 'c_u154cs': ['4', 'cs2'],
+            'c3_u154klnf': ['4', 'kl_2', 'nfhg3'], 'c3_u154nbns': ['4', 'nbtts3', 'nshg3'],
+            'c3_u154csnf': ['4', 'cs2', 'nfhg3'],
+            'c4_u154gembok': ['4', 'cs2', 'nfhg3', 'nbtts3'],
+            'c4_u154krisis': ['4', 'kl_2', 'fts2', 'nshg3'],            // Kombinasi 3 kondisi — batch 3
             'c3_csu15nf': ['cs2', '3', 'nfhg3'], 'c3_mno25bt3': ['mn_2', 'o25s3', 'btts3'],
             'c3_dru15ns': ['dr_3', '3', 'nshg3'], 'c3_klu15fts': ['kl_2', '3', 'fts2'],
             // Kombinasi 4 kondisi
@@ -1106,7 +1252,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             const outText = out === 'dc1x' ? 'DC 1X (Home/Draw)' : out === 'dcx2' ? 'DC X2 (Away/Draw)' : out === 'o05' ? 'Over 0.5' : (out === 'shg' ? 'SHG Over 0.5' : (out === 'fhg' ? 'FHG Over 0.5' : (out === 'u25' ? 'Under 2.5' : (out === 'o25' ? 'Over 2.5' : (out === 'u35' ? 'Under 3.5' : (out === 'btts' ? 'BTTS' : (out === 'nbtts' ? 'No BTTS' : (out === 'draw' ? 'Draw' : (out === 'nodraw' ? 'No Draw' : (out === 'hg05' ? 'Goal Home Over 0.5' : (out === 'ag05' ? 'Goal Away Over 0.5' : (out === 'tg01' ? 'Total Gol 0-1' : (out === 'tg23' ? 'Total Gol 2-3' : (out === 'tg46' ? 'Total Gol 4-6' : (out === 'tg7' ? 'Total Gol 7+' : (out === 'eg1' ? 'Exactly 1 Gol' : (out === 'eg2' ? 'Exactly 2 Gol' : (out === 'eg3' ? 'Exactly 3 Gol' : (out === 'eg4' ? 'Exactly 4 Gol' : (out === 'hw' ? 'Home Win' : (out === 'aw' ? 'Away Win' : (out === 'ftodd' ? 'FT Skor Ganjil' : (out === 'fteven' ? 'FT Skor Genap' : (out === 'u15' ? 'Under 1.5' : (out === 'u05' ? 'Under 0.5' : (out === 'o35' ? 'Over 3.5' : 'Over 1.5'))))))))))))))))))))))))));
             const q = search.value.toLowerCase().trim();
             const lg = leagueSel.value;
-            const ALL_MODES = ['3','4','05_2','05_3','kl_2','kl_3','mn_2','mn_3','dr_3','od_4','ev_4','od_5','ev_5','o25s2','o15s3','o25s3','nbtts3','nfhg3','nshg3','od4u','ev4u','u15oe3','dry2o','btso3','kncs3','nfo3','btts2','btts3','cs2','fts2','htodd3','hteven3','u15_5','u15_6','05_4','kl_4','kl_5','mn_4','mn_5','dr_4','o15s4','o15s5','o25s4','o25s5','btts4','nbtts4','od_6','ev_6','c_u15kl','c_u15nf','c_klfts','c_mno25','c_mnbt','c_o15bt','c_u05ns','c_dru15','c_evu15','c_odo15','c_csmn','c_ftsnf','c_klnb','c_mnnf','c_drnb','c_dro25','c_u15ns','c_o25bt3','c_csu15','c_kl3fts','c_htou15','c_hteo15','c3_u15klnf','c3_klftsnf','c3_mnbto25','c3_mncs','c3_u05krg','c3_o15bto25','c3_dru15nb','c3_klbto25','c_klo25','c_mnu15','c_csnf','c_kl3nb','c_mn3o25','c_odbt','c_evnb','c_dr3u15','c_nfns','c3_csu15nf','c3_mno25bt3','c3_dru15ns','c3_klu15fts','c4_krisis','c4_panas','c4_gembok','c4_terpuruk','c4_badai','c5_krisis','c5_gembok','c5_badai','shg3','fhg3','u35_4','cm_shfhcs','cm_drnfbt','cm_o15cshto','cm_nsbthto','cm_odftshto','cm_o15o25cs','cm_nsftshto','cm_u05evfts','cm_o25ftsu35','cm_o25nsu35','cm_o25fhcs','cm_o15cshte','cm_klodns'];
+            const ALL_MODES = ['3','4','05_2','05_3','kl_2','kl_3','mn_2','mn_3','dr_3','od_4','ev_4','od_5','ev_5','o25s2','o15s3','o25s3','nbtts3','nfhg3','nshg3','od4u','ev4u','u15oe3','dry2o','btso3','kncs3','nfo3','btts2','btts3','cs2','fts2','htodd3','hteven3','u15_5','u15_6','05_4','kl_4','kl_5','mn_4','mn_5','dr_4','o15s4','o15s5','o25s4','o25s5','btts4','nbtts4','od_6','ev_6','c_u15kl','c_u15nf','c_klfts','c_mno25','c_mnbt','c_o15bt','c_u05ns','c_dru15','c_evu15','c_odo15','c_csmn','c_ftsnf','c_klnb','c_mnnf','c_drnb','c_dro25','c_u15ns','c_o25bt3','c_csu15','c_kl3fts','c_htou15','c_hteo15','c3_u15klnf','c3_klftsnf','c3_mnbto25','c3_mncs','c3_u05krg','c3_o15bto25','c3_dru15nb','c3_klbto25','c_klo25','c_mnu15','c_csnf','c_kl3nb','c_mn3o25','c_odbt','c_evnb','c_dr3u15','c_nfns','c_u15fts','c_u15nb','c_u15u35','c_u154kl','c_u154nf','c_u154ns','c_u154nb','c_u154fts','c_u154cs','c3_u154klnf','c3_u154nbns','c3_u154csnf','c4_u154gembok','c4_u154krisis','c3_csu15nf','c3_mno25bt3','c3_dru15ns','c3_klu15fts','c4_krisis','c4_panas','c4_gembok','c4_terpuruk','c4_badai','c5_krisis','c5_gembok','c5_badai','shg3','fhg3','u35_4','cm_shfhcs','cm_drnfbt','cm_o15cshto','cm_nsbthto','cm_odftshto','cm_o15o25cs','cm_nsftshto','cm_u05evfts','cm_o25ftsu35','cm_o25nsu35','cm_o25fhcs','cm_o15cshte','cm_klodns'];
             const isAll = mode === 'ALL';
             const modesList = isAll ? ALL_MODES : [mode];
 
@@ -1144,6 +1290,8 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             }
             curNeedEl.textContent = isAll ? 'len' : (STREAK_LEN[mode] || 1);
 
+            const timeFrom = timeToMin(timeFromInp.value);
+            const timeTo = timeToMin(timeToInp.value);
             const minN = parseInt(minNInp.value, 10) || 0;
             const oppMin = parseFloat(oppOverInp.value) || 0;
             const teamMin = parseFloat(teamOverInp.value) || 0;
@@ -1160,6 +1308,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                 if (lg && r.l !== lg) return;
                 if (q && !(r.t.toLowerCase().includes(q) || r.l.toLowerCase().includes(q))) return;
                 if (nextOnly.checked && !r.next) return;
+                if (!inTimeRange(r.nextMin, timeFrom, timeTo)) return;
                 modesList.forEach(mk => {
                     const p = pick(r, mk, out);
                     if (p.over === null) return;
@@ -1195,7 +1344,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                 if (typeof x === 'string') return asc ? x.localeCompare(y) : y.localeCompare(x);
                 return asc ? x - y : y - x;
             });
-            countEl.textContent = d.length + (isAll ? ' baris' : ' tim');
+            if (countEl) countEl.textContent = '';
             body.innerHTML = d.map(r => `<tr class="border-t border-slate-100 hover:bg-indigo-50/30">
                 <td class="px-4 py-2.5"><div class="font-semibold text-slate-900 whitespace-nowrap">${r.t}</div>${r.next ? `<div class="text-[10px] text-slate-500 mt-0.5 whitespace-nowrap">${r.next}</div>` : ''}</td>
                 <td class="px-4 py-2.5 text-[11px] font-semibold text-indigo-600 whitespace-nowrap">${r.mk || '-'}</td>
@@ -1215,17 +1364,17 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             if (k === sortKey) asc = !asc; else { sortKey = k; asc = (k === 't' || k === 'l'); }
             render();
         }));
-        [modeSel, outSel, search, leagueSel, curOnly, nextOnly, oppOverInp, teamOverInp, minOverInp, minNInp].forEach(el => el.addEventListener('input', render));
+        [modeSel, outSel, search, leagueSel, timeFromInp, timeToInp, curOnly, nextOnly, oppOverInp, teamOverInp, minOverInp, minNInp].forEach(el => el.addEventListener('input', render));
         [curOnly, nextOnly].forEach(el => el.addEventListener('change', render));
 
         // ---- Tabel peluang 100% (scan semua market × semua hasil) -------------
-        const ALL_MODES_100 = ['3','4','05_2','05_3','kl_2','kl_3','mn_2','mn_3','dr_3','od_4','ev_4','od_5','ev_5','o25s2','o15s3','o25s3','nbtts3','nfhg3','nshg3','od4u','ev4u','u15oe3','dry2o','btso3','kncs3','nfo3','btts2','btts3','cs2','fts2','htodd3','hteven3','u15_5','u15_6','05_4','kl_4','kl_5','mn_4','mn_5','dr_4','o15s4','o15s5','o25s4','o25s5','btts4','nbtts4','od_6','ev_6','c_u15kl','c_u15nf','c_klfts','c_mno25','c_mnbt','c_o15bt','c_u05ns','c_dru15','c_evu15','c_odo15','c_csmn','c_ftsnf','c_klnb','c_mnnf','c_drnb','c_dro25','c_u15ns','c_o25bt3','c_csu15','c_kl3fts','c_htou15','c_hteo15','c3_u15klnf','c3_klftsnf','c3_mnbto25','c3_mncs','c3_u05krg','c3_o15bto25','c3_dru15nb','c3_klbto25','c_klo25','c_mnu15','c_csnf','c_kl3nb','c_mn3o25','c_odbt','c_evnb','c_dr3u15','c_nfns','c3_csu15nf','c3_mno25bt3','c3_dru15ns','c3_klu15fts','c4_krisis','c4_panas','c4_gembok','c4_terpuruk','c4_badai','c5_krisis','c5_gembok','c5_badai','shg3','fhg3','u35_4','cm_shfhcs','cm_drnfbt','cm_o15cshto','cm_nsbthto','cm_odftshto','cm_o15o25cs','cm_nsftshto','cm_u05evfts','cm_o25ftsu35','cm_o25nsu35','cm_o25fhcs','cm_o15cshte','cm_klodns'];
+        const ALL_MODES_100 = ['3','4','05_2','05_3','kl_2','kl_3','mn_2','mn_3','dr_3','od_4','ev_4','od_5','ev_5','o25s2','o15s3','o25s3','nbtts3','nfhg3','nshg3','od4u','ev4u','u15oe3','dry2o','btso3','kncs3','nfo3','btts2','btts3','cs2','fts2','htodd3','hteven3','u15_5','u15_6','05_4','kl_4','kl_5','mn_4','mn_5','dr_4','o15s4','o15s5','o25s4','o25s5','btts4','nbtts4','od_6','ev_6','c_u15kl','c_u15nf','c_klfts','c_mno25','c_mnbt','c_o15bt','c_u05ns','c_dru15','c_evu15','c_odo15','c_csmn','c_ftsnf','c_klnb','c_mnnf','c_drnb','c_dro25','c_u15ns','c_o25bt3','c_csu15','c_kl3fts','c_htou15','c_hteo15','c3_u15klnf','c3_klftsnf','c3_mnbto25','c3_mncs','c3_u05krg','c3_o15bto25','c3_dru15nb','c3_klbto25','c_klo25','c_mnu15','c_csnf','c_kl3nb','c_mn3o25','c_odbt','c_evnb','c_dr3u15','c_nfns','c_u15fts','c_u15nb','c_u15u35','c_u154kl','c_u154nf','c_u154ns','c_u154nb','c_u154fts','c_u154cs','c3_u154klnf','c3_u154nbns','c3_u154csnf','c4_u154gembok','c4_u154krisis','c3_csu15nf','c3_mno25bt3','c3_dru15ns','c3_klu15fts','c4_krisis','c4_panas','c4_gembok','c4_terpuruk','c4_badai','c5_krisis','c5_gembok','c5_badai','shg3','fhg3','u35_4','cm_shfhcs','cm_drnfbt','cm_o15cshto','cm_nsbthto','cm_odftshto','cm_o15o25cs','cm_nsftshto','cm_u05evfts','cm_o25ftsu35','cm_o25nsu35','cm_o25fhcs','cm_o15cshte','cm_klodns'];
         const OUTS_100 = [
             { k: 'o15', t: 'Over 1.5' }, { k: 'o05', t: 'Over 0.5' },
             { k: 'shg', t: 'SHG O0.5' }, { k: 'fhg', t: 'FHG O0.5' },
             { k: 'o25', t: 'Over 2.5' }, { k: 'btts', t: 'BTTS' }, { k: 'nbtts', t: 'No BTTS' }, { k: 'draw', t: 'Draw' }, { k: 'nodraw', t: 'No Draw' },
             { k: 'hg05', t: 'Home O0.5' }, { k: 'ag05', t: 'Away O0.5' },
-            { k: 'tg01', t: 'TG 0-1' }, { k: 'tg23', t: 'TG 2-3' }, { k: 'tg46', t: 'TG 4-6' }, { k: 'tg7', t: 'TG 7+' },
+            { k: 'tg01', t: 'TG 0-1' }, { k: 'tg23', t: 'TG 2-3' }, { k: 'tg46', t: 'TG 4-6' },
             { k: 'eg1', t: 'Exact 1' }, { k: 'eg2', t: 'Exact 2' }, { k: 'eg3', t: 'Exact 3' }, { k: 'eg4', t: 'Exact 4' },
             { k: 'hw', t: 'Home Win' }, { k: 'aw', t: 'Away Win' },
             { k: 'dc1x', t: 'DC 1X' }, { k: 'dcx2', t: 'DC X2' },
@@ -1240,12 +1389,15 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
         function render100() {
             const q = search.value.toLowerCase().trim();
             const lg = leagueSel.value;
+            const timeFrom = timeToMin(timeFromInp.value);
+            const timeTo = timeToMin(timeToInp.value);
             let d = [];
             const minN = parseInt(minNInp.value, 10) || 0;
             DATA.forEach(r => {
                 if (lg && r.l !== lg) return;
                 if (q && !(r.t.toLowerCase().includes(q) || r.l.toLowerCase().includes(q))) return;
                 if (next100.checked && !r.next) return;
+                if (!inTimeRange(r.nextMin, timeFrom, timeTo)) return;
                 ALL_MODES_100.forEach(mk => {
                     const cur = curOf(r, mk);
                     const need = STREAK_LEN[mk] || 1;
@@ -1290,8 +1442,8 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             if (k === sortKey100) asc100 = !asc100; else { sortKey100 = k; asc100 = (k === 't' || k === 'l' || k === 'mk' || k === 'outT'); }
             render100();
         }));
-        [search, leagueSel, minNInp].forEach(el => el.addEventListener('input', render100));
-        [cur100, next100].forEach(el => el.addEventListener('change', render100));
+        [search, leagueSel, timeFromInp, timeToInp, minNInp].forEach(el => el.addEventListener('input', render100));
+        [cur100, next100, nextOnly].forEach(el => el.addEventListener('change', render100));
 
         render();
         render100();

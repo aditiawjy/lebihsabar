@@ -960,7 +960,6 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                 <option value="o15">→ Over 1.5</option>
                 <option value="o05" selected>→ Over 0.5</option>
                 <option value="shg">→ SHG Over 0.5 (gol babak 2)</option>
-                <option value="fhg">→ FHG Over 0.5 (gol babak 1)</option>
                 <option value="o25">→ Over 2.5 (min 3 gol)</option>
                 <option value="btts">→ BTTS (kedua tim cetak)</option>
                 <option value="nbtts">→ No BTTS (ada tim gagal cetak)</option>
@@ -1371,7 +1370,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
         const ALL_MODES_100 = ['3','4','05_2','05_3','kl_2','kl_3','mn_2','mn_3','dr_3','od_4','ev_4','od_5','ev_5','o25s2','o15s3','o25s3','nbtts3','nfhg3','nshg3','od4u','ev4u','u15oe3','dry2o','btso3','kncs3','nfo3','btts2','btts3','cs2','fts2','htodd3','hteven3','u15_5','u15_6','05_4','kl_4','kl_5','mn_4','mn_5','dr_4','o15s4','o15s5','o25s4','o25s5','btts4','nbtts4','od_6','ev_6','c_u15kl','c_u15nf','c_klfts','c_mno25','c_mnbt','c_o15bt','c_u05ns','c_dru15','c_evu15','c_odo15','c_csmn','c_ftsnf','c_klnb','c_mnnf','c_drnb','c_dro25','c_u15ns','c_o25bt3','c_csu15','c_kl3fts','c_htou15','c_hteo15','c3_u15klnf','c3_klftsnf','c3_mnbto25','c3_mncs','c3_u05krg','c3_o15bto25','c3_dru15nb','c3_klbto25','c_klo25','c_mnu15','c_csnf','c_kl3nb','c_mn3o25','c_odbt','c_evnb','c_dr3u15','c_nfns','c_u15fts','c_u15nb','c_u15u35','c_u154kl','c_u154nf','c_u154ns','c_u154nb','c_u154fts','c_u154cs','c3_u154klnf','c3_u154nbns','c3_u154csnf','c4_u154gembok','c4_u154krisis','c3_csu15nf','c3_mno25bt3','c3_dru15ns','c3_klu15fts','c4_krisis','c4_panas','c4_gembok','c4_terpuruk','c4_badai','c5_krisis','c5_gembok','c5_badai','shg3','fhg3','u35_4','cm_shfhcs','cm_drnfbt','cm_o15cshto','cm_nsbthto','cm_odftshto','cm_o15o25cs','cm_nsftshto','cm_u05evfts','cm_o25ftsu35','cm_o25nsu35','cm_o25fhcs','cm_o15cshte','cm_klodns'];
         const OUTS_100 = [
             { k: 'o15', t: 'Over 1.5' }, { k: 'o05', t: 'Over 0.5' },
-            { k: 'shg', t: 'SHG O0.5' }, { k: 'fhg', t: 'FHG O0.5' },
+            { k: 'shg', t: 'SHG O0.5' },
             { k: 'o25', t: 'Over 2.5' }, { k: 'btts', t: 'BTTS' }, { k: 'nbtts', t: 'No BTTS' }, { k: 'draw', t: 'Draw' }, { k: 'nodraw', t: 'No Draw' },
             { k: 'hg05', t: 'Home O0.5' }, { k: 'ag05', t: 'Away O0.5' },
             { k: 'tg01', t: 'TG 0-1' }, { k: 'tg23', t: 'TG 2-3' }, { k: 'tg46', t: 'TG 4-6' },

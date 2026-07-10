@@ -8,6 +8,44 @@ require_once 'matches_data_helper.php';
 
 $dbActive = sabarajaDataConnectionReady($conn, $db_error ?? '');
 
+/**
+ * Boost filter: true berarti match ini TIDAK dihitung untuk $team,
+ * yaitu ketika $team adalah tim boost tapi lawannya tidak ada di
+ * daftar lawan bertipe terbuka pada konfigurasi boost.
+ */
+function sabarajaBoostSkip(string $team, string $opponent, array $config): bool
+{
+    $searchVal = $config['search'] ?? '';
+    if ($searchVal === '' || stripos($team, $searchVal) === false) {
+        return false;
+    }
+    foreach ($config['opponents'] as $allowedOpp) {
+        $cleanOpp = trim(str_replace('(V)', '', $allowedOpp));
+        if (stripos($opponent, $cleanOpp) !== false) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
+ * Akumulasi statistik akurasi boost dari data aktual: baseline (semua match
+ * tim boost) dan boosted (hanya vs lawan bertipe terbuka).
+ */
+function sabarajaBoostAccumulate(array &$stats, array $config, string $team, string $opponent, bool $isOver15): void
+{
+    $searchVal = $config['search'] ?? '';
+    if ($searchVal === '' || stripos($team, $searchVal) === false) {
+        return;
+    }
+    $stats['base_played']++;
+    if ($isOver15) $stats['base_over']++;
+    if (!sabarajaBoostSkip($team, $opponent, $config)) {
+        $stats['boost_played']++;
+        if ($isOver15) $stats['boost_over']++;
+    }
+}
+
 // 1. Fetch distinct leagues
 $leagues = [];
 if ($dbActive) {
@@ -18,22 +56,23 @@ if ($dbActive) {
         }
     }
 } else if (sabarajaDataCsvAvailable()) {
-    sabarajaDataReadCsv(function (array $match) use (&$leagues): void {
-        if ($match['league'] !== '') {
-            $leagues[$match['league']] = true;
-        }
-    });
-    $leagues = array_keys($leagues);
-    sort($leagues);
+    // Daftar liga dari cache (tidak membaca ulang seluruh CSV tiap request)
+    $leagues = sabarajaDataCsvLeaguesCached();
 }
 
 // 2. Determine selected league, min matches, and active Boost Team
+// Liga dari URL divalidasi terhadap daftar; kalau tidak dikenal, fallback ke liga pertama
 $selectedLeague = $_GET['league'] ?? '';
-if ($selectedLeague === '' && !empty($leagues)) {
+if (!empty($leagues) && !in_array($selectedLeague, $leagues, true)) {
     $selectedLeague = $leagues[0];
 }
 
+// min_matches dibatasi ke pilihan yang tersedia di dropdown
+$minMatchesOptions = [1, 3, 5, 10, 15, 20];
 $minMatches = isset($_GET['min_matches']) ? (int)$_GET['min_matches'] : 5;
+if (!in_array($minMatches, $minMatchesOptions, true)) {
+    $minMatches = 5;
+}
 $searchTerm = $_GET['search'] ?? '';
 $boostTeam = $_GET['boost_team'] ?? '';
 
@@ -150,6 +189,13 @@ $totalLeagueMatches = 0;
 $totalOver15Matches = 0;
 $presentTeams = [];
 
+// Statistik akurasi boost dihitung dari data aktual liga terpilih
+$boostStats = [];
+foreach ($boostConfigs as $bKey => $bCfg) {
+    $boostConfigs[$bKey]['search'] = $bCfg['search'] ?? $bKey;
+    $boostStats[$bKey] = ['base_played' => 0, 'base_over' => 0, 'boost_played' => 0, 'boost_over' => 0];
+}
+
 if ($selectedLeague !== '') {
     if ($dbActive) {
         $stmt = $conn->prepare("SELECT home_team, away_team, ft_home, ft_away FROM matches WHERE league = ? AND ft_home IS NOT NULL AND ft_away IS NOT NULL");
@@ -177,60 +223,39 @@ if ($selectedLeague !== '') {
                     $presentTeams[$home] = true;
                     $presentTeams[$away] = true;
 
+                    foreach ($boostConfigs as $bKey => $bCfg) {
+                        sabarajaBoostAccumulate($boostStats[$bKey], $bCfg, $home, $away, $isOver15);
+                        sabarajaBoostAccumulate($boostStats[$bKey], $bCfg, $away, $home, $isOver15);
+                    }
+
                     // Boost filter logic
                     $skipHome = false;
                     $skipAway = false;
                     if ($boostTeam !== '' && isset($boostConfigs[$boostTeam])) {
                         $config = $boostConfigs[$boostTeam];
-                        $searchVal = $config['search'] ?? $boostTeam;
-                        
-                        // If Home is the boost team, check if Away is in its high-scoring opponents list
-                        if (stripos($home, $searchVal) !== false) {
-                            $matched = false;
-                            foreach ($config['opponents'] as $allowedOpp) {
-                                $cleanOpp = trim(str_replace('(V)', '', $allowedOpp));
-                                if (stripos($away, $cleanOpp) !== false) {
-                                    $matched = true;
-                                    break;
-                                }
-                            }
-                            if (!$matched) {
-                                $skipHome = true;
-                            }
-                        }
-                        
-                        // If Away is the boost team, check if Home is in its high-scoring opponents list
-                        if (stripos($away, $searchVal) !== false) {
-                            $matched = false;
-                            foreach ($config['opponents'] as $allowedOpp) {
-                                $cleanOpp = trim(str_replace('(V)', '', $allowedOpp));
-                                if (stripos($home, $cleanOpp) !== false) {
-                                    $matched = true;
-                                    break;
-                                }
-                            }
-                            if (!$matched) {
-                                $skipAway = true;
-                            }
-                        }
+                        $config['search'] = $config['search'] ?? $boostTeam;
+                        $skipHome = sabarajaBoostSkip($home, $away, $config);
+                        $skipAway = sabarajaBoostSkip($away, $home, $config);
                     }
 
-                    if (!isset($teamStats[$home])) $teamStats[$home] = ['played' => 0, 'over15' => 0];
-                    if (!isset($teamStats[$away])) $teamStats[$away] = ['played' => 0, 'over15' => 0];
+                    if (!isset($teamStats[$home])) $teamStats[$home] = ['played' => 0, 'over15' => 0, 'recent' => []];
+                    if (!isset($teamStats[$away])) $teamStats[$away] = ['played' => 0, 'over15' => 0, 'recent' => []];
 
                     if (!$skipHome) {
                         $teamStats[$home]['played']++;
                         if ($isOver15) $teamStats[$home]['over15']++;
+                        $teamStats[$home]['recent'][] = $isOver15;
                     }
                     if (!$skipAway) {
                         $teamStats[$away]['played']++;
                         if ($isOver15) $teamStats[$away]['over15']++;
+                        $teamStats[$away]['recent'][] = $isOver15;
                     }
                 }
             }
         }
     } else if (sabarajaDataCsvAvailable()) {
-        sabarajaDataReadCsv(function (array $match) use ($selectedLeague, &$teamStats, &$totalLeagueMatches, &$totalOver15Matches, &$presentTeams, $boostTeam, $boostConfigs): void {
+        sabarajaDataReadCsv(function (array $match) use ($selectedLeague, &$teamStats, &$totalLeagueMatches, &$totalOver15Matches, &$presentTeams, $boostTeam, $boostConfigs, &$boostStats): void {
             if ($match['league'] === $selectedLeague && $match['ft_home'] !== null && $match['ft_away'] !== null) {
                 $home = $match['home_team'];
                 $away = $match['away_team'];
@@ -245,54 +270,53 @@ if ($selectedLeague !== '') {
                 $presentTeams[$home] = true;
                 $presentTeams[$away] = true;
 
+                foreach ($boostConfigs as $bKey => $bCfg) {
+                    sabarajaBoostAccumulate($boostStats[$bKey], $bCfg, $home, $away, $isOver15);
+                    sabarajaBoostAccumulate($boostStats[$bKey], $bCfg, $away, $home, $isOver15);
+                }
+
                 // Boost filter logic
                 $skipHome = false;
                 $skipAway = false;
                 if ($boostTeam !== '' && isset($boostConfigs[$boostTeam])) {
                     $config = $boostConfigs[$boostTeam];
-                    $searchVal = $config['search'] ?? $boostTeam;
-                    
-                    if (stripos($home, $searchVal) !== false) {
-                        $matched = false;
-                        foreach ($config['opponents'] as $allowedOpp) {
-                            $cleanOpp = trim(str_replace('(V)', '', $allowedOpp));
-                            if (stripos($away, $cleanOpp) !== false) {
-                                $matched = true;
-                                    break;
-                            }
-                        }
-                        if (!$matched) {
-                            $skipHome = true;
-                        }
-                    }
-                    if (stripos($away, $searchVal) !== false) {
-                        $matched = false;
-                        foreach ($config['opponents'] as $allowedOpp) {
-                            $cleanOpp = trim(str_replace('(V)', '', $allowedOpp));
-                            if (stripos($home, $cleanOpp) !== false) {
-                                $matched = true;
-                                    break;
-                            }
-                        }
-                        if (!$matched) {
-                            $skipAway = true;
-                        }
-                    }
+                    $config['search'] = $config['search'] ?? $boostTeam;
+                    $skipHome = sabarajaBoostSkip($home, $away, $config);
+                    $skipAway = sabarajaBoostSkip($away, $home, $config);
                 }
 
-                if (!isset($teamStats[$home])) $teamStats[$home] = ['played' => 0, 'over15' => 0];
-                if (!isset($teamStats[$away])) $teamStats[$away] = ['played' => 0, 'over15' => 0];
+                if (!isset($teamStats[$home])) $teamStats[$home] = ['played' => 0, 'over15' => 0, 'recent' => []];
+                if (!isset($teamStats[$away])) $teamStats[$away] = ['played' => 0, 'over15' => 0, 'recent' => []];
 
                 if (!$skipHome) {
                     $teamStats[$home]['played']++;
                     if ($isOver15) $teamStats[$home]['over15']++;
+                    $teamStats[$home]['recent'][] = $isOver15;
                 }
                 if (!$skipAway) {
                     $teamStats[$away]['played']++;
                     if ($isOver15) $teamStats[$away]['over15']++;
+                    $teamStats[$away]['recent'][] = $isOver15;
                 }
             }
         });
+    }
+}
+
+// Timpa target & deskripsi boost dengan angka hasil hitungan data aktual liga ini.
+// Angka lama yang hard-coded hanya jadi fallback saat datanya belum cukup.
+foreach ($boostConfigs as $bKey => $bCfg) {
+    $bs = $boostStats[$bKey];
+    if ($bs['boost_played'] > 0) {
+        $basePct = $bs['base_played'] > 0 ? ($bs['base_over'] / $bs['base_played']) * 100 : 0;
+        $boostPct = ($bs['boost_over'] / $bs['boost_played']) * 100;
+        $oppNames = array_map(static fn($o) => trim(str_replace('(V)', '', $o)), $bCfg['opponents']);
+        $boostConfigs[$bKey]['target'] = number_format($boostPct, 1) . '%';
+        $boostConfigs[$bKey]['desc'] = 'Meningkatkan akurasi ' . htmlspecialchars($bCfg['name'])
+            . ' dari ' . number_format($basePct, 1) . '% (' . $bs['base_played'] . ' match)'
+            . ' menjadi <strong class="text-blue-700 font-bold">' . number_format($boostPct, 1) . '%</strong>'
+            . ' (' . $bs['boost_played'] . ' match) — dihitung dari data aktual liga ini,'
+            . ' dengan memfilter hanya lawan bertipe terbuka (' . htmlspecialchars(implode(', ', $oppNames)) . ').';
     }
 }
 
@@ -317,7 +341,8 @@ foreach ($teamStats as $team => $stats) {
         'team' => $team,
         'played' => $stats['played'],
         'over15' => $stats['over15'],
-        'percentage' => $percentage
+        'percentage' => $percentage,
+        'recent' => array_slice($stats['recent'], -10)
     ];
 }
 
@@ -491,7 +516,7 @@ $overallPct = $totalLeagueMatches > 0 ? ($totalOver15Matches / $totalLeagueMatch
                 <label for="min_matches" class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Minimal Match</label>
                 <div class="relative">
                     <select id="min_matches" name="min_matches" onchange="this.form.submit()" class="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-semibold text-slate-800 outline-none appearance-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all cursor-pointer">
-                        <?php foreach ([1, 3, 5, 10, 15, 20] as $num): ?>
+                        <?php foreach ($minMatchesOptions as $num): ?>
                             <option value="<?= $num ?>" <?= $minMatches === $num ? 'selected' : '' ?>>
                                 Minimal <?= $num ?> Pertandingan
                             </option>
@@ -509,7 +534,7 @@ $overallPct = $totalLeagueMatches > 0 ? ($totalOver15Matches / $totalLeagueMatch
             <div class="flex flex-col gap-1.5">
                 <label for="team-search" class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Cari Team</label>
                 <div class="relative">
-                    <input type="text" id="team-search" value="<?= htmlspecialchars($searchTerm) ?>" placeholder="Masukkan nama team..." class="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all">
+                    <input type="text" id="team-search" name="search" value="<?= htmlspecialchars($searchTerm) ?>" placeholder="Masukkan nama team..." class="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all">
                     <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -531,7 +556,7 @@ $overallPct = $totalLeagueMatches > 0 ? ($totalOver15Matches / $totalLeagueMatch
                         <th scope="col" class="px-6 py-4 w-32 text-center">Main</th>
                         <th scope="col" class="px-6 py-4 w-32 text-center">Over 1.5</th>
                         <th scope="col" class="px-6 py-4 w-36 text-center">Persentase</th>
-                        <th scope="col" class="px-6 py-4 text-center">Visual Trend</th>
+                        <th scope="col" class="px-6 py-4 text-center">Trend 10 Terakhir</th>
                     </tr>
                 </thead>
                 <tbody id="team-table-body" class="divide-y divide-slate-100 font-medium">
@@ -558,16 +583,12 @@ $overallPct = $totalLeagueMatches > 0 ? ($totalOver15Matches / $totalLeagueMatch
                             $pct = $item['percentage'];
                             if ($pct >= 85) {
                                 $badgeClass = 'text-emerald-700 bg-emerald-50 border border-emerald-200/50';
-                                $barClass = 'bg-gradient-to-r from-emerald-400 to-emerald-600';
                             } elseif ($pct >= 70) {
                                 $badgeClass = 'text-blue-700 bg-blue-50 border border-blue-200/50';
-                                $barClass = 'bg-gradient-to-r from-blue-400 to-blue-600';
                             } elseif ($pct >= 50) {
                                 $badgeClass = 'text-slate-700 bg-slate-50 border border-slate-200/50';
-                                $barClass = 'bg-gradient-to-r from-slate-400 to-slate-500';
                             } else {
                                 $badgeClass = 'text-rose-700 bg-rose-50 border border-rose-200/50';
-                                $barClass = 'bg-gradient-to-r from-rose-400 to-rose-600';
                             }
 
                             // Highlighting matches using correct search configs
@@ -610,11 +631,17 @@ $overallPct = $totalLeagueMatches > 0 ? ($totalOver15Matches / $totalLeagueMatch
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3 max-w-xs mx-auto">
-                                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                                            <div class="h-full rounded-full <?= $barClass ?> transition-all duration-500" style="width: <?= $pct ?>%"></div>
+                                    <?php
+                                        $recentOver = count(array_filter($item['recent']));
+                                        $recentTotal = count($item['recent']);
+                                    ?>
+                                    <div class="flex items-center justify-center gap-2" title="<?= $recentOver ?> Over dari <?= $recentTotal ?> match terakhir (kiri = terlama, kanan = terbaru)">
+                                        <div class="flex items-center gap-1">
+                                            <?php foreach ($item['recent'] as $wasOver): ?>
+                                                <span class="w-2.5 h-2.5 rounded-sm <?= $wasOver ? 'bg-emerald-500' : 'bg-rose-300' ?>"></span>
+                                            <?php endforeach; ?>
                                         </div>
-                                        <span class="text-[10px] text-slate-400 w-8 text-right font-mono"><?= round($pct) ?>%</span>
+                                        <span class="text-[10px] text-slate-400 font-mono whitespace-nowrap"><?= $recentOver ?>/<?= $recentTotal ?></span>
                                     </div>
                                 </td>
                             </tr>
@@ -632,19 +659,46 @@ document.addEventListener('DOMContentLoaded', function() {
     const tableBody = document.getElementById('team-table-body');
     
     if (searchInput && tableBody) {
-        searchInput.addEventListener('input', function() {
-            const query = this.value.toLowerCase().trim();
+        // Simpan isi sel rank asli (medali/nomor) supaya bisa dikembalikan saat query kosong
+        tableBody.querySelectorAll('tr[data-team]').forEach(row => {
+            const rankCell = row.querySelector('td');
+            if (rankCell && row.dataset.rankHtml === undefined) {
+                row.dataset.rankHtml = rankCell.innerHTML;
+            }
+        });
+
+        function applyTeamFilter() {
+            const query = searchInput.value.toLowerCase().trim();
             const rows = tableBody.querySelectorAll('tr[data-team]');
-            
+            let visibleRank = 0;
+
             rows.forEach(row => {
                 const teamName = row.getAttribute('data-team').toLowerCase();
+                const rankCell = row.querySelector('td');
                 if (teamName.includes(query)) {
                     row.style.display = '';
+                    if (rankCell) {
+                        visibleRank++;
+                        if (query === '') {
+                            // Tanpa filter: kembalikan rank asli (termasuk medali top-3)
+                            rankCell.innerHTML = row.dataset.rankHtml;
+                        } else {
+                            // Saat filter aktif: nomor urut baris yang terlihat, tidak loncat
+                            rankCell.innerHTML = '<span class="text-slate-400 font-semibold text-xs">' + visibleRank + '</span>';
+                        }
+                    }
                 } else {
                     row.style.display = 'none';
                 }
             });
-        });
+        }
+
+        searchInput.addEventListener('input', applyTeamFilter);
+
+        // Terapkan filter saat load kalau URL sudah membawa ?search=...
+        if (searchInput.value.trim() !== '') {
+            applyTeamFilter();
+        }
     }
 });
 </script>

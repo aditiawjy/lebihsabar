@@ -229,11 +229,6 @@ Game time (UTC 7)    Leagues    Events    Home score    Away score    Details
 </style>
 
 <script>
-// Clear any unwanted output
-if (typeof console !== 'undefined') {
-    console.clear();
-}
-
 // State Management
 const state = {
     leagues: [],
@@ -275,20 +270,50 @@ const elements = {
 const formatTime = (date) => date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 const formatDate = (date) => date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 const toIntOrNull = (value) => (value === null || value === '' || value === undefined) ? null : parseInt(value, 10);
+const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// Epoch server (ms) ditanam saat render supaya jam tidak bergantung jam PC user
+const serverEpochAtLoad = <?php echo (int) round(microtime(true) * 1000); ?>;
+const clientEpochAtLoad = Date.now();
 
 function tickClock() {
     if (!elements.serverClock) return;
-    const now = new Date();
-    elements.serverClock.textContent = `${now.toLocaleTimeString('id-ID', { hour12: false })} WIB`;
+    const serverNow = new Date(serverEpochAtLoad + (Date.now() - clientEpochAtLoad));
+    elements.serverClock.textContent = `${serverNow.toLocaleTimeString('id-ID', { hour12: false, timeZone: 'Asia/Jakarta' })} WIB`;
+}
+
+// Parse "YYYY-MM-DD HH:MM[:SS]" (24 jam) atau "YYYY-MM-DD h:MM AM/PM" secara manual.
+// Sengaja tidak pakai new Date(string)/Date.parse karena format ini non-ISO dan
+// hasilnya beda antar browser (Safari/Firefox bisa menghasilkan Invalid Date).
+function parseMatchTime(value) {
+    if (!value) return null;
+    const m = String(value).trim().match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\s*(AM|PM))?$/i);
+    if (!m) return null;
+
+    const year = parseInt(m[1], 10);
+    const month = parseInt(m[2], 10);
+    const day = parseInt(m[3], 10);
+    let hours = parseInt(m[4], 10);
+    const minutes = parseInt(m[5], 10);
+    const seconds = m[6] ? parseInt(m[6], 10) : 0;
+    const ampm = m[7] ? m[7].toUpperCase() : null;
+
+    if (ampm) {
+        if (hours < 1 || hours > 12) return null;
+        hours = (hours % 12) + (ampm === 'PM' ? 12 : 0);
+    } else if (hours > 23) {
+        return null;
+    }
+    if (minutes > 59 || seconds > 59 || month < 1 || month > 12 || day < 1 || day > 31) return null;
+
+    const date = new Date(year, month - 1, day, hours, minutes, seconds);
+    // Tolak tanggal overflow (mis. 2026-02-31 yang digeser JS ke Maret)
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null;
+    return date;
 }
 
 function isValidMatchTime(value) {
-    if (!value) return false;
-    const normalized = String(value).trim();
-    const hasAmPm = /\b(AM|PM)\b/i.test(normalized);
-    const withSeconds = /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/.test(normalized);
-    const ts = Date.parse(normalized);
-    return Number.isFinite(ts) && (hasAmPm || withSeconds || /^\d{4}-\d{2}-\d{2}\s\d{1,2}:\d{2}$/.test(normalized));
+    return parseMatchTime(value) !== null;
 }
 
 function validateMatch(match, index) {
@@ -493,6 +518,8 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 elements.leagueSelect.addEventListener('change', function() {
+    // Hapus penanda error "liga belum dipilih" begitu user memilih
+    this.classList.remove('ring-2', 'ring-rose-400', 'border-rose-400');
     if (this.value === 'other') {
         elements.newLeagueInput.classList.remove('hidden');
         document.getElementById('enterToAddHint').classList.remove('hidden'); // Show hint
@@ -553,7 +580,7 @@ elements.newLeagueInput.addEventListener('keydown', function(e) {
             setTimeout(() => elements.leagueSelect.classList.remove('ring-2', 'ring-green-500'), 500);
             
             // Update league status text
-            elements.leagueStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-green-500"></span> Liga "${newLeagueValue}" ditambahkan`;
+            elements.leagueStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-green-500"></span> Liga "${escapeHtml(newLeagueValue)}" ditambahkan`;
         }
     }
 });
@@ -580,8 +607,16 @@ function parseTableFormat(input) {
     
     dataLines.forEach((line, index) => {
         try {
-            // Split by tab atau multiple spaces (min 2 spaces)
-            const parts = line.split(/\t+|\s{2,}/).map(p => p.trim()).filter(p => p);
+            // Prioritas split per-tab: sel kosong di tengah dipertahankan supaya kolom
+            // tidak bergeser, dan nama tim/liga yang mengandung spasi ganda tetap utuh.
+            // Fallback 2+ spasi hanya untuk data yang tab-nya hilang (mis. paste dari teks).
+            let parts;
+            if (line.includes('\t')) {
+                parts = line.split('\t').map(p => p.trim());
+                while (parts.length > 0 && parts[parts.length - 1] === '') parts.pop();
+            } else {
+                parts = line.split(/\s{2,}/).map(p => p.trim()).filter(p => p);
+            }
             
             // Minimal 5 kolom: datetime, league, events, home_score, away_score
             if (parts.length < 5) {
@@ -626,7 +661,10 @@ function parseTableFormat(input) {
             const ftAway = normalizeScore(awayScore);
             
             // Format untuk database (konversi ke AM/PM untuk konsistensi dengan parser lama)
-            const dateObj = new Date(datetime);
+            const dateObj = parseMatchTime(datetime);
+            if (!dateObj) {
+                throw new Error(`Baris ${index + 2}: Waktu tidak valid "${datetimeStr}"`);
+            }
             const hours = dateObj.getHours();
             const minutes = dateObj.getMinutes();
             const ampm = hours >= 12 ? 'PM' : 'AM';
@@ -666,20 +704,20 @@ function parseTableFormat(input) {
                 
                 <div class="flex-1 flex items-center justify-between gap-4">
                     <div class="flex-1 text-right">
-                        <span class="text-sm font-bold text-slate-800">${homeClub}</span>
+                        <span class="text-sm font-bold text-slate-800">${escapeHtml(homeClub)}</span>
                     </div>
-                    
+
                     <div class="shrink-0 flex flex-col items-center gap-1 px-4 min-w-[100px]">
                         <div class="flex items-center justify-center gap-2 px-4 py-1.5 rounded-xl shadow-sm border w-full ${
                             isNotStarted ? 'bg-amber-100 border-amber-200 text-amber-700' : 'bg-slate-50 border-slate-100 text-slate-900'
                         }">
                             <span class="text-lg font-black">${displayFt}</span>
                         </div>
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">${league}</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">${escapeHtml(league)}</span>
                     </div>
-                    
+
                     <div class="flex-1 text-left">
-                        <span class="text-sm font-bold text-slate-800">${awayClub}</span>
+                        <span class="text-sm font-bold text-slate-800">${escapeHtml(awayClub)}</span>
                     </div>
                 </div>
             `;
@@ -689,7 +727,7 @@ function parseTableFormat(input) {
         } catch (e) {
             const errorCard = document.createElement('div');
             errorCard.className = 'p-4 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600 font-medium flex items-center gap-2';
-            errorCard.innerHTML = `<span class="font-bold">Baris ${index + 2}:</span> ${e.message}`;
+            errorCard.innerHTML = `<span class="font-bold">Baris ${index + 2}:</span> ${escapeHtml(e.message)}`;
             fragment.appendChild(errorCard);
         }
     });
@@ -708,20 +746,20 @@ function parseTableFormat(input) {
 
 // Parser untuk format Standard (3 baris per match)
 function parseStandardFormat(input) {
-    const lines = input.trim().split('\n');
+    // Baris kosong dibuang dulu supaya grouping per-3 tidak bergeser
+    const lines = input.split('\n').map(l => l.trim()).filter(l => l !== '');
     const rawMatches = [];
-    
-    // Group lines by 3
-    for (let i = 0; i < lines.length; i += 3) {
-        if (i + 2 < lines.length) {
-            rawMatches.push({
-                datetimeLine: lines[i],
-                matchLine: lines[i + 1],
-                infoLine: lines[i + 2]
-            });
-        }
+
+    for (let i = 0; i + 2 < lines.length; i += 3) {
+        rawMatches.push({
+            datetimeLine: lines[i],
+            matchLine: lines[i + 1],
+            infoLine: lines[i + 2]
+        });
     }
-    
+
+    const leftoverCount = lines.length % 3;
+
     if (rawMatches.length === 0) throw new Error('Format tidak valid. Pastikan setiap pertandingan memiliki 3 baris data.');
     
     const selectedLeague = getSelectedLeague();
@@ -735,6 +773,8 @@ function parseStandardFormat(input) {
             if (!datetimeMatch) throw new Error(`Format waktu baris ke-${index * 3 + 1} tidak valid`);
             
             const datetime = `${datetimeMatch[1]} ${datetimeMatch[2]} ${datetimeMatch[3].toUpperCase()}`;
+            const parsedDate = parseMatchTime(datetime);
+            if (!parsedDate) throw new Error(`Waktu tidak valid: "${match.datetimeLine}"`);
             const normalizedLine = match.matchLine.replace(/\t/g, ' | ');
             const isRefund = /refund/i.test(match.datetimeLine) || /refund/i.test(match.matchLine) || /refund/i.test(match.infoLine);
             const teamMatch = normalizedLine.match(/^(.+?)\s+v\s+(.+?)(?:\s+\||\s+\d|$)/i);
@@ -742,7 +782,7 @@ function parseStandardFormat(input) {
             const refundAway = teamMatch ? teamMatch[2].trim() : 'Unknown Team';
 
             if (isRefund) {
-                const dateObj = new Date(datetime);
+                const dateObj = parsedDate;
                 const refundCard = document.createElement('div');
                 refundCard.className = 'flex flex-col md:flex-row md:items-center gap-6 p-6 rounded-2xl border border-red-200 bg-red-50/60 shadow-sm card-animate';
                 refundCard.style.animationDelay = `${index * 50}ms`;
@@ -753,7 +793,7 @@ function parseStandardFormat(input) {
                     </div>
                     <div class="flex-1 flex items-center justify-between gap-4">
                         <div class="flex-1 text-right">
-                            <span class="text-sm font-bold text-slate-800">${refundHome}</span>
+                            <span class="text-sm font-bold text-slate-800">${escapeHtml(refundHome)}</span>
                         </div>
                         <div class="shrink-0 flex flex-col items-center gap-1 px-4 min-w-[120px]">
                             <div class="flex items-center justify-center gap-2 px-4 py-1.5 rounded-xl shadow-sm border w-full bg-red-100 border-red-200 text-red-700">
@@ -762,7 +802,7 @@ function parseStandardFormat(input) {
                             <span class="text-[10px] font-bold uppercase tracking-wider text-red-600">Tidak disimpan</span>
                         </div>
                         <div class="flex-1 text-left">
-                            <span class="text-sm font-bold text-slate-800">${refundAway}</span>
+                            <span class="text-sm font-bold text-slate-800">${escapeHtml(refundAway)}</span>
                         </div>
                     </div>
                 `;
@@ -830,8 +870,8 @@ function parseStandardFormat(input) {
                 (isNotStarted ? 'bg-amber-50/50 border-amber-200' : 'bg-white border-slate-100')
             }`;
             card.style.animationDelay = `${index * 50}ms`;
-            
-            const dateObj = new Date(datetime);
+
+            const dateObj = parsedDate;
             
             card.innerHTML = `
                 <div class="md:w-32 shrink-0 flex md:block items-center gap-2 md:gap-0">
@@ -841,7 +881,7 @@ function parseStandardFormat(input) {
                 
                 <div class="flex-1 flex items-center justify-between gap-4">
                     <div class="flex-1 text-right">
-                        <span class="text-sm font-bold text-slate-800">${homeClub.trim()}</span>
+                        <span class="text-sm font-bold text-slate-800">${escapeHtml(homeClub.trim())}</span>
                     </div>
                     
                     <div class="shrink-0 flex flex-col items-center gap-1 px-4 min-w-[100px]">
@@ -856,7 +896,7 @@ function parseStandardFormat(input) {
                     </div>
                     
                     <div class="flex-1 text-left">
-                        <span class="text-sm font-bold text-slate-800">${awayClub.trim()}</span>
+                        <span class="text-sm font-bold text-slate-800">${escapeHtml(awayClub.trim())}</span>
                     </div>
                 </div>
             `;
@@ -866,16 +906,33 @@ function parseStandardFormat(input) {
         } catch (e) {
             const errorCard = document.createElement('div');
             errorCard.className = 'p-4 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600 font-medium flex items-center gap-2';
-            errorCard.innerHTML = `<span class="font-bold">Baris ${index * 3 + 1}:</span> ${e.message}`;
+            errorCard.innerHTML = `<span class="font-bold">Baris ${index * 3 + 1}:</span> ${escapeHtml(e.message)}`;
             fragment.appendChild(errorCard);
         }
     });
-    
+
+    if (leftoverCount > 0) {
+        const leftoverLines = lines.slice(lines.length - leftoverCount);
+        const warnCard = document.createElement('div');
+        warnCard.className = 'p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700 font-medium space-y-1';
+        const title = document.createElement('div');
+        title.className = 'font-bold';
+        title.textContent = `Peringatan: ${leftoverCount} baris terakhir tidak diproses (setiap match butuh 3 baris).`;
+        warnCard.appendChild(title);
+        leftoverLines.forEach((line) => {
+            const p = document.createElement('div');
+            p.className = 'font-mono truncate';
+            p.textContent = line;
+            warnCard.appendChild(p);
+        });
+        fragment.appendChild(warnCard);
+    }
+
     state.matches = parsedMatches;
     elements.parsedContent.innerHTML = '';
     elements.parsedContent.appendChild(fragment);
     elements.matchCountBadge.textContent = `${parsedMatches.length} Data`;
-    
+
     elements.resultDiv.classList.remove('hidden');
     if (parsedMatches.length > 0) {
         finalizeParsedMatches(parsedMatches);
@@ -887,27 +944,49 @@ function parseStandardFormat(input) {
 function parseData() {
     const input = elements.inputText.value;
     const formatType = elements.formatSelect.value;
-    
+
     // Reset UI
     elements.resultDiv.classList.add('hidden');
     elements.errorDiv.classList.add('hidden');
     elements.saveBtn.classList.add('hidden');
     elements.saveStatus.innerHTML = '';
-    
-    try {
-        if (!input.trim()) throw new Error('Mohon isi data pertandingan terlebih dahulu.');
-        
-        // Pilih parser berdasarkan format
-        if (formatType === 'table') {
-            parseTableFormat(input);
-        } else {
-            parseStandardFormat(input);
+
+    // Tampilkan status loading di tombol, lalu tunda parsing sebentar
+    // supaya browser sempat menggambar ulang sebelum thread sibuk mem-parse
+    elements.parseBtn.disabled = true;
+    const originalParseBtnContent = elements.parseBtn.innerHTML;
+    elements.parseBtn.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span class="animate-pulse">Memproses...</span>';
+
+    setTimeout(function () {
+        try {
+            if (!input.trim()) throw new Error('Mohon isi data pertandingan terlebih dahulu.');
+
+            // Format standar wajib pilih liga sebelum parsing (format tabel opsional,
+            // karena liga bisa diambil dari kolom data)
+            if (formatType !== 'table') {
+                const selectedLeague = getSelectedLeague();
+                if (!selectedLeague || selectedLeague === 'other') {
+                    elements.leagueSelect.classList.add('ring-2', 'ring-rose-400', 'border-rose-400');
+                    elements.leagueSelect.focus();
+                    throw new Error('Pilih liga/kompetisi terlebih dahulu sebelum memproses data.');
+                }
+            }
+
+            // Pilih parser berdasarkan format
+            if (formatType === 'table') {
+                parseTableFormat(input);
+            } else {
+                parseStandardFormat(input);
+            }
+
+        } catch (error) {
+            elements.errorDiv.querySelector('p').textContent = error.message;
+            elements.errorDiv.classList.remove('hidden');
+        } finally {
+            elements.parseBtn.disabled = false;
+            elements.parseBtn.innerHTML = originalParseBtnContent;
         }
-        
-    } catch (error) {
-        elements.errorDiv.querySelector('p').textContent = error.message;
-        elements.errorDiv.classList.remove('hidden');
-    }
+    }, 50);
 }
 
 function saveToDatabase() {
@@ -941,7 +1020,7 @@ function saveToDatabase() {
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                         </div>
                         <div>
-                            <p class="font-bold text-lg tracking-tight">${data.message}</p>
+                            <p class="font-bold text-lg tracking-tight">${escapeHtml(data.message)}</p>
                             <p class="text-xs text-indigo-100 font-medium opacity-80">Database diperbarui: ${new Date().toLocaleTimeString()}</p>
                         </div>
                     </div>
@@ -967,7 +1046,7 @@ function saveToDatabase() {
         elements.saveStatus.innerHTML = `
             <div class="mt-6 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 flex items-center gap-3">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span class="text-sm font-medium">Gagal menyimpan: ${error.message}</span>
+                <span class="text-sm font-medium">Gagal menyimpan: ${escapeHtml(error.message)}</span>
             </div>
         `;
     })
@@ -979,6 +1058,19 @@ function saveToDatabase() {
 }
 
 function resetForm() {
-    location.reload();
+    elements.inputText.value = '';
+    elements.saveStatus.innerHTML = '';
+    elements.parsedContent.innerHTML = '';
+    elements.matchCountBadge.textContent = '';
+    elements.resultDiv.classList.add('hidden');
+    elements.errorDiv.classList.add('hidden');
+    elements.saveBtn.classList.add('hidden');
+    elements.validationSummary.classList.add('hidden');
+    state.matches = [];
+    state.validation = { invalidCount: 0, warningCount: 0, validCount: 0, duplicateCount: 0, details: [] };
+    if (elements.metricInvalidData) elements.metricInvalidData.textContent = '0';
+    if (elements.metricDuplicate) elements.metricDuplicate.textContent = '0';
+    elements.inputText.focus();
+    elements.inputText.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 </script>

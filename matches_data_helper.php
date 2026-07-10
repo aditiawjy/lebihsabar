@@ -86,6 +86,55 @@ function sabarajaDataReadCsv(callable $onRow): bool
     return true;
 }
 
+/**
+ * Daftar liga unik dari CSV, di-cache ke file JSON kecil supaya tidak perlu
+ * membaca ulang seluruh matches.csv di setiap request. Cache otomatis
+ * dibangun ulang ketika mtime/size CSV berubah (mis. setelah simpan data baru).
+ */
+function sabarajaDataCsvLeaguesCached(): array
+{
+    $csvPath = sabarajaDataCsvPath();
+    if (!is_readable($csvPath)) {
+        return [];
+    }
+
+    $mtime = filemtime($csvPath);
+    $size = filesize($csvPath);
+    $cacheDir = __DIR__ . DIRECTORY_SEPARATOR . 'cache';
+    $cacheFile = $cacheDir . DIRECTORY_SEPARATOR . 'csv_leagues_cache.json';
+
+    if (is_readable($cacheFile)) {
+        $cached = json_decode((string) file_get_contents($cacheFile), true);
+        if (is_array($cached)
+            && ($cached['mtime'] ?? null) === $mtime
+            && ($cached['size'] ?? null) === $size
+            && is_array($cached['leagues'] ?? null)
+        ) {
+            return $cached['leagues'];
+        }
+    }
+
+    $leagues = [];
+    sabarajaDataReadCsv(function (array $match) use (&$leagues): void {
+        if ($match['league'] !== '') {
+            $leagues[$match['league']] = true;
+        }
+    });
+    $leagues = array_keys($leagues);
+    sort($leagues);
+
+    if (!is_dir($cacheDir)) {
+        @mkdir($cacheDir, 0775, true);
+    }
+    @file_put_contents(
+        $cacheFile,
+        json_encode(['mtime' => $mtime, 'size' => $size, 'leagues' => $leagues]),
+        LOCK_EX
+    );
+
+    return $leagues;
+}
+
 function sabarajaDataFormatNumber($value): string
 {
     if ($value === null || $value === '') {

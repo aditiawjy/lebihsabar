@@ -1,0 +1,12 @@
+# Browser Chromium (besar) - di-download ulang oleh setup.bat
+.playwright/
+
+# Sesi/profil Chromium persisten
+.chrome-profile/
+
+# Log runtime
+*.log
+
+# Cache Python
+__pycache__/
+*.pyc

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 880px;
+            padding: 15px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+        }
+        h3 {
+            margin: 0 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #007bff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .live-indicator {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .live-on { background: #d4edda; color: #155724; }
+        .live-off { background: #f8d7da; color: #721c24; }
+        .view-toggle {
+            display: inline-flex;
+            gap: 6px;
+            margin-left: auto;
+            flex-wrap: wrap;
+        }
+        .view-toggle__btn {
+            background: #e9ecef;
+            color: #495057;
+            border: 1px solid #ced4da;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .view-toggle__btn.active {
+            background: #174ea6;
+            color: white;
+            border-color: #174ea6;
+        }
+        .status-bar {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+        th {
+            background: #007bff;
+            color: white;
+            padding: 8px 6px;
+            text-align: left;
+        }
+        td {
+            padding: 7px 6px;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+        .team-name {
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 130px;
+        }
+        .score { font-weight: bold; color: #dc3545; font-size: 13px; }
+        .time-live { background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 12px; font-size: 10px; }
+        .time-ht   { background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 12px; font-size: 10px; }
+        .ou-line { font-weight: 700; color: #174ea6; }
+        .odds-over  { color: #007bff; font-weight: 600; }
+        .odds-under { color: #dc3545; font-weight: 600; }
+        .odds-x2 { color: #212529; }
+        .suspended { color: #999; font-style: italic; }
+        .scalp-badge {
+            display: inline-block;
+            background: #ffe08a;
+            color: #7a5b00;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 9px;
+            font-weight: 800;
+            margin-left: 6px;
+        }
+        .error-box { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
+        .league-group {
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        .league-title {
+            background: #eef4ff;
+            color: #174ea6;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 8px 10px;
+            border-bottom: 1px solid #d6e4ff;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+    </style>
+</head>
+<body>
+    <h3>
+        V-Soccer Scalper
+        <span id="matchCount" style="font-size: 14px; background: #007bff; color: white; padding: 4px 12px; border-radius: 12px;">0 matches</span>
+    </h3>
+
+    <div class="controls">
+        <button id="refreshBtn" class="btn-primary">Refresh Data</button>
+        <button id="autoBtn" class="btn-success">Start Auto</button>
+        <button id="stopBtn" class="btn-danger" disabled>Stop Auto</button>
+        <span id="autoStatus" class="live-indicator live-off">AUTO: OFF</span>
+        <div class="view-toggle">
+            <button id="viewAllBtn" class="view-toggle__btn active">All</button>
+            <button id="view2HBtn" class="view-toggle__btn">2H only</button>
+            <button id="viewScalpBtn" class="view-toggle__btn">Scalp only</button>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <span id="pageStatus">Checking page...</span>
+        <span id="lastUpdate">Last update: -</span>
+    </div>
+
+    <div id="errorBox"></div>
+
+    <div style="max-height: 460px; overflow-y: auto;">
+        <div id="matchesTable">
+            <div style="text-align:center;padding:40px;background:white;">Buka halaman Virtual Soccer (Asian view) lalu klik "Refresh Data".</div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

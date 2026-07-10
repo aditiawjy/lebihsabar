@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "V-Soccer Scalper",
+  "version": "1.0",
+  "description": "Live Virtual Soccer scalping monitor + goal log for *.1x2aaa.com (Asian view)",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "tabs",
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://*.1x2aaa.com/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.1x2aaa.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "V-Soccer Scalper"
+  }
+}

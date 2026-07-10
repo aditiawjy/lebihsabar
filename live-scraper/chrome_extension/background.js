@@ -1,0 +1,836 @@
+importScripts(
+    'lib/utils.js',
+    'lib/constants.js',
+    'lib/telegram.js',
+    'lib/state.js',
+    'lib/odd-tracker.js',
+    'lib/signals.js',
+    'lib/h2h-notify.js',
+    'lib/streak-notify.js'
+);
+
+const DASHBOARD_API_URL = 'http://127.0.0.1:5000/api/dashboard-live-data';
+
+
+function isTargetUrl(url) {
+    return typeof url === 'string' && url.includes(TARGET_HOST);
+}
+
+async function getTargetTab() {
+    if (currentTabId !== null) {
+        try {
+            const tab = await chrome.tabs.get(currentTabId);
+            if (tab?.id && isTargetUrl(tab.url)) {
+                return tab;
+            }
+        } catch (error) {
+            currentTabId = null;
+        }
+    }
+
+    const tabs = await chrome.tabs.query({});
+    const targetTab = tabs.find((tab) => isTargetUrl(tab.url)) || null;
+    currentTabId = targetTab?.id ?? null;
+    return targetTab;
+}
+
+async function keepTargetTabAlive(tab) {
+    if (!tab?.id) {
+        return null;
+    }
+
+    try {
+        return await chrome.tabs.update(tab.id, { autoDiscardable: false });
+    } catch (_) {
+        return tab;
+    }
+}
+
+async function ensureTargetTabReady(tab) {
+    const protectedTab = await keepTargetTabAlive(tab);
+    if (!protectedTab?.id) {
+        return null;
+    }
+
+    if (!protectedTab.discarded) {
+        return protectedTab;
+    }
+
+    await chrome.tabs.reload(protectedTab.id);
+    await delay(REFRESH_SETTLE_MS + 1000);
+    return chrome.tabs.get(protectedTab.id);
+}
+
+async function requestContentAction(tabId, action) {
+    await ensureContentScript(tabId);
+    return chrome.tabs.sendMessage(tabId, { action });
+}
+
+async function ensureContentScript(tabId) {
+    try {
+        await chrome.tabs.sendMessage(tabId, { action: 'ping' });
+        return;
+    } catch (error) {
+        if (!error?.message?.includes('Receiving end does not exist')) {
+            throw error;
+        }
+    }
+
+    await chrome.scripting.executeScript({
+        target: { tabId },
+        files: ['content.js']
+    });
+}
+
+async function clickPageRefresh(tabId) {
+    try {
+        const response = await requestContentAction(tabId, 'clickRefresh');
+        if (response?.ok) {
+            return response.data || { clicked: false, selector: null };
+        }
+        return { clicked: false, selector: null };
+    } catch (error) {
+        return {
+            clicked: false,
+            selector: null,
+            error: error.message || 'Refresh message failed'
+        };
+    }
+}
+
+async function reloadTargetTabIfNeeded(tabId) {
+    const intervalMs = typeof TARGET_TAB_RELOAD_INTERVAL_MS === 'number'
+        ? TARGET_TAB_RELOAD_INTERVAL_MS
+        : 30 * 60 * 1000;
+    const now = Date.now();
+
+    if (lastTargetTabReloadAt && now - lastTargetTabReloadAt < intervalMs) {
+        return false;
+    }
+
+    lastTargetTabReloadAt = now;
+    try {
+        await chrome.tabs.reload(tabId);
+        await delay(REFRESH_SETTLE_MS + 2500);
+        await setStatus({
+            lastRefresh: `Tab reload ${new Date().toLocaleTimeString()}`,
+            error: ''
+        });
+        return true;
+    } catch (error) {
+        await setStatus({ error: error.message || 'Scheduled tab reload failed' });
+        return false;
+    }
+}
+
+async function extractDataFromTab(tabId) {
+    const response = await requestContentAction(tabId, 'extractData');
+    if (!response?.ok || !response.data) {
+        throw new Error(response?.error || 'Failed to extract data from page');
+    }
+
+    return response.data;
+}
+
+function mergeDetailIntoMatch(match, detailMatch) {
+    if (!match || !detailMatch) return match;
+
+    if (detailMatch.nextGoalOdds && !match.nextGoalOdds) {
+        match.nextGoalOdds = detailMatch.nextGoalOdds;
+    }
+
+    if (Array.isArray(detailMatch.odds) && detailMatch.odds.length) {
+        const existing = new Set(Array.isArray(match.odds) ? match.odds : []);
+        match.odds = Array.from(existing);
+        detailMatch.odds.forEach((odd) => {
+            if (!existing.has(odd)) {
+                existing.add(odd);
+                match.odds.push(odd);
+            }
+        });
+    }
+
+    return match;
+}
+
+function replaceGroupedMatch(groupedMatches, targetMatch, mergedMatch) {
+    if (!Array.isArray(groupedMatches) || !targetMatch || !mergedMatch) return groupedMatches;
+
+    return groupedMatches.map((group) => ({
+        ...group,
+        matches: (group.matches || []).map((match) => (
+            match === targetMatch || (match.detailUrl && match.detailUrl === targetMatch.detailUrl)
+                ? mergedMatch
+                : match
+        ))
+    }));
+}
+
+async function waitForTabLoad(tabId, timeoutMs) {
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < timeoutMs) {
+        try {
+            const tab = await chrome.tabs.get(tabId);
+            if (tab.status === 'complete') {
+                return true;
+            }
+        } catch (_) {
+            return false;
+        }
+        await delay(250);
+    }
+
+    return false;
+}
+
+async function scrapeDetailPage(detailUrl) {
+    let tab = null;
+    try {
+        tab = await chrome.tabs.create({ url: detailUrl, active: false });
+        const loadWaitMs = typeof DETAIL_PAGE_LOAD_WAIT_MS === 'number' ? DETAIL_PAGE_LOAD_WAIT_MS : 2200;
+        await waitForTabLoad(tab.id, Math.max(loadWaitMs, 1000));
+        await delay(loadWaitMs);
+        const detailData = await extractDataFromTab(tab.id);
+        return Array.isArray(detailData?.matches) ? detailData.matches[0] || null : null;
+    } catch (error) {
+        await setStatus({ error: `Detail scrape failed: ${error.message || detailUrl}` });
+        return null;
+    } finally {
+        if (tab?.id) {
+            try {
+                await chrome.tabs.remove(tab.id);
+            } catch (_) {}
+        }
+    }
+}
+
+async function scrapeDetailByClickFromList(listUrl, listIndex) {
+    let tab = null;
+    try {
+        tab = await chrome.tabs.create({ url: listUrl, active: false });
+        const loadWaitMs = typeof DETAIL_PAGE_LOAD_WAIT_MS === 'number' ? DETAIL_PAGE_LOAD_WAIT_MS : 2200;
+        await waitForTabLoad(tab.id, Math.max(loadWaitMs, 1000));
+        await delay(loadWaitMs);
+
+        await ensureContentScript(tab.id);
+        const openResp = await chrome.tabs.sendMessage(tab.id, { action: 'openMatchDetailByIndex', index: listIndex });
+        if (!openResp?.ok || !openResp?.data?.opened) {
+            throw new Error(openResp?.data?.error || openResp?.error || 'Unable to open detail by index');
+        }
+
+        const settleMs = typeof DETAIL_CLICK_SETTLE_MS === 'number' ? DETAIL_CLICK_SETTLE_MS : 2500;
+        await delay(settleMs);
+        await waitForTabLoad(tab.id, Math.max(settleMs, 1000));
+        await delay(500);
+
+        const detailData = await extractDataFromTab(tab.id);
+        return Array.isArray(detailData?.matches) ? detailData.matches[0] || null : null;
+    } catch (error) {
+        await setStatus({ error: `Detail click scrape failed: ${error.message || listIndex}` });
+        return null;
+    } finally {
+        if (tab?.id) {
+            try {
+                await chrome.tabs.remove(tab.id);
+            } catch (_) {}
+        }
+    }
+}
+
+async function enrichMatchesFromDetailPages(data) {
+    if (typeof DETAIL_PAGE_ENRICH_ENABLED === 'boolean' && !DETAIL_PAGE_ENRICH_ENABLED) {
+        return data;
+    }
+
+    const matches = Array.isArray(data?.matches) ? data.matches : [];
+    const maxMatches = typeof DETAIL_PAGE_ENRICH_MAX_MATCHES === 'number' ? DETAIL_PAGE_ENRICH_MAX_MATCHES : 8;
+    const candidates = matches
+        .filter((match) => match.detailUrl && !match.nextGoalOdds)
+        .slice(0, maxMatches);
+
+    if (!candidates.length) {
+        return data;
+    }
+
+    let enrichedCount = 0;
+    for (const match of candidates) {
+        const detailMatch = await scrapeDetailPage(match.detailUrl);
+        if (detailMatch?.nextGoalOdds || detailMatch?.odds?.length) {
+            mergeDetailIntoMatch(match, detailMatch);
+            data.groupedMatches = replaceGroupedMatch(data.groupedMatches, match, match);
+            enrichedCount += 1;
+        }
+    }
+
+    await setStatus({
+        lastExtractStatus: `Detail NG ${enrichedCount}/${candidates.length} @ ${new Date().toLocaleTimeString()}`
+    });
+    return data;
+}
+
+async function enrichMatchesByClickingDetails(data, listUrl) {
+    if (typeof DETAIL_CLICK_ENRICH_ENABLED === 'boolean' && !DETAIL_CLICK_ENRICH_ENABLED) {
+        return data;
+    }
+
+    const matches = Array.isArray(data?.matches) ? data.matches : [];
+    const maxMatches = typeof DETAIL_CLICK_ENRICH_MAX_MATCHES === 'number' ? DETAIL_CLICK_ENRICH_MAX_MATCHES : 5;
+    const candidates = matches
+        .filter((match) => !match.nextGoalOdds && Number.isInteger(match.listIndex))
+        .slice(0, maxMatches);
+
+    if (!candidates.length || !listUrl) {
+        return data;
+    }
+
+    let enrichedCount = 0;
+    for (const match of candidates) {
+        const detailMatch = await scrapeDetailByClickFromList(listUrl, match.listIndex);
+        if (detailMatch?.nextGoalOdds || detailMatch?.odds?.length) {
+            mergeDetailIntoMatch(match, detailMatch);
+            data.groupedMatches = replaceGroupedMatch(data.groupedMatches, match, match);
+            enrichedCount += 1;
+        }
+    }
+
+    await setStatus({
+        lastExtractStatus: `Click NG ${enrichedCount}/${candidates.length} @ ${new Date().toLocaleTimeString()}`
+    });
+    return data;
+}
+
+async function enrichMatchesWithNextGoal(data, listUrl) {
+    await enrichMatchesFromDetailPages(data);
+    return enrichMatchesByClickingDetails(data, listUrl);
+}
+
+function createDataSignature(data) {
+    if (!data?.matches) {
+        return null;
+    }
+
+    return JSON.stringify({
+        count: data.count,
+        matches: data.matches
+    });
+}
+
+async function syncLiveDataToApi(data) {
+    try {
+        const resp = await fetch('http://127.0.0.1:5000/api/live-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data || {})
+        });
+
+        if (!resp.ok) {
+            throw new Error(`Live API HTTP ${resp.status}`);
+        }
+
+        return true;
+    } catch (error) {
+        await setStatus({
+            error: error.message || 'Live API sync failed'
+        });
+        return false;
+    }
+}
+
+async function sendToServer(data, isAutoSend = false) {
+    try {
+        const matches = Array.isArray(data?.matches) ? data.matches : [];
+        if (!matches.length) {
+            await setStatus({
+                serverStatus: 'Telegram: No data',
+                error: 'No match data to send.'
+            });
+            return false;
+        }
+
+        const watchConfig = await getCustomWatchConfig();
+        pruneMatchAlertState(matches);
+
+        const evaluatedMatches = matches
+            .map((match) => {
+                const matchKey = createMatchKey(match);
+                const watchContext = getMatchWatchContext(match, watchConfig);
+                const threshold = watchContext.appliedThreshold;
+                const marketSelection = watchContext.appliedSelection;
+
+                return {
+                    match,
+                    matchKey,
+                    stateKey: getThresholdStateKey(matchKey, threshold, marketSelection),
+                    targetOdd: getQualifiedOddsAlert(match, marketSelection, threshold),
+                    watchContext
+                };
+            });
+
+        const alertMatches = evaluatedMatches.filter(({ stateKey, targetOdd, watchContext }) => {
+            // Team mode HT: odd dimatikan, jangan kirim alert odd untuk team ini.
+            if (watchContext?.htOnly) {
+                return false;
+            }
+            if (!targetOdd || notifiedMatchKeys.has(stateKey)) {
+                return false;
+            }
+
+            return wasAboveThresholdByMatchKey.get(stateKey) !== true;
+        });
+
+        if (!alertMatches.length) {
+            evaluatedMatches.forEach(({ stateKey, targetOdd }) => {
+                wasAboveThresholdByMatchKey.set(stateKey, Boolean(targetOdd));
+            });
+
+            const defaultThresholdText = TARGET_ODD_MIN.toFixed(2);
+            const defaultSelectionText = `FT ${formatWatchMarketForDisplay(TARGET_ODD_SELECTION)}`;
+            const watchTeamsCount = Array.isArray(watchConfig.teamRules) ? watchConfig.teamRules.length : 0;
+            const hasWatchTeams = watchTeamsCount > 0;
+            const customThresholdText = toThresholdNumber(watchConfig.customOddThreshold, TARGET_ODD_MIN).toFixed(2);
+            const customSelectionText = `FT ${formatWatchMarketForDisplay(watchConfig.customOddSelection)}`;
+            const statusText = hasWatchTeams
+                ? `Telegram: No alert on ${defaultSelectionText} > ${defaultThresholdText} (team watch uses per-team rules; fallback ${customSelectionText} > ${customThresholdText})`
+                : `Telegram: No alert on ${defaultSelectionText} > ${defaultThresholdText}`;
+
+            await setStatus({
+                serverStatus: statusText,
+                error: ''
+            });
+            return false;
+        }
+
+        let sentCount = 0;
+        for (const { match, stateKey, targetOdd, watchContext } of alertMatches) {
+            const res = await fetch(TELEGRAM_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_CHAT_ID,
+                    text: formatMatchMessage(match, targetOdd, watchContext),
+                    parse_mode: 'HTML'
+                })
+            });
+
+            if (!res.ok) {
+                throw new Error(`Telegram API error ${res.status}`);
+            }
+
+            notifiedMatchKeys.add(stateKey);
+            wasAboveThresholdByMatchKey.set(stateKey, true);
+            sentCount += 1;
+        }
+
+        evaluatedMatches.forEach(({ stateKey, targetOdd }) => {
+            if (!notifiedMatchKeys.has(stateKey)) {
+                wasAboveThresholdByMatchKey.set(stateKey, Boolean(targetOdd));
+            }
+        });
+
+        const sentAt = new Date().toLocaleTimeString();
+        await setStatus({
+            serverStatus: isAutoSend ? `Telegram: Auto-sent ${sentCount} alert OK` : `Telegram: Sent ${sentCount} alert OK`,
+            lastSent: sentAt,
+            lastRetry: isAutoSend ? undefined : 'manual',
+            error: ''
+        });
+        return true;
+    } catch (error) {
+        await setStatus({
+            serverStatus: isAutoSend ? 'Telegram: Auto-send failed X' : 'Telegram: Failed X',
+            error: error.message || 'Telegram send failed'
+        });
+    }
+
+    return false;
+}
+
+async function sendDashboardLiveData(data) {
+    const matches = Array.isArray(data?.matches) ? data.matches : [];
+    if (!matches.length) return false;
+    const activeState = buildActiveMatchStatePayload(matches);
+
+    try {
+        await fetch(DASHBOARD_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                matches,
+                allGoalMinutes: activeState.allGoalMinutes,
+                allGoalScorers: activeState.allGoalScorers,
+                all2HGoalMinutes: activeState.all2HGoalMinutes,
+                all2HScorers: activeState.all2HScorers,
+                kickoffTimes: activeState.kickoffTimes,
+                patternSignals: activeState.patternSignals,
+                htScores: activeState.htScores,
+                timestamp: new Date().toISOString()
+            })
+        });
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
+
+async function sendToServerWithRetry(data) {
+    let attempt = 0;
+    await setStatus({ lastRetry: '0' });
+
+    while (attempt <= AUTO_SEND_RETRY_COUNT) {
+        const sent = await sendToServer(data, true);
+        if (sent) {
+            await setStatus({ lastRetry: String(attempt) });
+            return true;
+        }
+
+        attempt += 1;
+        if (attempt <= AUTO_SEND_RETRY_COUNT) {
+                await setStatus({
+                    serverStatus: `Telegram: Retry ${attempt}/${AUTO_SEND_RETRY_COUNT}`,
+                    lastRetry: String(attempt)
+                });
+            await delay(AUTO_SEND_RETRY_DELAY_MS);
+        }
+    }
+
+    await setStatus({
+        serverStatus: 'Telegram: Auto-send failed after retry X',
+        lastRetry: String(AUTO_SEND_RETRY_COUNT)
+    });
+    return false;
+}
+
+async function handleFreshData(data) {
+    await setSavedMatchData(data);
+    await syncLiveDataToApi(data);
+    await trackGoalEvents(Array.isArray(data?.matches) ? data.matches : []);
+    await trackP727374GoalSignal(Array.isArray(data?.matches) ? data.matches : []);
+    await trackOneGoal2HSignal(Array.isArray(data?.matches) ? data.matches : []);
+    await trackTeamHalftimeSignal(Array.isArray(data?.matches) ? data.matches : []);
+    await trackH2HLive0to0SecondHalf(Array.isArray(data?.matches) ? data.matches : []);
+    await trackStreakKl2LiveOdds(Array.isArray(data?.matches) ? data.matches : []);
+    await persistMatchState(Array.isArray(data?.matches) ? data.matches : []);
+    await sendDashboardLiveData(data);
+    await updateOddTracking(Array.isArray(data?.matches) ? data.matches : []);
+    await trackOddChanges(Array.isArray(data?.matches) ? data.matches : []);
+    await setStatus({
+        pageStatus: 'OK Target page detected',
+        lastUpdate: data.time,
+        error: ''
+    });
+
+    if (!isLiveRunning) {
+        return { sent: false, changed: false };
+    }
+
+    const currentSignature = createDataSignature(data);
+    if (currentSignature && currentSignature !== lastAutoSentSignature) {
+        const sent = await sendToServerWithRetry(data);
+        if (sent) {
+            lastAutoSentSignature = currentSignature;
+        }
+        return { sent, changed: true };
+    }
+
+    await setStatus({ serverStatus: 'Server: No change' });
+    return { sent: false, changed: false };
+}
+
+async function runLiveCycle() {
+    if (!isLiveRunning || isLiveCycleRunning) {
+        return;
+    }
+
+    isLiveCycleRunning = true;
+
+    try {
+        const foundTab = await getTargetTab();
+        const targetTab = await ensureTargetTabReady(foundTab);
+        if (!targetTab?.id || !isTargetUrl(targetTab.url)) {
+            await setStatus({
+                pageStatus: 'X Not on target page',
+                error: 'Target tab not found. Will retry next cycle.'
+            });
+            return;
+        }
+
+        currentTabId = targetTab.id;
+        await saveRuntimeState();
+        await setStatus({
+            pageStatus: 'OK Target page detected',
+            lastCycle: new Date().toLocaleTimeString(),
+            error: foundTab?.discarded ? 'Target tab was discarded and has been reloaded.' : ''
+        });
+
+        const didReload = await reloadTargetTabIfNeeded(targetTab.id);
+        if (!didReload) {
+            const refreshResult = await clickPageRefresh(targetTab.id);
+            await setStatus({
+                lastRefresh: refreshResult.clicked
+                    ? `Clicked ${new Date().toLocaleTimeString()}`
+                    : `Not found ${new Date().toLocaleTimeString()}`,
+                error: refreshResult.error || ''
+            });
+
+            await delay(REFRESH_SETTLE_MS);
+        }
+
+        if (!isLiveRunning) {
+            return;
+        }
+
+        const data = await enrichMatchesWithNextGoal(await extractDataFromTab(targetTab.id), targetTab.url);
+        const firstMatchStatus = data.matches?.[0]?.status || '-';
+        await setStatus({
+            lastExtractStatus: `${firstMatchStatus} @ ${new Date().toLocaleTimeString()}`
+        });
+        await handleFreshData(data);
+    } catch (error) {
+        await setStatus({
+            error: error.message || 'Live cycle failed',
+            serverStatus: 'Server: Failed X'
+        });
+    } finally {
+        isLiveCycleRunning = false;
+    }
+
+}
+
+async function startLive() {
+    const foundTab = await getTargetTab();
+    const targetTab = await ensureTargetTabReady(foundTab);
+    if (!targetTab?.id || !isTargetUrl(targetTab.url)) {
+        await updateLiveState(false);
+        await setStatus({
+            pageStatus: 'X Not on target page',
+            error: 'Open the BPVM target page first.'
+        });
+        return { ok: false, error: 'Not on target page' };
+    }
+
+    currentTabId = targetTab.id;
+    lastAutoSentSignature = null;
+    lastTargetTabReloadAt = Date.now();
+    await updateLiveState(true);
+    await setStatus({
+        pageStatus: 'OK Target page detected',
+        error: ''
+    });
+
+    runLiveCycle();
+    return { ok: true };
+}
+
+async function stopLive() {
+    await updateLiveState(false);
+    await setStatus({ error: '' });
+    return { ok: true };
+}
+
+// Auto-start: jalankan live tanpa harus tekan tombol, asalkan tab situs target
+// sedang terbuka. Aman dipanggil berkali-kali (idempotent) — skip bila sudah jalan
+// atau bila tab target belum ada.
+let autoStartInFlight = false;
+async function autoStartLiveIfPossible() {
+    if (isLiveRunning || autoStartInFlight) return;
+    autoStartInFlight = true;
+    try {
+        const tab = await getTargetTab();
+        if (tab?.id && isTargetUrl(tab.url)) {
+            await startLive();
+        }
+    } catch (_) {
+        // diam: coba lagi di trigger berikutnya (startup / tab load / alarm)
+    } finally {
+        autoStartInFlight = false;
+    }
+}
+
+async function sendStoredDataToServer() {
+    const data = await chrome.storage.local.get(['lastMatches', 'lastGroupedMatches', 'lastCount', 'lastUpdate']);
+    if (!data.lastMatches?.length) {
+        await setStatus({ error: 'No data to send! Extract first.' });
+        return { ok: false, error: 'No data to send' };
+    }
+
+    const payload = {
+        matches: data.lastMatches,
+        groupedMatches: data.lastGroupedMatches || [],
+        count: data.lastCount || data.lastMatches.length,
+        time: data.lastUpdate || new Date().toLocaleTimeString()
+    };
+
+    const sent = await sendToServer(payload, false);
+    return sent ? { ok: true } : { ok: false, error: 'Send failed' };
+}
+
+async function getPopupState() {
+    const data = await chrome.storage.local.get([
+        'lastMatches',
+        'lastGroupedMatches',
+        'lastCount',
+        'lastUpdate',
+        'liveOddInsights',
+        'liveHtScores',
+        'liveStatus',
+        'liveRuntimeState',
+        'h2hNotifyStatus',
+        'h2hWatchToday',
+        'streakNotifyStatus',
+        'streakWatchToday',
+        CUSTOM_WATCH_CONFIG_KEY
+    ]);
+
+    return {
+        ok: true,
+        data: {
+            matches: data.lastMatches || [],
+            groupedMatches: data.lastGroupedMatches || [],
+            count: data.lastCount || 0,
+            time: data.lastUpdate || '-',
+            oddInsights: data.liveOddInsights || {},
+            htScores: data.liveHtScores || {},
+            liveStatus: data.liveStatus || null,
+            h2hNotifyStatus: data.h2hNotifyStatus || null,
+            h2hWatchToday: data.h2hWatchToday || null,
+            streakNotifyStatus: data.streakNotifyStatus || null,
+            streakWatchToday: data.streakWatchToday || null,
+            customWatchConfig: data[CUSTOM_WATCH_CONFIG_KEY] || getDefaultCustomWatchConfig(),
+            runtimeState: data.liveRuntimeState || {
+                isLiveRunning: false,
+                currentTabId: null
+            },
+            goalMinutes: Object.fromEntries(first1HGoalMinByMatchKey),
+            allGoalMinutes: Object.fromEntries(all1HGoalMinsByMatchKey),
+            all2HGoalMinutes: Object.fromEntries(all2HGoalMinsByMatchKey)
+        }
+    };
+}
+
+chrome.runtime.onInstalled.addListener(() => {
+    chrome.storage.local.set({
+        liveOddInsights: {},
+        liveRuntimeState: {
+            isLiveRunning: false,
+            currentTabId: null
+        },
+        [CUSTOM_WATCH_CONFIG_KEY]: getDefaultCustomWatchConfig(),
+        liveStatus: {
+            lastUpdate: '-',
+            lastSent: '-',
+            lastRetry: '0',
+            serverStatus: 'Telegram: -',
+            pageStatus: 'Checking page...',
+            lastCycle: '-',
+            lastRefresh: '-',
+            lastExtractStatus: '-',
+            error: ''
+        }
+    }, () => {
+        autoStartLiveIfPossible().catch(() => {});
+    });
+    ensureH2HAlarm().catch(() => {});
+    checkH2HTodayAndNotify().catch(() => {});
+    checkStreakWatchRefresh().catch(() => {});
+});
+
+chrome.runtime.onStartup.addListener(() => {
+    restoreRuntimeState()
+        .then(autoStartLiveIfPossible)
+        .catch(() => {});
+    ensureH2HAlarm().catch(() => {});
+    checkH2HTodayAndNotify().catch(() => {});
+    checkStreakWatchRefresh().catch(() => {});
+});
+
+restoreRuntimeState()
+    .then(autoStartLiveIfPossible)
+    .catch(() => {});
+
+ensureH2HAlarm().catch(() => {});
+checkStreakWatchRefresh().catch(() => {});
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+    if (tabId === currentTabId) {
+        currentTabId = null;
+        saveRuntimeState().catch(() => {});
+    }
+});
+
+// Saat tab situs target selesai dimuat dan live belum jalan, mulai otomatis.
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.status !== 'complete') return;
+    if (!isTargetUrl(tab?.url)) return;
+    autoStartLiveIfPossible().catch(() => {});
+});
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === H2H_ALARM_NAME) {
+        checkH2HTodayAndNotify().catch(() => {});
+        checkStreakWatchRefresh().catch(() => {});
+        return;
+    }
+    if (alarm.name !== LIVE_ALARM_NAME) {
+        return;
+    }
+
+    restoreRuntimeState()
+        .then(() => {
+            if (isLiveRunning) {
+                return runLiveCycle();
+            }
+            return null;
+        })
+        .catch(() => {});
+});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    (async () => {
+        switch (message?.action) {
+            case 'startLive':
+                sendResponse(await startLive());
+                break;
+            case 'stopLive':
+                sendResponse(await stopLive());
+                break;
+            case 'extractNow': {
+                const targetTab = await getTargetTab();
+                if (!targetTab?.id) {
+                    sendResponse({ ok: false, error: 'Target tab not found' });
+                    break;
+                }
+
+                const data = await enrichMatchesWithNextGoal(await extractDataFromTab(targetTab.id), targetTab.url);
+                await handleFreshData(data);
+                sendResponse({ ok: true, data });
+                break;
+            }
+            case 'sendStoredData':
+                sendResponse(await sendStoredDataToServer());
+                break;
+            case 'checkH2HNow':
+                sendResponse(await checkH2HTodayAndNotify());
+                break;
+            case 'checkStreakNow':
+                sendResponse(await checkStreakWatchRefresh());
+                break;
+    case 'getPopupState':
+                sendResponse(await getPopupState());
+                break;
+            case 'getCustomWatchConfig':
+                sendResponse(await getCustomWatchConfig());
+                break;
+            case 'setCustomWatchConfig':
+                sendResponse(await setCustomWatchConfig(message.payload || {}));
+                break;
+            default:
+                sendResponse({ ok: false, error: 'Unknown action' });
+        }
+    })().catch((error) => {
+        sendResponse({ ok: false, error: error.message || 'Unhandled background error' });
+    });
+
+    return true;
+});

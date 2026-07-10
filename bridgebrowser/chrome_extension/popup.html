@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 400px;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .method-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .status {
+            padding: 5px;
+            border-radius: 3px;
+            margin: 5px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .data {
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .live-controls {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .live-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .live-running {
+            background-color: #28a745;
+            color: white;
+        }
+        .live-stopped {
+            background-color: #dc3545;
+            color: white;
+        }
+        .start-btn {
+            background-color: #28a745;
+        }
+        .start-btn:hover {
+            background-color: #218838;
+        }
+        .stop-btn {
+            background-color: #dc3545;
+        }
+        .stop-btn:hover {
+            background-color: #c82333;
+        }
+        .clear-btn {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .clear-btn:hover {
+            background-color: #e0a800;
+        }
+        .button-group {
+            margin-bottom: 10px;
+        }
+        .tab-info {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .tab-info div {
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+        .server-status {
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+        .auto-refresh {
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        .auto-refresh label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .auto-refresh input[type="checkbox"] {
+            margin-right: 5px;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .live-controls {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h3>Live Data Browser Extension</h3>
+    
+    <!-- Current Tab Info -->
+    <div class="section">
+        <div class="method-title">Current Tab Information</div>
+        <div class="tab-info">
+            <div><strong>URL:</strong> <span id="currentUrl">Loading...</span></div>
+            <div><strong>Title:</strong> <span id="currentTitle">Loading...</span></div>
+        </div>
+    </div>
+    
+    <!-- Direct Browser Data Extraction -->
+    <div class="section">
+        <div class="method-title">Direct Browser Data Extraction</div>
+        <div class="button-group">
+            <button id="extractBtn">Extract Page Data</button>
+            <button id="loadFromFileBtn">Load from File</button>
+        </div>
+        <div id="extractStatus" class="status"></div>
+        <div id="extractedData" class="data"></div>
+    </div>
+    
+    <!-- Server Communication -->
+    <div class="section">
+        <div class="method-title">Server Communication</div>
+        <div class="server-status">
+            <span>Status: </span><span id="serverConnectionStatus" class="status">Checking...</span>
+        </div>
+        <div class="button-group">
+            <button id="sendToServerBtn">Send to Server</button>
+            <button id="getServerDataBtn">Get Server Data</button>
+            <button id="clearServerBtn" class="clear-btn">Clear Server</button>
+        </div>
+        <div id="serverStatus" class="status"></div>
+        <div id="serverData" class="data"></div>
+    </div>
+    
+    <!-- Live Mode Controls -->
+    <div class="section">
+        <div class="method-title">Live Mode</div>
+        <div class="live-controls">
+            <button id="startLiveBtn" class="start-btn">Start Live</button>
+            <button id="stopLiveBtn" class="stop-btn">Stop Live</button>
+            <span id="liveStatus" class="live-status live-stopped">STOPPED</span>
+        </div>
+        <div class="auto-refresh">
+            <label>
+                <input type="checkbox" id="autoRefreshToggle"> Auto Refresh
+            </label>
+        </div>
+    </div>
+    
+    <!-- HTTP Server Fallback -->
+    <div class="section">
+        <div class="method-title">HTTP Server Fallback</div>
+        <div class="button-group">
+            <button id="httpAccess">Load via HTTP</button>
+            <button id="refreshBtn">Refresh HTTP</button>
+        </div>
+        <div id="httpStatus" class="status"></div>
+        <div id="httpData" class="data"></div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

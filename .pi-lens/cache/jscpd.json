@@ -1,0 +1,496 @@
+{
+  "success": true,
+  "clones": [
+    {
+      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startA": 635,
+      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startB": 594,
+      "lines": 7,
+      "tokens": 0
+    },
+    {
+      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startA": 641,
+      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startB": 600,
+      "lines": 10,
+      "tokens": 0
+    },
+    {
+      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startA": 687,
+      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startB": 594,
+      "lines": 7,
+      "tokens": 0
+    },
+    {
+      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startA": 693,
+      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startB": 600,
+      "lines": 9,
+      "tokens": 0
+    },
+    {
+      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startA": 752,
+      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startB": 594,
+      "lines": 7,
+      "tokens": 0
+    },
+    {
+      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startA": 758,
+      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startB": 600,
+      "lines": 9,
+      "tokens": 0
+    },
+    {
+      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startA": 804,
+      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startB": 594,
+      "lines": 7,
+      "tokens": 0
+    },
+    {
+      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startA": 826,
+      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startB": 653,
+      "lines": 9,
+      "tokens": 0
+    },
+    {
+      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startA": 839,
+      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startB": 724,
+      "lines": 8,
+      "tokens": 0
+    },
+    {
+      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startA": 849,
+      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startB": 733,
+      "lines": 7,
+      "tokens": 0
+    },
+    {
+      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startA": 866,
+      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startB": 594,
+      "lines": 7,
+      "tokens": 0
+    },
+    {
+      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startA": 881,
+      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startB": 815,
+      "lines": 9,
+      "tokens": 0
+    },
+    {
+      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startA": 902,
+      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startB": 724,
+      "lines": 10,
+      "tokens": 0
+    },
+    {
+      "fileA": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startA": 911,
+      "fileB": "live-scraper\\chrome_extension\\lib\\signals.js",
+      "startB": 733,
+      "lines": 7,
+      "tokens": 0
+    },
+    {
+      "fileA": "live-scraper\\chrome_extension\\background.js",
+      "startA": 209,
+      "fileB": "live-scraper\\chrome_extension\\background.js",
+      "startB": 188,
+      "lines": 6,
+      "tokens": 0
+    },
+    {
+      "fileA": "live-scraper\\chrome_extension\\background.js",
+      "startA": 228,
+      "fileB": "live-scraper\\chrome_extension\\background.js",
+      "startB": 195,
+      "lines": 12,
+      "tokens": 0
+    },
+    {
+      "fileA": "live-scraper\\chrome_extension\\background.js",
+      "startA": 287,
+      "fileB": "live-scraper\\chrome_extension\\background.js",
+      "startB": 256,
+      "lines": 10,
+      "tokens": 0
+    },
+    {
+      "fileA": "msports-parser\\content.js",
+      "startA": 205,
+      "fileB": "msports-parser\\content.js",
+      "startB": 191,
+      "lines": 16,
+      "tokens": 0
+    },
+    {
+      "fileA": "bridgebrowser\\telegram_notifier.py",
+      "startA": 60,
+      "fileB": "bridgebrowser\\telegram_notifier.py",
+      "startB": 51,
+      "lines": 7,
+      "tokens": 0
+    },
+    {
+      "fileA": "bridgebrowser\\telegram_notifier.py",
+      "startA": 112,
+      "fileB": "bridgebrowser\\telegram_notifier.py",
+      "startB": 70,
+      "lines": 6,
+      "tokens": 0
+    },
+    {
+      "fileA": "bridgebrowser\\telegram_notifier.py",
+      "startA": 127,
+      "fileB": "bridgebrowser\\telegram_notifier.py",
+      "startB": 70,
+      "lines": 6,
+      "tokens": 0
+    },
+    {
+      "fileA": "bridgebrowser\\telegram_notifier.py",
+      "startA": 142,
+      "fileB": "bridgebrowser\\telegram_notifier.py",
+      "startB": 70,
+      "lines": 6,
+      "tokens": 0
+    },
+    {
+      "fileA": "bridgebrowser\\telegram_notifier.py",
+      "startA": 157,
+      "fileB": "bridgebrowser\\telegram_notifier.py",
+      "startB": 70,
+      "lines": 6,
+      "tokens": 0
+    },
+    {
+      "fileA": "bridgebrowser\\telegram_notifier.py",
+      "startA": 171,
+      "fileB": "bridgebrowser\\telegram_notifier.py",
+      "startB": 51,
+      "lines": 7,
+      "tokens": 0
+    },
+    {
+      "fileA": "bridgebrowser\\telegram_alert_monitor.py",
+      "startA": 207,
+      "fileB": "bridgebrowser\\telegram_alert_monitor.py",
+      "startB": 143,
+      "lines": 6,
+      "tokens": 0
+    },
+    {
+      "fileA": "bridgebrowser\\telegram_alert_monitor.py",
+      "startA": 213,
+      "fileB": "bridgebrowser\\telegram_alert_monitor.py",
+      "startB": 149,
+      "lines": 16,
+      "tokens": 0
+    },
+    {
+      "fileA": "bridgebrowser\\telegram_alert_monitor.py",
+      "startA": 295,
+      "fileB": "bridgebrowser\\telegram_alert_monitor.py",
+      "startB": 255,
+      "lines": 8,
+      "tokens": 0
+    },
+    {
+      "fileA": "bridgebrowser\\telegram_alert_monitor.py",
+      "startA": 430,
+      "fileB": "bridgebrowser\\telegram_alert_monitor.py",
+      "startB": 420,
+      "lines": 7,
+      "tokens": 0
+    },
+    {
+      "fileA": "bridgebrowser\\match_history_api.php",
+      "startA": 227,
+      "fileB": "bridgebrowser\\match_history_api.php",
+      "startB": 174,
+      "lines": 25,
+      "tokens": 0
+    },
+    {
+      "fileA": "bridgebrowser\\h2h_validator.py",
+      "startA": 266,
+      "fileB": "bridgebrowser\\h2h_validator.py",
+      "startB": 234,
+      "lines": 9,
+      "tokens": 0
+    },
+    {
+      "fileA": "bridgebrowser\\api_server.py",
+      "startA": 333,
+      "fileB": "bridgebrowser\\telegram_alert_monitor.py",
+      "startB": 47,
+      "lines": 6,
+      "tokens": 0
+    },
+    {
+      "fileA": "bridgebrowser\\api_server.py",
+      "startA": 437,
+      "fileB": "bridgebrowser\\api_server.py",
+      "startB": 386,
+      "lines": 12,
+      "tokens": 0
+    },
+    {
+      "fileA": "top-teams-over15.php",
+      "startA": 207,
+      "fileB": "top-teams-over15.php",
+      "startB": 146,
+      "lines": 10,
+      "tokens": 0
+    },
+    {
+      "fileA": "save_matches_simple.php",
+      "startA": 115,
+      "fileB": "save_matches_simple.php",
+      "startB": 61,
+      "lines": 10,
+      "tokens": 0
+    },
+    {
+      "fileA": "save_matches_csv.php",
+      "startA": 69,
+      "fileB": "upload_csv.php",
+      "startB": 61,
+      "lines": 8,
+      "tokens": 0
+    },
+    {
+      "fileA": "save_matches_csv.php",
+      "startA": 121,
+      "fileB": "upload_csv.php",
+      "startB": 92,
+      "lines": 22,
+      "tokens": 0
+    },
+    {
+      "fileA": "rng_eval_fhg_u05.php",
+      "startA": 221,
+      "fileB": "rng_eval_fhg_u05.php",
+      "startB": 144,
+      "lines": 11,
+      "tokens": 0
+    },
+    {
+      "fileA": "parser-content.php",
+      "startA": 856,
+      "fileB": "parser-content.php",
+      "startB": 679,
+      "lines": 14,
+      "tokens": 0
+    },
+    {
+      "fileA": "h2h-over05.php",
+      "startA": 334,
+      "fileB": "win-streak-over25.php",
+      "startB": 371,
+      "lines": 6,
+      "tokens": 0
+    },
+    {
+      "fileA": "h2h-over05.php",
+      "startA": 376,
+      "fileB": "win-streak-over25.php",
+      "startB": 429,
+      "lines": 13,
+      "tokens": 0
+    },
+    {
+      "fileA": "goal-log-save.php",
+      "startA": 202,
+      "fileB": "goal-log-save.php",
+      "startB": 144,
+      "lines": 7,
+      "tokens": 0
+    },
+    {
+      "fileA": "goal-log-save.php",
+      "startA": 278,
+      "fileB": "goal-log-save.php",
+      "startB": 158,
+      "lines": 9,
+      "tokens": 0
+    },
+    {
+      "fileA": "find_patterns.py",
+      "startA": 3,
+      "fileB": "next_goal_patterns.py",
+      "startB": 2,
+      "lines": 10,
+      "tokens": 0
+    },
+    {
+      "fileA": "find_patterns.py",
+      "startA": 23,
+      "fileB": "next_goal_patterns.py",
+      "startB": 27,
+      "lines": 7,
+      "tokens": 0
+    },
+    {
+      "fileA": "dashboard.php",
+      "startA": 40,
+      "fileB": "dashboard_api.php",
+      "startB": 134,
+      "lines": 8,
+      "tokens": 0
+    },
+    {
+      "fileA": "dashboard.php",
+      "startA": 51,
+      "fileB": "dashboard_api.php",
+      "startB": 16,
+      "lines": 10,
+      "tokens": 0
+    },
+    {
+      "fileA": "dashboard.php",
+      "startA": 63,
+      "fileB": "dashboard_api.php",
+      "startB": 89,
+      "lines": 17,
+      "tokens": 0
+    },
+    {
+      "fileA": "dashboard.php",
+      "startA": 91,
+      "fileB": "dashboard_api.php",
+      "startB": 56,
+      "lines": 11,
+      "tokens": 0
+    },
+    {
+      "fileA": "dashboard.php",
+      "startA": 187,
+      "fileB": "dashboard.php",
+      "startB": 151,
+      "lines": 11,
+      "tokens": 0
+    },
+    {
+      "fileA": "clubs-record-simple.php",
+      "startA": 59,
+      "fileB": "h2h-over05.php",
+      "startB": 9,
+      "lines": 12,
+      "tokens": 0
+    },
+    {
+      "fileA": "clubs-record-simple.php",
+      "startA": 82,
+      "fileB": "h2h-over05.php",
+      "startB": 22,
+      "lines": 8,
+      "tokens": 0
+    },
+    {
+      "fileA": "clubs-record-simple.php",
+      "startA": 305,
+      "fileB": "clubs-record-simple.php",
+      "startB": 289,
+      "lines": 15,
+      "tokens": 0
+    },
+    {
+      "fileA": "clubs-record-simple.php",
+      "startA": 549,
+      "fileB": "h2h-over05.php",
+      "startB": 250,
+      "lines": 8,
+      "tokens": 0
+    },
+    {
+      "fileA": "clubs-record-simple.php",
+      "startA": 557,
+      "fileB": "h2h-over05.php",
+      "startB": 287,
+      "lines": 8,
+      "tokens": 0
+    },
+    {
+      "fileA": "clubs-record-simple.php",
+      "startA": 801,
+      "fileB": "clubs-record-simple.php",
+      "startB": 679,
+      "lines": 6,
+      "tokens": 0
+    },
+    {
+      "fileA": "clubs-record-simple.php",
+      "startA": 833,
+      "fileB": "clubs-record-simple.php",
+      "startB": 698,
+      "lines": 7,
+      "tokens": 0
+    },
+    {
+      "fileA": "clubs-record-simple.php",
+      "startA": 869,
+      "fileB": "h2h-over05.php",
+      "startB": 337,
+      "lines": 7,
+      "tokens": 0
+    },
+    {
+      "fileA": "clubs-record-simple.php",
+      "startA": 893,
+      "fileB": "clubs-record-simple.php",
+      "startB": 736,
+      "lines": 21,
+      "tokens": 0
+    },
+    {
+      "fileA": "clubs-record-simple.php",
+      "startA": 907,
+      "fileB": "h2h-over05.php",
+      "startB": 375,
+      "lines": 16,
+      "tokens": 0
+    },
+    {
+      "fileA": "api_msports_sync.php",
+      "startA": 21,
+      "fileB": "save_matches.php",
+      "startB": 9,
+      "lines": 46,
+      "tokens": 0
+    },
+    {
+      "fileA": "api_msports_sync.php",
+      "startA": 67,
+      "fileB": "save_matches.php",
+      "startB": 54,
+      "lines": 17,
+      "tokens": 0
+    }
+  ],
+  "duplicatedLines": 578,
+  "totalLines": 18990,
+  "percentage": 3.04
+}

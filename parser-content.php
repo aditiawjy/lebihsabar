@@ -746,21 +746,40 @@ function parseTableFormat(input) {
 
 // Parser untuk format Standard (3 baris per match)
 function parseStandardFormat(input) {
-    // Baris kosong dibuang dulu supaya grouping per-3 tidak bergeser
     const lines = input.split('\n').map(l => l.trim()).filter(l => l !== '');
     const rawMatches = [];
 
-    for (let i = 0; i + 2 < lines.length; i += 3) {
-        rawMatches.push({
-            datetimeLine: lines[i],
-            matchLine: lines[i + 1],
-            infoLine: lines[i + 2]
-        });
+    let currentMatch = null;
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const isDateLine = /(\d{4}-\d{2}-\d{2})\s+(\d{1,2}:\d{2})\s*(AM|PM)/i.test(line);
+
+        if (isDateLine) {
+            if (currentMatch) {
+                rawMatches.push(currentMatch);
+            }
+            currentMatch = {
+                datetimeLine: line,
+                matchLine: '',
+                infoLine: ''
+            };
+        } else {
+            if (currentMatch) {
+                if (currentMatch.matchLine === '') {
+                    currentMatch.matchLine = line;
+                } else if (currentMatch.infoLine === '') {
+                    currentMatch.infoLine = line;
+                }
+            }
+        }
+    }
+    if (currentMatch) {
+        rawMatches.push(currentMatch);
     }
 
-    const leftoverCount = lines.length % 3;
+    const leftoverCount = 0;
 
-    if (rawMatches.length === 0) throw new Error('Format tidak valid. Pastikan setiap pertandingan memiliki 3 baris data.');
+    if (rawMatches.length === 0) throw new Error('Format tidak valid. Tidak ada data pertandingan dengan tanggal yang valid ditemukan.');
     
     const selectedLeague = getSelectedLeague();
     const fragment = document.createDocumentFragment();

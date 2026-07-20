@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "projectRoot": "C:/xampp/htdocs/lebihsabar",
+  "generatedAt": "2026-05-29T23:45:32.043Z",
+  "seq": 0,
+  "files": {},
+  "symbols": {},
+  "reverseDeps": {},
+  "cachedExports": [],
+  "projectRulesScan": {
+    "rules": [],
+    "hasCustomRules": false
+  },
+  "startupScan": {
+    "cwd": "C:\\xampp\\htdocs\\lebihsabar",
+    "scanRoot": "C:\\xampp\\htdocs\\lebihsabar",
+    "projectRoot": "C:\\xampp\\htdocs\\lebihsabar",
+    "canWarmCaches": true,
+    "sourceFileCount": 387
+  },
+  "languageProfile": {
+    "present": {
+      "jsts": true,
+      "python": true,
+      "go": false,
+      "rust": false,
+      "cxx": false,
+      "cmake": false,
+      "fish": false,
+      "shell": false,
+      "json": false,
+      "markdown": false,
+      "css": false,
+      "yaml": false,
+      "sql": false,
+      "ruby": false,
+      "html": false,
+      "docker": false,
+      "php": false,
+      "powershell": false,
+      "prisma": false,
+      "csharp": false,
+      "fsharp": false,
+      "java": false,
+      "kotlin": false,
+      "swift": false,
+      "dart": false,
+      "lua": false,
+      "zig": false,
+      "haskell": false,
+      "elixir": false,
+      "gleam": false,
+      "ocaml": false,
+      "clojure": false,
+      "terraform": false,
+      "nix": false,
+      "toml": false
+    },
+    "configured": {
+      "jsts": true
+    },
+    "counts": {
+      "python": 10,
+      "jsts": 375
+    },
+    "detectedKinds": [
+      "jsts",
+      "python"
+    ]
+  }
+}

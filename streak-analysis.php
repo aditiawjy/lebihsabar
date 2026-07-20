@@ -13,7 +13,7 @@ if (!is_dir($cacheDir)) @mkdir($cacheDir, 0775, true);
 $cacheKey = md5(json_encode([
     is_file($csvPath) ? filemtime($csvPath) : 0,
     is_file($csvPath) ? filesize($csvPath) : 0,
-    'streak_v57_both_o25',
+    'streak_v58_vsoccer_gate',
     date('Y-m-d'), // tu15 bergantung tanggal → recompute tiap hari
 ]));
 $cacheFile = $cacheDir . '/' . $cacheKey . '.cache';
@@ -595,7 +595,16 @@ if ($payload === null) {
             $tu15 = 0;
             for ($i = 0; $i < $n; $i++) { if ($arr[$i][1] && substr($arr[$i][0], 0, 10) === $todayStr) $tu15++; }
 
-            if ($n < 150 || $a[2][0] < 10) continue; // sampel minimal
+            // Gate baris league-aware. SABA (puluhan ribu match) pakai ambang lama.
+            // Liga V-Soccer sampelnya kecil (±12-22 match/tim) & gol tinggi (U1.5 ~0%),
+            // jadi syarat streak U1.5 ($a[2][0]) mustahil dipenuhi → gunakan ambang
+            // sampel total saja supaya market lain (Over/BTTS/Odd-Even/gol) tetap tampil.
+            $isVsoccer = stripos($lg, 'V-Soccer') !== false;
+            if ($isVsoccer) {
+                if ($n < 8) continue; // liga V-Soccer: minimal 8 match/tim
+            } elseif ($n < 150 || $a[2][0] < 10) {
+                continue; // SABA & lainnya: ambang lama (tidak diubah)
+            }
             $base = $u15tot / $n;
             $pct = fn($num, $den) => $den > 0 ? round($num / $den * 100, 1) : null;
             // next match (jadwal terdekat belum main)

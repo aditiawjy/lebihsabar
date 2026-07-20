@@ -248,13 +248,14 @@ if ($payload === null) {
         'cm_odftshto' => [[7, false, 4], [12, false, 3], [13, false, 3]],  // Odd 4x + FTS 3x + HT-Odd 3x → U3.5 91.4%
         'cm_o15o25cs' => [[1, true, 3], [2, false, 2], [11, false, 3]],    // O1.5 3x + O2.5 2x + CS 3x → Away O0.5 95%
         'cm_nsftshto' => [[8, true, 3], [12, false, 3], [13, false, 3]],   // NoSHG 3x + FTS 3x + HT-Odd 3x → NoDraw 93.8%
-        'cm_u05evfts' => [[3, false, 2], [7, true, 4], [12, false, 3]],    // U0.5 2x + Even 4x + FTS 3x → U3.5 88.2% (n=93)
         'cm_o25ftsu35'=> [[2, false, 2], [12, false, 3], [15, false, 4]],  // O2.5 2x + FTS 3x + U3.5 4x → Home O0.5 & O1.5 90.7%
         'cm_o25nsu35' => [[2, false, 2], [8, true, 3], [15, false, 4]],    // O2.5 2x + NoSHG 3x + U3.5 4x → FHG 90.4%
-        // Lolos validasi out-of-sample (train <2026-05, test >=2026-05):
+        // Lolos validasi out-of-sample (train <2026-05-01, test >=2026-05-01;
+        // cek ulang via validate_mining_modes.php: test n>=30 & Wilson LB>=75%):
         'cm_o25fhcs'  => [[2, false, 2], [9, false, 3], [11, false, 3]],   // O2.5 2x + FHG 3x + CS 3x → Away O0.5 (test 100%)
         'cm_o15cshte' => [[1, true, 3], [11, false, 3], [14, false, 3]],   // O1.5 3x + CS 3x + HT-Even 3x → Away O0.5 (test 100%)
         'cm_klodns'   => [[4, false, 3], [7, false, 4], [8, true, 3]],     // Kalah 3x + Odd 4x + NoSHG 3x → No Draw
+        'cm_u05evfts' => [[3, false, 2], [7, true, 4], [12, false, 3]],    // U0.5 2x + Even 4x + FTS 3x → U3.5 (test n=31, 90.3%, LB 75.1%)
     ];
 
     // Backtest kemarin/hari ini: definisi kondisi utk mode lama yang sederhana
@@ -978,20 +979,22 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                     <option value="c4_terpuruk">Kalah 3x + Gagal cetak 3x + No BTTS 3x + U1.5 3x (terpuruk total)</option>
                     <option value="c4_badai">Menang 3x + Over 2.5 3x + BTTS 2x + Over 1.5 3x (badai gol)</option>
                 </optgroup>
-                <optgroup label="— Kombinasi Hasil Mining (win rate tertinggi) —">
-                    <option value="cm_shfhcs">SHG 3x + FHG 3x + CS 3x → O0.5 100%</option>
-                    <option value="cm_drnfbt">Draw 3x + No FHG 3x + BTTS 2x → O0.5 100%</option>
-                    <option value="cm_o15cshto">O1.5 3x + CS 3x + HT Odd 3x → O0.5 100%</option>
-                    <option value="cm_nsbthto">No SHG 3x + BTTS 2x + HT Odd 3x → FHG 96%</option>
-                    <option value="cm_odftshto">Odd 4x + Gagal cetak 3x + HT Odd 3x → U3.5 91%</option>
-                    <option value="cm_o15o25cs">O1.5 3x + O2.5 2x + CS 3x → Away O0.5 95%</option>
-                    <option value="cm_nsftshto">No SHG 3x + Gagal cetak 3x + HT Odd 3x → No Draw 93%</option>
-                    <option value="cm_u05evfts">U0.5 2x + Even 4x + Gagal cetak 3x → U3.5 88%</option>
-                    <option value="cm_o25ftsu35">O2.5 2x + Gagal cetak 3x + U3.5 4x → Home O0.5 90%</option>
-                    <option value="cm_o25nsu35">O2.5 2x + No SHG 3x + U3.5 4x → FHG 90%</option>
+                <optgroup label="— ✅ Kombinasi Tervalidasi Out-of-Sample —">
                     <option value="cm_o25fhcs">O2.5 2x + FHG 3x + CS 3x → Away O0.5 (lolos validasi)</option>
                     <option value="cm_o15cshte">O1.5 3x + CS 3x + HT Even 3x → Away O0.5 (lolos validasi)</option>
                     <option value="cm_klodns">Kalah 3x + Odd 4x + No SHG 3x → No Draw (lolos validasi)</option>
+                    <option value="cm_u05evfts">U0.5 2x + Even 4x + Gagal cetak 3x → U3.5 (lolos validasi)</option>
+                </optgroup>
+                <optgroup label="— ⚠️ Eksperimental (mining in-sample, BELUM divalidasi) —">
+                    <option value="cm_shfhcs">SHG 3x + FHG 3x + CS 3x → O0.5</option>
+                    <option value="cm_drnfbt">Draw 3x + No FHG 3x + BTTS 2x → O0.5</option>
+                    <option value="cm_o15cshto">O1.5 3x + CS 3x + HT Odd 3x → O0.5</option>
+                    <option value="cm_nsbthto">No SHG 3x + BTTS 2x + HT Odd 3x → FHG</option>
+                    <option value="cm_odftshto">Odd 4x + Gagal cetak 3x + HT Odd 3x → U3.5</option>
+                    <option value="cm_o15o25cs">O1.5 3x + O2.5 2x + CS 3x → Away O0.5</option>
+                    <option value="cm_nsftshto">No SHG 3x + Gagal cetak 3x + HT Odd 3x → No Draw</option>
+                    <option value="cm_o25ftsu35">O2.5 2x + Gagal cetak 3x + U3.5 4x → Home O0.5</option>
+                    <option value="cm_o25nsu35">O2.5 2x + No SHG 3x + U3.5 4x → FHG</option>
                 </optgroup>
                 <optgroup label="— Kombinasi 5 Kondisi —">
                     <option value="c5_krisis">Kalah 2x + Gagal cetak 3x + No FHG 3x + No SHG 3x + U1.5 3x (krisis ekstrem)</option>
@@ -1099,6 +1102,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             <span id="stkLift" class="font-bold"></span>.
             Baseline normal: Over 1.5 = <b><?= $baseO15 ?>%</b> · Over 0.5 = <b><?= $baseO05 ?>%</b>.</p>
         <p id="stkVerify" class="text-sm text-slate-500 mt-1 border-t border-slate-100 pt-2"></p>
+        <div id="stkExpWarn" class="hidden mt-2 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-[12px] text-amber-800 leading-snug"></div>
     </div>
 
     <!-- Tabel sederhana -->
@@ -1174,6 +1178,18 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             const lb = (p + z*z/(2*n) - z*Math.sqrt(p*(1-p)/n + z*z/(4*n*n))) / (1 + z*z/n);
             return Math.round(lb * 1000) / 10;
         }
+        // --- Kontrol overfitting / multiple-testing --------------------------
+        // Puluhan mode/kombinasi diuji terhadap data yang sama, jadi rate mentah
+        // "100%" pada sampel kecil sangat mungkin muncul kebetulan (p-hacking).
+        // Hanya 3 mode cm_ yang lolos uji out-of-sample; sisanya + kombinasi
+        // orde-tinggi (c4_/c5_) diperlakukan sebagai EKSPERIMENTAL dan dikenai
+        // syarat sampel & keandalan (Wilson lower bound) yang jauh lebih ketat.
+        const VALIDATED_MODES = new Set(['cm_o25fhcs', 'cm_o15cshte', 'cm_klodns', 'cm_u05evfts']);
+        function isMinedMode(mk) { return mk.indexOf('cm_') === 0 && !VALIDATED_MODES.has(mk); }
+        function isHiOrder(mk) { return mk.indexOf('c4_') === 0 || mk.indexOf('c5_') === 0; }
+        function isExperimental(mk) { return isMinedMode(mk) || isHiOrder(mk); }
+        // Ambang untuk mode eksperimental: n minimal + Wilson LB minimal.
+        const EXP_MIN_N = 30, EXP_MIN_LB = 75;
         // ambil data sesuai mode + hasil (o15/o05): m[mode] = [over15, over05, sampel]
         function pick(r, mode, out) {
             const a = (r.m && r.m[mode]) ? r.m[mode] : [null, null, 0, null, null, null, null, null];
@@ -1317,6 +1333,24 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             const modesList = isAll ? ALL_MODES : [mode];
 
             modeLabel.textContent = isAll ? 'Semua market' : (MODE_TEXT[mode] || mode);
+            // Banner peringatan overfitting utk mode eksperimental / ALL.
+            const expWarn = document.getElementById('stkExpWarn');
+            if (expWarn) {
+                if (!isAll && isExperimental(mode)) {
+                    expWarn.classList.remove('hidden');
+                    expWarn.innerHTML = '⚠️ <b>Mode eksperimental (hasil data-mining, belum divalidasi out-of-sample).</b> ' +
+                        'Ratusan kombinasi diuji terhadap data yang sama, sehingga rate tinggi pada sampel kecil sering hanya kebetulan (multiple-testing / p-hacking). ' +
+                        'Untuk mode ini baris hanya tampil bila sampel ≥ ' + EXP_MIN_N + ' dan keandalan (Wilson LB) ≥ ' + EXP_MIN_LB + '%. ' +
+                        'Utamakan grup "✅ Tervalidasi" dan kolom <b>Keandalan</b>, bukan angka Peluang mentah.';
+                } else if (isAll) {
+                    expWarn.classList.remove('hidden');
+                    expWarn.innerHTML = '⚠️ Tampilan "Semua market" mencakup mode eksperimental (ditandai <span class="rounded bg-amber-100 px-1 font-bold text-amber-700">⚠ exp</span>). ' +
+                        'Perlakukan angka mode bertanda itu sebagai hipotesis, bukan rekomendasi — cek kolom <b>Keandalan</b>.';
+                } else {
+                    expWarn.classList.add('hidden');
+                    expWarn.innerHTML = '';
+                }
+            }
             outLabel.textContent = outText;
             colOut.textContent = outText;
             const gk = GLOBAL[mode];
@@ -1375,14 +1409,21 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                     if (minN > 0 && !(p.samp > minN)) return; // sampel kondisi harus > Min Sampel
                     const hits = Math.round(p.over * p.samp / 100);
                     const miss = p.samp - hits; // berapa kali meleset
+                    const exp = isExperimental(mk);
+                    // Mode eksperimental (mining in-sample / kombinasi orde-tinggi):
+                    // butuh sampel besar DAN Wilson lower bound tinggi agar tak lolos
+                    // hanya karena kebetulan pada n kecil — apa pun ambang lain di bawah.
+                    if (exp) {
+                        if (p.samp < EXP_MIN_N) return;
+                        const lbExp = wilsonLB(p.over, p.samp);
+                        if (lbExp === null || lbExp < EXP_MIN_LB) return;
+                    }
                     if (minOverV !== null && !isNaN(minOverV)) {
                         // "Min Peluang %" diisi manual -> pakai ambang manual ini, tanpa toleransi meleset.
                         if (!overOK(p.over)) return;
                     } else {
-                        // kombinasi >3 pilihan (cm_) utk Over 0.5: bila 100% cukup total > 1
-                        const combo05 = (out === 'o05' && mk.indexOf('cm_') === 0);
-                        // syarat mutlak: meleset 0x > sampel 5; 1x > sampel 100; 2x > sampel 200; 3x > sampel 300
-                        if (miss === 0 && p.samp < (combo05 ? 3 : 6)) return;
+                        // syarat mutlak: meleset 0x > sampel 6; 1x > sampel 100; 2x > sampel 200; 3x > sampel 300
+                        if (miss === 0 && p.samp < 6) return;
                         else if (miss === 1 && p.samp <= 100) return;
                         else if (miss === 2 && p.samp <= 200) return;
                         else if (miss === 3 && p.samp <= 300) return;
@@ -1392,7 +1433,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                     const need = STREAK_LEN[mk] || 1;
                     if (curOnly.checked && cur < need) return;
                     const baseV = BASE_OUT[out] ?? null;
-                    d.push({ t: r.t, mk: MODE_TEXT[mk] || mk, l: r.l, cur: cur, over: p.over, samp: p.samp, hits: hits, miss: miss,
+                    d.push({ t: r.t, mk: MODE_TEXT[mk] || mk, exp: exp, l: r.l, cur: cur, over: p.over, samp: p.samp, hits: hits, miss: miss,
                         lift: baseV === null || p.over === null ? null : Math.round((p.over - baseV) * 10) / 10,
                         lb: wilsonLB(p.over, p.samp), tu15: r.tu15 || 0, oppOver: oppOver, teamOver: teamOver, next: r.next, nextMin: r.nextMin });
                 });
@@ -1407,7 +1448,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             if (countEl) countEl.textContent = '';
             body.innerHTML = d.map(r => `<tr class="border-t border-slate-100 hover:bg-indigo-50/30"${hourHiStyle(r.nextMin)}>
                 <td class="px-4 py-2.5"><div class="font-semibold text-slate-900 whitespace-nowrap">${r.t}</div>${r.next ? `<div class="text-[10px] text-slate-500 mt-0.5 whitespace-nowrap">${r.next}</div>` : ''}</td>
-                <td class="px-4 py-2.5 text-[11px] font-semibold text-indigo-600 whitespace-nowrap">${r.mk || '-'}</td>
+                <td class="px-4 py-2.5 text-[11px] font-semibold text-indigo-600 whitespace-nowrap">${r.mk || '-'}${r.exp ? ' <span class="ml-1 rounded bg-amber-100 px-1 text-[9px] font-bold text-amber-700" title="Mode eksperimental hasil data-mining, belum tervalidasi out-of-sample. Angka % kemungkinan optimistis.">⚠ exp</span>' : ''}</td>
                 <td class="px-4 py-2.5 text-[11px] text-slate-500" style="max-width:240px;white-space:normal;line-height:1.25">${r.l}</td>
                 <td class="px-4 py-2.5 text-center text-base ${overClass(r.over)}">${r.over}%</td>
                 <td class="px-4 py-2.5 text-center font-bold ${r.lift===null?'text-slate-300':(r.lift>=5?'text-emerald-600':(r.lift>0?'text-emerald-500':(r.lift>=-2?'text-slate-400':'text-rose-500')))}">${r.lift===null?'-':(r.lift>0?'+':'')+r.lift}%</td>
@@ -1468,12 +1509,20 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                         if (minN > 0 && !(p.samp > minN)) return; // sampel kondisi harus > Min Sampel
                         const hits = Math.round(p.over * p.samp / 100);
                         const miss = p.samp - hits; // berapa kali meleset
-                        // syarat mutlak: meleset 0x (peluang 100%) tanpa batas sampel; meleset 1x > sampel 100; meleset 2x > sampel 200; meleset 3x > sampel 300
+                        const exp = isExperimental(mk);
+                        // Mode eksperimental: sampel ≥ EXP_MIN_N & Wilson LB ≥ EXP_MIN_LB.
+                        if (exp) {
+                            if (p.samp < EXP_MIN_N) return;
+                            const lbExp = wilsonLB(p.over, p.samp);
+                            if (lbExp === null || lbExp < EXP_MIN_LB) return;
+                        }
+                        // syarat mutlak: meleset 0x (peluang 100%) butuh sampel > 6 (bukan tanpa batas — cegah 100% palsu pada n kecil); 1x > 100; 2x > 200; 3x > 300
+                        if (miss === 0 && p.samp < 6) return;
                         if (miss === 1 && p.samp <= 100) return;
                         if (miss === 2 && p.samp <= 200) return;
                         if (miss === 3 && p.samp <= 300) return;
                         if (miss > 3) return;
-                        d.push({ t: r.t, mk: MODE_TEXT[mk] || mk, outT: o.t, l: r.l, cur: cur,
+                        d.push({ t: r.t, mk: MODE_TEXT[mk] || mk, exp: exp, outT: o.t, l: r.l, cur: cur,
                             over: p.over, samp: p.samp, hits: hits, miss: miss,
                             lb: wilsonLB(p.over, p.samp), next: r.next, nextMin: r.nextMin });
                     });
@@ -1488,7 +1537,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             count100.textContent = d.length + ' baris';
             body100.innerHTML = d.map(r => `<tr class="border-t border-slate-100 hover:bg-amber-50/40"${hourHiStyle(r.nextMin)}>
                 <td class="px-4 py-2.5"><div class="font-semibold text-slate-900 whitespace-nowrap">${r.t}</div>${r.next ? `<div class="text-[10px] text-slate-500 mt-0.5 whitespace-nowrap">${r.next}</div>` : ''}</td>
-                <td class="px-4 py-2.5 text-[11px] font-semibold text-indigo-600 whitespace-nowrap">${r.mk}</td>
+                <td class="px-4 py-2.5 text-[11px] font-semibold text-indigo-600 whitespace-nowrap">${r.mk}${r.exp ? ' <span class="ml-1 rounded bg-amber-100 px-1 text-[9px] font-bold text-amber-700" title="Eksperimental hasil data-mining, belum tervalidasi out-of-sample.">⚠ exp</span>' : ''}</td>
                 <td class="px-4 py-2.5 text-[11px] font-bold text-emerald-700 whitespace-nowrap">${r.outT}</td>
                 <td class="px-4 py-2.5 text-[11px] text-slate-500" style="max-width:240px;white-space:normal;line-height:1.25">${r.l}</td>
                 <td class="px-4 py-2.5 text-center text-base text-emerald-600 font-extrabold">${r.over}%</td>

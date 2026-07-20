@@ -250,12 +250,14 @@ if ($payload === null) {
         'cm_nsftshto' => [[8, true, 3], [12, false, 3], [13, false, 3]],   // NoSHG 3x + FTS 3x + HT-Odd 3x → NoDraw 93.8%
         'cm_o25ftsu35'=> [[2, false, 2], [12, false, 3], [15, false, 4]],  // O2.5 2x + FTS 3x + U3.5 4x → Home O0.5 & O1.5 90.7%
         'cm_o25nsu35' => [[2, false, 2], [8, true, 3], [15, false, 4]],    // O2.5 2x + NoSHG 3x + U3.5 4x → FHG 90.4%
-        // Lolos validasi out-of-sample (train <2026-05-01, test >=2026-05-01;
-        // cek ulang via validate_mining_modes.php: test n>=30 & Wilson LB>=75%):
-        'cm_o25fhcs'  => [[2, false, 2], [9, false, 3], [11, false, 3]],   // O2.5 2x + FHG 3x + CS 3x → Away O0.5 (test 100%)
-        'cm_o15cshte' => [[1, true, 3], [11, false, 3], [14, false, 3]],   // O1.5 3x + CS 3x + HT-Even 3x → Away O0.5 (test 100%)
-        'cm_klodns'   => [[4, false, 3], [7, false, 4], [8, true, 3]],     // Kalah 3x + Odd 4x + NoSHG 3x → No Draw
-        'cm_u05evfts' => [[3, false, 2], [7, true, 4], [12, false, 3]],    // U0.5 2x + Even 4x + FTS 3x → U3.5 (test n=31, 90.3%, LB 75.1%)
+        // Uji ulang out-of-sample konsisten (validate_mining_modes.php, split 2026-05-01,
+        // syarat: test n>=30 & Wilson LB>=75% & drift<=15pt). Hanya cm_u05evfts yg lolos.
+        // Tiga label "lolos validasi" lama TERBUKTI tak lolos di bar konsisten (test n
+        // terlalu kecil / rate drift), jadi dikembalikan ke status eksperimental:
+        'cm_o25fhcs'  => [[2, false, 2], [9, false, 3], [11, false, 3]],   // Away O0.5 — test n=8 (terlalu kecil)
+        'cm_o15cshte' => [[1, true, 3], [11, false, 3], [14, false, 3]],   // Away O0.5 — test n=10 (terlalu kecil)
+        'cm_klodns'   => [[4, false, 3], [7, false, 4], [8, true, 3]],     // NoDraw — test 73.3% LB 48% (drift)
+        'cm_u05evfts' => [[3, false, 2], [7, true, 4], [12, false, 3]],    // U3.5 → LOLOS: test n=31, 90.3%, LB 75.1%
     ];
 
     // Backtest kemarin/hari ini: definisi kondisi utk mode lama yang sederhana
@@ -980,10 +982,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                     <option value="c4_badai">Menang 3x + Over 2.5 3x + BTTS 2x + Over 1.5 3x (badai gol)</option>
                 </optgroup>
                 <optgroup label="— ✅ Kombinasi Tervalidasi Out-of-Sample —">
-                    <option value="cm_o25fhcs">O2.5 2x + FHG 3x + CS 3x → Away O0.5 (lolos validasi)</option>
-                    <option value="cm_o15cshte">O1.5 3x + CS 3x + HT Even 3x → Away O0.5 (lolos validasi)</option>
-                    <option value="cm_klodns">Kalah 3x + Odd 4x + No SHG 3x → No Draw (lolos validasi)</option>
-                    <option value="cm_u05evfts">U0.5 2x + Even 4x + Gagal cetak 3x → U3.5 (lolos validasi)</option>
+                    <option value="cm_u05evfts">U0.5 2x + Even 4x + Gagal cetak 3x → U3.5 (lolos validasi: test n=31, LB 75%)</option>
                 </optgroup>
                 <optgroup label="— ⚠️ Eksperimental (mining in-sample, BELUM divalidasi) —">
                     <option value="cm_shfhcs">SHG 3x + FHG 3x + CS 3x → O0.5</option>
@@ -995,6 +994,9 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                     <option value="cm_nsftshto">No SHG 3x + Gagal cetak 3x + HT Odd 3x → No Draw</option>
                     <option value="cm_o25ftsu35">O2.5 2x + Gagal cetak 3x + U3.5 4x → Home O0.5</option>
                     <option value="cm_o25nsu35">O2.5 2x + No SHG 3x + U3.5 4x → FHG</option>
+                    <option value="cm_o25fhcs">O2.5 2x + FHG 3x + CS 3x → Away O0.5 (test n kecil)</option>
+                    <option value="cm_o15cshte">O1.5 3x + CS 3x + HT Even 3x → Away O0.5 (test n kecil)</option>
+                    <option value="cm_klodns">Kalah 3x + Odd 4x + No SHG 3x → No Draw (drift test)</option>
                 </optgroup>
                 <optgroup label="— Kombinasi 5 Kondisi —">
                     <option value="c5_krisis">Kalah 2x + Gagal cetak 3x + No FHG 3x + No SHG 3x + U1.5 3x (krisis ekstrem)</option>
@@ -1184,7 +1186,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
         // Hanya 3 mode cm_ yang lolos uji out-of-sample; sisanya + kombinasi
         // orde-tinggi (c4_/c5_) diperlakukan sebagai EKSPERIMENTAL dan dikenai
         // syarat sampel & keandalan (Wilson lower bound) yang jauh lebih ketat.
-        const VALIDATED_MODES = new Set(['cm_o25fhcs', 'cm_o15cshte', 'cm_klodns', 'cm_u05evfts']);
+        const VALIDATED_MODES = new Set(['cm_u05evfts']);
         function isMinedMode(mk) { return mk.indexOf('cm_') === 0 && !VALIDATED_MODES.has(mk); }
         function isHiOrder(mk) { return mk.indexOf('c4_') === 0 || mk.indexOf('c5_') === 0; }
         function isExperimental(mk) { return isMinedMode(mk) || isHiOrder(mk); }

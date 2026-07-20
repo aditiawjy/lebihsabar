@@ -35,6 +35,10 @@ $modes = [
     'cm_u05evfts'  => ['conds' => [[3, false, 2], [7, true, 4], [12, false, 3]],   'out' => 7,  'label' => 'U0.5 2x + Even 4x + FTS 3x → U3.5'],
     'cm_o25ftsu35' => ['conds' => [[2, false, 2], [12, false, 3], [15, false, 4]], 'out' => 12, 'label' => 'O2.5 2x + FTS 3x + U3.5 4x → Home O0.5'],
     'cm_o25nsu35'  => ['conds' => [[2, false, 2], [8, true, 3], [15, false, 4]],   'out' => 4,  'label' => 'O2.5 2x + NoSHG 3x + U3.5 4x → FHG'],
+    // Mode yg sudah dilabeli "lolos validasi" — diuji ulang utk konsistensi metodologi.
+    'cm_o25fhcs'   => ['conds' => [[2, false, 2], [9, false, 3], [11, false, 3]],  'out' => 13, 'label' => '[V] O2.5 2x + FHG 3x + CS 3x → Away O0.5'],
+    'cm_o15cshte'  => ['conds' => [[1, true, 3], [11, false, 3], [14, false, 3]],  'out' => 13, 'label' => '[V] O1.5 3x + CS 3x + HT-Even 3x → Away O0.5'],
+    'cm_klodns'    => ['conds' => [[4, false, 3], [7, false, 4], [8, true, 3]],    'out' => 11, 'label' => '[V] Kalah 3x + Odd 4x + NoSHG 3x → NoDraw'],
 ];
 
 // --- Scan CSV → sequence per tim|liga (played only), tuple identik aplikasi ----

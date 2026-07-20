@@ -13,7 +13,7 @@ if (!is_dir($cacheDir)) @mkdir($cacheDir, 0775, true);
 $cacheKey = md5(json_encode([
     is_file($csvPath) ? filemtime($csvPath) : 0,
     is_file($csvPath) ? filesize($csvPath) : 0,
-    'streak_v54_time_filter',
+    'streak_v57_both_o25',
     date('Y-m-d'), // tu15 bergantung tanggal → recompute tiap hari
 ]));
 $cacheFile = $cacheDir . '/' . $cacheKey . '.cache';
@@ -60,8 +60,8 @@ if ($payload === null) {
                     // Jadwal yang belum dimainkan & masih akan datang → kandidat next match
                     if ($sk !== '' && $sk >= $nowStr) {
                         $hk = $h . '|' . $lg; $ak = $a . '|' . $lg;
-                        if (!isset($nextMatch[$hk]) || $sk < $nextMatch[$hk]['dt']) $nextMatch[$hk] = ['vs' => $a, 'dt' => $sk];
-                        if (!isset($nextMatch[$ak]) || $sk < $nextMatch[$ak]['dt']) $nextMatch[$ak] = ['vs' => $h, 'dt' => $sk];
+                        if (!isset($nextMatch[$hk]) || $sk < $nextMatch[$hk]['dt']) $nextMatch[$hk] = ['vs' => $a, 'dt' => $sk, 'home' => 1];
+                        if (!isset($nextMatch[$ak]) || $sk < $nextMatch[$ak]['dt']) $nextMatch[$ak] = ['vs' => $h, 'dt' => $sk, 'home' => 0];
                     }
                     continue;
                 }
@@ -99,8 +99,8 @@ if ($payload === null) {
                 $gHW += $hw; $gAW += $aw;
                 $gODD += $odd;
                 // tuple: [..25 eg4,26 hw,27 aw]
-                $team[$h . '|' . $lg][] = [$sk, $u15, $o25, $u05, $loseH, $winH, $draw, $odd, $shg, $fhg, $nbtts, $csH, $ftsH, $htodd, $hteven, $u35, $hg05, $ag05, $tg01, $tg23, $tg46, $tg7, $eg1, $eg2, $eg3, $eg4, $hw, $aw];
-                $team[$a . '|' . $lg][] = [$sk, $u15, $o25, $u05, $loseA, $winA, $draw, $odd, $shg, $fhg, $nbtts, $csA, $ftsA, $htodd, $hteven, $u35, $hg05, $ag05, $tg01, $tg23, $tg46, $tg7, $eg1, $eg2, $eg3, $eg4, $hw, $aw];
+                $team[$h . '|' . $lg][] = [$sk, $u15, $o25, $u05, $loseH, $winH, $draw, $odd, $shg, $fhg, $nbtts, $csH, $ftsH, $htodd, $hteven, $u35, $hg05, $ag05, $tg01, $tg23, $tg46, $tg7, $eg1, $eg2, $eg3, $eg4, $hw, $aw, $a, 1];
+                $team[$a . '|' . $lg][] = [$sk, $u15, $o25, $u05, $loseA, $winA, $draw, $odd, $shg, $fhg, $nbtts, $csA, $ftsA, $htodd, $hteven, $u35, $hg05, $ag05, $tg01, $tg23, $tg46, $tg7, $eg1, $eg2, $eg3, $eg4, $hw, $aw, $h, 0];
             }
         }
         fclose($fh);
@@ -114,6 +114,9 @@ if ($payload === null) {
     $gC  = [1 => [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2 => [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 3 => [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]; // streak KALAH (1/2/3x)
     $gW2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; $gDR2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];                     // 2x MENANG / 2x DRAW
     $gW3 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; $gDR3 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];                     // 3x MENANG / 3x DRAW
+    $gW3O80 = array_fill(0, 26, 0); $gW3O80H = array_fill(0, 26, 0);   // Menang 3x + lawan Over1.5>=80% (+kandang)
+    $gBOTH80 = array_fill(0, 26, 0); $gBOTH85 = array_fill(0, 26, 0);  // Kedua tim (sendiri + lawan) Over1.5>=80% / >=85%
+    $gB2560 = array_fill(0, 26, 0); $gB2565 = array_fill(0, 26, 0);    // Kedua tim Over2.5>=60% / >=65%
     $gOD4 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; $gEV4 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];                    // 4x ODD / 4x EVEN
     $gOD5 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; $gEV5 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];                    // 5x ODD / 5x EVEN
     $gO25S2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; $gO15S3 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];                // momentum: O2.5 2x / O1.5 3x
@@ -285,7 +288,15 @@ if ($payload === null) {
         $u = 0; foreach ($arr as $e) $u += $e[1]; // e[1] = isU1.5
         $overRateMap[$k] = round((1 - $u / $nn) * 100, 1); // % Over 1.5
     }
+    $over25Map = [];
+    foreach ($team as $k => $arr) {
+        $nn = count($arr); if ($nn === 0) continue;
+        $o = 0; foreach ($arr as $e) $o += $e[2]; // e[2] = isO2.5 (tot>2)
+        $over25Map[$k] = round($o / $nn * 100, 1); // % Over 2.5
+    }
 
+    // Helper akumulasi 26-slot: [0]=total, [1..25]=outcome next-match (urutan sama dgn $mk).
+    $accf = function (array &$A, array $v) { $A[0]++; for ($z = 0; $z < 25; $z++) $A[$z + 1] += $v[$z]; };
     if ($csvError === null) {
         foreach ($team as $key => $arr) {
             usort($arr, fn($x, $y) => strcmp($x[0], $y[0])); // terlama dulu
@@ -300,6 +311,11 @@ if ($payload === null) {
             $c = [1 => [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 2 => [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 3 => [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]; // streak KALAH (1/2/3x)
             $w2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; $dr2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];                     // 2x MENANG / 2x DRAW
             $w3 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; $dr3 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];                     // 3x MENANG / 3x DRAW
+            $w3o80 = array_fill(0, 26, 0); $w3o80h = array_fill(0, 26, 0);   // Menang 3x + lawan Over1.5>=80% (+kandang)
+            $both80 = array_fill(0, 26, 0); $both85 = array_fill(0, 26, 0);  // Kedua tim (sendiri + lawan) Over1.5>=80% / >=85%
+            $b2560 = array_fill(0, 26, 0); $b2565 = array_fill(0, 26, 0);    // Kedua tim Over2.5>=60% / >=65%
+            $selfR = $overRateMap[$key] ?? 0;                                // rate Over1.5 musim tim ini
+            $self25R = $over25Map[$key] ?? 0;                                // rate Over2.5 musim tim ini
             $od4 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; $ev4 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];                    // 4x ODD / 4x EVEN
             $od5 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; $ev5 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];                    // 5x ODD / 5x EVEN
             $o25s2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; $o15s3 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];                // momentum
@@ -333,6 +349,15 @@ if ($payload === null) {
                 $eg3N = $arr[$i][24] ?? 0; $eg4N = $arr[$i][25] ?? 0;   // total gol pas 3 / 4 di match berikutnya
                 $hwN = $arr[$i][26] ?? 0; $awN = $arr[$i][27] ?? 0;     // home win / away win di match berikutnya
                 $ftoddN = $arr[$i][7] ?? 0; $ftevenN = ($arr[$i][7] ?? 0) ? 0 : 1; // FT total gol ganjil / genap di match berikutnya
+                $vals = [$ov15, $ov05, $shgN, $fhgN, $u25N, $o25N, $u35N, $bttsN, $nbttsN, $drawN, $nodrawN, $hg05N, $ag05N, $tg01N, $tg23N, $tg46N, $tg7N, $eg1N, $eg2N, $eg3N, $eg4N, $hwN, $awN, $ftoddN, $ftevenN];
+                // Kondisi "kedua tim subur": rate musim tim sendiri & lawan (match berikutnya) sama-sama tinggi.
+                $oppRcur = $overRateMap[(($arr[$i][28] ?? '')) . '|' . $lg] ?? 0;
+                if ($selfR >= 80 && $oppRcur >= 80) { $accf($both80, $vals); $accf($gBOTH80, $vals); }
+                if ($selfR >= 85 && $oppRcur >= 85) { $accf($both85, $vals); $accf($gBOTH85, $vals); }
+                // Kedua tim subur Over 2.5 (rate musim O2.5 tim sendiri & lawan)
+                $opp25cur = $over25Map[(($arr[$i][28] ?? '')) . '|' . $lg] ?? 0;
+                if ($self25R >= 60 && $opp25cur >= 60) { $accf($b2560, $vals); $accf($gB2560, $vals); }
+                if ($self25R >= 65 && $opp25cur >= 65) { $accf($b2565, $vals); $accf($gB2565, $vals); }
                 foreach ([1, 2, 3, 4] as $k) { // streak U1.5
                     if ($i < $k) continue;
                     $ok = true;
@@ -364,6 +389,12 @@ if ($payload === null) {
                 if ($i >= 3 && $arr[$i - 1][5] && $arr[$i - 2][5] && $arr[$i - 3][5]) { // 3x MENANG
                     $w3[0]++; $w3[1] += $ov15; $w3[2] += $ov05; $w3[3] += $shgN; $w3[4] += $fhgN; $w3[5] += $u25N; $w3[6] += $o25N; $w3[7] += $u35N; $w3[8] += $bttsN; $w3[9] += $nbttsN; $w3[10] += $drawN; $w3[11] += $nodrawN; $w3[12] += $hg05N; $w3[13] += $ag05N; $w3[14] += $tg01N; $w3[15] += $tg23N; $w3[16] += $tg46N; $w3[17] += $tg7N; $w3[18] += $eg1N; $w3[19] += $eg2N; $w3[20] += $eg3N; $w3[21] += $eg4N; $w3[22] += $hwN; $w3[23] += $awN; $w3[24] += $ftoddN; $w3[25] += $ftevenN;
                     $gW3[0]++; $gW3[1] += $ov15; $gW3[2] += $ov05; $gW3[3] += $shgN; $gW3[4] += $fhgN; $gW3[5] += $u25N; $gW3[6] += $o25N; $gW3[7] += $u35N; $gW3[8] += $bttsN; $gW3[9] += $nbttsN; $gW3[10] += $drawN; $gW3[11] += $nodrawN; $gW3[12] += $hg05N; $gW3[13] += $ag05N; $gW3[14] += $tg01N; $gW3[15] += $tg23N; $gW3[16] += $tg46N; $gW3[17] += $tg7N; $gW3[18] += $eg1N; $gW3[19] += $eg2N; $gW3[20] += $eg3N; $gW3[21] += $eg4N; $gW3[22] += $hwN; $gW3[23] += $awN; $gW3[24] += $ftoddN; $gW3[25] += $ftevenN;
+                    // + syarat LAWAN Over1.5 >=80% (rate musim lawan di match berikutnya) & kandang
+                    $oppR = $overRateMap[(($arr[$i][28] ?? '')) . '|' . $lg] ?? 0;
+                    if ($oppR >= 80) {
+                        $accf($w3o80, $vals); $accf($gW3O80, $vals);
+                        if (!empty($arr[$i][29])) { $accf($w3o80h, $vals); $accf($gW3O80H, $vals); }
+                    }
                 }
                 if ($i >= 2 && $arr[$i - 1][6] && $arr[$i - 2][6]) { // 2x DRAW
                     $dr2[0]++; $dr2[1] += $ov15; $dr2[2] += $ov05; $dr2[3] += $shgN; $dr2[4] += $fhgN; $dr2[5] += $u25N; $dr2[6] += $o25N; $dr2[7] += $u35N; $dr2[8] += $bttsN; $dr2[9] += $nbttsN; $dr2[10] += $drawN; $dr2[11] += $nodrawN; $dr2[12] += $hg05N; $dr2[13] += $ag05N; $dr2[14] += $tg01N; $dr2[15] += $tg23N; $dr2[16] += $tg46N; $dr2[17] += $tg7N; $dr2[18] += $eg1N; $dr2[19] += $eg2N; $dr2[20] += $eg3N; $dr2[21] += $eg4N; $dr2[22] += $hwN; $dr2[23] += $awN; $dr2[24] += $ftoddN; $dr2[25] += $ftevenN;
@@ -592,6 +623,9 @@ if ($payload === null) {
                     'kl_1' => $mk($c[1]), 'kl_2' => $mk($c[2]), 'kl_3' => $mk($c[3]),
                     'mn_2' => $mk($w2), 'dr_2' => $mk($dr2), 'od_4' => $mk($od4), 'ev_4' => $mk($ev4), 'od_5' => $mk($od5), 'ev_5' => $mk($ev5),
                     'mn_3' => $mk($w3), 'dr_3' => $mk($dr3),
+                    'c_mn3op80' => $mk($w3o80), 'c_mn3op80h' => $mk($w3o80h),
+                    'c_both80' => $mk($both80), 'c_both85' => $mk($both85),
+                    'c_b2560' => $mk($b2560), 'c_b2565' => $mk($b2565),
                     'o25s2' => $mk($o25s2), 'o15s3' => $mk($o15s3), 'o25s3' => $mk($o25s3), 'nbtts3' => $mk($nb3),
                     'nfhg2' => $mk($nfhg2), 'nshg2' => $mk($nshg2),
                     'nfhg3' => $mk($nfhg3), 'nshg3' => $mk($nshg3),
@@ -608,6 +642,9 @@ if ($payload === null) {
                 'curBTTS' => $curBTTS, 'curCS' => $curCS, 'curFTS' => $curFTS, 'curHTO' => $curHTO, 'curHTE' => $curHTE,
                 'tu15' => $tu15, // pertandingan U1.5 hari ini (utk syarat mode "2")
                 'oppOver' => $oppOver, // % Over 1.5 lawan di next match
+                'nextHome' => $nx ? ($nx['home'] ?? null) : null, // 1 bila tim main kandang di next match
+                'selfO25' => $over25Map[$key] ?? null, // rate Over2.5 musim tim ini
+                'oppO25' => $nx ? ($over25Map[$nx['vs'] . '|' . $lg] ?? null) : null, // rate Over2.5 lawan next match
             ];
         }
     }
@@ -648,6 +685,9 @@ if ($payload === null) {
             'kl_1' => $gmk($gC[1]), 'kl_2' => $gmk($gC[2]), 'kl_3' => $gmk($gC[3]),
             'mn_2' => $gmk($gW2), 'dr_2' => $gmk($gDR2), 'od_4' => $gmk($gOD4), 'ev_4' => $gmk($gEV4), 'od_5' => $gmk($gOD5), 'ev_5' => $gmk($gEV5),
             'mn_3' => $gmk($gW3), 'dr_3' => $gmk($gDR3),
+            'c_mn3op80' => $gmk($gW3O80), 'c_mn3op80h' => $gmk($gW3O80H),
+            'c_both80' => $gmk($gBOTH80), 'c_both85' => $gmk($gBOTH85),
+            'c_b2560' => $gmk($gB2560), 'c_b2565' => $gmk($gB2565),
             'o25s2' => $gmk($gO25S2), 'o15s3' => $gmk($gO15S3), 'o25s3' => $gmk($gO25S3), 'nbtts3' => $gmk($gNB3),
             'nfhg2' => $gmk($gNFHG2), 'nshg2' => $gmk($gNSHG2),
             'nfhg3' => $gmk($gNFHG3), 'nshg3' => $gmk($gNSHG3),
@@ -890,6 +930,12 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                     <option value="c_csnf">Cleansheet 3x + No FHG 3x (gembok babak 1)</option>
                     <option value="c_kl3nb">Kalah 3x + No BTTS 3x (kalah tanpa balas panjang)</option>
                     <option value="c_mn3o25">Menang 3x + Over 2.5 3x (mesin gol panjang)</option>
+                    <option value="c_mn3op80">Menang 3x + Lawan Over 1.5 ≥80% (lawan subur)</option>
+                    <option value="c_mn3op80h">Menang 3x + Lawan Over 1.5 ≥80% + Kandang</option>
+                    <option value="c_both80">Kedua tim Over 1.5 ≥80% (duel subur) — tanpa streak</option>
+                    <option value="c_both85">Kedua tim Over 1.5 ≥85% (duel super subur) — tanpa streak</option>
+                    <option value="c_b2560">Kedua tim Over 2.5 ≥60% (untuk pasang Over 2.5)</option>
+                    <option value="c_b2565">Kedua tim Over 2.5 ≥65% (untuk pasang Over 2.5)</option>
                     <option value="c_odbt">Odd 4x + BTTS 2x (ganjil saling serang)</option>
                     <option value="c_evnb">Even 4x + No BTTS 3x (genap & kering)</option>
                     <option value="c_dr3u15">Draw 3x + U1.5 3x (seri minim gol)</option>
@@ -1142,8 +1188,8 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             const over = out === 'o05' ? a[1] : (out === 'shg' ? (a[3] ?? null) : (out === 'fhg' ? (a[4] ?? null) : (out === 'u25' ? (a[5] ?? null) : (out === 'o25' ? (a[6] ?? null) : (out === 'u35' ? (a[7] ?? null) : (out === 'btts' ? (a[8] ?? null) : (out === 'nbtts' ? (a[9] ?? null) : (out === 'draw' ? (a[10] ?? null) : (out === 'nodraw' ? (a[11] ?? null) : (out === 'hg05' ? (a[12] ?? null) : (out === 'ag05' ? (a[13] ?? null) : (out === 'tg01' ? (a[14] ?? null) : (out === 'tg23' ? (a[15] ?? null) : (out === 'tg46' ? (a[16] ?? null) : (out === 'tg7' ? (a[17] ?? null) : (out === 'eg1' ? (a[18] ?? null) : (out === 'eg2' ? (a[19] ?? null) : (out === 'eg3' ? (a[20] ?? null) : (out === 'eg4' ? (a[21] ?? null) : (out === 'hw' ? (a[22] ?? null) : (out === 'aw' ? (a[23] ?? null) : (out === 'ftodd' ? (a[24] ?? null) : (out === 'fteven' ? (a[25] ?? null) : (out === 'u15' ? comp(a[0]) : (out === 'u05' ? comp(a[1]) : (out === 'o35' ? comp(a[7] ?? null) : a[0]))))))))))))))))))))))))));
             return { over: over, samp: a[2] };
         }
-        const MIN_SAMP = { '3': 8, '4': 5, '05_3': 5, '05_1': 20, '05_2': 8, 'kl_1': 40, 'kl_2': 20, 'kl_3': 10, 'mn_2': 20, 'mn_3': 10, 'dr_2': 12, 'dr_3': 8, 'od_4': 10, 'ev_4': 10, 'od_5': 8, 'ev_5': 8, 'o25s2': 20, 'o15s3': 20, 'o25s3': 15, 'nbtts3': 15, 'nfhg2': 15, 'nshg2': 15, 'nfhg3': 10, 'nshg3': 10, 'od4u': 10, 'ev4u': 10, 'btts2': 20, 'btts3': 15, 'nbtts2': 15, 'cs2': 10, 'fts2': 10, 'htodd3': 15, 'hteven3': 15, 'u15oe3': 8, 'dry2o': 5, 'btso3': 10, 'kncs3': 10, 'nfo3': 10, 'u15_5': 4, 'u15_6': 3, '05_4': 3, 'kl_4': 6, 'kl_5': 4, 'mn_4': 6, 'mn_5': 4, 'dr_4': 4, 'o15s4': 12, 'o15s5': 8, 'o25s4': 8, 'o25s5': 5, 'btts4': 8, 'nbtts4': 8, 'od_6': 5, 'ev_6': 5, 'shg3': 15, 'fhg3': 15, 'u35_4': 10 };
-        const MODE_TEXT = { '3': 'U1.5 3x', '4': 'U1.5 4x', '05_3': 'U0.5 3x', '05_1': 'U0.5 1x', '05_2': 'U0.5 2x', 'kl_1': 'Kalah 1x', 'kl_2': 'Kalah 2x', 'kl_3': 'Kalah 3x', 'mn_2': 'Menang 2x', 'mn_3': 'Menang 3x', 'dr_2': 'Draw 3x', 'dr_3': 'Draw 3x', 'od_4': 'Odd 4x', 'ev_4': 'Even 4x', 'od_5': 'Odd 5x', 'ev_5': 'Even 5x', 'ev_4': 'Even 4x', 'o25s2': 'O2.5 2x', 'o15s3': 'O1.5 3x', 'o25s3': 'O2.5 3x', 'nbtts3': 'NoBTTS 3x', 'nfhg2': 'NoFHG 2x', 'nshg2': 'NoSHG 2x', 'nfhg3': 'NoFHG 3x', 'nshg3': 'NoSHG 3x', 'od4u': 'Odd5x+2U1.5', 'ev4u': 'Even5x+2U1.5', 'u15oe3': 'U1.5 3x+1O2E', 'dry2o': 'Kering 3x', 'btso3': 'BTTS+O1.5 3x', 'kncs3': 'Kalah+Bobol 3x', 'nfo3': 'NoFHG+O0.5 3x', 'btts2': 'BTTS 2x', 'btts3': 'BTTS 3x', 'nbtts2': 'NoBTTS 2x', 'cs2': 'Cleansheet 3x', 'fts2': 'Gagal cetak 3x', 'htodd3': 'HT-Odd 3x', 'hteven3': 'HT-Even 3x', 'u15_5': 'U1.5 5x', 'u15_6': 'U1.5 6x', '05_4': 'U0.5 4x', 'kl_4': 'Kalah 4x', 'kl_5': 'Kalah 5x', 'mn_4': 'Menang 4x', 'mn_5': 'Menang 5x', 'dr_4': 'Draw 4x', 'o15s4': 'O1.5 4x', 'o15s5': 'O1.5 5x', 'o25s4': 'O2.5 4x', 'o25s5': 'O2.5 5x', 'btts4': 'BTTS 4x', 'nbtts4': 'NoBTTS 4x', 'od_6': 'Odd 6x', 'ev_6': 'Even 6x', 'shg3': 'SHG 3x', 'fhg3': 'FHG 3x', 'u35_4': 'U3.5 4x' };
+        const MIN_SAMP = { '3': 8, '4': 5, '05_3': 5, '05_1': 20, '05_2': 8, 'kl_1': 40, 'kl_2': 20, 'kl_3': 10, 'mn_2': 20, 'mn_3': 10, 'dr_2': 12, 'dr_3': 8, 'od_4': 10, 'ev_4': 10, 'od_5': 8, 'ev_5': 8, 'o25s2': 20, 'o15s3': 20, 'o25s3': 15, 'nbtts3': 15, 'nfhg2': 15, 'nshg2': 15, 'nfhg3': 10, 'nshg3': 10, 'od4u': 10, 'ev4u': 10, 'btts2': 20, 'btts3': 15, 'nbtts2': 15, 'cs2': 10, 'fts2': 10, 'htodd3': 15, 'hteven3': 15, 'u15oe3': 8, 'dry2o': 5, 'btso3': 10, 'kncs3': 10, 'nfo3': 10, 'u15_5': 4, 'u15_6': 3, '05_4': 3, 'kl_4': 6, 'kl_5': 4, 'mn_4': 6, 'mn_5': 4, 'dr_4': 4, 'o15s4': 12, 'o15s5': 8, 'o25s4': 8, 'o25s5': 5, 'btts4': 8, 'nbtts4': 8, 'od_6': 5, 'ev_6': 5, 'shg3': 15, 'fhg3': 15, 'u35_4': 10, 'c_mn3op80': 8, 'c_mn3op80h': 6, 'c_both80': 10, 'c_both85': 8, 'c_b2560': 10, 'c_b2565': 8 };
+        const MODE_TEXT = { '3': 'U1.5 3x', '4': 'U1.5 4x', '05_3': 'U0.5 3x', '05_1': 'U0.5 1x', '05_2': 'U0.5 2x', 'kl_1': 'Kalah 1x', 'kl_2': 'Kalah 2x', 'kl_3': 'Kalah 3x', 'mn_2': 'Menang 2x', 'mn_3': 'Menang 3x', 'dr_2': 'Draw 3x', 'dr_3': 'Draw 3x', 'od_4': 'Odd 4x', 'ev_4': 'Even 4x', 'od_5': 'Odd 5x', 'ev_5': 'Even 5x', 'ev_4': 'Even 4x', 'o25s2': 'O2.5 2x', 'o15s3': 'O1.5 3x', 'o25s3': 'O2.5 3x', 'nbtts3': 'NoBTTS 3x', 'nfhg2': 'NoFHG 2x', 'nshg2': 'NoSHG 2x', 'nfhg3': 'NoFHG 3x', 'nshg3': 'NoSHG 3x', 'od4u': 'Odd5x+2U1.5', 'ev4u': 'Even5x+2U1.5', 'u15oe3': 'U1.5 3x+1O2E', 'dry2o': 'Kering 3x', 'btso3': 'BTTS+O1.5 3x', 'kncs3': 'Kalah+Bobol 3x', 'nfo3': 'NoFHG+O0.5 3x', 'btts2': 'BTTS 2x', 'btts3': 'BTTS 3x', 'nbtts2': 'NoBTTS 2x', 'cs2': 'Cleansheet 3x', 'fts2': 'Gagal cetak 3x', 'htodd3': 'HT-Odd 3x', 'hteven3': 'HT-Even 3x', 'u15_5': 'U1.5 5x', 'u15_6': 'U1.5 6x', '05_4': 'U0.5 4x', 'kl_4': 'Kalah 4x', 'kl_5': 'Kalah 5x', 'mn_4': 'Menang 4x', 'mn_5': 'Menang 5x', 'dr_4': 'Draw 4x', 'o15s4': 'O1.5 4x', 'o15s5': 'O1.5 5x', 'o25s4': 'O2.5 4x', 'o25s5': 'O2.5 5x', 'btts4': 'BTTS 4x', 'nbtts4': 'NoBTTS 4x', 'od_6': 'Odd 6x', 'ev_6': 'Even 6x', 'shg3': 'SHG 3x', 'fhg3': 'FHG 3x', 'u35_4': 'U3.5 4x', 'c_mn3op80': 'Menang 3x + Lawan O1.5≥80%', 'c_mn3op80h': 'Menang 3x + Lawan O1.5≥80% + Kandang', 'c_both80': 'Kedua tim O1.5≥80%', 'c_both85': 'Kedua tim O1.5≥85%', 'c_b2560': 'Kedua tim O2.5≥60%', 'c_b2565': 'Kedua tim O2.5≥65%' };
         const LOSS_MODE = { 'kl_1': 1, 'kl_2': 1, 'kl_3': 1, 'kl_4': 1, 'kl_5': 1 };
         // Mode kombinasi preset: key -> [mode dasar A, mode dasar B] (untuk curOf & label).
         const COMBO_DEFS = {
@@ -1195,7 +1241,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             'cm_o25fhcs': ['o25s2', 'fhg3', 'cs2'], 'cm_o15cshte': ['o15s3', 'cs2', 'hteven3'],
             'cm_klodns': ['kl_3', 'od_4', 'nshg3'],
         };
-        const STREAK_LEN = { '3': 3, '4': 4, '05_3': 3, '05_1': 1, '05_2': 2, 'kl_1': 1, 'kl_2': 2, 'kl_3': 3, 'mn_2': 2, 'mn_3': 3, 'dr_2': 2, 'dr_3': 3, 'od_4': 4, 'ev_4': 4, 'od_5': 5, 'ev_5': 5, 'o25s2': 2, 'o15s3': 3, 'o25s3': 3, 'nbtts3': 3, 'nfhg2': 2, 'nshg2': 2, 'nfhg3': 3, 'nshg3': 3, 'od4u': 5, 'ev4u': 5, 'btts2': 2, 'btts3': 3, 'nbtts2': 2, 'cs2': 3, 'fts2': 3, 'htodd3': 3, 'hteven3': 3, 'u15oe3': 3, 'dry2o': 3, 'btso3': 3, 'kncs3': 3, 'nfo3': 3, 'u15_5': 5, 'u15_6': 6, '05_4': 4, 'kl_4': 4, 'kl_5': 5, 'mn_4': 4, 'mn_5': 5, 'dr_4': 4, 'o15s4': 4, 'o15s5': 5, 'o25s4': 4, 'o25s5': 5, 'btts4': 4, 'nbtts4': 4, 'od_6': 6, 'ev_6': 6, 'shg3': 3, 'fhg3': 3, 'u35_4': 4 };
+        const STREAK_LEN = { '3': 3, '4': 4, '05_3': 3, '05_1': 1, '05_2': 2, 'kl_1': 1, 'kl_2': 2, 'kl_3': 3, 'mn_2': 2, 'mn_3': 3, 'dr_2': 2, 'dr_3': 3, 'od_4': 4, 'ev_4': 4, 'od_5': 5, 'ev_5': 5, 'o25s2': 2, 'o15s3': 3, 'o25s3': 3, 'nbtts3': 3, 'nfhg2': 2, 'nshg2': 2, 'nfhg3': 3, 'nshg3': 3, 'od4u': 5, 'ev4u': 5, 'btts2': 2, 'btts3': 3, 'nbtts2': 2, 'cs2': 3, 'fts2': 3, 'htodd3': 3, 'hteven3': 3, 'u15oe3': 3, 'dry2o': 3, 'btso3': 3, 'kncs3': 3, 'nfo3': 3, 'u15_5': 5, 'u15_6': 6, '05_4': 4, 'kl_4': 4, 'kl_5': 5, 'mn_4': 4, 'mn_5': 5, 'dr_4': 4, 'o15s4': 4, 'o15s5': 5, 'o25s4': 4, 'o25s5': 5, 'btts4': 4, 'nbtts4': 4, 'od_6': 6, 'ev_6': 6, 'shg3': 3, 'fhg3': 3, 'u35_4': 4, 'c_mn3op80': 1, 'c_mn3op80h': 1, 'c_both80': 1, 'c_both85': 1, 'c_b2560': 1, 'c_b2565': 1 };
         // Registrasi metadata mode kombinasi — HARUS setelah deklarasi STREAK_LEN di atas.
         Object.keys(COMBO_DEFS).forEach(k => {
             MODE_TEXT[k] = COMBO_DEFS[k].map(x => MODE_TEXT[x]).join('+');
@@ -1207,6 +1253,15 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             if (COMBO_DEFS[mode]) { // kombinasi: SEMUA streak berjalan harus sudah cukup panjang
                 return COMBO_DEFS[mode].every(c => curOf(r, c) >= (STREAK_LEN[c] || 1)) ? 1 : 0;
             }
+            // Menang 3x + syarat lawan Over1.5>=80% (dan kandang) di match berikutnya
+            if (mode === 'c_mn3op80') return (r.curW >= 3 && r.oppOver !== null && r.oppOver >= 80) ? 1 : 0;
+            if (mode === 'c_mn3op80h') return (r.curW >= 3 && r.oppOver !== null && r.oppOver >= 80 && r.nextHome === 1) ? 1 : 0;
+            // Kedua tim subur: rate musim tim sendiri (100-base) & lawan berikutnya sama-sama tinggi
+            if (mode === 'c_both80') return (r.oppOver !== null && r.oppOver >= 80 && r.base !== null && (100 - r.base) >= 80) ? 1 : 0;
+            if (mode === 'c_both85') return (r.oppOver !== null && r.oppOver >= 85 && r.base !== null && (100 - r.base) >= 85) ? 1 : 0;
+            // Kedua tim subur Over 2.5: rate musim O2.5 tim sendiri & lawan berikutnya sama-sama tinggi
+            if (mode === 'c_b2560') return (r.oppO25 !== null && r.oppO25 >= 60 && r.selfO25 !== null && r.selfO25 >= 60) ? 1 : 0;
+            if (mode === 'c_b2565') return (r.oppO25 !== null && r.oppO25 >= 65 && r.selfO25 !== null && r.selfO25 >= 65) ? 1 : 0;
             if (mode.indexOf('mn_') === 0) return r.curW; // streak menang berjalan (2x/3x)
             if (mode.indexOf('dr_') === 0) return r.curD; // streak draw berjalan (2x/3x)
             if (mode === 'od_4' || mode === 'od_5' || mode === 'od_6') return r.curO;           // streak odd berjalan
@@ -1245,13 +1300,19 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             if (v >= 78) return 'text-emerald-600 font-bold';
             return 'text-slate-700';
         }
+        // Sorot baris yang jam pertandingannya = jam sekarang (mis. sekarang 11:xx → sorot 11:00–11:59).
+        function hourHiStyle(nextMin) {
+            if (nextMin === null || nextMin === undefined) return '';
+            return Math.floor(nextMin / 60) === new Date().getHours()
+                ? ' style="background-color:#dbeafe;box-shadow:inset 3px 0 0 #2563eb"' : '';
+        }
         function render() {
             const mode = modeSel.value;
             const out = outSel.value; // 'o15' | 'o05'
             const outText = out === 'dc1x' ? 'DC 1X (Home/Draw)' : out === 'dcx2' ? 'DC X2 (Away/Draw)' : out === 'o05' ? 'Over 0.5' : (out === 'shg' ? 'SHG Over 0.5' : (out === 'fhg' ? 'FHG Over 0.5' : (out === 'u25' ? 'Under 2.5' : (out === 'o25' ? 'Over 2.5' : (out === 'u35' ? 'Under 3.5' : (out === 'btts' ? 'BTTS' : (out === 'nbtts' ? 'No BTTS' : (out === 'draw' ? 'Draw' : (out === 'nodraw' ? 'No Draw' : (out === 'hg05' ? 'Goal Home Over 0.5' : (out === 'ag05' ? 'Goal Away Over 0.5' : (out === 'tg01' ? 'Total Gol 0-1' : (out === 'tg23' ? 'Total Gol 2-3' : (out === 'tg46' ? 'Total Gol 4-6' : (out === 'tg7' ? 'Total Gol 7+' : (out === 'eg1' ? 'Exactly 1 Gol' : (out === 'eg2' ? 'Exactly 2 Gol' : (out === 'eg3' ? 'Exactly 3 Gol' : (out === 'eg4' ? 'Exactly 4 Gol' : (out === 'hw' ? 'Home Win' : (out === 'aw' ? 'Away Win' : (out === 'ftodd' ? 'FT Skor Ganjil' : (out === 'fteven' ? 'FT Skor Genap' : (out === 'u15' ? 'Under 1.5' : (out === 'u05' ? 'Under 0.5' : (out === 'o35' ? 'Over 3.5' : 'Over 1.5'))))))))))))))))))))))))));
             const q = search.value.toLowerCase().trim();
             const lg = leagueSel.value;
-            const ALL_MODES = ['3','4','05_2','05_3','kl_2','kl_3','mn_2','mn_3','dr_3','od_4','ev_4','od_5','ev_5','o25s2','o15s3','o25s3','nbtts3','nfhg3','nshg3','od4u','ev4u','u15oe3','dry2o','btso3','kncs3','nfo3','btts2','btts3','cs2','fts2','htodd3','hteven3','u15_5','u15_6','05_4','kl_4','kl_5','mn_4','mn_5','dr_4','o15s4','o15s5','o25s4','o25s5','btts4','nbtts4','od_6','ev_6','c_u15kl','c_u15nf','c_klfts','c_mno25','c_mnbt','c_o15bt','c_u05ns','c_dru15','c_evu15','c_odo15','c_csmn','c_ftsnf','c_klnb','c_mnnf','c_drnb','c_dro25','c_u15ns','c_o25bt3','c_csu15','c_kl3fts','c_htou15','c_hteo15','c3_u15klnf','c3_klftsnf','c3_mnbto25','c3_mncs','c3_u05krg','c3_o15bto25','c3_dru15nb','c3_klbto25','c_klo25','c_mnu15','c_csnf','c_kl3nb','c_mn3o25','c_odbt','c_evnb','c_dr3u15','c_nfns','c_u15fts','c_u15nb','c_u15u35','c_u154kl','c_u154nf','c_u154ns','c_u154nb','c_u154fts','c_u154cs','c3_u154klnf','c3_u154nbns','c3_u154csnf','c4_u154gembok','c4_u154krisis','c3_csu15nf','c3_mno25bt3','c3_dru15ns','c3_klu15fts','c4_krisis','c4_panas','c4_gembok','c4_terpuruk','c4_badai','c5_krisis','c5_gembok','c5_badai','shg3','fhg3','u35_4','cm_shfhcs','cm_drnfbt','cm_o15cshto','cm_nsbthto','cm_odftshto','cm_o15o25cs','cm_nsftshto','cm_u05evfts','cm_o25ftsu35','cm_o25nsu35','cm_o25fhcs','cm_o15cshte','cm_klodns'];
+            const ALL_MODES = ['3','4','05_2','05_3','kl_2','kl_3','mn_2','mn_3','dr_3','od_4','ev_4','od_5','ev_5','o25s2','o15s3','o25s3','nbtts3','nfhg3','nshg3','od4u','ev4u','u15oe3','dry2o','btso3','kncs3','nfo3','btts2','btts3','cs2','fts2','htodd3','hteven3','u15_5','u15_6','05_4','kl_4','kl_5','mn_4','mn_5','dr_4','o15s4','o15s5','o25s4','o25s5','btts4','nbtts4','od_6','ev_6','c_u15kl','c_u15nf','c_klfts','c_mno25','c_mnbt','c_o15bt','c_u05ns','c_dru15','c_evu15','c_odo15','c_csmn','c_ftsnf','c_klnb','c_mnnf','c_drnb','c_dro25','c_u15ns','c_o25bt3','c_csu15','c_kl3fts','c_htou15','c_hteo15','c3_u15klnf','c3_klftsnf','c3_mnbto25','c3_mncs','c3_u05krg','c3_o15bto25','c3_dru15nb','c3_klbto25','c_klo25','c_mnu15','c_csnf','c_kl3nb','c_mn3o25','c_odbt','c_evnb','c_dr3u15','c_nfns','c_u15fts','c_u15nb','c_u15u35','c_u154kl','c_u154nf','c_u154ns','c_u154nb','c_u154fts','c_u154cs','c3_u154klnf','c3_u154nbns','c3_u154csnf','c4_u154gembok','c4_u154krisis','c3_csu15nf','c3_mno25bt3','c3_dru15ns','c3_klu15fts','c4_krisis','c4_panas','c4_gembok','c4_terpuruk','c4_badai','c5_krisis','c5_gembok','c5_badai','shg3','fhg3','u35_4','cm_shfhcs','cm_drnfbt','cm_o15cshto','cm_nsbthto','cm_odftshto','cm_o15o25cs','cm_nsftshto','cm_u05evfts','cm_o25ftsu35','cm_o25nsu35','cm_o25fhcs','cm_o15cshte','cm_klodns','c_mn3op80','c_mn3op80h','c_both80','c_both85','c_b2560','c_b2565'];
             const isAll = mode === 'ALL';
             const modesList = isAll ? ALL_MODES : [mode];
 
@@ -1333,7 +1394,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                     const baseV = BASE_OUT[out] ?? null;
                     d.push({ t: r.t, mk: MODE_TEXT[mk] || mk, l: r.l, cur: cur, over: p.over, samp: p.samp, hits: hits, miss: miss,
                         lift: baseV === null || p.over === null ? null : Math.round((p.over - baseV) * 10) / 10,
-                        lb: wilsonLB(p.over, p.samp), tu15: r.tu15 || 0, oppOver: oppOver, teamOver: teamOver, next: r.next });
+                        lb: wilsonLB(p.over, p.samp), tu15: r.tu15 || 0, oppOver: oppOver, teamOver: teamOver, next: r.next, nextMin: r.nextMin });
                 });
             });
 
@@ -1344,7 +1405,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                 return asc ? x - y : y - x;
             });
             if (countEl) countEl.textContent = '';
-            body.innerHTML = d.map(r => `<tr class="border-t border-slate-100 hover:bg-indigo-50/30">
+            body.innerHTML = d.map(r => `<tr class="border-t border-slate-100 hover:bg-indigo-50/30"${hourHiStyle(r.nextMin)}>
                 <td class="px-4 py-2.5"><div class="font-semibold text-slate-900 whitespace-nowrap">${r.t}</div>${r.next ? `<div class="text-[10px] text-slate-500 mt-0.5 whitespace-nowrap">${r.next}</div>` : ''}</td>
                 <td class="px-4 py-2.5 text-[11px] font-semibold text-indigo-600 whitespace-nowrap">${r.mk || '-'}</td>
                 <td class="px-4 py-2.5 text-[11px] text-slate-500" style="max-width:240px;white-space:normal;line-height:1.25">${r.l}</td>
@@ -1367,7 +1428,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
         [curOnly, nextOnly].forEach(el => el.addEventListener('change', render));
 
         // ---- Tabel peluang 100% (scan semua market × semua hasil) -------------
-        const ALL_MODES_100 = ['3','4','05_2','05_3','kl_2','kl_3','mn_2','mn_3','dr_3','od_4','ev_4','od_5','ev_5','o25s2','o15s3','o25s3','nbtts3','nfhg3','nshg3','od4u','ev4u','u15oe3','dry2o','btso3','kncs3','nfo3','btts2','btts3','cs2','fts2','htodd3','hteven3','u15_5','u15_6','05_4','kl_4','kl_5','mn_4','mn_5','dr_4','o15s4','o15s5','o25s4','o25s5','btts4','nbtts4','od_6','ev_6','c_u15kl','c_u15nf','c_klfts','c_mno25','c_mnbt','c_o15bt','c_u05ns','c_dru15','c_evu15','c_odo15','c_csmn','c_ftsnf','c_klnb','c_mnnf','c_drnb','c_dro25','c_u15ns','c_o25bt3','c_csu15','c_kl3fts','c_htou15','c_hteo15','c3_u15klnf','c3_klftsnf','c3_mnbto25','c3_mncs','c3_u05krg','c3_o15bto25','c3_dru15nb','c3_klbto25','c_klo25','c_mnu15','c_csnf','c_kl3nb','c_mn3o25','c_odbt','c_evnb','c_dr3u15','c_nfns','c_u15fts','c_u15nb','c_u15u35','c_u154kl','c_u154nf','c_u154ns','c_u154nb','c_u154fts','c_u154cs','c3_u154klnf','c3_u154nbns','c3_u154csnf','c4_u154gembok','c4_u154krisis','c3_csu15nf','c3_mno25bt3','c3_dru15ns','c3_klu15fts','c4_krisis','c4_panas','c4_gembok','c4_terpuruk','c4_badai','c5_krisis','c5_gembok','c5_badai','shg3','fhg3','u35_4','cm_shfhcs','cm_drnfbt','cm_o15cshto','cm_nsbthto','cm_odftshto','cm_o15o25cs','cm_nsftshto','cm_u05evfts','cm_o25ftsu35','cm_o25nsu35','cm_o25fhcs','cm_o15cshte','cm_klodns'];
+        const ALL_MODES_100 = ['3','4','05_2','05_3','kl_2','kl_3','mn_2','mn_3','dr_3','od_4','ev_4','od_5','ev_5','o25s2','o15s3','o25s3','nbtts3','nfhg3','nshg3','od4u','ev4u','u15oe3','dry2o','btso3','kncs3','nfo3','btts2','btts3','cs2','fts2','htodd3','hteven3','u15_5','u15_6','05_4','kl_4','kl_5','mn_4','mn_5','dr_4','o15s4','o15s5','o25s4','o25s5','btts4','nbtts4','od_6','ev_6','c_u15kl','c_u15nf','c_klfts','c_mno25','c_mnbt','c_o15bt','c_u05ns','c_dru15','c_evu15','c_odo15','c_csmn','c_ftsnf','c_klnb','c_mnnf','c_drnb','c_dro25','c_u15ns','c_o25bt3','c_csu15','c_kl3fts','c_htou15','c_hteo15','c3_u15klnf','c3_klftsnf','c3_mnbto25','c3_mncs','c3_u05krg','c3_o15bto25','c3_dru15nb','c3_klbto25','c_klo25','c_mnu15','c_csnf','c_kl3nb','c_mn3o25','c_odbt','c_evnb','c_dr3u15','c_nfns','c_u15fts','c_u15nb','c_u15u35','c_u154kl','c_u154nf','c_u154ns','c_u154nb','c_u154fts','c_u154cs','c3_u154klnf','c3_u154nbns','c3_u154csnf','c4_u154gembok','c4_u154krisis','c3_csu15nf','c3_mno25bt3','c3_dru15ns','c3_klu15fts','c4_krisis','c4_panas','c4_gembok','c4_terpuruk','c4_badai','c5_krisis','c5_gembok','c5_badai','shg3','fhg3','u35_4','cm_shfhcs','cm_drnfbt','cm_o15cshto','cm_nsbthto','cm_odftshto','cm_o15o25cs','cm_nsftshto','cm_u05evfts','cm_o25ftsu35','cm_o25nsu35','cm_o25fhcs','cm_o15cshte','cm_klodns','c_mn3op80','c_mn3op80h','c_both80','c_both85','c_b2560','c_b2565'];
         const OUTS_100 = [
             { k: 'o15', t: 'Over 1.5' }, { k: 'o05', t: 'Over 0.5' },
             { k: 'shg', t: 'SHG O0.5' },
@@ -1414,7 +1475,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                         if (miss > 3) return;
                         d.push({ t: r.t, mk: MODE_TEXT[mk] || mk, outT: o.t, l: r.l, cur: cur,
                             over: p.over, samp: p.samp, hits: hits, miss: miss,
-                            lb: wilsonLB(p.over, p.samp), next: r.next });
+                            lb: wilsonLB(p.over, p.samp), next: r.next, nextMin: r.nextMin });
                     });
                 });
             });
@@ -1425,7 +1486,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                 return asc100 ? x - y : y - x;
             });
             count100.textContent = d.length + ' baris';
-            body100.innerHTML = d.map(r => `<tr class="border-t border-slate-100 hover:bg-amber-50/40">
+            body100.innerHTML = d.map(r => `<tr class="border-t border-slate-100 hover:bg-amber-50/40"${hourHiStyle(r.nextMin)}>
                 <td class="px-4 py-2.5"><div class="font-semibold text-slate-900 whitespace-nowrap">${r.t}</div>${r.next ? `<div class="text-[10px] text-slate-500 mt-0.5 whitespace-nowrap">${r.next}</div>` : ''}</td>
                 <td class="px-4 py-2.5 text-[11px] font-semibold text-indigo-600 whitespace-nowrap">${r.mk}</td>
                 <td class="px-4 py-2.5 text-[11px] font-bold text-emerald-700 whitespace-nowrap">${r.outT}</td>

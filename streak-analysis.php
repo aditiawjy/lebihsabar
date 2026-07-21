@@ -1123,6 +1123,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             Baseline normal: Over 1.5 = <b><?= $baseO15 ?>%</b> · Over 0.5 = <b><?= $baseO05 ?>%</b>.</p>
         <p id="stkVerify" class="text-sm text-slate-500 mt-1 border-t border-slate-100 pt-2"></p>
         <div id="stkExpWarn" class="hidden mt-2 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-[12px] text-amber-800 leading-snug"></div>
+        <div id="stkLiveStatus" class="mt-2 text-[11px] text-slate-400">memuat status live…</div>
     </div>
 
     <!-- Tabel sederhana -->
@@ -1158,6 +1159,67 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
         const GLOBAL = <?= json_encode($gl) ?>; // mode -> [over15, over05, sampel]
         const BASE_OUT = <?= json_encode($payload['baseOut'] ?? []) ?>; // outcome -> baseline % semua match
         const VERIFY = <?= json_encode($payload['verify'] ?? ['y' => [], 't' => [], 'ydate' => '', 'tdate' => '']) ?>; // backtest kemarin/hari ini
+
+        // ---- Overlay skor LIVE (sumber: live_api_proxy.php → scraper port 5000) ----
+        // Menempelkan menit + skor berjalan ke baris tim yang sedang bertanding.
+        // CATATAN: match RNG independen — overlay ini untuk OBSERVASI, bukan prediksi.
+        let LIVE = {};            // "team" -> {mine, opp, vs, status, home}
+        let LIVE_ONLINE = false, LIVE_COUNT = 0;
+        const escHtml = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+        // Apakah market sudah PASTI kena dari skor berjalan (hanya market "over"
+        // yang monoton naik & tak bisa berbalik). null = tak bisa dikunci live.
+        function marketHitLive(k, mine, opp) {
+            const tot = mine + opp;
+            switch (k) {
+                case 'o05': return tot >= 1;
+                case 'o15': return tot >= 2;
+                case 'o25': return tot >= 3;
+                case 'o35': return tot >= 4;
+                case 'o45': return tot >= 5;
+                case 'o55': return tot >= 6;
+                case 'o65': return tot >= 7;
+                case 'o75': return tot >= 8;
+                case 'btts': return mine >= 1 && opp >= 1;
+                default: return null; // under/exact/hasil/hg05/ag05: tak bisa dikunci dari skor berjalan
+            }
+        }
+        function liveBadge(team, outKey) {
+            const v = LIVE[team];
+            if (!v) return '';
+            const cls = v.mine > v.opp ? 'bg-emerald-100 text-emerald-700' : (v.mine < v.opp ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700');
+            let hit = '';
+            if (outKey) {
+                const h = marketHitLive(outKey, v.mine, v.opp);
+                if (h === true) hit = ` <span class="rounded bg-emerald-600 px-1 text-[9px] font-bold text-white" title="Market ini sudah tercapai dari skor berjalan">✓ kena</span>`;
+                else if (h === false) hit = ` <span class="rounded bg-slate-200 px-1 text-[9px] font-bold text-slate-600" title="Belum tercapai (skor berjalan)">⏳ belum</span>`;
+            }
+            return ` <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold ${cls}" title="Skor live vs ${escHtml(v.vs)} (${v.home ? 'kandang' : 'tandang'})">🔴 ${escHtml(v.status || 'LIVE')} · ${v.mine}:${v.opp}</span>${hit}`;
+        }
+        function renderLiveStatus() {
+            const el = document.getElementById('stkLiveStatus');
+            if (!el) return;
+            el.innerHTML = LIVE_ONLINE
+                ? `<span class="text-emerald-600 font-bold">● LIVE</span> ${LIVE_COUNT} match berjalan — skor & menit ditempel di baris tim terkait.`
+                : `<span class="text-slate-400 font-bold">○ offline</span> scraper tidak aktif (jalankan start_headless.bat + buka situsnya). Overlay skor live nonaktif.`;
+        }
+        function pollLive() {
+            fetch('live_api_proxy.php', { cache: 'no-store' }).then(r => r.json()).then(d => {
+                LIVE = {}; LIVE_ONLINE = !!d.online;
+                const ms = d.matches || []; LIVE_COUNT = ms.length;
+                ms.forEach(m => {
+                    const h = m.home_team ?? m.homeTeam, a = m.away_team ?? m.awayTeam;
+                    const hs = +(m.homeScore ?? m.home_score ?? 0), as = +(m.awayScore ?? m.away_score ?? 0);
+                    const st = m.status || m.minute || '';
+                    if (h) LIVE[h] = { mine: hs, opp: as, vs: a, status: st, home: true };
+                    if (a) LIVE[a] = { mine: as, opp: hs, vs: h, status: st, home: false };
+                });
+                renderLiveStatus(); render(); render100();
+            }).catch(() => {
+                LIVE = {}; LIVE_ONLINE = false; LIVE_COUNT = 0;
+                renderLiveStatus(); render(); render100();
+            });
+        }
+
         const body = document.getElementById('stkBody');
         const modeSel = document.getElementById('stkMode');
         const outSel = document.getElementById('stkOut');
@@ -1488,7 +1550,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             });
             if (countEl) countEl.textContent = '';
             body.innerHTML = d.map(r => `<tr class="border-t border-slate-100 hover:bg-indigo-50/30"${hourHiStyle(r.nextMin)}>
-                <td class="px-4 py-2.5"><div class="font-semibold text-slate-900 whitespace-nowrap">${r.t}</div>${r.next ? `<div class="text-[10px] text-slate-500 mt-0.5 whitespace-nowrap">${r.next}</div>` : ''}</td>
+                <td class="px-4 py-2.5"><div class="font-semibold text-slate-900 whitespace-nowrap">${r.t}${liveBadge(r.t, out)}</div>${r.next ? `<div class="text-[10px] text-slate-500 mt-0.5 whitespace-nowrap">${r.next}</div>` : ''}</td>
                 <td class="px-4 py-2.5 text-[11px] font-semibold text-indigo-600 whitespace-nowrap">${r.mk || '-'}${r.exp ? ' <span class="ml-1 rounded bg-amber-100 px-1 text-[9px] font-bold text-amber-700" title="Mode eksperimental hasil data-mining, belum tervalidasi out-of-sample. Angka % kemungkinan optimistis.">⚠ exp</span>' : ''}</td>
                 <td class="px-4 py-2.5 text-[11px] text-slate-500" style="max-width:240px;white-space:normal;line-height:1.25">${r.l}</td>
                 <td class="px-4 py-2.5 text-center text-base ${overClass(r.over)}">${r.over}%</td>
@@ -1572,7 +1634,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                         if (miss === 2 && p.samp <= 200) return;
                         if (miss === 3 && p.samp <= 300) return;
                         if (miss > 3) return;
-                        d.push({ t: r.t, mk: MODE_TEXT[mk] || mk, exp: exp, outT: o.t, l: r.l, cur: cur,
+                        d.push({ t: r.t, mk: MODE_TEXT[mk] || mk, exp: exp, outT: o.t, outK: o.k, l: r.l, cur: cur,
                             over: p.over, samp: p.samp, hits: hits, miss: miss,
                             lb: wilsonLB(p.over, p.samp), next: r.next, nextMin: r.nextMin });
                     });
@@ -1586,7 +1648,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             });
             count100.textContent = d.length + ' baris';
             body100.innerHTML = d.map(r => `<tr class="border-t border-slate-100 hover:bg-amber-50/40"${hourHiStyle(r.nextMin)}>
-                <td class="px-4 py-2.5"><div class="font-semibold text-slate-900 whitespace-nowrap">${r.t}</div>${r.next ? `<div class="text-[10px] text-slate-500 mt-0.5 whitespace-nowrap">${r.next}</div>` : ''}</td>
+                <td class="px-4 py-2.5"><div class="font-semibold text-slate-900 whitespace-nowrap">${r.t}${liveBadge(r.t, r.outK)}</div>${r.next ? `<div class="text-[10px] text-slate-500 mt-0.5 whitespace-nowrap">${r.next}</div>` : ''}</td>
                 <td class="px-4 py-2.5 text-[11px] font-semibold text-indigo-600 whitespace-nowrap">${r.mk}${r.exp ? ' <span class="ml-1 rounded bg-amber-100 px-1 text-[9px] font-bold text-amber-700" title="Eksperimental hasil data-mining, belum tervalidasi out-of-sample.">⚠ exp</span>' : ''}</td>
                 <td class="px-4 py-2.5 text-[11px] font-bold text-emerald-700 whitespace-nowrap">${r.outT}</td>
                 <td class="px-4 py-2.5 text-[11px] text-slate-500" style="max-width:240px;white-space:normal;line-height:1.25">${r.l}</td>
@@ -1606,6 +1668,8 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
 
         render();
         render100();
+        pollLive();                 // overlay skor live
+        setInterval(pollLive, 7000); // refresh tiap 7 detik
     })();
     </script>
 

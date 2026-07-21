@@ -629,9 +629,11 @@ function parseTableFormat(input) {
             const homeScore = parts[3];
             const awayScore = parts[4];
             
-            // Use selected league from dropdown if available, otherwise use from data
+            // V-Soccer: liga sudah ada di kolom data (beda-beda per baris) → selalu pakai
+            // liga dari data, abaikan pilihan dropdown. Liga lain: dropdown menang bila dipilih.
             const selectedLeague = getSelectedLeague();
-            const league = selectedLeague || leagueFromData;
+            const isVsoccerRow = leagueFromData && leagueFromData.indexOf('V-Soccer') !== -1;
+            const league = isVsoccerRow ? leagueFromData : (selectedLeague || leagueFromData);
             
             // Parse datetime: YYYY-MM-DD HH:MM (24 jam format)
             const datetimeMatch = datetimeStr.match(/(\d{4}-\d{2}-\d{2})\s+(\d{1,2}:\d{2})/);

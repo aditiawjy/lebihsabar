@@ -1612,8 +1612,8 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                     const need = STREAK_LEN[mk] || 1;
                     if (cur100.checked && cur < need) return;
                     OUTS_100.forEach(o => {
-                        // Liga V-Soccer: sembunyikan Home O0.5 / Away O0.5 / BTTS / No BTTS / Over 0.5 / Over 1.5 / Over 2.5 + hasil babak-1 (SHG).
-                        if (vsoc && (o.k === 'hg05' || o.k === 'ag05' || o.k === 'btts' || o.k === 'nbtts' || o.k === 'o05' || o.k === 'o15' || o.k === 'o25' || FH_OUTS.has(o.k))) return;
+                        // Liga V-Soccer: sembunyikan Home O0.5 / Away O0.5 / BTTS / No BTTS / Over 0.5 / Over 1.5 / Over 2.5 / No Draw + hasil babak-1 (SHG).
+                        if (vsoc && (o.k === 'hg05' || o.k === 'ag05' || o.k === 'btts' || o.k === 'nbtts' || o.k === 'o05' || o.k === 'o15' || o.k === 'o25' || o.k === 'nodraw' || FH_OUTS.has(o.k))) return;
                         // Over 4.5 / 5.5 / 6.5 / 7.5 hanya untuk V-Soccer.
                         if (!vsoc && (o.k === 'o45' || o.k === 'o55' || o.k === 'o65' || o.k === 'o75')) return;
                         const p = pick(r, mk, o.k);
@@ -1628,7 +1628,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                             const lbExp = wilsonLB(p.over, p.samp);
                             if (lbExp === null || lbExp < EXP_MIN_LB) return;
                         }
-                        // syarat mutlak: meleset 0x (peluang 100%) butuh sampel > 6 (bukan tanpa batas — cegah 100% palsu pada n kecil); 1x > 100; 2x > 200; 3x > 300
+                        // syarat mutlak: meleset 0x (peluang 100%) butuh sampel > 6 (cegah 100% palsu pada n kecil); 1x > 100; 2x > 200; 3x > 300
                         if (miss === 0 && p.samp < 6) return;
                         if (miss === 1 && p.samp <= 100) return;
                         if (miss === 2 && p.samp <= 200) return;

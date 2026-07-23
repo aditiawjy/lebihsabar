@@ -82,6 +82,7 @@ $acCrit = $n ? 2/sqrt($n) : 1;
 $geFile = __DIR__ . '/goal_events_vsoccer.csv';
 $minuteBuckets = ['1H'=>array_fill(0,10,0), '2H'=>array_fill(0,10,0)]; // bucket per 5 menit (0-45 -> 9 bucket)
 $geN = 0; $withOdds = 0; $overShorten = 0;
+$matchMinutes = []; // key match -> daftar menit gol (untuk analisis jarak antar-gol)
 if (is_file($geFile) && ($gf = fopen($geFile, 'r'))) {
     $gh = fgetcsv($gf); $gi = array_flip($gh ?: []);
     while (($r = fgetcsv($gf)) !== false) {
@@ -94,11 +95,35 @@ if (is_file($geFile) && ($gf = fopen($geFile, 'r'))) {
             $b = max(0, min(8, intdiv($rel, 5)));
             $minuteBuckets[$half][$b]++;
             $geN++;
+            // menit sudah skala penuh 0-90; kelompokkan per match (per hari) untuk jarak antar-gol
+            $mk = ($r[$gi['home_team']]??'').'|'.($r[$gi['away_team']]??'').'|'.substr($r[$gi['logged_at']]??'',0,10);
+            $matchMinutes[$mk][] = $min;
         }
         if (isset($gi['over_odd']) && is_numeric($r[$gi['over_odd']] ?? '')) $withOdds++;
     }
     fclose($gf);
 }
+
+// ---------- Analisis jarak antar-gol (uji "gol bergerombol?") ----------
+$gaps = [];
+foreach ($matchMinutes as $mins) {
+    sort($mins);
+    for ($i = 1; $i < count($mins); $i++) {
+        $g = $mins[$i] - $mins[$i-1];
+        if ($g >= 0 && $g <= 90) $gaps[] = $g;
+    }
+}
+$gapN = count($gaps);
+$gapMean = $gapN ? array_sum($gaps)/$gapN : 0;
+$gapSd = 0;
+if ($gapN > 1) { foreach ($gaps as $g) $gapSd += ($g-$gapMean)**2; $gapSd = sqrt($gapSd/$gapN); }
+$smallGaps = 0; foreach ($gaps as $g) if ($g < 3) $smallGaps++;
+$pSmallAct = $gapN ? $smallGaps/$gapN*100 : 0;
+$pSmallExp = $gapMean > 0 ? (1 - exp(-3/$gapMean))*100 : 0; // harapan bila memoryless (exponensial)
+// verdict timing
+if ($gapN < 30) $vGap = ['SAMPEL KURANG','y'];
+elseif ($pSmallAct > $pSmallExp + 8) $vGap = ['BERGEROMBOL (ada pola)','r'];
+else $vGap = ['MEMORYLESS (acak)','g'];
 
 function verdict($ok) { return $ok ? ['ACAK','g'] : ['ADA PENYIMPANGAN','r']; }
 $vAc = verdict(abs($acAvg) < $acCrit);
@@ -208,6 +233,32 @@ th{color:var(--txt2);font-size:.72rem;text-transform:uppercase;}
           </div>
         <?php endfor; ?>
       <?php endforeach; ?>
+    <?php endif; ?>
+  </div>
+
+  <div class="card">
+    <h2>Jarak antar-gol — uji "gol bergerombol?"</h2>
+    <?php if ($gapN < 30): ?>
+      <p class="empty">Belum cukup data jarak antar-gol (<?= $gapN ?>). Terisi seiring gol terekam.</p>
+    <?php else: ?>
+      <div class="verdicts" style="grid-template-columns:repeat(3,1fr);">
+        <div class="vcard">
+          <div class="t">Rata-rata jarak antar-gol</div>
+          <div class="p mono"><?= number_format($gapMean,1) ?>' <span style="font-size:.7rem;color:var(--txt2);">(std <?= number_format($gapSd,1) ?>)</span></div>
+          <div class="d">std ≈ mean = memoryless (acak). std &lt; mean = gol malah teratur/terspasi.</div>
+        </div>
+        <div class="vcard">
+          <div class="t">Gol &lt;3' setelah gol sebelumnya</div>
+          <div class="p mono"><?= number_format($pSmallAct,0) ?>% <span class="pill <?= $vGap[1] ?>"><?= $vGap[0] ?></span></div>
+          <div class="d">Aktual <?= number_format($pSmallAct,0) ?>% vs harapan-acak <?= number_format($pSmallExp,0) ?>%. Aktual &gt;&gt; harapan = bergerombol.</div>
+        </div>
+        <div class="vcard">
+          <div class="t">Sampel jarak</div>
+          <div class="p mono"><?= number_format($gapN) ?></div>
+          <div class="d">dari <?= count($matchMinutes) ?> match.</div>
+        </div>
+      </div>
+      <p class="note">Kalau "gol memancing gol" benar, aktual &lt;3' harus jauh di atas harapan-acak. Bila aktual ≤ harapan → <b>gol TIDAK bergerombol</b>, waktu gol berikutnya tak bisa ditebak (RNG).</p>
     <?php endif; ?>
   </div>
 

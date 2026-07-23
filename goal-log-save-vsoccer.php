@@ -45,7 +45,7 @@ function extractGoalMinutes(string $goals): string {
 function logGoalEvent(array $g): void {
     static $seen = null;
     $file = __DIR__ . '/goal_events_vsoccer.csv';
-    $header = ['logged_at', 'league', 'home_team', 'away_team', 'half', 'minute', 'side', 'score_after', 'ou_line', 'over_odd', 'under_odd'];
+    $header = ['logged_at', 'league', 'home_team', 'away_team', 'half', 'minute', 'side', 'score_after', 'ou_line', 'over_odd', 'under_odd', 'accurate'];
     if ($seen === null) {
         $seen = [];
         if (is_file($file) && ($rf = fopen($file, 'r'))) {
@@ -65,7 +65,7 @@ function logGoalEvent(array $g): void {
     $isNew = !is_file($file) || filesize($file) === 0;
     if ($out = fopen($file, 'a')) {
         if ($isNew) fputcsv($out, $header);
-        fputcsv($out, [$g['logged_at'], $g['league'], $g['home_team'], $g['away_team'], $g['half'], $g['minute'], $g['side'], $g['score_after'], $g['ou_line'] ?? '', $g['over_odd'] ?? '', $g['under_odd'] ?? '']);
+        fputcsv($out, [$g['logged_at'], $g['league'], $g['home_team'], $g['away_team'], $g['half'], $g['minute'], $g['side'], $g['score_after'], $g['ou_line'] ?? '', $g['over_odd'] ?? '', $g['under_odd'] ?? '', $g['accurate'] ?? '']);
         fclose($out);
     }
 }
@@ -315,6 +315,7 @@ foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
         'ou_line'     => trim((string)($goal['ou_line'] ?? '')),
         'over_odd'    => trim((string)($goal['over_odd'] ?? '')),
         'under_odd'   => trim((string)($goal['under_odd'] ?? '')),
+        'accurate'    => (isset($goal['accurate']) && (int)$goal['accurate'] === 0) ? '0' : '1',
         'date'        => $dateOnly,
     ]);
 }

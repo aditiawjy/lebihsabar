@@ -14,9 +14,48 @@
   'use strict';
 
   const POLL_MS = 2500;
+
+  // Anti-throttle: Chrome memperlambat setInterval di tab background (~1x/menit),
+  // bikin gol tertangkap menumpuk 1 poll (menit sama). Audio senyap membuat tab
+  // dianggap "aktif" sehingga timer tetap 2.5s walau tab tak dilihat. Best-effort.
+  let audioCtx = null;
+  function keepAwake() {
+    try {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        audioCtx = new AC();
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        g.gain.value = 0.0008; // sangat pelan, praktis tak terdengar
+        osc.frequency.value = 40;
+        osc.connect(g); g.connect(audioCtx.destination); osc.start();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+    } catch (e) { /* abaikan */ }
+  }
+  // Hanya buat/resume AudioContext SETELAH gesture user (kebijakan autoplay browser).
+  // Tidak dipanggil langsung saat load agar tak muncul warning "AudioContext was not allowed".
+  ['click', 'keydown', 'pointerdown', 'touchstart'].forEach(ev =>
+    document.addEventListener(ev, keepAwake, { passive: true }));
+
   const q = (el, s) => el.querySelector(s);
   const qa = (el, s) => Array.from(el.querySelectorAll(s));
   const txt = (el) => (el ? el.innerText.trim() : '');
+
+  // Normalisasi odds ke DESIMAL (situs bisa tampilkan Indo/Malay/HK).
+  // Desimal>=1 apa adanya; Indo<=-1 -> 1+1/|v|; HK 0<v<1 -> 1+v; Malay -1<v<0 -> 1+1/|v|.
+  function toDecimal(v) {
+    const f = parseFloat(String(v).trim());
+    if (isNaN(f)) return '';
+    let d;
+    if (f >= 1.0) d = f;
+    else if (f <= -1.0) d = 1 + 1 / Math.abs(f);
+    else if (f > 0 && f < 1.0) d = 1 + f;
+    else if (f > -1.0 && f < 0) d = 1 + 1 / Math.abs(f);
+    else return '';
+    return d.toFixed(2);
+  }
 
   // state per match dalam satu siklus (12 menit). key = league|home|away
   // { home, away, ms:{'1h3','2h1','2h7'} }
@@ -69,7 +108,7 @@
       league, home: teams[0], away: teams[1],
       half: part.toUpperCase(), minute,
       h: parseInt(sm[1], 10), a: parseInt(sm[2], 10),
-      line, over, under,
+      line, over: toDecimal(over), under: toDecimal(under),
     };
   }
 
@@ -116,6 +155,8 @@
 
         // GOL BARU pada match yang dilacak dari kickoff: catat di menit yang teramati saat ini.
         let ch = st.home, ca = st.away;
+        const jump = (m.h - st.home) + (m.a - st.away);   // gol tertangkap dalam 1 poll
+        const accurate = jump <= 2 ? 1 : 0;               // >=3 = ciri tab ke-throttle, menit tak andal
         const minuteStr = m.half + ' ' + Math.max(m.minute, 0) + "'";
         while (ch < m.h || ca < m.a) {
           // dahulukan sisi yang masih tertinggal dari target; default home
@@ -124,7 +165,7 @@
           goals.push({
             league, home_team: m.home, away_team: m.away,
             minute: minuteStr, half: m.half, min_num: Math.max(m.minute, 0),
-            side, score_after: ch + '-' + ca,
+            side, score_after: ch + '-' + ca, accurate, // 1=menit andal, 0=diragukan (throttle)
             ou_line: m.line, over_odd: m.over, under_odd: m.under, // odds saat gol
             home_score: String(m.h), away_score: String(m.a), timestamp: nowIso(),
           });

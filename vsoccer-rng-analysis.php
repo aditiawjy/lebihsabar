@@ -85,6 +85,8 @@ $geN = 0; $withOdds = 0; $overShorten = 0;
 if (is_file($geFile) && ($gf = fopen($geFile, 'r'))) {
     $gh = fgetcsv($gf); $gi = array_flip($gh ?: []);
     while (($r = fgetcsv($gf)) !== false) {
+        // Abaikan gol dengan menit tak andal (accurate=0, akibat tab ke-throttle).
+        if (isset($gi['accurate']) && ($r[$gi['accurate']] ?? '1') === '0') continue;
         $half = $r[$gi['half']] ?? ''; $min = (int)($r[$gi['minute']] ?? -1);
         if (($half==='1H'||$half==='2H') && $min>=0) {
             $b = min(9, intdiv($min, 5));

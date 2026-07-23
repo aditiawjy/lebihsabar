@@ -46,3 +46,7 @@ cache/
 scratch/chrome-profile/
 
 matches.csv.bak-*
+
+# Virtual soccer profile directory
+.vsoccer-profile/
+

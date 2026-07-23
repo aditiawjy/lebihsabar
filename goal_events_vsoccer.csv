@@ -1,1 +1,3 @@
-logged_at,league,home_team,away_team,half,minute,side,score_after,ou_line,over_odd,under_odd
+logged_at,league,home_team,away_team,half,minute,side,score_after,ou_line,over_odd,under_odd,accurate
+"23/07/2026 12:33","V-Soccer Champions League - 12 mins [V]","Bayern [V]","Juventus [V]",1H,12,home,1-0,6/6.5,1.91,1.77,1
+"23/07/2026 12:34","V-Soccer China Super League - 12 mins [V]","Changchun Yatai [V]","Zhejiang Pro [V]",1H,4,away,0-1,6/6.5,1.00,1.70,1

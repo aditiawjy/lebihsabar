@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "V-Soccer Goal Logger (1x2)",
+  "version": "1.0",
+  "description": "Merekam gol per menit tiap pertandingan V-Soccer 1x2 ke goal_log_vsoccer.csv (via goal-log-save-vsoccer.php).",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://*.1x2aaa.com/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://*.1x2aaa.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

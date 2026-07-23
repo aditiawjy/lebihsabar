@@ -31,7 +31,44 @@ if (!$hasGoals && !$hasMatches && !$hasMilestones) {
 
 // Goal log khusus Virtual Soccer (1x2aaa.com), terpisah dari goal_log.csv utama.
 $csvFile = __DIR__ . '/goal_log_vsoccer.csv';
-$headers = ['datetime', 'league', 'home_team', 'away_team', 'goals', 'final_home', 'final_away', '1h3', '2h1', '2h7'];
+$headers = ['datetime', 'league', 'home_team', 'away_team', 'goals', 'goal_minutes', 'final_home', 'final_away', 'ko_line', 'ko_over', 'ko_under'];
+
+// Ambil menit gol saja dari kolom goals, mis "1H 20' (1-0) | 2H 3' (2-0)" -> "1H 20' | 2H 3'".
+function extractGoalMinutes(string $goals): string {
+    if (preg_match_all("/(1H|2H)\s+(\d+)'/", $goals, $m, PREG_SET_ORDER)) {
+        return implode(' | ', array_map(fn($x) => $x[1] . ' ' . $x[2] . "'", $m));
+    }
+    return '';
+}
+
+// Append satu baris per gol ke goal_events_vsoccer.csv, dedup per gol/hari.
+function logGoalEvent(array $g): void {
+    static $seen = null;
+    $file = __DIR__ . '/goal_events_vsoccer.csv';
+    $header = ['logged_at', 'league', 'home_team', 'away_team', 'half', 'minute', 'side', 'score_after', 'ou_line', 'over_odd', 'under_odd'];
+    if ($seen === null) {
+        $seen = [];
+        if (is_file($file) && ($rf = fopen($file, 'r'))) {
+            $h = fgetcsv($rf);
+            while (($r = fgetcsv($rf)) !== false) {
+                // kunci: tanggal(logged_at) | teams | score_after
+                $day = substr((string)($r[0] ?? ''), 0, 10);
+                $seen[$day . '|' . ($r[2] ?? '') . '|' . ($r[3] ?? '') . '|' . ($r[7] ?? '')] = true;
+            }
+            fclose($rf);
+        }
+    }
+    $day = substr((string)$g['logged_at'], 0, 10); // selaras cara baca file di atas
+    $key = $day . '|' . $g['home_team'] . '|' . $g['away_team'] . '|' . $g['score_after'];
+    if (isset($seen[$key]) || $g['score_after'] === '') return;
+    $seen[$key] = true;
+    $isNew = !is_file($file) || filesize($file) === 0;
+    if ($out = fopen($file, 'a')) {
+        if ($isNew) fputcsv($out, $header);
+        fputcsv($out, [$g['logged_at'], $g['league'], $g['home_team'], $g['away_team'], $g['half'], $g['minute'], $g['side'], $g['score_after'], $g['ou_line'] ?? '', $g['over_odd'] ?? '', $g['under_odd'] ?? '']);
+        fclose($out);
+    }
+}
 
 function parseMinute(string $minute): array {
     if (preg_match('/^(1H|2H)\s+(\d+)\'/i', $minute, $m)) {
@@ -140,22 +177,30 @@ flock($lock, LOCK_EX);
 $rows = [];
 if (is_file($csvFile) && is_readable($csvFile)) {
     $fh = fopen($csvFile, 'r');
-    fgetcsv($fh);
+    $hdr = fgetcsv($fh);
+    $ci = is_array($hdr) ? array_flip($hdr) : [];
+    // Kompat: format lama (tanpa goal_minutes, ada 1h3/2h1/2h7). Pakai nama kolom, fallback ke indeks lama.
+    $get = function (array $row, string $name, int $legacyIdx) use ($ci) {
+        if (isset($ci[$name]) && isset($row[$ci[$name]])) return $row[$ci[$name]];
+        return $row[$legacyIdx] ?? '';
+    };
     while (($row = fgetcsv($fh)) !== false) {
-        if (count($row) < 7) continue;
-        $parsed = parseCsvDatetime($row[0]);
-        $key = $parsed['date'] . '|' . $parsed['hour'] . ':' . $parsed['minute'] . '|' . $row[2] . '|' . $row[3];
+        if (count($row) < 5) continue;
+        $home = $get($row, 'home_team', 2);
+        $away = $get($row, 'away_team', 3);
+        $parsed = parseCsvDatetime($get($row, 'datetime', 0));
+        $key = $parsed['date'] . '|' . $parsed['hour'] . ':' . $parsed['minute'] . '|' . $home . '|' . $away;
         $rows[$key] = [
-            'datetime'   => $row[0],
-            'league'     => $row[1],
-            'home_team'  => $row[2],
-            'away_team'  => $row[3],
-            'goals'      => $row[4],
-            'final_home' => $row[5],
-            'final_away' => $row[6],
-            '1h3'        => $row[7] ?? '',
-            '2h1'        => $row[8] ?? '',
-            '2h7'        => $row[9] ?? '',
+            'datetime'   => $get($row, 'datetime', 0),
+            'league'     => $get($row, 'league', 1),
+            'home_team'  => $home,
+            'away_team'  => $away,
+            'goals'      => $get($row, 'goals', 4),
+            'final_home' => $get($row, 'final_home', 5),
+            'final_away' => $get($row, 'final_away', 6),
+            'ko_line'    => $get($row, 'ko_line', -1),
+            'ko_over'    => $get($row, 'ko_over', -1),
+            'ko_under'   => $get($row, 'ko_under', -1),
         ];
     }
     fclose($fh);
@@ -187,14 +232,18 @@ if ($hasMatches) {
                 'goals'      => '',
                 'final_home' => '0',
                 'final_away' => '0',
-                '1h3'        => '',
-                '2h1'        => '',
-                '2h7'        => '',
+                'ko_line'    => '',
+                'ko_over'    => '',
+                'ko_under'   => '',
             ];
         }
 
         if ($homeScore !== null && $homeScore !== '') $rows[$key]['final_home'] = $homeScore;
         if ($awayScore !== null && $awayScore !== '') $rows[$key]['final_away'] = $awayScore;
+        // Odds awal (kickoff) — hanya diisi sekali, saat pertama match diregistrasi.
+        if (($rows[$key]['ko_line'] ?? '') === '' && isset($m['ko_line'])) $rows[$key]['ko_line'] = trim((string)$m['ko_line']);
+        if (($rows[$key]['ko_over'] ?? '') === '' && isset($m['ko_over'])) $rows[$key]['ko_over'] = trim((string)$m['ko_over']);
+        if (($rows[$key]['ko_under'] ?? '') === '' && isset($m['ko_under'])) $rows[$key]['ko_under'] = trim((string)$m['ko_under']);
     }
 }
 
@@ -252,52 +301,22 @@ foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
     }
 
     $pm = parseMinute($minute);
-    if ($pm['half'] === '1H' && $pm['min'] >= 3) $rows[$key]['1h3'] = 'OK';
-    if ($pm['half'] === '2H') $rows[$key]['1h3'] = 'OK';
-    if ($pm['half'] === '2H' && $pm['min'] >= 1) $rows[$key]['2h1'] = 'OK';
-    if ($pm['half'] === '2H' && $pm['min'] >= 7) $rows[$key]['2h7'] = 'OK';
-}
 
-// Apply milestone events
-if ($hasMilestones) {
-    foreach ($payload['milestones'] as $ms) {
-        $ts = $ms['timestamp'] ?? date('c');
-        $dt = (new DateTime($ts))->setTimezone(new DateTimeZone('Asia/Jakarta'));
-        $datetime   = $dt->format('d/m/Y H:i');
-        $dateOnly   = $dt->format('Y-m-d');
-        $hourOnly   = $dt->format('H');
-        $minuteOnly = $dt->format('i');
-        $league     = trim($ms['league'] ?? '');
-        $homeTeam   = trim($ms['home_team'] ?? '');
-        $awayTeam   = trim($ms['away_team'] ?? '');
-        $msId       = trim($ms['milestone'] ?? '');
-        if ($homeTeam === '' || $awayTeam === '') continue;
-        if (!in_array($msId, ['1h3', '2h1', '2h7'], true)) continue;
-        $exactKey = $dateOnly . '|' . $hourOnly . ':' . $minuteOnly . '|' . $homeTeam . '|' . $awayTeam;
-        $key = isset($rows[$exactKey]) ? $exactKey : (findExistingKey($rows, $dateOnly, $homeTeam, $awayTeam, $dt) ?? $exactKey);
-        if (!isset($rows[$key])) {
-            $rows[$key] = [
-                'datetime'   => $datetime,
-                'league'     => $league,
-                'home_team'  => $homeTeam,
-                'away_team'  => $awayTeam,
-                'goals'      => '',
-                'final_home' => trim($ms['home_score'] ?? '0'),
-                'final_away' => trim($ms['away_score'] ?? '0'),
-                '1h3'        => '',
-                '2h1'        => '',
-                '2h7'        => '',
-            ];
-        }
-
-        $rows[$key][$msId] = 'OK';
-        if ($msId === '2h1' || $msId === '2h7') $rows[$key]['1h3'] = 'OK';
-        if ($msId === '2h7') $rows[$key]['2h1'] = 'OK';
-        $hscore = trim($ms['home_score'] ?? '');
-        $ascore = trim($ms['away_score'] ?? '');
-        if ($hscore !== '' && $rows[$key]['final_home'] === '') $rows[$key]['final_home'] = $hscore;
-        if ($ascore !== '' && $rows[$key]['final_away'] === '') $rows[$key]['final_away'] = $ascore;
-    }
+    // Log per-gol (satu baris = satu gol) ke goal_events_vsoccer.csv.
+    logGoalEvent([
+        'logged_at'   => $datetime,
+        'league'      => $league,
+        'home_team'   => $homeTeam,
+        'away_team'   => $awayTeam,
+        'half'        => $pm['half'],
+        'minute'      => $pm['min'] >= 0 ? $pm['min'] : ($goal['min_num'] ?? ''),
+        'side'        => trim($goal['side'] ?? ''),
+        'score_after' => $scoreAfter,
+        'ou_line'     => trim((string)($goal['ou_line'] ?? '')),
+        'over_odd'    => trim((string)($goal['over_odd'] ?? '')),
+        'under_odd'   => trim((string)($goal['under_odd'] ?? '')),
+        'date'        => $dateOnly,
+    ]);
 }
 
 $rows = array_filter($rows, static fn(array $row): bool => shouldKeepPendingRow($row));
@@ -331,11 +350,12 @@ foreach ($rows as $row) {
         $row['home_team'],
         $row['away_team'],
         $row['goals'],
+        extractGoalMinutes((string)($row['goals'] ?? '')),
         $row['final_home'],
         $row['final_away'],
-        $row['1h3'] ?? '',
-        $row['2h1'] ?? '',
-        $row['2h7'] ?? '',
+        $row['ko_line']  ?? '',
+        $row['ko_over']  ?? '',
+        $row['ko_under'] ?? '',
     ]);
 }
 fclose($fh);

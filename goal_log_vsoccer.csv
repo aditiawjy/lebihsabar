@@ -1,10 +1,2 @@
-datetime,league,home_team,away_team,goals,final_home,final_away,1h3,2h1,2h7
-"14/06/2026 21:40","V-Soccer Argentina Liga Profesional - 12 mins [V]","Velez Sarsfield [V]","River Plate [V]",,0,0,OK,OK,OK
-"14/06/2026 21:40","V-Soccer England Premier League - 12 mins [V]","Liverpool [V]","Arsenal [V]","1H 20' (1-0)",1,0,OK,,
-"14/06/2026 23:46","V-Soccer Champions League - 12 mins [V]","AC Milan [V]","Barcelona [V]","1H 5' (1-0)",1,0,OK,,
-"14/06/2026 23:47","V-Soccer Copa Libertadores - 12 mins [V]","Nacional [V]","Colo-Colo [V]","1H 5' (1-0)",1,0,OK,,
-"15/06/2026 07:23","World Cup 2026","Ivory Coast",Ecuador,,0,0,OK,OK,OK
-"15/06/2026 07:23","Peru Copa de la Liga","Deportivo Garcilaso","Cusco FC",,0,0,OK,OK,OK
-"15/06/2026 07:23","USA - UPSL","Empire SC","Miami U20",,0,0,OK,,
-"15/06/2026 07:23","USA - USL League Two","City SC San Diego","Ventura County Fusion",,0,0,OK,,
-"15/06/2026 07:23","USA - WPSL Women","Manitou FC [W]","Salvo SC [W]",,0,0,OK,,
+datetime,league,home_team,away_team,goals,goal_minutes,final_home,final_away,ko_line,ko_over,ko_under
+"23/07/2026 10:55","V-Soccer Champions League - 12 mins [V]","Manchester City [V]","Arsenal [V]",,,0,0,6.5/7,1.80,1.88

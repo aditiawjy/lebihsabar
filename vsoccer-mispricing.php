@@ -140,6 +140,8 @@ tbody tr:hover{background:#1a2030;}
     <a class="btn" href="vsoccer-rng-analysis.php">← Analisis RNG</a>
     <a class="btn" href="vsoccer-dashboard.php">Dashboard</a>
     <a class="btn" href="javascript:location.reload()">&#x21BB; Refresh</a>
+    <button class="btn" id="autoBtn" type="button">⏸ Auto-refresh: ON</button>
+    <span class="mono" id="countdown" style="color:var(--txt2);align-self:center;font-size:.8rem;"></span>
   </div>
 
   <?php if ($rowsWithOdds === 0): ?>
@@ -204,5 +206,31 @@ tbody tr:hover{background:#1a2030;}
   <?php endif; ?>
   <p class="foot">Edukasi statistik, bukan ajakan bertaruh. Untuk RNG fair, EV jangka panjang tetap negatif sebesar margin operator.</p>
 </div>
+<script>
+(function(){
+  var PERIOD = 60;                       // detik antar refresh
+  var on = localStorage.getItem('vsm_auto') !== 'off';
+  var left = PERIOD, timer = null;
+  var btn = document.getElementById('autoBtn');
+  var cd  = document.getElementById('countdown');
+  function render(){
+    btn.textContent = (on ? '⏸' : '▶') + ' Auto-refresh: ' + (on ? 'ON' : 'OFF');
+    cd.textContent = on ? ('refresh dalam ' + left + 's') : 'dijeda';
+  }
+  function tick(){
+    if(!on) return;
+    left--;
+    if(left <= 0){ location.reload(); return; }
+    render();
+  }
+  btn.addEventListener('click', function(){
+    on = !on; left = PERIOD;
+    localStorage.setItem('vsm_auto', on ? 'on' : 'off');
+    render();
+  });
+  timer = setInterval(tick, 1000);
+  render();
+})();
+</script>
 </body>
 </html>

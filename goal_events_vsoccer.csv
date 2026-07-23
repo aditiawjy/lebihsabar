@@ -1,3 +1,272 @@
 logged_at,league,home_team,away_team,half,minute,side,score_after,ou_line,over_odd,under_odd,accurate
 "23/07/2026 12:33","V-Soccer Champions League - 12 mins [V]","Bayern [V]","Juventus [V]",1H,12,home,1-0,6/6.5,1.91,1.77,1
 "23/07/2026 12:34","V-Soccer China Super League - 12 mins [V]","Changchun Yatai [V]","Zhejiang Pro [V]",1H,4,away,0-1,6/6.5,1.00,1.70,1
+"23/07/2026 12:36","V-Soccer Copa Libertadores - 12 mins [V]","The Strongest [V]","Palmeiras [V]",1H,8,home,1-0,7.5/8,1.85,1.83,1
+"23/07/2026 12:36","V-Soccer Champions League - 12 mins [V]","Bayern [V]","Juventus [V]",1H,39,home,2-0,5.5,1.83,1.85,1
+"23/07/2026 12:37","V-Soccer China Super League - 12 mins [V]","Changchun Yatai [V]","Zhejiang Pro [V]",1H,22,home,1-1,6/6.5,1.97,1.73,1
+"23/07/2026 12:37","V-Soccer Copa Libertadores - 12 mins [V]","The Strongest [V]","Palmeiras [V]",1H,18,home,2-0,7.5/8,1.75,1.94,1
+"23/07/2026 12:38","V-Soccer Champions League - 12 mins [V]","Bayern [V]","Juventus [V]",2H,45,away,2-1,6/6.5,1.04,1.68,1
+"23/07/2026 12:38","V-Soccer Copa Libertadores - 12 mins [V]","The Strongest [V]","Palmeiras [V]",1H,21,away,2-1,7.5,1.82,1.86,1
+"23/07/2026 12:38","V-Soccer China Super League - 12 mins [V]","Changchun Yatai [V]","Zhejiang Pro [V]",1H,26,home,2-1,6.5/7,1.87,1.81,1
+"23/07/2026 12:38","V-Soccer Germany Bundesliga - 12 mins [V]","TSG Hoffenheim [V]","SV Werder Bremen [V]",1H,11,home,1-0,5.5/6,1.88,1.80,1
+"23/07/2026 12:39","V-Soccer Germany Bundesliga - 12 mins [V]","TSG Hoffenheim [V]","SV Werder Bremen [V]",1H,17,home,2-0,6.5,1.93,1.76,1
+"23/07/2026 12:40","V-Soccer Korea K-League 1 - 12 mins [V]","Jeonbuk Hyundai [V]","Ulsan Hyundai [V]",1H,10,away,0-1,6/6.5,1.96,1.73,1
+"23/07/2026 12:40","V-Soccer China Super League - 12 mins [V]","Changchun Yatai [V]","Zhejiang Pro [V]",1H,46,away,2-2,6.5,1.79,1.89,1
+"23/07/2026 12:41","V-Soccer Copa Libertadores - 12 mins [V]","The Strongest [V]","Palmeiras [V]",1H,41,away,2-2,7.5/8,1.77,1.91,1
+"23/07/2026 12:41","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","Canada W [V]",1H,6,home,1-0,8/8.5,1.95,1.74,1
+"23/07/2026 12:41","V-Soccer Champions League - 12 mins [V]","Bayern [V]","Juventus [V]",2H,74,home,3-1,4/4.5,1.81,1.87,1
+"23/07/2026 12:41","V-Soccer International Friendly - 12 mins [V]","Belgium [V]","Croatia [V]",1H,45,home,1-0,4.5/5,1.88,1.81,1
+"23/07/2026 12:42","V-Soccer Copa Libertadores - 12 mins [V]","The Strongest [V]","Palmeiras [V]",2H,46,away,2-3,8.5,1.91,1.78,1
+"23/07/2026 12:42","V-Soccer Korea K-League 1 - 12 mins [V]","Jeonbuk Hyundai [V]","Ulsan Hyundai [V]",1H,21,away,0-2,6.5,1.88,1.81,1
+"23/07/2026 12:42","V-Soccer Germany Bundesliga - 12 mins [V]","TSG Hoffenheim [V]","SV Werder Bremen [V]",1H,39,away,2-1,5.5/6,1.65,1.08,1
+"23/07/2026 12:43","V-Soccer Champions League - 12 mins [V]","Bayern [V]","Juventus [V]",2H,81,home,4-1,,,,1
+"23/07/2026 12:43","V-Soccer International Friendly - 12 mins [V]","Belgium [V]","Croatia [V]",2H,52,home,2-0,5/5.5,1.81,1.88,1
+"23/07/2026 12:43","V-Soccer Spain La Liga - 12 mins [V]","Atletico Madrid [V]","Girona FC [V]",1H,4,home,1-0,7.5/8,1.89,1.79,1
+"23/07/2026 12:44","V-Soccer Copa Libertadores - 12 mins [V]","The Strongest [V]","Palmeiras [V]",2H,60,away,2-4,8.5,1.80,1.88,1
+"23/07/2026 12:44","V-Soccer China Super League - 12 mins [V]","Changchun Yatai [V]","Zhejiang Pro [V]",2H,63,home,3-2,6.5,1.84,1.84,1
+"23/07/2026 12:44","V-Soccer Champions League - 12 mins [V]","Bayern [V]","Juventus [V]",2H,90,home,5-1,,,,1
+"23/07/2026 12:44","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","Canada W [V]",1H,30,away,1-1,7/7.5,1.00,1.70,1
+"23/07/2026 12:44","V-Soccer Italy Serie A - 12 mins [V]","AC Milan [V]","Roma [V]",1H,24,away,0-1,5/5.5,1.84,1.84,1
+"23/07/2026 12:44","V-Soccer International Friendly - 12 mins [V]","Belgium [V]","Croatia [V]",2H,64,away,2-1,4/4.5,1.81,1.87,1
+"23/07/2026 12:44","V-Soccer China Super League - 12 mins [V]","Changchun Yatai [V]","Zhejiang Pro [V]",2H,66,away,3-3,7/7.5,1.78,1.91,1
+"23/07/2026 12:44","V-Soccer England Premier League - 12 mins [V]","Chelsea [V]","Crystal Palace [V]",2H,58,away,0-1,3/3.5,1.92,1.77,1
+"23/07/2026 12:45","V-Soccer Germany Bundesliga - 12 mins [V]","TSG Hoffenheim [V]","SV Werder Bremen [V]",2H,55,home,3-1,6/6.5,1.04,1.68,1
+"23/07/2026 12:45","V-Soccer Italy Serie A - 12 mins [V]","AC Milan [V]","Roma [V]",1H,27,home,1-1,6/6.5,1.00,1.70,1
+"23/07/2026 12:45","V-Soccer France Ligue 1 - 12 mins [V]","Monaco [V]","Olympique Lyonnais [V]",1H,45,home,1-0,3.5/4,1.76,1.93,1
+"23/07/2026 12:45","V-Soccer International Friendly - 12 mins [V]","Belgium [V]","Croatia [V]",2H,66,home,3-1,5/5.5,1.14,1.61,1
+"23/07/2026 12:45","V-Soccer Copa Libertadores - 12 mins [V]","The Strongest [V]","Palmeiras [V]",2H,69,home,3-4,8.5/9,1.94,1.75,1
+"23/07/2026 12:45","V-Soccer Italy Serie A - 12 mins [V]","AC Milan [V]","Roma [V]",1H,30,away,1-2,6.5/7,1.76,1.93,1
+"23/07/2026 12:45","V-Soccer International Friendly - 12 mins [V]","Belgium [V]","Croatia [V]",2H,69,away,3-2,6.5/7,1.88,1.81,1
+"23/07/2026 12:46","V-Soccer Copa Libertadores - 12 mins [V]","The Strongest [V]","Palmeiras [V]",2H,72,away,3-5,9.5,1.97,1.73,1
+"23/07/2026 12:46","V-Soccer England Premier League - 12 mins [V]","Chelsea [V]","Crystal Palace [V]",2H,69,home,1-1,3.5,1.95,1.74,1
+"23/07/2026 12:46","V-Soccer France Ligue 1 - 12 mins [V]","Monaco [V]","Olympique Lyonnais [V]",2H,55,home,2-0,4.5,1.95,1.74,1
+"23/07/2026 12:47","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","Canada W [V]",1H,48,home,2-1,6.5/7,1.92,1.77,1
+"23/07/2026 12:47","V-Soccer Spain La Liga - 12 mins [V]","Atletico Madrid [V]","Girona FC [V]",1H,27,home,2-0,6.5/7,1.81,1.87,1
+"23/07/2026 12:47","V-Soccer International Friendly - 12 mins [V]","Belgium [V]","Croatia [V]",2H,80,home,4-2,,,,1
+"23/07/2026 12:47","V-Soccer Argentina Liga Profesional - 12 mins [V]","Defensa [V]","Racing Club [V]",1H,41,away,0-1,4.5,1.88,1.80,1
+"23/07/2026 12:47","V-Soccer France Ligue 1 - 12 mins [V]","Monaco [V]","Olympique Lyonnais [V]",2H,61,away,2-1,4.5/5,1.69,1.02,1
+"23/07/2026 12:47","V-Soccer England Premier League - 12 mins [V]","Chelsea [V]","Crystal Palace [V]",2H,79,away,1-2,,,,1
+"23/07/2026 12:48","V-Soccer Champions League - 12 mins [V]","Real Madrid [V]","AC Milan [V]",1H,8,home,1-0,5.5,1.91,1.77,1
+"23/07/2026 12:48","V-Soccer Copa Libertadores - 12 mins [V]","The Strongest [V]","Palmeiras [V]",2H,87,home,4-5,,,,1
+"23/07/2026 12:48","V-Soccer Spain La Liga - 12 mins [V]","Atletico Madrid [V]","Girona FC [V]",1H,33,home,3-0,7/7.5,1.78,1.91,1
+"23/07/2026 12:48","V-Soccer China Super League - 12 mins [V]","Changchun Yatai [V]","Zhejiang Pro [V]",2H,88,home,4-3,,,,1
+"23/07/2026 12:48","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","Canada W [V]",2H,53,home,3-1,7/7.5,1.93,1.76,1
+"23/07/2026 12:48","V-Soccer Italy Serie A - 12 mins [V]","AC Milan [V]","Roma [V]",2H,47,away,1-3,6.5/7,1.86,1.82,1
+"23/07/2026 12:48","V-Soccer International Friendly - 12 mins [V]","Belgium [V]","Croatia [V]",2H,89,home,5-2,,,,1
+"23/07/2026 12:48","V-Soccer International Friendly - 12 mins [V]","Belgium [V]","Croatia [V]",2H,89,away,5-3,,,,1
+"23/07/2026 12:48","V-Soccer Argentina Liga Profesional - 12 mins [V]","Defensa [V]","Racing Club [V]",1H,46,away,0-2,4.5/5,1.83,1.85,1
+"23/07/2026 12:49","V-Soccer Copa Libertadores - 12 mins [V]","The Strongest [V]","Palmeiras [V]",2H,91,home,5-5,,,,1
+"23/07/2026 12:49","V-Soccer Germany Bundesliga - 12 mins [V]","TSG Hoffenheim [V]","SV Werder Bremen [V]",2H,86,away,3-2,,,,1
+"23/07/2026 12:49","V-Soccer Spain La Liga - 12 mins [V]","Atletico Madrid [V]","Girona FC [V]",1H,41,home,4-0,7.5/8,1.83,1.85,1
+"23/07/2026 12:49","V-Soccer Korea K-League 1 - 12 mins [V]","Jeonbuk Hyundai [V]","Ulsan Hyundai [V]",2H,66,home,1-2,4.5,1.88,1.80,1
+"23/07/2026 12:49","V-Soccer England Premier League - 12 mins [V]","Chelsea [V]","Crystal Palace [V]",2H,89,home,2-2,,,,1
+"23/07/2026 12:49","V-Soccer Champions League - 12 mins [V]","Real Madrid [V]","AC Milan [V]",1H,18,home,2-0,6.5/7,1.91,1.78,1
+"23/07/2026 12:49","V-Soccer Germany Bundesliga - 12 mins [V]","TSG Hoffenheim [V]","SV Werder Bremen [V]",2H,85,home,4-2,,,,1
+"23/07/2026 12:49","V-Soccer England Premier League - 12 mins [V]","Chelsea [V]","Crystal Palace [V]",2H,91,home,3-2,,,,1
+"23/07/2026 12:50","V-Soccer Italy Serie A - 12 mins [V]","AC Milan [V]","Roma [V]",2H,57,away,1-4,7/7.5,1.90,1.79,1
+"23/07/2026 12:50","V-Soccer Korea K-League 1 - 12 mins [V]","Jeonbuk Hyundai [V]","Ulsan Hyundai [V]",2H,72,home,2-2,5/5.5,1.14,1.61,1
+"23/07/2026 12:50","V-Soccer Champions League - 12 mins [V]","Real Madrid [V]","AC Milan [V]",1H,25,away,2-1,6.5,1.88,1.80,1
+"23/07/2026 12:50","V-Soccer Spain La Liga - 12 mins [V]","Atletico Madrid [V]","Girona FC [V]",2H,49,away,4-1,8/8.5,1.86,1.82,1
+"23/07/2026 12:50","V-Soccer France Ligue 1 - 12 mins [V]","Monaco [V]","Olympique Lyonnais [V]",2H,82,home,3-1,,,,1
+"23/07/2026 12:50","V-Soccer Korea K-League 1 - 12 mins [V]","Jeonbuk Hyundai [V]","Ulsan Hyundai [V]",2H,75,home,3-2,,,,1
+"23/07/2026 12:51","V-Soccer Champions League - 12 mins [V]","Real Madrid [V]","AC Milan [V]",1H,27,home,3-1,8/8.5,1.84,1.84,1
+"23/07/2026 12:51","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","Canada W [V]",2H,71,home,4-1,6.5,1.78,1.91,1
+"23/07/2026 12:51","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","Canada W [V]",2H,73,away,4-2,7/7.5,1.75,1.94,1
+"23/07/2026 12:52","V-Soccer Spain La Liga - 12 mins [V]","Atletico Madrid [V]","Girona FC [V]",2H,57,away,4-2,8.5,1.76,1.93,1
+"23/07/2026 12:52","V-Soccer International Friendly - 12 mins [V]","France [V]","England [V]",1H,5,away,0-1,7.5,1.82,1.86,1
+"23/07/2026 12:52","V-Soccer Champions League - 12 mins [V]","Real Madrid [V]","AC Milan [V]",1H,35,home,4-1,8.5/9,1.86,1.82,1
+"23/07/2026 12:52","V-Soccer Copa Libertadores - 12 mins [V]","Palmeiras [V]","Sao Paulo [V]",1H,8,home,1-0,6.5,1.88,1.80,1
+"23/07/2026 12:52","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","Canada W [V]",2H,77,away,4-3,,,,1
+"23/07/2026 12:52","V-Soccer International Friendly - 12 mins [V]","France [V]","England [V]",1H,6,home,1-1,8.5,1.89,1.79,1
+"23/07/2026 12:52","V-Soccer Italy Serie A - 12 mins [V]","AC Milan [V]","Roma [V]",2H,76,home,2-4,7/7.5,1.22,1.57,1
+"23/07/2026 12:52","V-Soccer Spain La Liga - 12 mins [V]","Atletico Madrid [V]","Girona FC [V]",2H,62,home,5-2,9/9.5,1.93,1.76,1
+"23/07/2026 12:52","V-Soccer China Super League - 12 mins [V]","Shanghai Shenhua [V]","Henan SSLM FC [V]",1H,18,away,0-1,5.5/6,1.91,1.78,1
+"23/07/2026 12:53","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","Canada W [V]",2H,84,away,4-4,,,,1
+"23/07/2026 12:53","V-Soccer Spain La Liga - 12 mins [V]","Atletico Madrid [V]","Girona FC [V]",2H,66,away,5-3,9.5/10,1.71,1.99,1
+"23/07/2026 12:53","V-Soccer Korea K-League 1 - 12 mins [V]","Jeonbuk Hyundai [V]","Ulsan Hyundai [V]",2H,90,away,3-3,,,,1
+"23/07/2026 12:53","V-Soccer England Premier League - 12 mins [V]","Manchester United [V]","Arsenal [V]",1H,9,home,1-0,6.5,1.77,1.91,1
+"23/07/2026 12:53","V-Soccer China Super League - 12 mins [V]","Shanghai Shenhua [V]","Henan SSLM FC [V]",1H,24,home,1-1,6/6.5,1.90,1.78,1
+"23/07/2026 12:53","V-Soccer Argentina Liga Profesional - 12 mins [V]","Defensa [V]","Racing Club [V]",2H,82,home,1-2,,,,1
+"23/07/2026 12:54","V-Soccer Champions League - 12 mins [V]","Real Madrid [V]","AC Milan [V]",2H,46,home,5-1,8.5/9,1.72,1.98,1
+"23/07/2026 12:54","V-Soccer Copa Libertadores - 12 mins [V]","Palmeiras [V]","Sao Paulo [V]",1H,21,home,2-0,6.5,1.83,1.85,1
+"23/07/2026 12:54","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","Canada W [V]",2H,90,away,4-5,,,,1
+"23/07/2026 12:54","V-Soccer Spain La Liga - 12 mins [V]","Atletico Madrid [V]","Girona FC [V]",2H,75,away,5-4,,,,1
+"23/07/2026 12:55","V-Soccer Germany Bundesliga - 12 mins [V]","RB Leipzig [V]","Eintracht Frankfurt [V]",1H,14,away,0-1,7.5/8,1.77,1.91,1
+"23/07/2026 12:56","V-Soccer Copa Libertadores - 12 mins [V]","Palmeiras [V]","Sao Paulo [V]",1H,32,home,3-0,7.5/8,1.90,1.78,1
+"23/07/2026 12:56","V-Soccer Copa Libertadores - 12 mins [V]","Palmeiras [V]","Sao Paulo [V]",1H,32,away,3-1,7.5/8,1.90,1.78,1
+"23/07/2026 12:56","V-Soccer France Ligue 1 - 12 mins [V]","RC Lens [V]","Stade Reims [V]",1H,13,away,0-1,4.5/5,1.69,1.02,1
+"23/07/2026 12:56","V-Soccer Spain La Liga - 12 mins [V]","Atletico Madrid [V]","Girona FC [V]",2H,86,home,6-4,,,,1
+"23/07/2026 12:57","V-Soccer Copa Libertadores - 12 mins [V]","Palmeiras [V]","Sao Paulo [V]",1H,44,home,4-1,9/9.5,1.91,1.77,1
+"23/07/2026 12:57","V-Soccer Copa Libertadores - 12 mins [V]","Palmeiras [V]","Sao Paulo [V]",1H,44,home,5-1,9/9.5,1.91,1.77,1
+"23/07/2026 12:57","V-Soccer Germany Bundesliga - 12 mins [V]","RB Leipzig [V]","Eintracht Frankfurt [V]",1H,31,home,1-1,8.5,1.92,1.77,1
+"23/07/2026 12:57","V-Soccer Germany Bundesliga - 12 mins [V]","RB Leipzig [V]","Eintracht Frankfurt [V]",1H,31,home,2-1,8.5,1.92,1.77,1
+"23/07/2026 12:57","V-Soccer Women’s Nations League - 12 mins [V]","Netherlands W [V]","Brazil W [V]",1H,9,home,1-0,8.5/9,1.75,1.94,1
+"23/07/2026 12:57","V-Soccer Women’s Nations League - 12 mins [V]","Netherlands W [V]","Brazil W [V]",1H,9,away,1-1,8.5/9,1.75,1.94,1
+"23/07/2026 12:58","V-Soccer Copa Libertadores - 12 mins [V]","Palmeiras [V]","Sao Paulo [V]",2H,45,home,6-1,10/10.5,1.00,1.70,1
+"23/07/2026 12:58","V-Soccer Korea K-League 1 - 12 mins [V]","Incheon United [V]","Pohang Steelers [V]",1H,25,away,0-1,4/4.5,1.97,1.73,1
+"23/07/2026 12:59","V-Soccer Copa Libertadores - 12 mins [V]","Palmeiras [V]","Sao Paulo [V]",2H,52,away,6-2,10.5/11,1.70,1.00,1
+"23/07/2026 12:59","V-Soccer China Super League - 12 mins [V]","Shanghai Shenhua [V]","Henan SSLM FC [V]",2H,59,home,2-1,5/5.5,1.07,1.66,1
+"23/07/2026 12:59","V-Soccer Germany Bundesliga - 12 mins [V]","RB Leipzig [V]","Eintracht Frankfurt [V]",1H,45,away,2-2,8/8.5,1.99,1.71,1
+"23/07/2026 13:00","V-Soccer Copa Libertadores - 12 mins [V]","Palmeiras [V]","Sao Paulo [V]",2H,62,home,7-2,11/11.5,1.05,1.67,1
+"23/07/2026 13:00","V-Soccer Korea K-League 1 - 12 mins [V]","Incheon United [V]","Pohang Steelers [V]",1H,39,home,1-1,4.5/5,1.85,1.83,1
+"23/07/2026 13:01","V-Soccer Women’s Nations League - 12 mins [V]","Netherlands W [V]","Brazil W [V]",1H,35,away,1-2,7.5/8,1.75,1.94,1
+"23/07/2026 13:01","V-Soccer Argentina Liga Profesional - 12 mins [V]","Newell's [V]","Velez Sarsfield [V]",1H,19,home,1-0,6/6.5,1.99,1.71,1
+"23/07/2026 13:01","V-Soccer Germany Bundesliga - 12 mins [V]","RB Leipzig [V]","Eintracht Frankfurt [V]",2H,56,home,3-2,8/8.5,1.80,1.88,1
+"23/07/2026 13:01","V-Soccer International Friendly - 12 mins [V]","France [V]","England [V]",2H,75,away,1-2,4/4.5,1.00,1.70,1
+"23/07/2026 13:02","V-Soccer Copa Libertadores - 12 mins [V]","Palmeiras [V]","Sao Paulo [V]",2H,72,away,7-3,11/11.5,1.79,1.89,1
+"23/07/2026 13:02","V-Soccer Women’s Nations League - 12 mins [V]","Netherlands W [V]","Brazil W [V]",1H,42,home,2-2,8/8.5,1.88,1.81,1
+"23/07/2026 13:02","V-Soccer Spain La Liga - 12 mins [V]","Barcelona [V]","Atletico Madrid [V]",1H,21,away,0-1,5.5/6,1.85,1.83,1
+"23/07/2026 13:02","V-Soccer China Super League - 12 mins [V]","Shanghai Shenhua [V]","Henan SSLM FC [V]",2H,80,home,3-1,,,,1
+"23/07/2026 13:02","V-Soccer Argentina Liga Profesional - 12 mins [V]","Newell's [V]","Velez Sarsfield [V]",1H,27,away,1-1,6.5,1.87,1.81,1
+"23/07/2026 13:02","V-Soccer England Premier League - 12 mins [V]","Manchester United [V]","Arsenal [V]",2H,68,home,2-0,3.5,1.81,1.88,1
+"23/07/2026 13:03","V-Soccer France Ligue 1 - 12 mins [V]","RC Lens [V]","Stade Reims [V]",2H,62,away,0-2,3.5/4,1.95,1.74,1
+"23/07/2026 13:03","V-Soccer China Super League - 12 mins [V]","Shanghai Shenhua [V]","Henan SSLM FC [V]",2H,86,away,3-2,,,,1
+"23/07/2026 13:03","V-Soccer England Premier League - 12 mins [V]","Manchester United [V]","Arsenal [V]",2H,75,away,2-1,4/4.5,1.19,1.59,1
+"23/07/2026 13:04","V-Soccer France Ligue 1 - 12 mins [V]","RC Lens [V]","Stade Reims [V]",2H,69,away,0-3,4/4.5,1.96,1.73,1
+"23/07/2026 13:04","V-Soccer England Premier League - 12 mins [V]","Manchester United [V]","Arsenal [V]",2H,81,home,3-1,,,,1
+"23/07/2026 13:05","V-Soccer Women’s Nations League - 12 mins [V]","Netherlands W [V]","Brazil W [V]",2H,62,home,3-2,7.5/8,1.94,1.75,1
+"23/07/2026 13:05","V-Soccer England Premier League - 12 mins [V]","Manchester United [V]","Arsenal [V]",2H,87,away,3-2,,,,1
+"23/07/2026 13:05","V-Soccer Champions League - 12 mins [V]","Manchester City [V]","PSG [V]",1H,18,away,0-1,7/7.5,1.95,1.74,1
+"23/07/2026 13:05","V-Soccer Spain La Liga - 12 mins [V]","Barcelona [V]","Atletico Madrid [V]",1H,45,away,0-2,4.5/5,1.66,1.06,1
+"23/07/2026 13:06","V-Soccer Champions League - 12 mins [V]","Manchester City [V]","PSG [V]",1H,21,home,1-1,8.5/9,1.78,1.90,1
+"23/07/2026 13:06","V-Soccer Champions League - 12 mins [V]","Manchester City [V]","PSG [V]",1H,21,away,1-2,8.5/9,1.78,1.90,1
+"23/07/2026 13:06","V-Soccer Korea K-League 1 - 12 mins [V]","Incheon United [V]","Pohang Steelers [V]",2H,75,home,2-1,3.5/4,1.92,1.77,1
+"23/07/2026 13:06","V-Soccer England Premier League - 12 mins [V]","Manchester United [V]","Arsenal [V]",2H,91,away,3-3,,,,1
+"23/07/2026 13:07","V-Soccer Champions League - 12 mins [V]","Manchester City [V]","PSG [V]",1H,27,home,2-2,9/9.5,1.78,1.91,1
+"23/07/2026 13:07","V-Soccer Korea K-League 1 - 12 mins [V]","Incheon United [V]","Pohang Steelers [V]",2H,82,home,3-1,,,,1
+"23/07/2026 13:07","V-Soccer Argentina Liga Profesional - 12 mins [V]","Newell's [V]","Velez Sarsfield [V]",2H,59,away,1-2,5/5.5,1.81,1.87,1
+"23/07/2026 13:07","V-Soccer Champions League - 12 mins [V]","Manchester City [V]","PSG [V]",1H,31,away,2-3,9.5/10,1.69,1.02,1
+"23/07/2026 13:07","V-Soccer Copa Libertadores - 12 mins [V]","Nacional [V]","River Plate [V]",1H,5,away,0-1,5.5/6,1.78,1.90,1
+"23/07/2026 13:08","V-Soccer Champions League - 12 mins [V]","Manchester City [V]","PSG [V]",1H,33,home,3-3,10.5/11,1.83,1.85,1
+"23/07/2026 13:08","V-Soccer Korea K-League 1 - 12 mins [V]","Incheon United [V]","Pohang Steelers [V]",2H,88,home,4-1,,,,1
+"23/07/2026 13:09","V-Soccer International Friendly - 12 mins [V]","Portugal [V]","Germany [V]",1H,14,away,0-1,5.5/6,1.79,1.89,1
+"23/07/2026 13:09","V-Soccer International Friendly - 12 mins [V]","Portugal [V]","Germany [V]",1H,17,home,1-1,6.5,1.78,1.91,1
+"23/07/2026 13:09","V-Soccer China Super League - 12 mins [V]","Zhejiang Pro [V]","Shenzhen FC [V]",1H,28,home,1-0,4/4.5,1.84,1.84,1
+"23/07/2026 13:09","V-Soccer England Premier League - 12 mins [V]","Aston Villa [V]","West Ham [V]",1H,12,home,1-0,5/5.5,1.93,1.76,1
+"23/07/2026 13:10","V-Soccer International Friendly - 12 mins [V]","Portugal [V]","Germany [V]",1H,19,home,2-1,7.5,1.89,1.79,1
+"23/07/2026 13:10","V-Soccer Argentina Liga Profesional - 12 mins [V]","Newell's [V]","Velez Sarsfield [V]",2H,82,away,1-3,,,,1
+"23/07/2026 13:10","V-Soccer Champions League - 12 mins [V]","Manchester City [V]","PSG [V]",2H,46,home,4-3,10.5/11,1.88,1.81,1
+"23/07/2026 13:10","V-Soccer China Super League - 12 mins [V]","Zhejiang Pro [V]","Shenzhen FC [V]",1H,32,home,2-0,5.5/6,1.77,1.92,1
+"23/07/2026 13:11","V-Soccer Champions League - 12 mins [V]","Manchester City [V]","PSG [V]",2H,52,away,4-4,11/11.5,1.83,1.85,1
+"23/07/2026 13:11","V-Soccer Spain La Liga - 12 mins [V]","Barcelona [V]","Atletico Madrid [V]",2H,82,home,1-2,,,,1
+"23/07/2026 13:11","V-Soccer Korea K-League 1 - 12 mins [V]","Daegu FC [V]","Suwon FC [V]",1H,5,away,0-1,6.5/7,1.73,1.97,1
+"23/07/2026 13:12","V-Soccer Champions League - 12 mins [V]","Manchester City [V]","PSG [V]",2H,57,away,4-5,11.5/12,1.70,1.00,1
+"23/07/2026 13:12","V-Soccer France Ligue 1 - 12 mins [V]","Stade Rennais FC [V]","Stade Reims [V]",1H,14,home,1-0,5/5.5,1.79,1.90,1
+"23/07/2026 13:12","V-Soccer Korea K-League 1 - 12 mins [V]","Daegu FC [V]","Suwon FC [V]",1H,8,home,1-1,7.5/8,1.85,1.83,1
+"23/07/2026 13:13","V-Soccer Champions League - 12 mins [V]","Manchester City [V]","PSG [V]",2H,60,away,4-6,12.5,1.79,1.90,1
+"23/07/2026 13:13","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","France W [V]",1H,6,away,0-1,7.5/8,1.90,1.79,1
+"23/07/2026 13:13","V-Soccer England Premier League - 12 mins [V]","Aston Villa [V]","West Ham [V]",1H,37,home,2-0,4.5/5,1.88,1.80,1
+"23/07/2026 13:14","V-Soccer Germany Bundesliga - 12 mins [V]","Bayer 04 [V]","SV Werder Bremen [V]",1H,38,home,1-0,4/4.5,1.77,1.92,1
+"23/07/2026 13:14","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","France W [V]",1H,11,away,0-2,9/9.5,1.95,1.74,1
+"23/07/2026 13:14","V-Soccer China Super League - 12 mins [V]","Zhejiang Pro [V]","Shenzhen FC [V]",2H,50,home,3-0,5.5/6,1.92,1.77,1
+"23/07/2026 13:14","V-Soccer China Super League - 12 mins [V]","Zhejiang Pro [V]","Shenzhen FC [V]",2H,50,away,3-1,5.5/6,1.92,1.77,1
+"23/07/2026 13:14","V-Soccer Copa Libertadores - 12 mins [V]","Nacional [V]","River Plate [V]",2H,45,away,0-2,4/4.5,1.73,1.97,1
+"23/07/2026 13:14","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","France W [V]",1H,15,away,0-3,8.5/9,1.85,1.83,1
+"23/07/2026 13:14","V-Soccer Italy Serie A - 12 mins [V]","Napoli [V]","Inter Milan [V]",1H,8,away,0-1,6.5/7,1.83,1.85,1
+"23/07/2026 13:15","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","France W [V]",1H,18,home,1-3,10.5,1.89,1.79,1
+"23/07/2026 13:15","V-Soccer International Friendly - 12 mins [V]","Portugal [V]","Germany [V]",2H,48,away,2-2,7/7.5,1.96,1.73,1
+"23/07/2026 13:15","V-Soccer Copa Libertadores - 12 mins [V]","Nacional [V]","River Plate [V]",2H,52,home,1-2,5/5.5,1.00,1.70,1
+"23/07/2026 13:15","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","France W [V]",1H,20,away,1-4,11/11.5,1.89,1.79,1
+"23/07/2026 13:16","V-Soccer Germany Bundesliga - 12 mins [V]","Bayer 04 [V]","SV Werder Bremen [V]",2H,46,home,2-0,4.5,1.80,1.88,1
+"23/07/2026 13:16","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","France W [V]",1H,25,away,1-5,11.5/12,1.75,1.94,1
+"23/07/2026 13:16","V-Soccer France Ligue 1 - 12 mins [V]","Stade Rennais FC [V]","Stade Reims [V]",1H,39,home,2-0,4.5/5,1.73,1.96,1
+"23/07/2026 13:16","V-Soccer Korea K-League 1 - 12 mins [V]","Daegu FC [V]","Suwon FC [V]",1H,32,away,1-2,6.5/7,1.67,1.05,1
+"23/07/2026 13:16","V-Soccer France Ligue 1 - 12 mins [V]","Stade Rennais FC [V]","Stade Reims [V]",1H,41,away,2-1,5.5,1.75,1.94,1
+"23/07/2026 13:17","V-Soccer Italy Serie A - 12 mins [V]","Napoli [V]","Inter Milan [V]",1H,26,away,0-2,6.5,1.88,1.80,1
+"23/07/2026 13:17","V-Soccer France Ligue 1 - 12 mins [V]","Stade Rennais FC [V]","Stade Reims [V]",1H,44,away,2-2,6.5/7,1.78,1.90,1
+"23/07/2026 13:17","V-Soccer Korea K-League 1 - 12 mins [V]","Daegu FC [V]","Suwon FC [V]",1H,39,away,1-3,7.5,1.83,1.85,1
+"23/07/2026 13:17","V-Soccer China Super League - 12 mins [V]","Zhejiang Pro [V]","Shenzhen FC [V]",2H,72,away,3-2,6/6.5,1.10,1.64,1
+"23/07/2026 13:17","V-Soccer Argentina Liga Profesional - 12 mins [V]","San Lorenzo [V]","River Plate [V]",1H,23,away,0-1,5.5/6,1.89,1.79,1
+"23/07/2026 13:18","V-Soccer Champions League - 12 mins [V]","Manchester City [V]","PSG [V]",2H,90,home,5-6,,,,1
+"23/07/2026 13:18","V-Soccer Italy Serie A - 12 mins [V]","Napoli [V]","Inter Milan [V]",1H,32,away,0-3,7/7.5,1.81,1.88,1
+"23/07/2026 13:19","V-Soccer Germany Bundesliga - 12 mins [V]","Bayer 04 [V]","SV Werder Bremen [V]",2H,65,home,3-0,4.5/5,1.90,1.78,1
+"23/07/2026 13:19","V-Soccer International Friendly - 12 mins [V]","Portugal [V]","Germany [V]",2H,75,home,3-2,,,,1
+"23/07/2026 13:19","V-Soccer China Super League - 12 mins [V]","Zhejiang Pro [V]","Shenzhen FC [V]",2H,85,home,4-2,,,,1
+"23/07/2026 13:19","V-Soccer England Premier League - 12 mins [V]","Aston Villa [V]","West Ham [V]",2H,75,home,3-0,4/4.5,1.01,1.69,1
+"23/07/2026 13:19","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","France W [V]",1H,45,home,2-5,10.5/11,1.73,1.97,1
+"23/07/2026 13:19","V-Soccer Italy Serie A - 12 mins [V]","Napoli [V]","Inter Milan [V]",1H,42,away,0-4,7.5,1.82,1.86,1
+"23/07/2026 13:19","V-Soccer China Super League - 12 mins [V]","Zhejiang Pro [V]","Shenzhen FC [V]",2H,89,away,4-3,,,,1
+"23/07/2026 13:19","V-Soccer England Premier League - 12 mins [V]","Aston Villa [V]","West Ham [V]",2H,75,away,3-1,4.5/5,1.66,1.07,1
+"23/07/2026 13:20","V-Soccer Champions League - 12 mins [V]","Borussia Dortmund [V]","Real Madrid [V]",1H,4,away,0-1,6.5,1.79,1.89,1
+"23/07/2026 13:20","V-Soccer International Friendly - 12 mins [V]","Portugal [V]","Germany [V]",2H,83,home,4-2,,,,1
+"23/07/2026 13:20","V-Soccer Korea K-League 1 - 12 mins [V]","Daegu FC [V]","Suwon FC [V]",2H,59,home,2-3,7/7.5,1.94,1.75,1
+"23/07/2026 13:20","V-Soccer Argentina Liga Profesional - 12 mins [V]","San Lorenzo [V]","River Plate [V]",1H,40,home,1-1,5.5,1.81,1.88,1
+"23/07/2026 13:21","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","France W [V]",2H,53,away,2-6,11.5,1.94,1.75,1
+"23/07/2026 13:21","V-Soccer Italy Serie A - 12 mins [V]","Napoli [V]","Inter Milan [V]",2H,50,home,1-4,8/8.5,1.04,1.68,1
+"23/07/2026 13:21","V-Soccer Germany Bundesliga - 12 mins [V]","Bayer 04 [V]","SV Werder Bremen [V]",2H,81,home,4-0,,,,1
+"23/07/2026 13:21","V-Soccer France Ligue 1 - 12 mins [V]","Stade Rennais FC [V]","Stade Reims [V]",2H,72,home,3-2,6/6.5,1.84,1.84,1
+"23/07/2026 13:21","V-Soccer Korea K-League 1 - 12 mins [V]","Daegu FC [V]","Suwon FC [V]",2H,68,away,2-4,7.5,1.78,1.90,1
+"23/07/2026 13:22","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","France W [V]",2H,64,home,3-6,11/11.5,1.79,1.90,1
+"23/07/2026 13:22","V-Soccer Italy Serie A - 12 mins [V]","Napoli [V]","Inter Milan [V]",2H,61,away,1-5,8/8.5,1.95,1.74,1
+"23/07/2026 13:22","V-Soccer Argentina Liga Profesional - 12 mins [V]","San Lorenzo [V]","River Plate [V]",2H,56,away,1-2,5.5,1.84,1.84,1
+"23/07/2026 13:23","V-Soccer Spain La Liga - 12 mins [V]","Girona FC [V]","Barcelona [V]",2H,52,home,1-0,3.5,1.76,1.93,1
+"23/07/2026 13:23","V-Soccer Korea K-League 1 - 12 mins [V]","Daegu FC [V]","Suwon FC [V]",2H,82,away,2-5,,,,1
+"23/07/2026 13:24","V-Soccer Champions League - 12 mins [V]","Borussia Dortmund [V]","Real Madrid [V]",1H,33,home,1-1,5.5/6,1.81,1.87,1
+"23/07/2026 13:24","V-Soccer Spain La Liga - 12 mins [V]","Girona FC [V]","Barcelona [V]",2H,55,home,2-0,4.5,1.90,1.78,1
+"23/07/2026 13:24","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","France W [V]",2H,75,away,3-7,,,,1
+"23/07/2026 13:24","V-Soccer Italy Serie A - 12 mins [V]","Napoli [V]","Inter Milan [V]",2H,76,home,2-5,8/8.5,1.95,1.74,1
+"23/07/2026 13:24","V-Soccer Spain La Liga - 12 mins [V]","Girona FC [V]","Barcelona [V]",2H,58,away,2-1,5/5.5,1.90,1.79,1
+"23/07/2026 13:25","V-Soccer Italy Serie A - 12 mins [V]","Napoli [V]","Inter Milan [V]",2H,78,away,2-6,,,,1
+"23/07/2026 13:25","V-Soccer China Super League - 12 mins [V]","Rongcheng FC [V]","Shanghai Shenhua [V]",1H,20,away,0-1,5.5,1.87,1.81,1
+"23/07/2026 13:25","V-Soccer Spain La Liga - 12 mins [V]","Girona FC [V]","Barcelona [V]",2H,65,away,2-2,5.5/6,1.94,1.75,1
+"23/07/2026 13:25","V-Soccer Argentina Liga Profesional - 12 mins [V]","San Lorenzo [V]","River Plate [V]",2H,76,away,1-3,4/4.5,1.08,1.65,1
+"23/07/2026 13:26","V-Soccer Spain La Liga - 12 mins [V]","Girona FC [V]","Barcelona [V]",2H,67,away,2-3,6.5,1.84,1.84,1
+"23/07/2026 13:26","V-Soccer Germany Bundesliga - 12 mins [V]","FC Heidenheim 1846 [V]","Bayern [V]",1H,9,away,0-1,6/6.5,1.81,1.87,1
+"23/07/2026 13:26","V-Soccer International Friendly - 12 mins [V]","England [V]","Netherlands [V]",1H,23,home,1-0,5.5,1.89,1.79,1
+"23/07/2026 13:26","V-Soccer China Super League - 12 mins [V]","Rongcheng FC [V]","Shanghai Shenhua [V]",1H,30,away,0-2,5.5/6,1.81,1.87,1
+"23/07/2026 13:26","V-Soccer Argentina Liga Profesional - 12 mins [V]","San Lorenzo [V]","River Plate [V]",2H,83,away,1-4,4/4.5,1.08,1.65,1
+"23/07/2026 13:26","V-Soccer England Premier League - 12 mins [V]","Aston Villa [V]","Chelsea [V]",1H,18,away,0-1,4.5,1.80,1.88,1
+"23/07/2026 13:27","V-Soccer Women’s Nations League - 12 mins [V]","Sweden W [V]","France W [V]",2H,90,away,3-8,,,,1
+"23/07/2026 13:27","V-Soccer Champions League - 12 mins [V]","Borussia Dortmund [V]","Real Madrid [V]",2H,56,home,2-1,5/5.5,1.74,1.95,1
+"23/07/2026 13:27","V-Soccer Copa Libertadores - 12 mins [V]","Nacional [V]","Palmeiras [V]",1H,29,home,1-0,5/5.5,1.93,1.76,1
+"23/07/2026 13:27","V-Soccer Spain La Liga - 12 mins [V]","Girona FC [V]","Barcelona [V]",2H,80,away,2-4,,,,1
+"23/07/2026 13:27","V-Soccer France Ligue 1 - 12 mins [V]","OGC Nice [V]","PSG [V]",1H,9,home,1-0,7.5,1.81,1.88,1
+"23/07/2026 13:28","V-Soccer Copa Libertadores - 12 mins [V]","Nacional [V]","Palmeiras [V]",1H,32,away,1-1,5.5/6,1.69,1.01,1
+"23/07/2026 13:28","V-Soccer International Friendly - 12 mins [V]","England [V]","Netherlands [V]",1H,33,away,1-1,5.5/6,1.83,1.85,1
+"23/07/2026 13:28","V-Soccer Copa Libertadores - 12 mins [V]","Nacional [V]","Palmeiras [V]",1H,36,away,1-2,5.5/6,1.90,1.78,1
+"23/07/2026 13:28","V-Soccer France Ligue 1 - 12 mins [V]","OGC Nice [V]","PSG [V]",1H,15,away,1-1,8/8.5,1.95,1.74,1
+"23/07/2026 13:28","V-Soccer Korea K-League 1 - 12 mins [V]","Pohang Steelers [V]","Suwon FC [V]",1H,8,away,0-1,6.5/7,1.78,1.90,1
+"23/07/2026 13:29","V-Soccer Germany Bundesliga - 12 mins [V]","FC Heidenheim 1846 [V]","Bayern [V]",1H,27,away,0-2,5.5/6,1.68,1.04,1
+"23/07/2026 13:29","V-Soccer Spain La Liga - 12 mins [V]","Girona FC [V]","Barcelona [V]",2H,88,home,3-4,,,,1
+"23/07/2026 13:29","V-Soccer England Premier League - 12 mins [V]","Aston Villa [V]","Chelsea [V]",1H,34,home,1-1,4.5/5,1.66,1.07,1
+"23/07/2026 13:29","V-Soccer Germany Bundesliga - 12 mins [V]","FC Heidenheim 1846 [V]","Bayern [V]",1H,31,away,0-3,6.5/7,1.81,1.88,1
+"23/07/2026 13:29","V-Soccer Women’s Nations League - 12 mins [V]","Brazil W [V]","Germany W [V]",1H,8,away,0-1,7.5,1.78,1.90,1
+"23/07/2026 13:30","V-Soccer International Friendly - 12 mins [V]","England [V]","Netherlands [V]",1H,47,home,2-1,5.5/6,1.74,1.95,1
+"23/07/2026 13:30","V-Soccer Korea K-League 1 - 12 mins [V]","Pohang Steelers [V]","Suwon FC [V]",1H,17,away,0-2,7/7.5,1.90,1.78,1
+"23/07/2026 13:30","V-Soccer England Premier League - 12 mins [V]","Aston Villa [V]","Chelsea [V]",1H,41,away,1-2,5.5,1.78,1.90,1
+"23/07/2026 13:30","V-Soccer Germany Bundesliga - 12 mins [V]","FC Heidenheim 1846 [V]","Bayern [V]",1H,37,home,1-3,7/7.5,1.75,1.94,1
+"23/07/2026 13:30","V-Soccer Women’s Nations League - 12 mins [V]","Brazil W [V]","Germany W [V]",1H,15,away,0-2,8/8.5,1.91,1.77,1
+"23/07/2026 13:30","V-Soccer Italy Serie A - 12 mins [V]","Torino FC [V]","Bologna FC 1909 [V]",1H,9,away,0-1,8/8.5,1.93,1.76,1
+"23/07/2026 13:30","V-Soccer Korea K-League 1 - 12 mins [V]","Pohang Steelers [V]","Suwon FC [V]",1H,21,away,0-3,7.5/8,1.73,1.97,1
+"23/07/2026 13:31","V-Soccer Germany Bundesliga - 12 mins [V]","FC Heidenheim 1846 [V]","Bayern [V]",1H,40,home,2-3,8/8.5,1.92,1.77,1
+"23/07/2026 13:31","V-Soccer Women’s Nations League - 12 mins [V]","Brazil W [V]","Germany W [V]",1H,18,home,1-2,8.5/9,1.79,1.89,1
+"23/07/2026 13:31","V-Soccer Italy Serie A - 12 mins [V]","Torino FC [V]","Bologna FC 1909 [V]",1H,12,home,1-1,8.5/9,1.84,1.84,1
+"23/07/2026 13:31","V-Soccer France Ligue 1 - 12 mins [V]","OGC Nice [V]","PSG [V]",1H,29,home,2-1,8/8.5,1.94,1.75,1
+"23/07/2026 13:31","V-Soccer Argentina Liga Profesional - 12 mins [V]","River Plate [V]","Boca Juniors [V]",1H,5,home,1-0,7/7.5,1.80,1.88,1
+"23/07/2026 13:31","V-Soccer England Premier League - 12 mins [V]","Aston Villa [V]","Chelsea [V]",2H,46,away,1-3,6/6.5,1.78,1.91,1
+"23/07/2026 13:31","V-Soccer England Premier League - 12 mins [V]","Aston Villa [V]","Chelsea [V]",2H,49,away,1-4,7/7.5,1.86,1.82,1
+"23/07/2026 13:32","V-Soccer Italy Serie A - 12 mins [V]","Torino FC [V]","Bologna FC 1909 [V]",1H,18,away,1-2,9/9.5,1.86,1.82,1
+"23/07/2026 13:32","V-Soccer Korea K-League 1 - 12 mins [V]","Pohang Steelers [V]","Suwon FC [V]",1H,32,home,1-3,8/8.5,1.93,1.76,1
+"23/07/2026 13:32","V-Soccer China Super League - 12 mins [V]","Rongcheng FC [V]","Shanghai Shenhua [V]",2H,67,away,0-3,4.5,1.88,1.80,1
+"23/07/2026 13:32","V-Soccer Argentina Liga Profesional - 12 mins [V]","River Plate [V]","Boca Juniors [V]",1H,11,away,1-1,7.5/8,1.73,1.97,1
+"23/07/2026 13:32","V-Soccer Argentina Liga Profesional - 12 mins [V]","River Plate [V]","Boca Juniors [V]",1H,11,away,1-2,7.5/8,1.73,1.97,1
+"23/07/2026 13:32","V-Soccer Copa Libertadores - 12 mins [V]","Nacional [V]","Palmeiras [V]",2H,59,away,1-3,6/6.5,1.93,1.76,1
+"23/07/2026 13:32","V-Soccer Korea K-League 1 - 12 mins [V]","Pohang Steelers [V]","Suwon FC [V]",1H,35,away,1-4,8.5/9,1.75,1.94,1
+"23/07/2026 13:33","V-Soccer Women’s Nations League - 12 mins [V]","Brazil W [V]","Germany W [V]",1H,32,away,1-3,8.5,1.84,1.84,1
+"23/07/2026 13:33","V-Soccer International Friendly - 12 mins [V]","England [V]","Netherlands [V]",2H,68,away,2-2,5.5,1.93,1.76,1
+"23/07/2026 13:34","V-Soccer Italy Serie A - 12 mins [V]","Torino FC [V]","Bologna FC 1909 [V]",1H,34,away,1-3,9/9.5,1.98,1.72,1
+"23/07/2026 13:34","V-Soccer Copa Libertadores - 12 mins [V]","Nacional [V]","Palmeiras [V]",2H,72,home,2-3,6/6.5,1.99,1.71,1
+"23/07/2026 13:34","V-Soccer Women’s Nations League - 12 mins [V]","Brazil W [V]","Germany W [V]",1H,42,away,1-4,8.5/9,1.86,1.82,1
+"23/07/2026 13:34","V-Soccer England Premier League - 12 mins [V]","Aston Villa [V]","Chelsea [V]",2H,72,home,2-4,6.5/7,1.57,1.22,1
+"23/07/2026 13:35","V-Soccer Copa Libertadores - 12 mins [V]","Nacional [V]","Palmeiras [V]",2H,75,away,2-4,,,,1
+"23/07/2026 13:35","V-Soccer Women’s Nations League - 12 mins [V]","Brazil W [V]","Germany W [V]",1H,45,home,2-4,8.5,1.88,1.80,1
+"23/07/2026 13:35","V-Soccer Argentina Liga Profesional - 12 mins [V]","River Plate [V]","Boca Juniors [V]",1H,31,home,2-2,8/8.5,1.77,1.92,1
+"23/07/2026 13:35","V-Soccer Copa Libertadores - 12 mins [V]","Nacional [V]","Palmeiras [V]",2H,79,away,2-5,,,,1
+"23/07/2026 13:35","V-Soccer Spain La Liga - 12 mins [V]","Valencia CF [V]","Athletic Bilbao [V]",1H,33,home,1-0,4.5/5,1.87,1.81,1
+"23/07/2026 13:35","V-Soccer France Ligue 1 - 12 mins [V]","OGC Nice [V]","PSG [V]",2H,58,home,3-1,6.5/7,1.83,1.85,1
+"23/07/2026 13:35","V-Soccer International Friendly - 12 mins [V]","England [V]","Netherlands [V]",2H,82,home,3-2,,,,1
+"23/07/2026 13:35","V-Soccer Korea K-League 1 - 12 mins [V]","Pohang Steelers [V]","Suwon FC [V]",2H,51,home,2-4,8.5/9,1.67,1.05,1
+"23/07/2026 13:36","V-Soccer Champions League - 12 mins [V]","Bayern [V]","Manchester City [V]",1H,6,home,1-0,6.5,1.89,1.79,1
+"23/07/2026 13:36","V-Soccer Italy Serie A - 12 mins [V]","Torino FC [V]","Bologna FC 1909 [V]",1H,45,away,1-4,8.5/9,1.79,1.90,1
+"23/07/2026 13:36","V-Soccer International Friendly - 12 mins [V]","England [V]","Netherlands [V]",2H,86,away,3-3,,,,1
+"23/07/2026 13:36","V-Soccer Argentina Liga Profesional - 12 mins [V]","River Plate [V]","Boca Juniors [V]",1H,37,away,2-3,8.5/9,1.72,1.98,1

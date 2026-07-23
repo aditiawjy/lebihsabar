@@ -89,7 +89,9 @@ if (is_file($geFile) && ($gf = fopen($geFile, 'r'))) {
         if (isset($gi['accurate']) && ($r[$gi['accurate']] ?? '1') === '0') continue;
         $half = $r[$gi['half']] ?? ''; $min = (int)($r[$gi['minute']] ?? -1);
         if (($half==='1H'||$half==='2H') && $min>=0) {
-            $b = min(9, intdiv($min, 5));
+            // 1H menit 0-44 -> bucket 0-8; 2H menit 45-89 -> geser -45 dulu -> bucket 0-8.
+            $rel = ($half === '2H') ? ($min - 45) : $min;
+            $b = max(0, min(8, intdiv($rel, 5)));
             $minuteBuckets[$half][$b]++;
             $geN++;
         }
@@ -198,7 +200,7 @@ th{color:var(--txt2);font-size:.72rem;text-transform:uppercase;}
       <p class="note" style="margin-bottom:.7rem;"><?= number_format($geN) ?> gol terekam. Bucket per 5 menit (skala sepak bola simulasi).</p>
       <?php foreach (['1H','2H'] as $half): $mx=max(1,max($minuteBuckets[$half])); ?>
         <div style="margin-bottom:.6rem;"><b class="mono"><?= $half ?></b></div>
-        <?php for ($b=0;$b<9;$b++): $c=$minuteBuckets[$half][$b]; $lo=$b*5; $hi=$lo+4; ?>
+        <?php $base = ($half==='2H') ? 45 : 0; for ($b=0;$b<9;$b++): $c=$minuteBuckets[$half][$b]; $lo=$base+$b*5; $hi=$lo+4; ?>
           <div class="barrow">
             <span class="lbl mono"><?= $lo ?>-<?= $hi ?>'</span>
             <span class="track"><span class="fill" style="width:<?= round($c/$mx*100) ?>%"></span></span>

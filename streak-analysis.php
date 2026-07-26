@@ -17,7 +17,7 @@ if (!is_dir($cacheDir)) @mkdir($cacheDir, 0775, true);
 $cacheKey = md5(json_encode([
     is_file($csvPath) ? filemtime($csvPath) : 0,
     is_file($csvPath) ? filesize($csvPath) : 0,
-    'streak_v60_over65_75',
+    'streak_v61_baseline_per_liga', // v61: baseline per liga + gate V-Soccer n>=30
     date('Y-m-d'), // tu15 bergantung tanggal → recompute tiap hari
 ]));
 $cacheFile = $cacheDir . '/' . $cacheKey . '.cache';
@@ -37,6 +37,11 @@ if ($payload === null) {
     $nextMatch = [];      // "tim|liga" => ['vs'=>lawan, 'dt'=>match_time]  (jadwal terdekat blm main)
     $gN = 0; $gU15 = 0; $gO25 = 0; $gU05 = 0;
     $gSHG = 0; $gFHG = 0; $gU35 = 0; $gNBTTS = 0; $gDRAW = 0; // baseline semua outcome
+    // Baseline PER LIGA. Baseline global mencampur SABA (gol rendah, ~150rb match) dgn
+    // V-Soccer (gol tinggi, ~17rb match), sehingga kolom "± Base" pada baris V-Soccer
+    // melambung palsu (mis. Over 3.5 tampak +65% padahal base V-Soccer sendiri ~86%).
+    // $lgAgg[liga] = ['n'=>..,'u15'=>..,...] dipakai utk baseline yang sebanding.
+    $lgAgg = [];
     $gHG = 0; $gAG = 0; // baseline: home cetak >=1 gol / away cetak >=1 gol
     $gTG01 = 0; $gTG23 = 0; $gTG46 = 0; $gTG7 = 0; // baseline: total gol 0-1 / 2-3 / 4-6 / 7+
     $gEG1 = 0; $gEG2 = 0; $gEG3 = 0; $gEG4 = 0; // baseline: total gol pas 1 / 2 / 3 / 4
@@ -103,6 +108,22 @@ if ($payload === null) {
                 $gEG1 += $eg1; $gEG2 += $eg2; $gEG3 += $eg3; $gEG4 += $eg4;
                 $gHW += $hw; $gAW += $aw;
                 $gODD += $odd;
+                // Akumulasi baseline per liga (sebanding: V-Soccer dibanding V-Soccer).
+                if (!isset($lgAgg[$lg])) {
+                    $lgAgg[$lg] = ['n'=>0,'u15'=>0,'o25'=>0,'u05'=>0,'shg'=>0,'fhg'=>0,'u35'=>0,
+                        'nbtts'=>0,'draw'=>0,'hg'=>0,'ag'=>0,'tg01'=>0,'tg23'=>0,'tg46'=>0,'tg7'=>0,
+                        'eg1'=>0,'eg2'=>0,'eg3'=>0,'eg4'=>0,'hw'=>0,'aw'=>0,'odd'=>0,
+                        'o45'=>0,'o55'=>0,'o65'=>0,'o75'=>0];
+                }
+                $L = &$lgAgg[$lg];
+                $L['n']++; $L['u15'] += $u15; $L['o25'] += $o25; $L['u05'] += $u05;
+                $L['shg'] += $shg; $L['fhg'] += $fhg; $L['u35'] += $u35;
+                $L['nbtts'] += $nbtts; $L['draw'] += $draw; $L['hg'] += $hg05; $L['ag'] += $ag05;
+                $L['tg01'] += $tg01; $L['tg23'] += $tg23; $L['tg46'] += $tg46; $L['tg7'] += $tg7;
+                $L['eg1'] += $eg1; $L['eg2'] += $eg2; $L['eg3'] += $eg3; $L['eg4'] += $eg4;
+                $L['hw'] += $hw; $L['aw'] += $aw; $L['odd'] += $odd;
+                $L['o45'] += $o45; $L['o55'] += $o55; $L['o65'] += ($tot >= 7 ? 1 : 0); $L['o75'] += $o75;
+                unset($L);
                 // tuple: [..25 eg4,26 hw,27 aw]
                 $team[$h . '|' . $lg][] = [$sk, $u15, $o25, $u05, $loseH, $winH, $draw, $odd, $shg, $fhg, $nbtts, $csH, $ftsH, $htodd, $hteven, $u35, $hg05, $ag05, $tg01, $tg23, $tg46, $tg7, $eg1, $eg2, $eg3, $eg4, $hw, $aw, $a, 1, $o45, $o55, $o75];
                 $team[$a . '|' . $lg][] = [$sk, $u15, $o25, $u05, $loseA, $winA, $draw, $odd, $shg, $fhg, $nbtts, $csA, $ftsA, $htodd, $hteven, $u35, $hg05, $ag05, $tg01, $tg23, $tg46, $tg7, $eg1, $eg2, $eg3, $eg4, $hw, $aw, $h, 0, $o45, $o55, $o75];
@@ -255,14 +276,22 @@ if ($payload === null) {
         'cm_nsftshto' => [[8, true, 3], [12, false, 3], [13, false, 3]],   // NoSHG 3x + FTS 3x + HT-Odd 3x → NoDraw 93.8%
         'cm_o25ftsu35'=> [[2, false, 2], [12, false, 3], [15, false, 4]],  // O2.5 2x + FTS 3x + U3.5 4x → Home O0.5 & O1.5 90.7%
         'cm_o25nsu35' => [[2, false, 2], [8, true, 3], [15, false, 4]],    // O2.5 2x + NoSHG 3x + U3.5 4x → FHG 90.4%
-        // Uji ulang out-of-sample konsisten (validate_mining_modes.php, split 2026-05-01,
-        // syarat: test n>=30 & Wilson LB>=75% & drift<=15pt). Hanya cm_u05evfts yg lolos.
-        // Tiga label "lolos validasi" lama TERBUKTI tak lolos di bar konsisten (test n
-        // terlalu kecil / rate drift), jadi dikembalikan ke status eksperimental:
+        // Uji ulang out-of-sample (validate_mining_modes.php, split 2026-05-01,
+        // syarat: test n>=30 & Wilson LB>=75% & drift<=15pt).
+        // HASIL TERBARU (dijalankan ulang setelah data bertambah) — hanya 2 dari 13 LOLOS:
+        //   LOLOS  : cm_drnfbt (test n=295, 99.7%, LB 98.1%)
+        //            cm_klodns (test n=424, 82.1%, LB 78.1%)
+        //   GAGAL  : 11 mode sisanya. Sebagian runtuh total di test:
+        //            cm_o25nsu35  90.5% -> 54.5%
+        //            cm_nsftshto  95%   -> 63.6%
+        //   CATATAN: cm_u05evfts dulu tercatat "LOLOS (n=31, 90.3%, LB 75.1%)" tapi
+        //            setelah data bertambah jadi GAGAL (n=33, 84.8%, LB 69.1%) — bukti
+        //            bahwa mode hasil mining in-sample memang rentan overfitting.
+        //            Jangan promosikan mode tanpa uji ulang berkala.
         'cm_o25fhcs'  => [[2, false, 2], [9, false, 3], [11, false, 3]],   // Away O0.5 — test n=8 (terlalu kecil)
-        'cm_o15cshte' => [[1, true, 3], [11, false, 3], [14, false, 3]],   // Away O0.5 — test n=10 (terlalu kecil)
-        'cm_klodns'   => [[4, false, 3], [7, false, 4], [8, true, 3]],     // NoDraw — test 73.3% LB 48% (drift)
-        'cm_u05evfts' => [[3, false, 2], [7, true, 4], [12, false, 3]],    // U3.5 → LOLOS: test n=31, 90.3%, LB 75.1%
+        'cm_o15cshte' => [[1, true, 3], [11, false, 3], [14, false, 3]],   // Away O0.5 — test n=11 (terlalu kecil)
+        'cm_klodns'   => [[4, false, 3], [7, false, 4], [8, true, 3]],     // NoDraw — LOLOS (test n=424, LB 78.1%)
+        'cm_u05evfts' => [[3, false, 2], [7, true, 4], [12, false, 3]],    // U3.5 — GAGAL (test n=33, LB 69.1%)
     ];
 
     // Backtest kemarin/hari ini: definisi kondisi utk mode lama yang sederhana
@@ -602,12 +631,16 @@ if ($payload === null) {
             for ($i = 0; $i < $n; $i++) { if ($arr[$i][1] && substr($arr[$i][0], 0, 10) === $todayStr) $tu15++; }
 
             // Gate baris league-aware. SABA (puluhan ribu match) pakai ambang lama.
-            // Liga V-Soccer sampelnya kecil (±12-22 match/tim) & gol tinggi (U1.5 ~0%),
-            // jadi syarat streak U1.5 ($a[2][0]) mustahil dipenuhi → gunakan ambang
-            // sampel total saja supaya market lain (Over/BTTS/Odd-Even/gol) tetap tampil.
+            // Liga V-Soccer gol tinggi (U1.5 ~0%) sehingga syarat streak U1.5 ($a[2][0])
+            // mustahil dipenuhi → pakai ambang sampel total saja supaya market lain
+            // (Over/BTTS/Odd-Even/gol) tetap tampil.
+            // Ambang dinaikkan 8 -> 30 (selaras MIN_N validate_mining_modes.php): saat
+            // ambang 8 dibuat, tiap tim baru punya ±12-22 match; sekarang median sudah
+            // ±311 match/tim, jadi n=8 tak lagi menyaring apa pun. Dicek: pada n>=50
+            // pun ke-127 baris (tim x liga) V-Soccer tetap lolos, jadi 30 aman.
             $isVsoccer = stripos($lg, 'V-Soccer') !== false;
             if ($isVsoccer) {
-                if ($n < 8) continue; // liga V-Soccer: minimal 8 match/tim
+                if ($n < 30) continue; // liga V-Soccer: minimal 30 match/tim
             } elseif ($n < 150 || $a[2][0] < 10) {
                 continue; // SABA & lainnya: ambang lama (tidak diubah)
             }
@@ -696,6 +729,34 @@ if ($payload === null) {
             'ftodd' => round($gODD / $gN * 100, 1), 'fteven' => round((1 - $gODD / $gN) * 100, 1),
             'dc1x' => round(($gHW + $gDRAW) / $gN * 100, 1), 'dcx2' => round(($gAW + $gDRAW) / $gN * 100, 1),
         ] : [],
+        // Baseline per liga (sebanding) — dipakai kolom "± Base" agar V-Soccer tidak
+        // dibandingkan dengan baseline campuran yang didominasi SABA.
+        'baseOutLg' => (function () use ($lgAgg) {
+            $out = [];
+            foreach ($lgAgg as $lg => $c) {
+                $n = $c['n']; if ($n <= 0) continue;
+                $p = fn($v) => round($v / $n * 100, 1);
+                $out[$lg] = [
+                    'o15' => $p($n - $c['u15']), 'u15' => $p($c['u15']),
+                    'o05' => $p($n - $c['u05']), 'u05' => $p($c['u05']),
+                    'o25' => $p($c['o25']),      'u25' => $p($n - $c['o25']),
+                    'u35' => $p($c['u35']),      'o35' => $p($n - $c['u35']),
+                    'shg' => $p($c['shg']),      'fhg' => $p($c['fhg']),
+                    'btts' => $p($n - $c['nbtts']), 'nbtts' => $p($c['nbtts']),
+                    'draw' => $p($c['draw']),    'nodraw' => $p($n - $c['draw']),
+                    'hg05' => $p($c['hg']),      'ag05' => $p($c['ag']),
+                    'tg01' => $p($c['tg01']),    'tg23' => $p($c['tg23']),
+                    'tg46' => $p($c['tg46']),    'tg7' => $p($c['tg7']),
+                    'eg1' => $p($c['eg1']),      'eg2' => $p($c['eg2']),
+                    'eg3' => $p($c['eg3']),      'eg4' => $p($c['eg4']),
+                    'hw' => $p($c['hw']),        'aw' => $p($c['aw']),
+                    'ftodd' => $p($c['odd']),    'fteven' => $p($n - $c['odd']),
+                    'dc1x' => $p($c['hw'] + $c['draw']), 'dcx2' => $p($c['aw'] + $c['draw']),
+                    'o45' => $p($c['o45']), 'o55' => $p($c['o55']), 'o65' => $p($c['o65']), 'o75' => $p($c['o75']),
+                ];
+            }
+            return $out;
+        })(),
         'verify'    => ['y' => $vAcc['y'], 't' => $vAcc['t'], 'ydate' => $vYest, 'tdate' => $vToday],
         'global'    => [
             '1' => $gmk($gA[1]), '2' => $gmk($gA[2]), '3' => $gmk($gA[3]), '4' => $gmk($gA[4]),
@@ -856,6 +917,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                         <th data-k="outT" class="px-4 py-3 font-bold cursor-pointer whitespace-nowrap">Hasil</th>
                         <th data-k="l"    class="px-4 py-3 font-bold cursor-pointer whitespace-nowrap">Liga</th>
                         <th data-k="over" class="px-4 py-3 font-bold cursor-pointer text-center whitespace-nowrap">Peluang</th>
+                        <th data-k="lift" class="px-4 py-3 font-bold cursor-pointer text-center whitespace-nowrap" title="Selisih vs baseline (rata-rata semua match tanpa syarat streak). PENTING: peluang 100% yang cuma sedikit di atas baseline berarti kondisinya tidak menambah apa-apa — itu base rate, bukan edge.">± Base</th>
                         <th data-k="samp" class="px-4 py-3 font-bold cursor-pointer text-center whitespace-nowrap" title="Menang / total sampel.">Menang/Total</th>
                         <th data-k="lb"   class="px-4 py-3 font-bold cursor-pointer text-center whitespace-nowrap" title="Wilson lower-bound 95%. Makin tinggi makin andal.">Keandalan</th>
                         <th data-k="cur"  class="px-4 py-3 font-bold cursor-pointer text-center whitespace-nowrap">Streak skrg</th>
@@ -996,22 +1058,22 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                     <option value="c4_terpuruk">Kalah 3x + Gagal cetak 3x + No BTTS 3x + U1.5 3x (terpuruk total)</option>
                     <option value="c4_badai">Menang 3x + Over 2.5 3x + BTTS 2x + Over 1.5 3x (badai gol)</option>
                 </optgroup>
-                <optgroup label="— ✅ Kombinasi Tervalidasi Out-of-Sample —">
-                    <option value="cm_u05evfts">U0.5 2x + Even 4x + Gagal cetak 3x → U3.5 (lolos validasi: test n=31, LB 75%)</option>
+                <optgroup label="— ✅ LOLOS Out-of-Sample (sampel test besar) —">
+                    <option value="cm_drnfbt">Draw 3x + No FHG 3x + BTTS 2x → O0.5 (test n=295, 99.7%, LB 98%)</option>
+                    <option value="cm_klodns">Kalah 3x + Odd 4x + No SHG 3x → No Draw (test n=424, 82.1%, LB 78%)</option>
                 </optgroup>
-                <optgroup label="— ⚠️ Eksperimental (mining in-sample, BELUM divalidasi) —">
-                    <option value="cm_shfhcs">SHG 3x + FHG 3x + CS 3x → O0.5</option>
-                    <option value="cm_drnfbt">Draw 3x + No FHG 3x + BTTS 2x → O0.5</option>
-                    <option value="cm_o15cshto">O1.5 3x + CS 3x + HT Odd 3x → O0.5</option>
-                    <option value="cm_nsbthto">No SHG 3x + BTTS 2x + HT Odd 3x → FHG</option>
-                    <option value="cm_odftshto">Odd 4x + Gagal cetak 3x + HT Odd 3x → U3.5</option>
-                    <option value="cm_o15o25cs">O1.5 3x + O2.5 2x + CS 3x → Away O0.5</option>
-                    <option value="cm_nsftshto">No SHG 3x + Gagal cetak 3x + HT Odd 3x → No Draw</option>
-                    <option value="cm_o25ftsu35">O2.5 2x + Gagal cetak 3x + U3.5 4x → Home O0.5</option>
-                    <option value="cm_o25nsu35">O2.5 2x + No SHG 3x + U3.5 4x → FHG</option>
-                    <option value="cm_o25fhcs">O2.5 2x + FHG 3x + CS 3x → Away O0.5 (test n kecil)</option>
-                    <option value="cm_o15cshte">O1.5 3x + CS 3x + HT Even 3x → Away O0.5 (test n kecil)</option>
-                    <option value="cm_klodns">Kalah 3x + Odd 4x + No SHG 3x → No Draw (drift test)</option>
+                <optgroup label="— ⚠️ GAGAL validasi / sampel test kecil (jangan dipercaya) —">
+                    <option value="cm_u05evfts">U0.5 2x + Even 4x + Gagal cetak 3x → U3.5 (test n=33, 84.8%, LB 69% — GAGAL)</option>
+                    <option value="cm_shfhcs">SHG 3x + FHG 3x + CS 3x → O0.5 (test n=18, LB 82% — n kecil)</option>
+                    <option value="cm_o15cshto">O1.5 3x + CS 3x + HT Odd 3x → O0.5 (test n=9 — n kecil)</option>
+                    <option value="cm_nsbthto">No SHG 3x + BTTS 2x + HT Odd 3x → FHG (test n=9 — n kecil)</option>
+                    <option value="cm_odftshto">Odd 4x + Gagal cetak 3x + HT Odd 3x → U3.5 (test n=12, 83.3%, LB 55%)</option>
+                    <option value="cm_o15o25cs">O1.5 3x + O2.5 2x + CS 3x → Away O0.5 (test n=14 — n kecil)</option>
+                    <option value="cm_nsftshto">No SHG 3x + Gagal cetak 3x + HT Odd 3x → No Draw (95% → test 63.6% — RUNTUH)</option>
+                    <option value="cm_o25ftsu35">O2.5 2x + Gagal cetak 3x + U3.5 4x → Home O0.5 (test n=13, LB 58%)</option>
+                    <option value="cm_o25nsu35">O2.5 2x + No SHG 3x + U3.5 4x → FHG (90.5% → test 54.5% — RUNTUH)</option>
+                    <option value="cm_o25fhcs">O2.5 2x + FHG 3x + CS 3x → Away O0.5 (test n=8 — n kecil)</option>
+                    <option value="cm_o15cshte">O1.5 3x + CS 3x + HT Even 3x → Away O0.5 (test n=11 — n kecil)</option>
                 </optgroup>
                 <optgroup label="— Kombinasi 5 Kondisi —">
                     <option value="c5_krisis">Kalah 2x + Gagal cetak 3x + No FHG 3x + No SHG 3x + U1.5 3x (krisis ekstrem)</option>
@@ -1158,6 +1220,14 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
         const DATA = <?= $rowsJson ?>;
         const GLOBAL = <?= json_encode($gl) ?>; // mode -> [over15, over05, sampel]
         const BASE_OUT = <?= json_encode($payload['baseOut'] ?? []) ?>; // outcome -> baseline % semua match
+        const BASE_OUT_LG = <?= json_encode($payload['baseOutLg'] ?? []) ?>; // liga -> outcome -> baseline %
+        // Baseline SEBANDING: pakai baseline liga itu sendiri; fallback ke global bila liga tak ada.
+        // Penting krn baseline global mencampur SABA (gol rendah) & V-Soccer (gol tinggi).
+        function baseFor(league, outKey) {
+            const lg = BASE_OUT_LG[league];
+            if (lg && lg[outKey] !== undefined && lg[outKey] !== null) return lg[outKey];
+            return BASE_OUT[outKey] ?? null;
+        }
         const VERIFY = <?= json_encode($payload['verify'] ?? ['y' => [], 't' => [], 'ydate' => '', 'tdate' => '']) ?>; // backtest kemarin/hari ini
 
         // ---- Overlay skor LIVE (sumber: live_api_proxy.php → scraper port 5000) ----
@@ -1535,7 +1605,7 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                     const cur = curOf(r, mk);
                     const need = STREAK_LEN[mk] || 1;
                     if (curOnly.checked && cur < need) return;
-                    const baseV = BASE_OUT[out] ?? null;
+                    const baseV = baseFor(r.l, out);
                     d.push({ t: r.t, mk: MODE_TEXT[mk] || mk, exp: exp, l: r.l, cur: cur, over: p.over, samp: p.samp, hits: hits, miss: miss,
                         lift: baseV === null || p.over === null ? null : Math.round((p.over - baseV) * 10) / 10,
                         lb: wilsonLB(p.over, p.samp), tu15: r.tu15 || 0, oppOver: oppOver, teamOver: teamOver, next: r.next, nextMin: r.nextMin });
@@ -1634,8 +1704,11 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                         if (miss === 2 && p.samp <= 200) return;
                         if (miss === 3 && p.samp <= 300) return;
                         if (miss > 3) return;
+                        const baseV100 = baseFor(r.l, o.k);
                         d.push({ t: r.t, mk: MODE_TEXT[mk] || mk, exp: exp, outT: o.t, outK: o.k, l: r.l, cur: cur,
                             over: p.over, samp: p.samp, hits: hits, miss: miss,
+                            base: baseV100,
+                            lift: baseV100 === null || p.over === null ? null : Math.round((p.over - baseV100) * 10) / 10,
                             lb: wilsonLB(p.over, p.samp), next: r.next, nextMin: r.nextMin });
                     });
                 });
@@ -1653,10 +1726,11 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                 <td class="px-4 py-2.5 text-[11px] font-bold text-emerald-700 whitespace-nowrap">${r.outT}</td>
                 <td class="px-4 py-2.5 text-[11px] text-slate-500" style="max-width:240px;white-space:normal;line-height:1.25">${r.l}</td>
                 <td class="px-4 py-2.5 text-center text-base text-emerald-600 font-extrabold">${r.over}%</td>
+                <td class="px-4 py-2.5 text-center font-bold ${r.lift===null?'text-slate-300':(r.lift>=5?'text-emerald-600':(r.lift>0?'text-emerald-500':(r.lift>=-2?'text-slate-400':'text-rose-500')))}" title="${r.base===null?'':'baseline '+r.base+'%'}">${r.lift===null?'-':(r.lift>0?'+':'')+r.lift}%</td>
                 <td class="px-4 py-2.5 text-center text-slate-400"><span class="font-semibold text-emerald-600">${r.hits}</span>/${r.samp}</td>
                 <td class="px-4 py-2.5 text-center font-semibold ${r.lb===null?'text-slate-300':(r.lb>=80?'text-emerald-600':(r.lb>=70?'text-amber-600':'text-rose-500'))}">${r.lb===null?'-':r.lb+'%'}</td>
                 <td class="px-4 py-2.5 text-center font-bold ${r.cur>=2?'text-indigo-600':'text-slate-400'}">${r.cur || '-'}</td>
-            </tr>`).join('') || `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Belum ada kombinasi dengan peluang 100% & sampel memadai.</td></tr>`;
+            </tr>`).join('') || `<tr><td colspan="9" class="px-4 py-8 text-center text-slate-400">Belum ada kombinasi dengan peluang 100% & sampel memadai.</td></tr>`;
         }
         document.querySelectorAll('#stk100Table th').forEach(th => th.addEventListener('click', () => {
             const k = th.dataset.k;

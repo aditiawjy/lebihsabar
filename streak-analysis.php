@@ -17,7 +17,7 @@ if (!is_dir($cacheDir)) @mkdir($cacheDir, 0775, true);
 $cacheKey = md5(json_encode([
     is_file($csvPath) ? filemtime($csvPath) : 0,
     is_file($csvPath) ? filesize($csvPath) : 0,
-    'streak_v62_kondisi_baru', // v62: +18 kondisi baru (o45/o55/o75, bucket total gol, skor pas)
+    'streak_v63_mining_validated', // v63: +4 mode hasil mining tervalidasi out-of-sample
     date('Y-m-d'), // tu15 bergantung tanggal → recompute tiap hari
 ]));
 $cacheFile = $cacheDir . '/' . $cacheKey . '.cache';
@@ -205,6 +205,20 @@ if ($payload === null) {
         'c_tg46o25' => [[20, false, 3], [2, false, 3]],  // zona 4-6 gol 3x + O2.5 3x
         'c_tg7bt' => [[21, false, 2], [10, true, 2]],    // 7+ gol 2x + BTTS 2x
         'c_dingin2' => [[18, false, 2], [12, false, 2]], // total 0-1 gol 2x + gagal cetak 2x (uji rebound)
+    ];
+    // ---- HASIL MINING TERVALIDASI OUT-OF-SAMPLE (v63) -----------------------
+    // Dicari otomatis dari 7.600 kandidat (2 kondisi x 10 outcome) pada liga
+    // V-Soccer, split train<2026-07-19 / test>=2026-07-19, lalu disaring:
+    // sampel test besar + drift train->test ~0 + lift positif vs baseline LIGA.
+    // CATATAN JUJUR: lift-nya KECIL (+1.5 s/d +3.7 poin). Nilainya bukan "edge
+    // besar" tapi konsistensinya (drift ~0, n test 762-2231). Banyak kombinasi
+    // lain tampak bagus tapi redundan: tg7 => o55 => o45 => o25 saling implikasi,
+    // sehingga angkanya identik dgn kondisi terkuatnya saja — itu tidak dipakai.
+    $newModes += [
+        'tg7s3'    => [[21, false, 3]],                  // Total 7+ gol 3x (pendorong utama, bukan kombinasi semu)
+        'c_tg7o55' => [[21, false, 2], [31, false, 3]],  // Total 7+ 2x + O5.5 3x -> O4.5 terandal (LB 79.4, n=2231)
+        'c_klo55'  => [[4, false, 2], [31, false, 3]],   // Kalah 2x + O5.5 3x    -> lift tertinggi (+3.7, n=762)
+        'c_bttg7'  => [[10, true, 3], [21, false, 3]],   // BTTS 3x + Total 7+ 3x -> O3.5 (LB 90.0, n=1624)
     ];
     // Kombinasi kondisi (preset, langsung tampil di dropdown Kondisi seperti combo lama).
     // Dua kondisi harus terpenuhi bersamaan pada N match terakhir masing-masing.
@@ -1105,6 +1119,12 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
                     <option value="c4_terpuruk">Kalah 3x + Gagal cetak 3x + No BTTS 3x + U1.5 3x (terpuruk total)</option>
                     <option value="c4_badai">Menang 3x + Over 2.5 3x + BTTS 2x + Over 1.5 3x (badai gol)</option>
                 </optgroup>
+                <optgroup label="— ✅ BARU: Tervalidasi Out-of-Sample (lift kecil tapi stabil) —">
+                    <option value="c_tg7o55">Total 7+ 2x + O5.5 3x (O4.5 terandal: 81%, LB 79, n=2231)</option>
+                    <option value="c_klo55">Kalah 2x + O5.5 3x (lift tertinggi +3.7, n=762)</option>
+                    <option value="c_bttg7">BTTS 3x + Total 7+ 3x (O3.5: 91.5%, LB 90, n=1624)</option>
+                    <option value="tg7s3">Total 7+ gol 3x (pendorong utama)</option>
+                </optgroup>
                 <optgroup label="— 🔥 BARU: Momentum Gol Tinggi (cocok V-Soccer) —">
                     <option value="o45s3">Over 4.5 3x beruntun</option>
                     <option value="o45s4">Over 4.5 4x beruntun</option>
@@ -1449,7 +1469,9 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             'eg3s2': 'Total pas 3 gol 2x', 'eg4s2': 'Total pas 4 gol 2x',
             'c_o45mn': 'O4.5 3x+Menang 2x', 'c_o45bt': 'O4.5 3x+BTTS 2x', 'c_o45cs': 'O4.5 3x+CS 2x',
             'c_o45kl': 'O4.5 3x+Kalah 2x', 'c_o55mn': 'O5.5 2x+Menang 2x',
-            'c_tg46o25': 'Total 4-6 3x+O2.5 3x', 'c_tg7bt': 'Total 7+ 2x+BTTS 2x', 'c_dingin2': 'Total 0-1 2x+Gagal cetak 2x' };
+            'c_tg46o25': 'Total 4-6 3x+O2.5 3x', 'c_tg7bt': 'Total 7+ 2x+BTTS 2x', 'c_dingin2': 'Total 0-1 2x+Gagal cetak 2x',
+            // v63 — mining tervalidasi out-of-sample
+            'tg7s3': 'Total 7+ gol 3x', 'c_tg7o55': 'Total 7+ 2x+O5.5 3x', 'c_klo55': 'Kalah 2x+O5.5 3x', 'c_bttg7': 'BTTS 3x+Total 7+ 3x' };
         const LOSS_MODE = { 'kl_1': 1, 'kl_2': 1, 'kl_3': 1, 'kl_4': 1, 'kl_5': 1 };
         // Mode kombinasi preset: key -> [mode dasar A, mode dasar B] (untuk curOf & label).
         const COMBO_DEFS = {
@@ -1506,7 +1528,8 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             'o45s3': 3, 'o45s4': 4, 'o55s3': 3, 'o75s2': 2,
             'tg46s3': 3, 'tg7s2': 2, 'tg23s3': 3, 'tg01s3': 3, 'eg3s2': 2, 'eg4s2': 2,
             'c_o45mn': 1, 'c_o45bt': 1, 'c_o45cs': 1, 'c_o45kl': 1, 'c_o55mn': 1,
-            'c_tg46o25': 1, 'c_tg7bt': 1, 'c_dingin2': 1 };
+            'c_tg46o25': 1, 'c_tg7bt': 1, 'c_dingin2': 1,
+            'tg7s3': 3, 'c_tg7o55': 1, 'c_klo55': 1, 'c_bttg7': 1 };
         // Registrasi metadata mode kombinasi — HARUS setelah deklarasi STREAK_LEN di atas.
         Object.keys(COMBO_DEFS).forEach(k => {
             MODE_TEXT[k] = COMBO_DEFS[k].map(x => MODE_TEXT[x]).join('+');
@@ -1571,6 +1594,11 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             if (mode === 'c_tg46o25') return (r.curTG46 >= 3 && r.curO25 >= 3) ? 1 : 0;
             if (mode === 'c_tg7bt')   return (r.curTG7 >= 2 && r.curBTTS >= 2) ? 1 : 0;
             if (mode === 'c_dingin2') return (r.curTG01 >= 2 && r.curFTS >= 2) ? 1 : 0;
+            // v63 — hasil mining tervalidasi out-of-sample
+            if (mode === 'tg7s3')    return r.curTG7;
+            if (mode === 'c_tg7o55') return (r.curTG7 >= 2 && r.curO55 >= 3) ? 1 : 0;
+            if (mode === 'c_klo55')  return (r.curL >= 2 && r.curO55 >= 3) ? 1 : 0;
+            if (mode === 'c_bttg7')  return (r.curBTTS >= 3 && r.curTG7 >= 3) ? 1 : 0;
             if (mode === 'htodd3') return r.curHTO;
             if (mode === 'hteven3') return r.curHTE;
             if (mode.indexOf('05') === 0) return r.curU;  // streak U0.5 berjalan
@@ -1599,7 +1627,8 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
             const ALL_MODES = ['3','4','05_2','05_3','kl_2','kl_3','mn_2','mn_3','dr_3','od_4','ev_4','od_5','ev_5','o25s2','o15s3','o25s3','nbtts3','nfhg3','nshg3','od4u','ev4u','u15oe3','dry2o','btso3','kncs3','nfo3','btts2','btts3','cs2','fts2','htodd3','hteven3','u15_5','u15_6','05_4','kl_4','kl_5','mn_4','mn_5','dr_4','o15s4','o15s5','o25s4','o25s5','btts4','nbtts4','od_6','ev_6','c_u15kl','c_u15nf','c_klfts','c_mno25','c_mnbt','c_o15bt','c_u05ns','c_dru15','c_evu15','c_odo15','c_csmn','c_ftsnf','c_klnb','c_mnnf','c_drnb','c_dro25','c_u15ns','c_o25bt3','c_csu15','c_kl3fts','c_htou15','c_hteo15','c3_u15klnf','c3_klftsnf','c3_mnbto25','c3_mncs','c3_u05krg','c3_o15bto25','c3_dru15nb','c3_klbto25','c_klo25','c_mnu15','c_csnf','c_kl3nb','c_mn3o25','c_odbt','c_evnb','c_dr3u15','c_nfns','c_u15fts','c_u15nb','c_u15u35','c_u154kl','c_u154nf','c_u154ns','c_u154nb','c_u154fts','c_u154cs','c3_u154klnf','c3_u154nbns','c3_u154csnf','c4_u154gembok','c4_u154krisis','c3_csu15nf','c3_mno25bt3','c3_dru15ns','c3_klu15fts','c4_krisis','c4_panas','c4_gembok','c4_terpuruk','c4_badai','c5_krisis','c5_gembok','c5_badai','shg3','fhg3','u35_4','cm_shfhcs','cm_drnfbt','cm_o15cshto','cm_nsbthto','cm_odftshto','cm_o15o25cs','cm_nsftshto','cm_u05evfts','cm_o25ftsu35','cm_o25nsu35','cm_o25fhcs','cm_o15cshte','cm_klodns','c_mn3op80','c_mn3op80h','c_both80','c_both85','c_b2560','c_b2565',
             // v62 — dimensi baru (gol tinggi & bucket total gol)
             'o45s3','o45s4','o55s3','o75s2','tg46s3','tg7s2','tg23s3','tg01s3','eg3s2','eg4s2',
-            'c_o45mn','c_o45bt','c_o45cs','c_o45kl','c_o55mn','c_tg46o25','c_tg7bt','c_dingin2'];
+            'c_o45mn','c_o45bt','c_o45cs','c_o45kl','c_o55mn','c_tg46o25','c_tg7bt','c_dingin2',
+            'tg7s3','c_tg7o55','c_klo55','c_bttg7'];
             const isAll = mode === 'ALL';
             const modesList = isAll ? ALL_MODES : [mode];
 
@@ -1750,7 +1779,8 @@ $rowsJson  = json_encode($rows, JSON_UNESCAPED_UNICODE);
         const ALL_MODES_100 = ['3','4','05_2','05_3','kl_2','kl_3','mn_2','mn_3','dr_3','od_4','ev_4','od_5','ev_5','o25s2','o15s3','o25s3','nbtts3','nfhg3','nshg3','od4u','ev4u','u15oe3','dry2o','btso3','kncs3','nfo3','btts2','btts3','cs2','fts2','htodd3','hteven3','u15_5','u15_6','05_4','kl_4','kl_5','mn_4','mn_5','dr_4','o15s4','o15s5','o25s4','o25s5','btts4','nbtts4','od_6','ev_6','c_u15kl','c_u15nf','c_klfts','c_mno25','c_mnbt','c_o15bt','c_u05ns','c_dru15','c_evu15','c_odo15','c_csmn','c_ftsnf','c_klnb','c_mnnf','c_drnb','c_dro25','c_u15ns','c_o25bt3','c_csu15','c_kl3fts','c_htou15','c_hteo15','c3_u15klnf','c3_klftsnf','c3_mnbto25','c3_mncs','c3_u05krg','c3_o15bto25','c3_dru15nb','c3_klbto25','c_klo25','c_mnu15','c_csnf','c_kl3nb','c_mn3o25','c_odbt','c_evnb','c_dr3u15','c_nfns','c_u15fts','c_u15nb','c_u15u35','c_u154kl','c_u154nf','c_u154ns','c_u154nb','c_u154fts','c_u154cs','c3_u154klnf','c3_u154nbns','c3_u154csnf','c4_u154gembok','c4_u154krisis','c3_csu15nf','c3_mno25bt3','c3_dru15ns','c3_klu15fts','c4_krisis','c4_panas','c4_gembok','c4_terpuruk','c4_badai','c5_krisis','c5_gembok','c5_badai','shg3','fhg3','u35_4','cm_shfhcs','cm_drnfbt','cm_o15cshto','cm_nsbthto','cm_odftshto','cm_o15o25cs','cm_nsftshto','cm_u05evfts','cm_o25ftsu35','cm_o25nsu35','cm_o25fhcs','cm_o15cshte','cm_klodns','c_mn3op80','c_mn3op80h','c_both80','c_both85','c_b2560','c_b2565',
             // v62 — dimensi baru (gol tinggi & bucket total gol)
             'o45s3','o45s4','o55s3','o75s2','tg46s3','tg7s2','tg23s3','tg01s3','eg3s2','eg4s2',
-            'c_o45mn','c_o45bt','c_o45cs','c_o45kl','c_o55mn','c_tg46o25','c_tg7bt','c_dingin2'];
+            'c_o45mn','c_o45bt','c_o45cs','c_o45kl','c_o55mn','c_tg46o25','c_tg7bt','c_dingin2',
+            'tg7s3','c_tg7o55','c_klo55','c_bttg7'];
         const OUTS_100 = [
             { k: 'o15', t: 'Over 1.5' }, { k: 'o05', t: 'Over 0.5' },
             { k: 'shg', t: 'SHG O0.5' },

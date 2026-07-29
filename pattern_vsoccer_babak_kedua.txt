@@ -1,0 +1,195 @@
+KUMPULAN PATTERN V-SOCCER BABAK KEDUA
+=====================================
+
+Sumber data: goal_log_vsoccer.csv
+Target: Over 1.5 dan Over 2.5 gol babak kedua
+
+
+OVER 1.5 BABAK KEDUA
+====================
+
+PATTERN UTAMA
+-------------
+
+O1
+Kondisi:
+- Selisih skor HT tepat 1 gol
+- Gol pertama maksimal menit 12
+- KO line minimal 5.5/6
+Hasil historis: 35/35
+Akurasi: 100%
+
+O2
+Kondisi:
+- Skor HT 2-1 atau 1-2
+- Gol pertama maksimal menit 15
+- KO line minimal 5.5
+Hasil historis: 26/26
+Akurasi: 100%
+
+O3
+Kondisi:
+- Total skor HT tepat 3 gol
+- Gol pertama terjadi menit 5-9
+Hasil historis: 23/24
+Akurasi: 95,8%
+
+O4
+Kondisi:
+- Total skor HT tepat 3 gol
+- Gol pertama maksimal menit 12
+Hasil historis: 38/41
+Akurasi: 92,7%
+
+O5
+Kondisi:
+- Selisih skor HT maksimal 2 gol
+- Gol pertama maksimal menit 8
+Hasil historis: 77/85
+Akurasi: 90,6%
+
+O6
+Kondisi:
+- KO line minimal 6.5/7
+Hasil historis: 74/85
+Akurasi: 87,1%
+
+O7
+Kondisi:
+- Total skor HT tepat 3 gol
+Hasil historis: 67/78
+Akurasi: 85,9%
+
+O8
+Kondisi:
+- Gol pertama terjadi menit 5-9
+Hasil historis: 80/94
+Akurasi: 85,1%
+
+
+PATTERN URUTAN GOL
+------------------
+
+Urutan:
+1. Home mencetak gol
+2. Away menyamakan skor
+3. Home mencetak gol kembali
+
+Kode urutan: H-A-H
+Skor HT: 2-1
+Target: Over 1.5 gol babak kedua
+Hasil historis: 11/11
+Akurasi: 100%
+
+
+PATTERN BERDASARKAN SKOR HT TERTENTU
+------------------------------------
+
+1. Skor HT 3-0
+   Kondisi tambahan: gol pertama maksimal menit 18
+   Hasil historis: 10/10
+
+2. Skor HT 2-2
+   Kondisi tambahan:
+   - Gol pertama maksimal menit 8
+   - KO line maksimal 6/6.5
+   Hasil historis: 9/9
+
+3. Skor HT 1-1
+   Kondisi tambahan:
+   - Gol pertama mulai menit 15
+   - KO line minimal 5.5
+   Hasil historis: 16/16
+
+4. Skor HT 3-2
+   Kondisi tambahan: gol pertama maksimal menit 8
+   Hasil historis: 7/7
+
+5. Skor HT 1-3
+   Kondisi tambahan: KO line minimal 6
+   Hasil historis: 6/6
+
+6. Skor HT 3-3
+   Kondisi tambahan: tidak ada
+   Hasil historis: 5/5
+
+7. Skor HT 2-3
+   Kondisi tambahan: KO line minimal 5.5/6
+   Hasil historis: 5/5
+
+Catatan: pattern berdasarkan skor tertentu memiliki sampel lebih kecil,
+sehingga sebaiknya dipakai sebagai filter tambahan dan bukan setup utama.
+
+
+OVER 2.5 BABAK KEDUA
+====================
+
+O25-1
+Kondisi:
+- Selisih skor HT maksimal 1 gol
+- Gol pertama maksimal menit 8
+- KO line minimal 5.5/6
+Hasil historis: 40/44
+Akurasi: 90,9%
+
+O25-2
+Kondisi:
+- Total skor HT tepat 3 gol
+- KO line minimal 6.5/7
+Hasil historis: 15/15
+Akurasi: 100%
+
+O25-3
+Kondisi:
+- Selisih skor HT maksimal 1 gol
+- Gol pertama maksimal menit 8
+- KO line minimal 7/7.5
+Hasil historis: 14/14
+Akurasi: 100%
+
+
+O25-4 - FILTER LANJUTAN
+-----------------------
+
+Syarat dasar:
+- Gol pertama maksimal menit 8
+- KO line minimal 5.5/6
+- Selisih skor HT maksimal 1 gol
+
+Keputusan masuk:
+
+A. Jika skor HT tidak seri:
+   - Masuk Over 2.5 gol babak kedua.
+
+ATAU
+
+B. Jika skor HT seri:
+   - Gol kedua maksimal menit 25
+   - Gol terakhir babak pertama mulai menit 35
+   - Jika kedua kondisi terpenuhi, masuk Over 2.5 gol babak kedua.
+
+Rumus singkat:
+Gol pertama <=8 + line >=5.5/6
++ [HT tidak seri, atau jika seri: gol kedua <=25 dan gol terakhir 1H >=35]
+-> Over 2.5 gol babak kedua.
+
+Hasil historis gabungan: 36/36
+Akurasi historis: 100%
+
+
+KONVERSI BATAS KO LINE
+======================
+
+- Nilai 5.75 berarti line 5.5/6
+- Nilai 6.25 berarti line 6/6.5
+- Nilai 6.75 berarti line 6.5/7
+- Nilai 7.25 berarti line 7/7.5
+
+
+PERINGATAN
+==========
+
+Semua hasil dan persentase di atas berasal dari dataset historis yang tersedia.
+Angka 100% bukan jaminan hasil pertandingan berikutnya.
+Pattern yang dibuat setelah melihat kegagalan memiliki risiko overfitting.
+Uji kembali menggunakan data baru dan gunakan pengelolaan modal yang konsisten.

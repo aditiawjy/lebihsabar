@@ -88,6 +88,15 @@ if (isset($_GET['json'])) {
     <b>S-LOW</b> — selisih HT ≤ 1 (termasuk seri) · gol pertama ≤ 8' · line awal ≥ 5.75<br>
     <b>P1</b> — selisih HT tepat 1 · gol pertama ≤ 12' · line awal ≥ 5.75<br>
     <b>P2</b> — HT 2-1 / 1-2 · gol pertama ≤ 15' · line awal ≥ 5.5<br>
+    <b>P3</b> — total gol HT tepat 3 · gol pertama 5'–9'<br>
+    <b>P4</b> — HT 1-1 · gol pertama ≥ 15' · line awal ≥ 5.5<br>
+    <b>P5</b> — HT 3-0 · gol pertama ≤ 18'<br>
+    <b>P6</b> — HT 2-2 · gol pertama ≤ 8' · line awal ≤ 6.25<br>
+    <b>P7</b> — HT 3-2 · gol pertama ≤ 8'<br>
+    <b>P8</b> — HT 1-3 · line awal ≥ 6<br>
+    <b>P9</b> — HT 3-3 (tanpa syarat tambahan)<br>
+    <b>P10</b> — HT 2-3 · line awal ≥ 5.75<br>
+    <b>P11</b> — total gol HT tepat 3 (low) · gol pertama ≤ 12'<br>
     <b>HAH</b> — urutan gol 1H Home–Away–Home, HT 2-1 (tanpa syarat menit / line)<br>
     Semua sinyal muncul selama babak kedua dan hilang begitu ada gol di babak kedua.
   </p>
@@ -156,8 +165,15 @@ function render(d) {
   if (pats.length) {
     document.getElementById('legend').innerHTML = pats.map(function (p) {
       var t = '<b>' + esc(p.code) + '</b> — ' + esc(p.desc);
-      if (p.first_goal_max != null) t += ' · gol pertama &le; ' + esc(p.first_goal_max) + "'";
+      if (p.first_goal_min != null && p.first_goal_max != null) {
+        t += ' · gol pertama ' + esc(p.first_goal_min) + "'–" + esc(p.first_goal_max) + "'";
+      } else if (p.first_goal_min != null) {
+        t += ' · gol pertama &ge; ' + esc(p.first_goal_min) + "'";
+      } else if (p.first_goal_max != null) {
+        t += ' · gol pertama &le; ' + esc(p.first_goal_max) + "'";
+      }
       if (p.min_line != null) t += ' · line awal &ge; ' + esc(p.min_line);
+      if (p.max_line != null) t += ' · line awal &le; ' + esc(p.max_line);
       return t;
     }).join('<br>') +
       '<br>Semua sinyal muncul selama babak kedua dan hilang begitu ada gol di babak kedua.';

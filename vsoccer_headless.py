@@ -64,6 +64,19 @@ P1_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P1_FIRST_GOAL_MAX", "12"))
 P1_MIN_LINE = float(os.environ.get("VSOCCER_P1_MIN_LINE", "5.75"))
 P2_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P2_FIRST_GOAL_MAX", "15"))
 P2_MIN_LINE = float(os.environ.get("VSOCCER_P2_MIN_LINE", "5.5"))
+P3_TOTAL_HT = int(os.environ.get("VSOCCER_P3_TOTAL_HT", "3"))
+P3_FIRST_GOAL_MIN = int(os.environ.get("VSOCCER_P3_FIRST_GOAL_MIN", "5"))
+P3_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P3_FIRST_GOAL_MAX", "9"))
+P4_FIRST_GOAL_MIN = int(os.environ.get("VSOCCER_P4_FIRST_GOAL_MIN", "15"))
+P4_MIN_LINE = float(os.environ.get("VSOCCER_P4_MIN_LINE", "5.5"))
+P5_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P5_FIRST_GOAL_MAX", "18"))
+P6_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P6_FIRST_GOAL_MAX", "8"))
+P6_MAX_LINE = float(os.environ.get("VSOCCER_P6_MAX_LINE", "6.25"))     # 6/6.5
+P7_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P7_FIRST_GOAL_MAX", "8"))
+P8_MIN_LINE = float(os.environ.get("VSOCCER_P8_MIN_LINE", "6"))
+P10_MIN_LINE = float(os.environ.get("VSOCCER_P10_MIN_LINE", "5.75"))   # 5.5/6
+P11_TOTAL_HT = int(os.environ.get("VSOCCER_P11_TOTAL_HT", "3"))
+P11_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P11_FIRST_GOAL_MAX", "12"))
 
 PATTERNS = [
     {"code": "SUPER",
@@ -71,7 +84,8 @@ PATTERNS = [
              f"dan gol terakhir 1H ≥ {SUPER_LAST_1H_MIN}')",
      "ht": "super", "first_goal_max": SUPER_FIRST_GOAL_MAX, "min_line": SUPER_MIN_LINE},
     {"code": "SUPER1", "desc": f"total gol HT tepat {SUPER1_TOTAL_HT} (tanpa syarat menit)",
-     "ht": "tot3", "first_goal_max": None, "min_line": SUPER1_MIN_LINE},
+     "ht": "total", "total_ht": SUPER1_TOTAL_HT, "first_goal_max": None,
+     "min_line": SUPER1_MIN_LINE},
     # SUPER2 = S-LOW dengan syarat line lebih tinggi (>= 7/7.5).
     {"code": "SUPER2", "desc": "selisih HT ≤ 1 (termasuk seri)", "ht": "diff_le1",
      "first_goal_max": SUPER2_FIRST_GOAL_MAX, "min_line": SUPER2_MIN_LINE},
@@ -81,7 +95,28 @@ PATTERNS = [
      "first_goal_max": P1_FIRST_GOAL_MAX, "min_line": P1_MIN_LINE},
     {"code": "P2", "desc": "HT 2-1 / 1-2", "ht": "21",
      "first_goal_max": P2_FIRST_GOAL_MAX, "min_line": P2_MIN_LINE},
-    # P3: urutan gol babak pertama Home - Away - Home, berakhir HT 2-1.
+    {"code": "P3", "desc": f"total gol HT tepat {P3_TOTAL_HT}", "ht": "total",
+     "total_ht": P3_TOTAL_HT, "first_goal_min": P3_FIRST_GOAL_MIN,
+     "first_goal_max": P3_FIRST_GOAL_MAX, "min_line": None},
+    {"code": "P4", "desc": "HT 1-1", "ht": "score", "score": (1, 1),
+     "first_goal_min": P4_FIRST_GOAL_MIN, "first_goal_max": None, "min_line": P4_MIN_LINE},
+    # P5-P10: skor HT persis (home-away, jadi 1-3 tidak sama dengan 3-1).
+    {"code": "P5", "desc": "HT 3-0", "ht": "score", "score": (3, 0),
+     "first_goal_max": P5_FIRST_GOAL_MAX, "min_line": None},
+    {"code": "P6", "desc": "HT 2-2", "ht": "score", "score": (2, 2),
+     "first_goal_max": P6_FIRST_GOAL_MAX, "min_line": None, "max_line": P6_MAX_LINE},
+    {"code": "P7", "desc": "HT 3-2", "ht": "score", "score": (3, 2),
+     "first_goal_max": P7_FIRST_GOAL_MAX, "min_line": None},
+    {"code": "P8", "desc": "HT 1-3", "ht": "score", "score": (1, 3),
+     "first_goal_max": None, "min_line": P8_MIN_LINE},
+    {"code": "P9", "desc": "HT 3-3 (tanpa syarat tambahan)", "ht": "score", "score": (3, 3),
+     "first_goal_max": None, "min_line": None},
+    {"code": "P10", "desc": "HT 2-3", "ht": "score", "score": (2, 3),
+     "first_goal_max": None, "min_line": P10_MIN_LINE},
+    # P11 "low": seperti P3 tapi jendela menit lebih longgar & tanpa syarat line.
+    {"code": "P11", "desc": f"total gol HT tepat {P11_TOTAL_HT} (low)", "ht": "total",
+     "total_ht": P11_TOTAL_HT, "first_goal_max": P11_FIRST_GOAL_MAX, "min_line": None},
+    # HAH: urutan gol babak pertama Home - Away - Home, berakhir HT 2-1.
     # Tanpa syarat menit gol pertama & tanpa syarat line awal.
     {"code": "HAH", "desc": "urutan gol 1H Home–Away–Home, HT 2-1", "ht": "hah",
      "first_goal_max": None, "min_line": None},
@@ -204,8 +239,10 @@ def signal_check(e, st, pat):
         return False, f"selisih HT {abs(ht_h - ht_a)}"
     if pat["ht"] == "diff_le1" and abs(ht_h - ht_a) > 1:
         return False, f"selisih HT {abs(ht_h - ht_a)}"
-    if pat["ht"] == "tot3" and (ht_h + ht_a) != SUPER1_TOTAL_HT:
+    if pat["ht"] == "total" and (ht_h + ht_a) != pat["total_ht"]:
         return False, f"total HT {ht_h + ht_a}"
+    if pat["ht"] == "score" and (ht_h, ht_a) != tuple(pat["score"]):
+        return False, f"HT {ht_h}-{ht_a}"
     if pat["ht"] == "21" and {ht_h, ht_a} != {1, 2}:
         return False, f"HT {ht_h}-{ht_a}"
     if pat["ht"] == "super" and ht_h == ht_a:
@@ -230,12 +267,16 @@ def signal_check(e, st, pat):
         return False, "belum ada gol"
     if pat["first_goal_max"] is not None and fg > pat["first_goal_max"]:
         return False, f"gol pertama {fg}'"
-    if pat["min_line"] is not None:
+    if pat.get("first_goal_min") is not None and fg < pat["first_goal_min"]:
+        return False, f"gol pertama {fg}'"
+    if pat["min_line"] is not None or pat.get("max_line") is not None:
         lv = line_value(st.get("ko_line"))
         if lv is None:
             return False, "line awal tak ada"
-        if lv < pat["min_line"]:
+        if pat["min_line"] is not None and lv < pat["min_line"]:
             return False, f"line awal {st.get('ko_line')}"
+        if pat.get("max_line") is not None and lv > pat["max_line"]:
+            return False, f"line awal {st.get('ko_line')} (di atas batas)"
     if (e["h"] + e["a"]) > (ht_h + ht_a):
         return False, "sudah ada gol 2H"
     return True, ""
@@ -425,17 +466,30 @@ def write_live(events, goals, status="running", note=""):
         "signals": sum(1 for r in rows if r["signal"]),
         "signals_by_code": by_code,
         "patterns": [{"code": p["code"], "desc": p["desc"],
-                      "first_goal_max": p["first_goal_max"], "min_line": p["min_line"]}
+                      "first_goal_min": p.get("first_goal_min"),
+                      "first_goal_max": p["first_goal_max"], "min_line": p["min_line"],
+                      "max_line": p.get("max_line")}
                      for p in PATTERNS],
         "recent_goals": list(recent_goals),
     }
+    # Tulis ke .tmp lalu replace. Di Windows replace kadang gagal karena file
+    # sedang dibuka pembaca (PHP/antivirus) -> coba lagi beberapa kali, kalau
+    # tidak snapshot lama tertinggal dan live view tampak macet.
     tmp = LIVE_FILE.with_suffix(".json.tmp")
     try:
         with open(tmp, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, ensure_ascii=False)
-        os.replace(tmp, LIVE_FILE)
     except Exception as e:
         log(f"Gagal tulis live snapshot: {e}")
+        return
+    for attempt in range(8):
+        try:
+            os.replace(tmp, LIVE_FILE)
+            return
+        except OSError as e:
+            last = e
+            time.sleep(0.05)
+    log(f"Gagal tukar live snapshot setelah 8 percobaan: {last}")
 
 
 def cleanup_stale():

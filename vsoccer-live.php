@@ -82,7 +82,7 @@ if (isset($_GET['json'])) {
     <span class="muted" id="err"></span>
   </div>
   <p class="muted" id="legend" style="margin:8px 2px 0">
-    <b>SUPER</b> — HT tidak seri (kalau seri: gol-2 ≤ 25' dan gol terakhir 1H ≥ 35') · gol pertama ≤ 8' · line awal ≥ 5.75<br>
+    <b>SUPER</b> — selisih HT ≤ 1 (kalau seri: gol-2 ≤ 25' dan gol terakhir 1H ≥ 35') · gol pertama ≤ 8' · line awal ≥ 5.75<br>
     <b>SUPER1</b> — total gol HT tepat 3 (tanpa syarat menit) · line awal ≥ 6.75<br>
     <b>SUPER2</b> — selisih HT ≤ 1 (termasuk seri) · gol pertama ≤ 8' · line awal ≥ 7.25<br>
     <b>S-LOW</b> — selisih HT ≤ 1 (termasuk seri) · gol pertama ≤ 8' · line awal ≥ 5.75<br>

@@ -18,6 +18,7 @@ Syarat: pip install playwright requests ; Chrome terpasang ; Apache (XAMPP) jala
 """
 
 import os
+import csv
 import sys
 import json
 import time
@@ -35,6 +36,7 @@ PROFILE_ROOT = BASE_DIR / ".vsoccer-profile"
 USER_DATA_DIR = PROFILE_ROOT / f"session-{os.getpid()}"
 LOG_FILE = BASE_DIR / "vsoccer_headless.log"
 LIVE_FILE = BASE_DIR / "vsoccer_live.json"   # snapshot untuk vsoccer-live.php
+SIGNAL_LOG = BASE_DIR / "signal_log_vsoccer.csv"  # odds market saat sinyal muncul
 
 TARGET_HOST = "1x2aaa.com"
 TARGET_URL = os.environ.get(
@@ -46,14 +48,17 @@ CHANNEL = os.environ.get("VSOCCER_CHANNEL", "chrome") or None
 
 # Sinyal babak kedua. Semua pattern: aktif hanya selama babak kedua dan langsung
 # hilang begitu ada gol di babak kedua.
-#   SUPER = gol pertama <= 8' + line awal >= 5.5/6 (=5.75) + HT tidak seri;
+#   SUPER = gol pertama <= 8' + line awal >= 5.5/6 (=5.75) + selisih HT <= 1;
 #           kalau HT seri, boleh asal gol kedua <= 25' dan gol terakhir 1H >= 35'
+#           (syarat selisih HT <= 1 berasal dari rumus historis O25-4; tanpa itu
+#            akurasi log turun 78,4% (58/74) -> dengan itu 97,4% (37/38))
 #   P1    = selisih HT tepat 1 + gol pertama <= 12' + line awal >= 5.5/6 (=5.75)
 #   P2    = HT tepat 2-1 / 1-2 + gol pertama <= 15' + line awal >= 5.5
 SUPER_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_SUPER_FIRST_GOAL_MAX", "8"))
 SUPER_MIN_LINE = float(os.environ.get("VSOCCER_SUPER_MIN_LINE", "5.75"))
 SUPER_SECOND_GOAL_MAX = int(os.environ.get("VSOCCER_SUPER_SECOND_GOAL_MAX", "25"))
 SUPER_LAST_1H_MIN = int(os.environ.get("VSOCCER_SUPER_LAST_1H_MIN", "35"))
+SUPER_MAX_HT_DIFF = int(os.environ.get("VSOCCER_SUPER_MAX_HT_DIFF", "1"))
 SUPER1_TOTAL_HT = int(os.environ.get("VSOCCER_SUPER1_TOTAL_HT", "3"))
 SUPER1_MIN_LINE = float(os.environ.get("VSOCCER_SUPER1_MIN_LINE", "6.75"))
 SUPER2_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_SUPER2_FIRST_GOAL_MAX", "8"))
@@ -80,7 +85,7 @@ P11_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P11_FIRST_GOAL_MAX", "12"))
 
 PATTERNS = [
     {"code": "SUPER",
-     "desc": f"HT tidak seri (kalau seri: gol-2 ≤ {SUPER_SECOND_GOAL_MAX}' "
+     "desc": f"selisih HT ≤ {SUPER_MAX_HT_DIFF} (kalau seri: gol-2 ≤ {SUPER_SECOND_GOAL_MAX}' "
              f"dan gol terakhir 1H ≥ {SUPER_LAST_1H_MIN}')",
      "ht": "super", "first_goal_max": SUPER_FIRST_GOAL_MAX, "min_line": SUPER_MIN_LINE},
     {"code": "SUPER1", "desc": f"total gol HT tepat {SUPER1_TOTAL_HT} (tanpa syarat menit)",
@@ -245,15 +250,20 @@ def signal_check(e, st, pat):
         return False, f"HT {ht_h}-{ht_a}"
     if pat["ht"] == "21" and {ht_h, ht_a} != {1, 2}:
         return False, f"HT {ht_h}-{ht_a}"
-    if pat["ht"] == "super" and ht_h == ht_a:
-        # HT seri masih boleh, asal gol kedua cepat & gol terakhir 1H terjadi telat.
-        g1h = st.get("goal_mins_1h") or []
-        if len(g1h) < 2:
-            return False, f"HT seri {ht_h}-{ht_a}, gol 1H cuma {len(g1h)}"
-        if g1h[1] > SUPER_SECOND_GOAL_MAX:
-            return False, f"HT seri, gol kedua {g1h[1]}'"
-        if g1h[-1] < SUPER_LAST_1H_MIN:
-            return False, f"HT seri, gol terakhir 1H {g1h[-1]}'"
+    if pat["ht"] == "super":
+        # Selisih HT harus rapat. Kalau timpang >= 2 gol, mesin cenderung
+        # "kehabisan kuota" dan babak kedua kering (15 dari 16 MISS di log).
+        if abs(ht_h - ht_a) > SUPER_MAX_HT_DIFF:
+            return False, f"selisih HT {abs(ht_h - ht_a)}"
+        if ht_h == ht_a:
+            # HT seri masih boleh, asal gol kedua cepat & gol terakhir 1H terjadi telat.
+            g1h = st.get("goal_mins_1h") or []
+            if len(g1h) < 2:
+                return False, f"HT seri {ht_h}-{ht_a}, gol 1H cuma {len(g1h)}"
+            if g1h[1] > SUPER_SECOND_GOAL_MAX:
+                return False, f"HT seri, gol kedua {g1h[1]}'"
+            if g1h[-1] < SUPER_LAST_1H_MIN:
+                return False, f"HT seri, gol terakhir 1H {g1h[-1]}'"
     if pat["ht"] == "hah":
         # Home cetak gol - Away menyamakan - Home cetak lagi, berakhir HT 2-1.
         if (ht_h, ht_a) != (2, 1):
@@ -295,6 +305,47 @@ def match_signals(e, st):
         else:
             why.append(f"{pat['code']}: {reason}")
     return hits, " · ".join(why)
+
+
+# Target tiap pattern dalam jumlah gol babak kedua. Harus sama dengan
+# $targetGoals di check-super-accuracy.php.
+PATTERN_TARGET_2H = {"SUPER": 3, "SUPER1": 3, "SUPER2": 3, "S-LOW": 3}
+SIGNAL_LOG_HEADER = [
+    "logged_at", "code", "league", "home_team", "away_team",
+    "half", "minute", "score", "ht", "ht_total",
+    "target_2h_goals", "needed_line",
+    "live_line", "live_over", "live_under",
+    "ko_line", "ko_over", "ko_under",
+]
+
+
+def st_ht_total(row):
+    """Total gol HT dari string "2-1" -> 3. None kalau HT belum terekam."""
+    parts = (row.get("ht") or "").split("-")
+    if len(parts) != 2:
+        return None
+    try:
+        return int(parts[0]) + int(parts[1])
+    except ValueError:
+        return None
+
+
+def append_signal_log(row):
+    """Catat odds market pada detik sinyal muncul.
+
+    Tanpa ini akurasi pattern tidak bisa diterjemahkan jadi untung/rugi: odds
+    di goal_log_vsoccer.csv adalah odds kickoff full-match, bukan odds yang
+    benar-benar tersedia saat taruhan dipasang di babak kedua.
+    """
+    try:
+        new_file = not SIGNAL_LOG.exists() or SIGNAL_LOG.stat().st_size == 0
+        with open(SIGNAL_LOG, "a", encoding="utf-8", newline="") as fh:
+            w = csv.writer(fh, quoting=csv.QUOTE_MINIMAL)
+            if new_file:
+                w.writerow(SIGNAL_LOG_HEADER)
+            w.writerow([row.get(k, "") for k in SIGNAL_LOG_HEADER])
+    except Exception as exc:
+        log(f"Gagal catat signal log: {exc}")
 
 
 def log(msg):
@@ -441,7 +492,30 @@ def write_live(events, goals, status="running", note=""):
             if k not in active_signals:
                 log(f"SINYAL {code}: {r['home']} vs {r['away']} | HT {r['ht']} "
                     f"| gol-1 {r['first_goal_min']}' | line awal {r['ko_line']} "
-                    f"| sekarang {r['half']} {r['minute']}' {r['score']}")
+                    f"| sekarang {r['half']} {r['minute']}' {r['score']} "
+                    f"| line hidup {r['line']} O{r['over']}/U{r['under']}")
+                # Taruhan "≥ N gol di 2H" dipasang sebagai Over pada line
+                # full-match = total HT + (N - 0.5). Line itu dicatat supaya
+                # nanti bisa dibandingkan dengan line yang benar-benar
+                # ditawarkan (r['line']) beserta odds-nya.
+                target2h = PATTERN_TARGET_2H.get(code, 2)
+                ht_total = ""
+                needed_line = ""
+                if st_ht_total(r) is not None:
+                    ht_total = st_ht_total(r)
+                    needed_line = ht_total + target2h - 0.5
+                append_signal_log({
+                    "logged_at": datetime.now().strftime("%d/%m/%Y %H:%M"),
+                    "code": code, "league": r["league"],
+                    "home_team": r["home"], "away_team": r["away"],
+                    "half": r["half"], "minute": r["minute"],
+                    "score": r["score"], "ht": r["ht"], "ht_total": ht_total,
+                    "target_2h_goals": target2h, "needed_line": needed_line,
+                    "live_line": r["line"], "live_over": r["over"],
+                    "live_under": r["under"],
+                    "ko_line": r["ko_line"], "ko_over": r["ko_over"],
+                    "ko_under": r["ko_under"],
+                })
     for gone in active_signals - live_keys:
         code, teams = gone.split("|", 1)
         log(f"Sinyal {code} hilang: {teams.replace('|', ' vs ')}")

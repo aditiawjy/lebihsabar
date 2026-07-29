@@ -207,6 +207,7 @@ if (is_file($csvFile) && is_readable($csvFile)) {
 }
 
 // Register new matches (kickoff, no goal yet)
+$skippedNoKo = 0;   // match/gol yang dilewati karena tidak punya line awal
 if ($hasMatches) {
     foreach ($payload['matches'] as $m) {
         $ts = $m['timestamp'] ?? date('c');
@@ -224,6 +225,8 @@ if ($hasMatches) {
         $exactKey = $dateOnly . '|' . $hourOnly . ':' . $minuteOnly . '|' . $homeTeam . '|' . $awayTeam;
         $key = isset($rows[$exactKey]) ? $exactKey : (findExistingKey($rows, $dateOnly, $homeTeam, $awayTeam, $dt) ?? $exactKey);
         if (!isset($rows[$key])) {
+            // Wajib ada line awal (kickoff): match tanpa ko_line tidak diregistrasi sama sekali.
+            if (trim((string)($m['ko_line'] ?? '')) === '') { $skippedNoKo++; continue; }
             $rows[$key] = [
                 'datetime'   => $datetime,
                 'league'     => $league,
@@ -281,19 +284,10 @@ foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
 
     if (!hasValidGoalProgression($candidateGoals)) continue;
 
+    // Match yang tidak pernah teregistrasi = tidak punya line awal -> jangan bikin baris baru
+    // di goal_log_vsoccer.csv (per-gol tetap dicatat di goal_events_vsoccer.csv di bawah).
     if (!isset($rows[$key])) {
-        $rows[$key] = [
-            'datetime'   => $datetime,
-            'league'     => $league,
-            'home_team'  => $homeTeam,
-            'away_team'  => $awayTeam,
-            'goals'      => $candidateGoals,
-            'final_home' => $homeFinal,
-            'final_away' => $awayFinal,
-            '1h3'        => '',
-            '2h1'        => '',
-            '2h7'        => '',
-        ];
+        $skippedNoKo++;
     } else {
         $rows[$key]['goals'] = $candidateGoals;
         $rows[$key]['final_home'] = $homeFinal;
@@ -321,6 +315,9 @@ foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
 }
 
 $rows = array_filter($rows, static fn(array $row): bool => shouldKeepPendingRow($row));
+
+// Jaring pengaman: baris tanpa line awal tidak boleh masuk log.
+$rows = array_filter($rows, static fn(array $row): bool => trim((string)($row['ko_line'] ?? '')) !== '');
 
 $rows = array_filter($rows, static function (array $row): bool {
     $goals = trim((string)($row['goals'] ?? ''));
@@ -368,5 +365,6 @@ echo json_encode([
     'ok' => true,
     'goals' => count($payload['goals'] ?? []),
     'matches' => count($payload['matches'] ?? []),
-    'milestones' => count($payload['milestones'] ?? [])
+    'milestones' => count($payload['milestones'] ?? []),
+    'skipped_no_ko_line' => $skippedNoKo
 ]);

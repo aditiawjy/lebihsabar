@@ -62,6 +62,8 @@ if (isset($_GET['json'])) {
   .sig { background:#0f3d24; color:#5ee39b; border:1px solid #2f7d54; border-radius:4px;
          padding:1px 7px; font-size:11px; font-weight:700; letter-spacing:.04em; }
   .sig.supr { background:#4a3a10; color:#ffd166; border-color:#8a6a1c; }
+  .sig.slow { background:#10304a; color:#8ecbff; border-color:#2b5f8a; }
+  .seq { color:#c9a0ff; letter-spacing:.05em; }
   .nosig { color:#4c5666; cursor:help; }
   tr.hit td { background:#12291d; }
   tr.hit td:first-child { box-shadow:inset 3px 0 0 #5ee39b; }
@@ -81,8 +83,12 @@ if (isset($_GET['json'])) {
   </div>
   <p class="muted" id="legend" style="margin:8px 2px 0">
     <b>SUPER</b> — HT tidak seri (kalau seri: gol-2 ≤ 25' dan gol terakhir 1H ≥ 35') · gol pertama ≤ 8' · line awal ≥ 5.75<br>
+    <b>SUPER1</b> — total gol HT tepat 3 (tanpa syarat menit) · line awal ≥ 6.75<br>
+    <b>SUPER2</b> — selisih HT ≤ 1 (termasuk seri) · gol pertama ≤ 8' · line awal ≥ 7.25<br>
+    <b>S-LOW</b> — selisih HT ≤ 1 (termasuk seri) · gol pertama ≤ 8' · line awal ≥ 5.75<br>
     <b>P1</b> — selisih HT tepat 1 · gol pertama ≤ 12' · line awal ≥ 5.75<br>
     <b>P2</b> — HT 2-1 / 1-2 · gol pertama ≤ 15' · line awal ≥ 5.5<br>
+    <b>HAH</b> — urutan gol 1H Home–Away–Home, HT 2-1 (tanpa syarat menit / line)<br>
     Semua sinyal muncul selama babak kedua dan hilang begitu ada gol di babak kedua.
   </p>
 
@@ -92,11 +98,11 @@ if (isset($_GET['json'])) {
       <table>
         <thead><tr>
           <th>Sinyal</th><th>Match</th><th>Babak</th><th class="num">Menit</th><th class="num">Skor</th>
-          <th class="num">HT</th><th class="num">Gol-1</th><th class="num">Gol 1H</th>
+          <th class="num">HT</th><th class="num">Gol-1</th><th class="num">Gol 1H</th><th class="num">Urutan</th>
           <th class="num">Tot</th><th class="num">Line KO</th><th class="num">O/U KO</th>
           <th class="num">Line</th><th class="num">Over</th><th class="num">Under</th>
         </tr></thead>
-        <tbody id="tb"><tr><td colspan="14" class="empty">Menunggu data…</td></tr></tbody>
+        <tbody id="tb"><tr><td colspan="15" class="empty">Menunggu data…</td></tr></tbody>
       </table>
     </div>
     <div>
@@ -149,27 +155,30 @@ function render(d) {
   document.title = (nSig ? '(' + nSig + ') ' : '') + 'V-Soccer Live View';
   if (pats.length) {
     document.getElementById('legend').innerHTML = pats.map(function (p) {
-      return '<b>' + esc(p.code) + '</b> — ' + esc(p.desc) + ' · gol pertama &le; ' +
-             esc(p.first_goal_max) + "' · line awal &ge; " + esc(p.min_line);
+      var t = '<b>' + esc(p.code) + '</b> — ' + esc(p.desc);
+      if (p.first_goal_max != null) t += ' · gol pertama &le; ' + esc(p.first_goal_max) + "'";
+      if (p.min_line != null) t += ' · line awal &ge; ' + esc(p.min_line);
+      return t;
     }).join('<br>') +
       '<br>Semua sinyal muncul selama babak kedua dan hilang begitu ada gol di babak kedua.';
   }
   document.getElementById('cnt').textContent = m.length;
   var tb = document.getElementById('tb'), rows = '', lastLg = null;
   if (!m.length) {
-    rows = '<tr><td colspan="14" class="empty">Tidak ada match terbaca.</td></tr>';
+    rows = '<tr><td colspan="15" class="empty">Tidak ada match terbaca.</td></tr>';
   } else {
     for (var i = 0; i < m.length; i++) {
       var r = m[i];
       if (r.league !== lastLg) {
         lastLg = r.league;
-        rows += '<tr class="lg"><td colspan="14">' + esc(shortLeague(r.league)) + '</td></tr>';
+        rows += '<tr class="lg"><td colspan="15">' + esc(shortLeague(r.league)) + '</td></tr>';
       }
       var koOu = (r.ko_over || r.ko_under) ? (esc(r.ko_over || '-') + ' / ' + esc(r.ko_under || '-')) : '-';
       var hits = r.hits || (r.signal ? ['P1'] : []);
       var sigCell = hits.length
         ? hits.map(function (c) {
-            return '<span class="sig' + (c === 'SUPER' ? ' supr' : '') + '">' + esc(c) + '</span>';
+            var extra = c.indexOf('SUPER') === 0 ? ' supr' : (c === 'S-LOW' ? ' slow' : '');
+            return '<span class="sig' + extra + '">' + esc(c) + '</span>';
           }).join(' ')
         : '<span class="nosig" title="' + esc(r.signal_why || '') + '">–</span>';
       rows += '<tr' + (r.signal ? ' class="hit"' : '') + '>' +
@@ -182,6 +191,8 @@ function render(d) {
         '<td class="num">' + (r.first_goal_min == null ? '-' : r.first_goal_min + "'") + '</td>' +
         '<td class="num" title="menit gol babak pertama">' +
           ((r.goal_mins_1h && r.goal_mins_1h.length) ? esc(r.goal_mins_1h.join(', ')) : '-') + '</td>' +
+        '<td class="num seq" title="urutan pencetak gol babak pertama (H=home, A=away)">' +
+          esc(r.goal_seq_1h || '-') + '</td>' +
         '<td class="num">' + (r.total == null ? '-' : r.total) + '</td>' +
         '<td class="num ' + (r.ko_line ? 'ko' : 'noko') + '">' + esc(r.ko_line || 'belum ada') + '</td>' +
         '<td class="num">' + koOu + '</td>' +

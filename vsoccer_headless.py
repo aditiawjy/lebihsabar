@@ -73,6 +73,14 @@ SUPER2_DRAW4_SECOND_GOAL_MIN = int(os.environ.get("VSOCCER_SUPER2_DRAW4_SECOND_G
 SUPER2_DRAW4_SECOND_GOAL_MAX = int(os.environ.get("VSOCCER_SUPER2_DRAW4_SECOND_GOAL_MAX", "30"))
 SLOW_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_SLOW_FIRST_GOAL_MAX", "8"))
 SLOW_MIN_LINE = float(os.environ.get("VSOCCER_SLOW_MIN_LINE", "5.75"))
+SLOW_TOTAL3_EARLY_FIRST_MAX = int(os.environ.get("VSOCCER_SLOW_TOTAL3_EARLY_FIRST_MAX", "4"))
+SLOW_TOTAL3_EARLY_MIN_LINE = float(os.environ.get("VSOCCER_SLOW_TOTAL3_EARLY_MIN_LINE", "7.25"))
+SLOW_DRAW4_LATE_FIRST_MIN = int(os.environ.get("VSOCCER_SLOW_DRAW4_LATE_FIRST_MIN", "7"))
+SLOW_DRAW4_EARLY_SECOND_MAX = int(os.environ.get("VSOCCER_SLOW_DRAW4_EARLY_SECOND_MAX", "10"))
+SLOW_DRAW4_MAX_LINE = float(os.environ.get("VSOCCER_SLOW_DRAW4_MAX_LINE", "6.25"))
+SLOW_TOTAL5_EARLY_FIRST_MAX = int(os.environ.get("VSOCCER_SLOW_TOTAL5_EARLY_FIRST_MAX", "5"))
+SLOW_TOTAL5_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_SLOW_TOTAL5_LAST_GOAL_MIN", "30"))
+SLOW_TOTAL6_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_SLOW_TOTAL6_FIRST_GOAL_MAX", "7"))
 P1_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P1_FIRST_GOAL_MAX", "12"))
 P1_MIN_LINE = float(os.environ.get("VSOCCER_P1_MIN_LINE", "5.75"))
 P1_LOW_TOTAL_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P1_LOW_TOTAL_FIRST_GOAL_MAX", "6"))
@@ -116,7 +124,7 @@ PATTERNS = [
      "ht": "diff_le1",
      "first_goal_max": SUPER2_FIRST_GOAL_MAX, "min_line": SUPER2_MIN_LINE},
     {"code": "S-LOW",
-     "desc": "selisih HT ≤ 1 (syarat seri & jendela gol-2 sama seperti SUPER)", "ht": "super",
+     "desc": "formula ketat 100%: tanpa total HT 1; total HT 3 + gol-1 ≤ 4' wajib line ≥ 7.25; HT 2-2 + gol-1 ≥ 7' + gol-2 ≤ 10' wajib line ≤ 6.25; total HT 5 + gol-1 ≤ 5' wajib gol terakhir 1H ≥ 30'; total HT 6 wajib gol-1 ≤ 7'", "ht": "super",
      "first_goal_max": SLOW_FIRST_GOAL_MAX, "min_line": SLOW_MIN_LINE},
     {"code": "P1",
      "desc": f"selisih HT tepat 1 (total HT 1: gol-1 ≤ {P1_LOW_TOTAL_FIRST_GOAL_MAX}'; "
@@ -279,6 +287,26 @@ def signal_check(e, st, pat):
         lv = line_value(st.get("ko_line"))
         if lv is None or lv < SUPER1_ONE_SIDED_MIN_LINE:
             return False, f"HT {ht_h}-{ht_a}, line awal {st.get('ko_line')}"
+    if pat["code"] == "S-LOW":
+        total_ht = ht_h + ht_a
+        g1h = st.get("goal_mins_1h") or []
+        fg = g1h[0] if g1h else None
+        sg = g1h[1] if len(g1h) >= 2 else None
+        lv = line_value(st.get("ko_line"))
+        if total_ht == 1:
+            return False, "total HT 1 dibuang"
+        if total_ht == 3 and fg is not None and fg <= SLOW_TOTAL3_EARLY_FIRST_MAX:
+            if lv is None or lv < SLOW_TOTAL3_EARLY_MIN_LINE:
+                return False, f"total HT 3, gol pertama {fg}', line {st.get('ko_line')}"
+        if ht_h == ht_a and total_ht == 4 and fg is not None and sg is not None:
+            if fg >= SLOW_DRAW4_LATE_FIRST_MIN and sg <= SLOW_DRAW4_EARLY_SECOND_MAX:
+                if lv is None or lv > SLOW_DRAW4_MAX_LINE:
+                    return False, f"HT 2-2, gol 1/2 {fg}'/{sg}', line {st.get('ko_line')}"
+        if total_ht == 5 and fg is not None and fg <= SLOW_TOTAL5_EARLY_FIRST_MAX:
+            if not g1h or g1h[-1] < SLOW_TOTAL5_LAST_GOAL_MIN:
+                return False, f"total HT 5, gol terakhir 1H {g1h[-1] if g1h else 'tak terekam'}"
+        if total_ht == 6 and fg is not None and fg > SLOW_TOTAL6_FIRST_GOAL_MAX:
+            return False, f"total HT 6, gol pertama {fg}'"
     if pat["code"] == "SUPER2":
         total_ht = ht_h + ht_a
         g1h = st.get("goal_mins_1h") or []

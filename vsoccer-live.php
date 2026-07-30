@@ -85,7 +85,7 @@ if (isset($_GET['json'])) {
     <b>SUPER</b> — selisih HT ≤ 1 (kalau seri: gol-2 ≤ 25' dan gol terakhir 1H ≥ 35') · gol pertama ≤ 6' · line awal ≥ 5.75 · jika total HT 3/5, gol-2 wajib menit 9'–30'<br>
     <b>SUPER1</b> — total gol HT tepat 3 · gol pertama ≤ 25' · line awal ≥ 6.75 · HT 3-0/0-3: line ≥ 7.5<br>
     <b>SUPER2</b> — selisih HT ≤ 1 · gol pertama ≤ 8' · line awal ≥ 7.25 · total HT 5: gol-2 menit 9'–30' · HT 2-2: gol-2 menit 14'–30'<br>
-    <b>S-LOW</b> — selisih HT ≤ 1 · gol pertama ≤ 8' · line awal ≥ 5.75 · syarat seri dan jendela gol-2 sama seperti SUPER<br>
+    <b>S-LOW</b> — selisih HT ≤ 1 · gol-1 ≤ 8' · line ≥ 5.75 · tanpa total HT 1 · total HT 3 + gol-1 ≤ 4': line ≥ 7.25 · HT 2-2 + gol-1 ≥ 7' + gol-2 ≤ 10': line ≤ 6.25 · total HT 5 + gol-1 ≤ 5': gol terakhir 1H ≥ 30' · total HT 6: gol-1 ≤ 7'<br>
     <b>P1</b> — selisih HT tepat 1 · gol pertama ≤ 12' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 5: gol-2 menit 9'–30'<br>
     <b>P2</b> — HT 2-1 / 1-2 · gol pertama ≤ 15' · line awal ≥ 5.5<br>
     <b>P3</b> — total gol HT tepat 3 · gol pertama 5'–9'<br>

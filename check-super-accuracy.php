@@ -23,6 +23,14 @@ const SUPER2_DRAW4_SECOND_GOAL_MIN = 14;
 const SUPER2_DRAW4_SECOND_GOAL_MAX = 30;
 const SLOW_FIRST_GOAL_MAX = 8;
 const SLOW_MIN_LINE = 5.75;
+const SLOW_TOTAL3_EARLY_FIRST_MAX = 4;
+const SLOW_TOTAL3_EARLY_MIN_LINE = 7.25;
+const SLOW_DRAW4_LATE_FIRST_MIN = 7;
+const SLOW_DRAW4_EARLY_SECOND_MAX = 10;
+const SLOW_DRAW4_MAX_LINE = 6.25;
+const SLOW_TOTAL5_EARLY_FIRST_MAX = 5;
+const SLOW_TOTAL5_LAST_GOAL_MIN = 30;
+const SLOW_TOTAL6_FIRST_GOAL_MAX = 7;
 const P11_TOTAL_HT = 3;
 const P11_FIRST_GOAL_MAX = 12;
 const P11_MIN_LINE = 5.75;
@@ -209,6 +217,12 @@ if (!is_file($file)) {
             }
         }
 
+        // Timeline scraper kadang terputus sebelum laga selesai. Jika skor akhir
+        // mencatat lebih banyak gol, pakai selisih FT-HT agar hasil pattern tidak
+        // keliru hanya karena event individual yang hilang.
+        $scoreDerivedGoals2H = max(0, ($finalHomeRaw + $finalAwayRaw) - ($htHome + $htAway));
+        $goals2H = max($goals2H, $scoreDerivedGoals2H);
+
         // Baseline dihitung sebelum filter pattern, jadi mencakup semua match
         // selesai — termasuk yang tidak memenuhi pattern.
         $day = substr($dateText, 0, 10);
@@ -319,7 +333,21 @@ if (!is_file($file)) {
                 && $firstGoal <= SLOW_FIRST_GOAL_MAX
                 && $ko >= SLOW_MIN_LINE
                 && (!$isDraw || $drawException)
-                && $nonDrawSecondGoalWindow;
+                && $nonDrawSecondGoalWindow
+                && ($htHome + $htAway) !== 1
+                && (($htHome + $htAway) !== 3
+                    || $firstGoal > SLOW_TOTAL3_EARLY_FIRST_MAX
+                    || $ko >= SLOW_TOTAL3_EARLY_MIN_LINE)
+                && (!($isDraw && ($htHome + $htAway) === 4
+                    && $firstGoal >= SLOW_DRAW4_LATE_FIRST_MIN
+                    && $secondGoal !== null
+                    && $secondGoal <= SLOW_DRAW4_EARLY_SECOND_MAX)
+                    || $ko <= SLOW_DRAW4_MAX_LINE)
+                && (($htHome + $htAway) !== 5
+                    || $firstGoal > SLOW_TOTAL5_EARLY_FIRST_MAX
+                    || $lastGoal1H >= SLOW_TOTAL5_LAST_GOAL_MIN)
+                && (($htHome + $htAway) !== 6
+                    || $firstGoal <= SLOW_TOTAL6_FIRST_GOAL_MAX);
             $branch = $isDraw ? 'HT seri' : 'Selisih HT 1';
         } elseif ($patternKey === 'super2') {
             $matchesPattern = abs($htHome - $htAway) <= 1
@@ -527,7 +555,7 @@ table{width:100%;border-collapse:collapse;white-space:nowrap;background:#10161e}
   <?php elseif ($patternKey === 'super2'): ?>
     <div class="rule"><b>SUPER2</b> — selisih HT ≤ 1 · gol pertama ≤ 8' · line awal ≥ 7.25 · jika total HT 5, gol kedua menit 9'–30' · jika HT 2-2, gol kedua menit 14'–30'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 3).</span></div>
   <?php elseif ($patternKey === 'slow'): ?>
-    <div class="rule"><b>S-LOW</b> — selisih HT ≤ 1 · gol pertama ≤ 8' · line awal ≥ 5.75 · jika HT seri, gol ke-2 ≤ 25' dan gol terakhir 1H ≥ 35' · jika total HT 3 atau 5, gol ke-2 harus menit 9'–30'.</div>
+    <div class="rule"><b>S-LOW</b> — selisih HT ≤ 1 · gol pertama ≤ 8' · line awal ≥ 5.75 · buang total HT 1 · total HT 3 dengan gol-1 ≤ 4': line ≥ 7.25 · HT 2-2 dengan gol-1 ≥ 7' dan gol-2 ≤ 10': line ≤ 6.25 · total HT 5 dengan gol-1 ≤ 5': gol terakhir 1H ≥ 30' · total HT 6: gol-1 ≤ 7'.</div>
   <?php elseif ($patternKey === 'hah'): ?>
     <div class="rule"><b>HAH</b> — urutan gol 1H Home–Away–Home, skor HT 2-1, tanpa syarat menit atau line.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php elseif ($patternKey === 'p1'): ?>

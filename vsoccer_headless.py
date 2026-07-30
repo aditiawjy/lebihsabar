@@ -109,6 +109,7 @@ P3_MAX_LINE = float(os.environ.get("VSOCCER_P3_MAX_LINE", "7.5"))
 P4_FIRST_GOAL_MIN = int(os.environ.get("VSOCCER_P4_FIRST_GOAL_MIN", "15"))
 P4_MIN_LINE = float(os.environ.get("VSOCCER_P4_MIN_LINE", "5.5"))
 P5_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P5_FIRST_GOAL_MAX", "18"))
+P5_LAST_1H_GOAL_MAX = int(os.environ.get("VSOCCER_P5_LAST_1H_GOAL_MAX", "40"))
 P6_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P6_FIRST_GOAL_MAX", "8"))
 P6_MAX_LINE = float(os.environ.get("VSOCCER_P6_MAX_LINE", "6.25"))     # 6/6.5
 P7_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P7_FIRST_GOAL_MAX", "8"))
@@ -116,6 +117,12 @@ P8_MIN_LINE = float(os.environ.get("VSOCCER_P8_MIN_LINE", "6"))
 P9_SECOND_GOAL_MIN = int(os.environ.get("VSOCCER_P9_SECOND_GOAL_MIN", "12"))
 P9_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_P9_LAST_GOAL_MIN", "34"))
 P10_MIN_LINE = float(os.environ.get("VSOCCER_P10_MIN_LINE", "5.75"))   # 5.5/6
+SUPER3_HT_DIFF = int(os.environ.get("VSOCCER_SUPER3_HT_DIFF", "3"))
+SUPER3_MIN_LINE = float(os.environ.get("VSOCCER_SUPER3_MIN_LINE", "6"))
+SUPER3_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_SUPER3_LAST_GOAL_MIN", "40"))
+P12_TOTAL_HT = int(os.environ.get("VSOCCER_P12_TOTAL_HT", "5"))
+P12_MIN_LINE = float(os.environ.get("VSOCCER_P12_MIN_LINE", "6.5"))
+P12_SECOND_GOAL_MIN = int(os.environ.get("VSOCCER_P12_SECOND_GOAL_MIN", "8"))
 P11_TOTAL_HT = int(os.environ.get("VSOCCER_P11_TOTAL_HT", "3"))
 P11_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P11_FIRST_GOAL_MAX", "12"))
 P11_MIN_LINE = float(os.environ.get("VSOCCER_P11_MIN_LINE", "5.75"))
@@ -149,6 +156,12 @@ PATTERNS = [
     {"code": "S-LOW",
      "desc": "formula ketat 100%: tanpa total HT 1; total HT 3 line ≤ 7.5, gol-1 ≤ 4' wajib line ≥ 7.25, gol-1 ≥ 8' wajib line ≤ 6.25; HT 2-2 + gol-1 ≥ 7' + gol-2 ≤ 10' wajib line ≤ 6; total HT 5 + gol-1 ≤ 5' wajib gol terakhir 1H ≥ 30'; total HT 6 wajib gol-1 ≤ 7'", "ht": "super",
      "first_goal_max": SLOW_FIRST_GOAL_MAX, "min_line": SLOW_MIN_LINE},
+    {"code": "SUPER3",
+     "desc": f"selisih HT tepat {SUPER3_HT_DIFF}; gol terakhir 1H ≥ {SUPER3_LAST_GOAL_MIN}'",
+     "ht": "any", "first_goal_max": None, "min_line": SUPER3_MIN_LINE},
+    {"code": "P12",
+     "desc": f"total HT tepat {P12_TOTAL_HT}; gol-2 ≥ {P12_SECOND_GOAL_MIN}'",
+     "ht": "total", "total_ht": P12_TOTAL_HT, "first_goal_max": None, "min_line": P12_MIN_LINE},
     {"code": "P1",
      "desc": f"selisih HT tepat 1 (total HT 1: gol-1 ≤ {P1_LOW_TOTAL_FIRST_GOAL_MAX}'; "
              f"total HT 3: line ≤ {P1_TOTAL3_MAX_LINE}, gol-1 ≤ {P1_TOTAL3_EARLY_FIRST_MAX}' wajib "
@@ -164,7 +177,7 @@ PATTERNS = [
     {"code": "P4", "desc": "HT 1-1", "ht": "score", "score": (1, 1),
      "first_goal_min": P4_FIRST_GOAL_MIN, "first_goal_max": None, "min_line": P4_MIN_LINE},
     # P5-P10: skor HT persis (home-away, jadi 1-3 tidak sama dengan 3-1).
-    {"code": "P5", "desc": "HT 3-0", "ht": "score", "score": (3, 0),
+    {"code": "P5", "desc": f"HT 3-0; gol terakhir 1H ≤ {P5_LAST_1H_GOAL_MAX}'", "ht": "score", "score": (3, 0),
      "first_goal_max": P5_FIRST_GOAL_MAX, "min_line": None},
     {"code": "P6", "desc": "HT 2-2", "ht": "score", "score": (2, 2),
      "first_goal_max": P6_FIRST_GOAL_MAX, "min_line": None, "max_line": P6_MAX_LINE},
@@ -187,7 +200,7 @@ PATTERNS = [
 
 POLL_SEC = float(os.environ.get("VSOCCER_POLL_SEC", "2.5"))
 RELOAD_SEC = int(os.environ.get("VSOCCER_RELOAD_SEC", str(20 * 60)))
-O25_SIGNAL_CODES = {"SUPER", "SUPER1", "SUPER2", "S-LOW"}
+O25_SIGNAL_CODES = {"SUPER", "SUPER1", "SUPER2", "S-LOW", "SUPER3"}
 SIGNAL_START_2H_O25_MINUTE = int(os.environ.get("VSOCCER_SIGNAL_START_2H_O25_MINUTE", "50"))
 SIGNAL_START_2H_OTHER_MINUTE = int(os.environ.get("VSOCCER_SIGNAL_START_2H_MINUTE", "60"))
 PAGE_LOAD_TIMEOUT_MS = 60_000
@@ -315,6 +328,16 @@ def signal_check(e, st, pat):
         return False, f"HT {ht_h}-{ht_a}"
     if pat["ht"] == "21" and {ht_h, ht_a} != {1, 2}:
         return False, f"HT {ht_h}-{ht_a}"
+    if pat["code"] == "SUPER3":
+        g1h = st.get("goal_mins_1h") or []
+        if abs(ht_h - ht_a) != SUPER3_HT_DIFF:
+            return False, f"selisih HT {abs(ht_h - ht_a)}"
+        if not g1h or g1h[-1] < SUPER3_LAST_GOAL_MIN:
+            return False, f"gol terakhir 1H {g1h[-1] if g1h else 'tak terekam'}"
+    if pat["code"] == "P12":
+        g1h = st.get("goal_mins_1h") or []
+        if len(g1h) < 2 or g1h[1] < P12_SECOND_GOAL_MIN:
+            return False, f"gol kedua {g1h[1] if len(g1h) >= 2 else 'tak terekam'}"
     if pat["code"] == "SUPER1" and abs(ht_h - ht_a) == 3:
         lv = line_value(st.get("ko_line"))
         if lv is None or lv < SUPER1_ONE_SIDED_MIN_LINE:
@@ -420,6 +443,10 @@ def signal_check(e, st, pat):
             return False, "P9 gol kedua terlalu cepat/tak terekam"
         if g1h[-1] < P9_LAST_GOAL_MIN:
             return False, f"P9 gol terakhir 1H {g1h[-1]}'"
+    if pat["code"] == "P5":
+        g1h = st.get("goal_mins_1h") or []
+        if not g1h or g1h[-1] > P5_LAST_1H_GOAL_MAX:
+            return False, f"P5 gol terakhir 1H {g1h[-1] if g1h else 'tak terekam'}'"
     if pat["code"] == "P2" and fg <= P2_EARLY_FIRST_GOAL_MAX:
         lv = line_value(st.get("ko_line"))
         if lv is None or lv < P2_EARLY_MIN_LINE:
@@ -458,7 +485,7 @@ def match_signals(e, st):
 
 # Target tiap pattern dalam jumlah gol babak kedua. Harus sama dengan
 # $targetGoals di check-super-accuracy.php.
-PATTERN_TARGET_2H = {"SUPER": 3, "SUPER1": 3, "SUPER2": 3, "S-LOW": 3}
+PATTERN_TARGET_2H = {"SUPER": 3, "SUPER1": 3, "SUPER2": 3, "S-LOW": 3, "SUPER3": 3}
 SIGNAL_LOG_HEADER = [
     "logged_at", "code", "league", "home_team", "away_team",
     "half", "minute", "score", "ht", "ht_total",

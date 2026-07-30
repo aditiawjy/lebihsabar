@@ -4,19 +4,33 @@ header('X-Frame-Options: DENY');
 date_default_timezone_set('Asia/Jakarta');
 
 const FINISH_MINUTES = 15;
-const SUPER_FIRST_GOAL_MAX = 8;
+const SUPER_FIRST_GOAL_MAX = 6;
 const SUPER_MIN_LINE = 5.75;
 const SUPER_SECOND_GOAL_MAX = 25;
 const SUPER_LAST_1H_MIN = 35;
 const SUPER_MAX_HT_DIFF = 1;
+const SUPER_NON_DRAW_SECOND_GOAL_MIN = 9;
+const SUPER_NON_DRAW_SECOND_GOAL_MAX = 30;
 const SUPER1_TOTAL_HT = 3;
 const SUPER1_MIN_LINE = 6.75;
+const SUPER1_FIRST_GOAL_MAX = 25;
+const SUPER1_ONE_SIDED_MIN_LINE = 7.5;
 const SUPER2_FIRST_GOAL_MAX = 8;
 const SUPER2_MIN_LINE = 7.25;
+const SUPER2_TOTAL5_SECOND_GOAL_MIN = 9;
+const SUPER2_TOTAL5_SECOND_GOAL_MAX = 30;
+const SUPER2_DRAW4_SECOND_GOAL_MIN = 14;
+const SUPER2_DRAW4_SECOND_GOAL_MAX = 30;
+const SLOW_FIRST_GOAL_MAX = 8;
+const SLOW_MIN_LINE = 5.75;
 const P11_TOTAL_HT = 3;
 const P11_FIRST_GOAL_MAX = 12;
+const P11_MIN_LINE = 5.75;
 const P1_FIRST_GOAL_MAX = 12;
 const P1_MIN_LINE = 5.75;
+const P1_LOW_TOTAL_FIRST_GOAL_MAX = 6;
+const P1_HIGH_TOTAL_SECOND_GOAL_MIN = 9;
+const P1_HIGH_TOTAL_SECOND_GOAL_MAX = 30;
 const P2_FIRST_GOAL_MAX = 15;
 const P2_MIN_LINE = 5.5;
 const P3_FIRST_GOAL_MIN = 5;
@@ -32,24 +46,39 @@ const P10_MIN_LINE = 5.75;
 
 $file = __DIR__ . '/goal_log_vsoccer.csv';
 $now = time();
-$allowedPatterns = ['super', 'super1', 'super2', 'hah', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p10', 'p11'];
+$allowedPatterns = ['super', 'super1', 'super2', 'slow', 'hah', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p10', 'p11'];
 $patternKey = isset($_GET['pattern']) && in_array($_GET['pattern'], $allowedPatterns, true)
     ? $_GET['pattern']
     : 'super';
-$patternCode = strtoupper($patternKey);
+$patternCode = $patternKey === 'slow' ? 'S-LOW' : strtoupper($patternKey);
 $isOver15Pattern = $patternKey === 'hah' || preg_match('/^p(?:[1-9]|10|11)$/', $patternKey) === 1;
 $targetGoals = $isOver15Pattern ? 2 : 3;
 $targetLabel = $isOver15Pattern
     ? 'Over 1.5 gol babak kedua'
     : 'Over 2.5 gol babak kedua';
 $lineRequirements = [
-    'super' => '≥ 5.75', 'super1' => '≥ 6.75', 'super2' => '≥ 7.25',
+    'super' => '≥ 5.75', 'super1' => '≥ 6.75', 'super2' => '≥ 7.25', 'slow' => '≥ 5.75',
     'hah' => 'Tanpa syarat', 'p1' => '≥ 5.75', 'p2' => '≥ 5.5',
     'p3' => 'Tanpa syarat', 'p4' => '≥ 5.5', 'p5' => 'Tanpa syarat',
     'p6' => '≤ 6.25', 'p7' => 'Tanpa syarat', 'p8' => '≥ 6',
-    'p9' => 'Tanpa syarat', 'p10' => '≥ 5.75', 'p11' => 'Tanpa syarat',
+    'p9' => 'Tanpa syarat', 'p10' => '≥ 5.75', 'p11' => '≥ 5.75',
 ];
 $lineRequirement = $lineRequirements[$patternKey];
+
+// Aturan pattern diturunkan dari data 23/07 & 28/07, jadi hari-hari itu in-sample:
+// akurasinya hampir selalu 100% dan bukan bukti apa pun. Verdict dihitung hanya
+// dari match sejak tanggal ini. Bisa digeser lewat ?since=dd/mm/yyyy.
+const RULES_LOCKED_FROM = '29/07/2026';
+const MIN_EVAL_SAMPLE = 10;
+$lockedText = RULES_LOCKED_FROM;
+if (isset($_GET['since']) && preg_match('#^\d{2}/\d{2}/\d{4}$#', (string)$_GET['since']) === 1) {
+    $parsed = DateTime::createFromFormat('d/m/Y H:i', $_GET['since'] . ' 00:00');
+    if ($parsed) {
+        $lockedText = (string)$_GET['since'];
+    }
+}
+$lockedDate = DateTime::createFromFormat('d/m/Y H:i', $lockedText . ' 00:00');
+$lockedTs = $lockedDate ? $lockedDate->getTimestamp() : 0;
 
 function e($value): string
 {
@@ -111,6 +140,7 @@ $error = null;
 // pembanding ini, akurasi pattern 90% tidak bisa dinilai: bisa jadi tebak-buta
 // pun sudah dapat 66%.
 $baseline = ['hits' => 0, 'total' => 0];
+$baselineEval = ['hits' => 0, 'total' => 0];   // baseline khusus data sejak aturan dikunci
 $baselineByDay = [];
 
 if (!is_file($file)) {
@@ -182,9 +212,15 @@ if (!is_file($file)) {
         // Baseline dihitung sebelum filter pattern, jadi mencakup semua match
         // selesai — termasuk yang tidak memenuhi pattern.
         $day = substr($dateText, 0, 10);
+        $rowTs = $date ? $date->getTimestamp() : 0;
+        $isEval = $lockedTs > 0 && $rowTs >= $lockedTs;
         $baselineHit = $goals2H >= $targetGoals;
         $baseline['total']++;
         $baseline['hits'] += $baselineHit ? 1 : 0;
+        if ($isEval) {
+            $baselineEval['total']++;
+            $baselineEval['hits'] += $baselineHit ? 1 : 0;
+        }
         $baselineByDay[$day]['total'] = ($baselineByDay[$day]['total'] ?? 0) + 1;
         $baselineByDay[$day]['hits'] = ($baselineByDay[$day]['hits'] ?? 0) + ($baselineHit ? 1 : 0);
 
@@ -200,11 +236,21 @@ if (!is_file($file)) {
             && $secondGoal !== null
             && $secondGoal <= SUPER_SECOND_GOAL_MAX
             && $lastGoal1H >= SUPER_LAST_1H_MIN;
+        $nonDrawSecondGoalWindow = $isDraw
+            || !in_array($htHome + $htAway, [3, 5], true)
+            || ($secondGoal !== null
+                && $secondGoal >= SUPER_NON_DRAW_SECOND_GOAL_MIN
+                && $secondGoal <= SUPER_NON_DRAW_SECOND_GOAL_MAX);
 
         if ($patternKey === 'p1') {
+            $totalHt = $htHome + $htAway;
             $matchesPattern = abs($htHome - $htAway) === 1
                 && $firstGoal <= P1_FIRST_GOAL_MAX
-                && $ko >= P1_MIN_LINE;
+                && $ko >= P1_MIN_LINE
+                && ($totalHt !== 1 || $firstGoal <= P1_LOW_TOTAL_FIRST_GOAL_MAX)
+                && ($totalHt !== 5 || ($secondGoal !== null
+                    && $secondGoal >= P1_HIGH_TOTAL_SECOND_GOAL_MIN
+                    && $secondGoal <= P1_HIGH_TOTAL_SECOND_GOAL_MAX));
             $branch = 'Selisih HT tepat 1';
         } elseif ($patternKey === 'p2') {
             $matchesPattern = (($htHome === 2 && $htAway === 1) || ($htHome === 1 && $htAway === 2))
@@ -253,7 +299,8 @@ if (!is_file($file)) {
             $branch = 'HT tepat 2-3';
         } elseif ($patternKey === 'p11') {
             $matchesPattern = ($htHome + $htAway) === P11_TOTAL_HT
-                && $firstGoal <= P11_FIRST_GOAL_MAX;
+                && $firstGoal <= P11_FIRST_GOAL_MAX
+                && $ko >= P11_MIN_LINE;
             $branch = 'Total HT 3 · gol-1 ≤ 12';
         } elseif ($patternKey === 'hah') {
             $matchesPattern = $htHome === 2
@@ -262,18 +309,35 @@ if (!is_file($file)) {
             $branch = 'Home–Away–Home';
         } elseif ($patternKey === 'super1') {
             $matchesPattern = ($htHome + $htAway) === SUPER1_TOTAL_HT
-                && $ko >= SUPER1_MIN_LINE;
+                && $ko >= SUPER1_MIN_LINE
+                && $firstGoal <= SUPER1_FIRST_GOAL_MAX
+                && (abs($htHome - $htAway) !== 3 || $ko >= SUPER1_ONE_SIDED_MIN_LINE);
             $branch = 'Total HT tepat 3';
+        } elseif ($patternKey === 'slow') {
+            // Sama seperti SUPER2 tapi ambang line lebih rendah; tanpa syarat khusus seri.
+            $matchesPattern = abs($htHome - $htAway) <= 1
+                && $firstGoal <= SLOW_FIRST_GOAL_MAX
+                && $ko >= SLOW_MIN_LINE
+                && (!$isDraw || $drawException)
+                && $nonDrawSecondGoalWindow;
+            $branch = $isDraw ? 'HT seri' : 'Selisih HT 1';
         } elseif ($patternKey === 'super2') {
             $matchesPattern = abs($htHome - $htAway) <= 1
                 && $firstGoal <= SUPER2_FIRST_GOAL_MAX
-                && $ko >= SUPER2_MIN_LINE;
+                && $ko >= SUPER2_MIN_LINE
+                && (($htHome + $htAway) !== 5 || ($secondGoal !== null
+                    && $secondGoal >= SUPER2_TOTAL5_SECOND_GOAL_MIN
+                    && $secondGoal <= SUPER2_TOTAL5_SECOND_GOAL_MAX))
+                && (!($isDraw && ($htHome + $htAway) === 4) || ($secondGoal !== null
+                    && $secondGoal >= SUPER2_DRAW4_SECOND_GOAL_MIN
+                    && $secondGoal <= SUPER2_DRAW4_SECOND_GOAL_MAX));
             $branch = $isDraw ? 'HT seri' : 'Selisih HT 1';
         } else {
             $matchesPattern = abs($htHome - $htAway) <= SUPER_MAX_HT_DIFF
                 && $firstGoal <= SUPER_FIRST_GOAL_MAX
                 && $ko >= SUPER_MIN_LINE
-                && (!$isDraw || $drawException);
+                && (!$isDraw || $drawException)
+                && $nonDrawSecondGoalWindow;
             $branch = $isDraw ? 'Seri + syarat khusus' : 'Selisih HT 1';
         }
 
@@ -282,9 +346,10 @@ if (!is_file($file)) {
         }
 
         $qualified[] = [
-            'timestamp' => $date ? $date->getTimestamp() : 0,
+            'timestamp' => $rowTs,
             'datetime' => $dateText,
             'day' => $day,
+            'eval' => $isEval,
             'league' => trim((string)($row[$index['league']] ?? '')),
             'home' => trim((string)($row[$index['home_team']] ?? '')),
             'away' => trim((string)($row[$index['away_team']] ?? '')),
@@ -310,14 +375,26 @@ usort($qualified, static fn($a, $b) => $a['timestamp'] <=> $b['timestamp']);
 $nonDrawRows = array_values(array_filter($qualified, static fn($row) => !$row['is_draw']));
 $drawRows = array_values(array_filter($qualified, static fn($row) => $row['is_draw']));
 
+$evalRows = array_values(array_filter($qualified, static fn($row) => $row['eval']));
+$inSampleRows = array_values(array_filter($qualified, static fn($row) => !$row['eval']));
+
 $allStats = summarize($qualified);
+$evalStats = summarize($evalRows);
+$inSampleStats = summarize($inSampleRows);
 $nonDrawStats = summarize($nonDrawRows);
 $drawStats = summarize($drawRows);
 $failures = array_values(array_filter($qualified, static fn($row) => !$row['hit']));
+// Verdict memakai SEMUA tanggal. Rincian in-sample vs data evaluasi tetap
+// ditampilkan di bawah sebagai peringatan, tapi tidak lagi memotong sampel.
 $ci = wilson95($allStats['hits'], $allStats['total']);
+$ciEval = wilson95($evalStats['hits'], $evalStats['total']);
 
 $baselineRate = percent($baseline['hits'], $baseline['total']);
+$baselineEvalRate = percent($baselineEval['hits'], $baselineEval['total']);
 $edge = ($allStats['rate'] === null || $baselineRate === null) ? null : $allStats['rate'] - $baselineRate;
+$edgeEval = ($evalStats['rate'] === null || $baselineEvalRate === null)
+    ? null
+    : $evalStats['rate'] - $baselineEvalRate;
 
 // Rincian per hari: pattern vs baseline hari yang sama. Hari pertama biasanya
 // in-sample (aturan diturunkan dari situ); hari-hari sesudahnya yang menentukan.
@@ -332,8 +409,10 @@ foreach ($byDay as $day => $agg) {
     $bHits = $baselineByDay[$day]['hits'] ?? 0;
     $bTotal = $baselineByDay[$day]['total'] ?? 0;
     $bRate = percent($bHits, $bTotal);
+    $dayDate = DateTime::createFromFormat('d/m/Y H:i', $day . ' 00:00');
     $dayRows[] = [
         'day' => $day,
+        'is_eval' => $lockedTs > 0 && $dayDate && $dayDate->getTimestamp() >= $lockedTs,
         'hits' => $agg['hits'],
         'total' => $agg['total'],
         'rate' => $pRate,
@@ -357,28 +436,36 @@ function signed(?float $value): string
     return ($value >= 0 ? '+' : '−') . number_format(abs($value), 1, ',', '.') . ' pp';
 }
 
-if ($allStats['total'] === 0) {
+// Verdict utama hanya memakai data evaluasi. Data in-sample dan gabungan tetap
+// ditampilkan sebagai konteks, tetapi tidak memengaruhi label edge utama.
+$hasEvaluation = $evalStats['total'] > 0;
+$primaryStats = $allStats;
+$primaryBaselineRate = $baselineRate;
+$primaryEdge = $edge;
+$primaryCi = $ci;
+$primaryScope = 'semua tanggal';
+
+if ($primaryStats['total'] === 0) {
     $verdict = 'BELUM ADA SAMPEL';
     $verdictClass = 'neutral';
     $verdictText = "Belum ada match selesai yang memenuhi pola {$patternCode}.";
-} elseif ($edge !== null && $ci[0] !== null && $ci[0] <= $baselineRate) {
-    // Batas bawah CI menyentuh baseline: belum ada bukti pattern lebih baik
-    // daripada menaruhi semua match tanpa filter.
+} elseif ($primaryEdge !== null && $primaryCi[0] !== null && $primaryCi[0] <= $primaryBaselineRate) {
     $verdict = 'EDGE BELUM TERBUKTI';
     $verdictClass = 'down';
-    $verdictText = "Akurasi {$patternCode} " . pct($allStats['rate']) . ' vs baseline '
-        . pct($baselineRate) . ' (' . signed($edge) . '), tapi batas bawah CI 95% ('
-        . pct($ci[0]) . ') masih di bawah/menyentuh baseline. Sampel belum cukup untuk menyimpulkan pattern ini unggul.';
-} elseif ($edge !== null && $edge <= 0) {
+    $verdictText = "Akurasi {$patternCode} semua tanggal " . pct($primaryStats['rate']) . ' vs baseline semua match '
+        . pct($primaryBaselineRate) . ' (' . signed($primaryEdge) . '), tetapi batas bawah CI 95% ('
+        . pct($primaryCi[0]) . ') masih di bawah/menyentuh baseline.';
+} elseif ($primaryEdge !== null && $primaryEdge <= 0) {
     $verdict = 'TIDAK ADA EDGE';
     $verdictClass = 'down';
-    $verdictText = "{$patternCode} (" . pct($allStats['rate']) . ') tidak lebih baik daripada menaruhi semua match tanpa filter ('
-        . pct($baselineRate) . ').';
+    $verdictText = "{$patternCode} semua tanggal (" . pct($primaryStats['rate'])
+        . ') tidak lebih baik daripada baseline semua match (' . pct($primaryBaselineRate) . ').';
 } else {
     $verdict = 'EDGE POSITIF';
     $verdictClass = 'same';
-    $verdictText = "{$patternCode} " . pct($allStats['rate']) . ' vs baseline ' . pct($baselineRate)
-        . ' (' . signed($edge) . '), batas bawah CI 95% ' . pct($ci[0]) . ' masih di atas baseline.';
+    $verdictText = "{$patternCode} semua tanggal " . pct($primaryStats['rate'])
+        . ' vs baseline semua match ' . pct($primaryBaselineRate) . ' (' . signed($primaryEdge)
+        . '), batas bawah CI 95% ' . pct($primaryCi[0]) . ' masih di atas baseline.';
 }
 ?>
 <!doctype html>
@@ -418,6 +505,7 @@ table{width:100%;border-collapse:collapse;white-space:nowrap;background:#10161e}
       <option value="super" <?= $patternKey === 'super' ? 'selected' : '' ?>>SUPER — Over 2.5 babak kedua</option>
       <option value="super1" <?= $patternKey === 'super1' ? 'selected' : '' ?>>SUPER1 — Over 2.5 babak kedua</option>
       <option value="super2" <?= $patternKey === 'super2' ? 'selected' : '' ?>>SUPER2 — Over 2.5 babak kedua</option>
+      <option value="slow" <?= $patternKey === 'slow' ? 'selected' : '' ?>>S-LOW — Over 2.5 babak kedua</option>
       <option value="hah" <?= $patternKey === 'hah' ? 'selected' : '' ?>>HAH — Over 1.5 babak kedua</option>
       <option value="p1" <?= $patternKey === 'p1' ? 'selected' : '' ?>>P1 — Over 1.5 babak kedua</option>
       <option value="p2" <?= $patternKey === 'p2' ? 'selected' : '' ?>>P2 — Over 1.5 babak kedua</option>
@@ -435,13 +523,15 @@ table{width:100%;border-collapse:collapse;white-space:nowrap;background:#10161e}
   </form>
 
   <?php if ($patternKey === 'super1'): ?>
-    <div class="rule"><b>SUPER1</b> — total gol HT tepat 3 (tanpa syarat menit) · line awal ≥ 6.75.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 3).</span></div>
+    <div class="rule"><b>SUPER1</b> — total gol HT tepat 3 · gol pertama ≤ 25' · line awal ≥ 6.75 · jika HT 3-0/0-3, line awal ≥ 7.5.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 3).</span></div>
   <?php elseif ($patternKey === 'super2'): ?>
-    <div class="rule"><b>SUPER2</b> — selisih HT ≤ 1 (termasuk seri) · gol pertama ≤ 8' · line awal ≥ 7.25.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 3).</span></div>
+    <div class="rule"><b>SUPER2</b> — selisih HT ≤ 1 · gol pertama ≤ 8' · line awal ≥ 7.25 · jika total HT 5, gol kedua menit 9'–30' · jika HT 2-2, gol kedua menit 14'–30'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 3).</span></div>
+  <?php elseif ($patternKey === 'slow'): ?>
+    <div class="rule"><b>S-LOW</b> — selisih HT ≤ 1 · gol pertama ≤ 8' · line awal ≥ 5.75 · jika HT seri, gol ke-2 ≤ 25' dan gol terakhir 1H ≥ 35' · jika total HT 3 atau 5, gol ke-2 harus menit 9'–30'.</div>
   <?php elseif ($patternKey === 'hah'): ?>
     <div class="rule"><b>HAH</b> — urutan gol 1H Home–Away–Home, skor HT 2-1, tanpa syarat menit atau line.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php elseif ($patternKey === 'p1'): ?>
-    <div class="rule"><b>P1</b> — selisih HT tepat 1 · gol pertama ≤ 12' · line awal ≥ 5.75.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
+    <div class="rule"><b>P1</b> — selisih HT tepat 1 · gol pertama ≤ 12' · line awal ≥ 5.75 · jika total HT 1, gol pertama ≤ 6' · jika total HT 5, gol kedua menit 9'–30'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php elseif ($patternKey === 'p2'): ?>
     <div class="rule"><b>P2</b> — HT 2-1 / 1-2 · gol pertama ≤ 15' · line awal ≥ 5.5.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php elseif ($patternKey === 'p3'): ?>
@@ -461,32 +551,34 @@ table{width:100%;border-collapse:collapse;white-space:nowrap;background:#10161e}
   <?php elseif ($patternKey === 'p10'): ?>
     <div class="rule"><b>P10</b> — skor HT tepat 2-3 · line awal ≥ 5.75.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php elseif ($patternKey === 'p11'): ?>
-    <div class="rule"><b>P11</b> — total gol HT tepat 3 (low) · gol pertama ≤ 12' · tanpa syarat line.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
+    <div class="rule"><b>P11</b> — total gol HT tepat 3 (low) · gol pertama ≤ 12' · line awal ≥ 5.75.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php else: ?>
-    <div class="rule"><b>SUPER</b> — <b>selisih HT ≤ 1</b>; jika HT seri, gol ke-2 ≤ 25' dan gol terakhir 1H ≥ 35' · gol pertama ≤ 8' · line awal ≥ 5.75.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 3).<br><b>Revisi:</b> syarat selisih HT ≤ 1 (dari rumus historis O25-4) dikembalikan — tanpa syarat itu akurasi log cuma 78% (64/82).</span></div>
+    <div class="rule"><b>SUPER</b> — <b>selisih HT ≤ 1</b>; jika HT seri, gol ke-2 ≤ 25' dan gol terakhir 1H ≥ 35' · gol pertama ≤ 6' · line awal ≥ 5.75 · jika total HT 3 atau 5, gol ke-2 harus menit 9'–30'.<br><span class="muted">Hasil semua tanggal: <b><?= $allStats['hits'] ?>/<?= $allStats['total'] ?> (<?= pct($allStats['rate']) ?>)</b> · evaluasi: <b><?= $evalStats['hits'] ?>/<?= $evalStats['total'] ?> (<?= pct($evalStats['rate']) ?>)</b>.</span></div>
   <?php endif; ?>
   <?php if ($error !== null): ?><div class="error"><?= e($error) ?></div><?php endif; ?>
 
   <section class="card verdict <?= e($verdictClass) ?>">
     <div class="tag"><?= e($verdict) ?></div>
-    <div class="big"><?= pct($allStats['rate']) ?> <span class="muted" style="font-size:16px">(<?= $allStats['hits'] ?>/<?= $allStats['total'] ?>)</span></div>
+    <div class="big"><?= pct($primaryStats['rate']) ?> <span class="muted" style="font-size:16px">(<?= $primaryStats['hits'] ?>/<?= $primaryStats['total'] ?> <?= e($primaryScope) ?>)</span></div>
     <div class="muted"><?= e($verdictText) ?></div>
   </section>
 
   <section class="grid">
-    <div class="card stat"><div class="label"><?= e($patternCode) ?></div><div class="value"><?= $allStats['hits'] ?>/<?= $allStats['total'] ?></div><div class="muted"><?= pct($allStats['rate']) ?></div></div>
-    <div class="card stat"><div class="label">Baseline (semua match)</div><div class="value"><?= pct($baselineRate) ?></div><div class="muted"><?= $baseline['hits'] ?>/<?= $baseline['total'] ?> tanpa filter apa pun</div></div>
-    <div class="card stat"><div class="label">Edge vs baseline</div><div class="value" style="color:<?= $edge !== null && $edge > 0 ? 'var(--green)' : 'var(--red)' ?>"><?= signed($edge) ?></div><div class="muted">selisih akurasi</div></div>
+    <div class="card stat"><div class="label"><?= e($patternCode) ?> — semua tanggal</div><div class="value" style="color:<?= $edge !== null && $edge > 0 ? 'var(--green)' : 'var(--red)' ?>"><?= $allStats['hits'] ?>/<?= $allStats['total'] ?></div><div class="muted"><?= pct($allStats['rate']) ?> · otomatis ikut data baru</div></div>
+    <div class="card stat"><div class="label">Baseline semua match</div><div class="value"><?= pct($baselineRate) ?></div><div class="muted"><?= $baseline['hits'] ?>/<?= $baseline['total'] ?> tanpa filter</div></div>
+    <div class="card stat"><div class="label">Edge semua tanggal</div><div class="value" style="color:<?= $edge !== null && $edge > 0 ? 'var(--green)' : 'var(--red)' ?>"><?= signed($edge) ?></div><div class="muted">dibanding baseline semua match</div></div>
+    <div class="card stat"><div class="label">Data baru sejak <?= e($lockedText) ?></div><div class="value"><?= $evalStats['hits'] ?>/<?= $evalStats['total'] ?></div><div class="muted"><?= pct($evalStats['rate']) ?> · rincian evaluasi terbaru</div></div>
+    <div class="card stat"><div class="label">Sebelumnya (in-sample)</div><div class="value" style="color:var(--muted)"><?= $inSampleStats['hits'] ?>/<?= $inSampleStats['total'] ?></div><div class="muted"><?= pct($inSampleStats['rate']) ?> · aturan diturunkan dari sini</div></div>
     <div class="card stat"><div class="label">Target aktif</div><div class="value">O<?= $targetGoals === 2 ? '1.5' : '2.5' ?></div><div class="muted">HIT jika ≥ <?= $targetGoals ?> gol 2H</div></div>
     <div class="card stat"><div class="label">Syarat line</div><div class="value"><?= e($lineRequirement) ?></div><div class="muted">line KO</div></div>
-    <div class="card stat"><div class="label">HT tidak seri (selisih 1)</div><div class="value"><?= $nonDrawStats['hits'] ?>/<?= $nonDrawStats['total'] ?></div><div class="muted"><?= pct($nonDrawStats['rate']) ?></div></div>
-    <div class="card stat"><div class="label">HT seri + pengecualian</div><div class="value"><?= $drawStats['hits'] ?>/<?= $drawStats['total'] ?></div><div class="muted"><?= pct($drawStats['rate']) ?></div></div>
+    <div class="card stat"><div class="label">HT tidak seri — semua tanggal</div><div class="value"><?= $nonDrawStats['hits'] ?>/<?= $nonDrawStats['total'] ?></div><div class="muted"><?= pct($nonDrawStats['rate']) ?></div></div>
+    <div class="card stat"><div class="label">HT seri + pengecualian — semua tanggal</div><div class="value"><?= $drawStats['hits'] ?>/<?= $drawStats['total'] ?></div><div class="muted"><?= pct($drawStats['rate']) ?></div></div>
   </section>
 
   <section class="card stat">
-    <div class="label">Interval keyakinan Wilson 95%</div>
-    <div class="value" style="font-size:18px"><?= pct($ci[0]) ?> – <?= pct($ci[1]) ?></div>
-    <div class="muted">Akurasi 100% pada sampel kecil belum berarti peluang sebenarnya pasti 100%. Bandingkan batas bawah dengan baseline <?= pct($baselineRate) ?> — kalau masih di bawahnya, edge belum terbukti.</div>
+    <div class="label">Interval keyakinan Wilson 95% (semua tanggal)</div>
+    <div class="value" style="font-size:18px"><?= pct($primaryCi[0]) ?> – <?= pct($primaryCi[1]) ?></div>
+    <div class="muted">Dihitung dari seluruh <?= $primaryStats['hits'] ?>/<?= $primaryStats['total'] ?> match yang memenuhi <?= e($patternCode) ?>. Data baru otomatis ikut dihitung ketika masuk ke CSV. Baseline semua match: <?= pct($primaryBaselineRate) ?>.</div>
   </section>
 
   <section class="section">
@@ -494,16 +586,17 @@ table{width:100%;border-collapse:collapse;white-space:nowrap;background:#10161e}
     <?php if (!$dayRows): ?>
       <div class="card empty">Belum ada data.</div>
     <?php else: ?>
-      <div class="tablebox"><table><thead><tr><th>Hari</th><th class="num"><?= e($patternCode) ?></th><th class="num">Akurasi</th><th class="num">Baseline</th><th class="num">Edge</th></tr></thead><tbody>
+      <div class="tablebox"><table><thead><tr><th>Hari</th><th>Status</th><th class="num"><?= e($patternCode) ?></th><th class="num">Akurasi</th><th class="num">Baseline</th><th class="num">Edge</th></tr></thead><tbody>
       <?php foreach ($dayRows as $d): ?><tr>
         <td><?= e($d['day']) ?></td>
+        <td><?= $d['is_eval'] ? '<b style="color:var(--blue)">evaluasi</b>' : '<span class="muted">in-sample</span>' ?></td>
         <td class="num"><?= $d['hits'] ?>/<?= $d['total'] ?></td>
         <td class="num"><?= pct($d['rate']) ?></td>
         <td class="num"><?= pct($d['b_rate']) ?> <span class="muted">(<?= $d['b_hits'] ?>/<?= $d['b_total'] ?>)</span></td>
         <td class="num <?= $d['edge'] !== null && $d['edge'] > 0 ? 'hit' : 'miss' ?>"><?= signed($d['edge']) ?></td>
       </tr><?php endforeach; ?>
       </tbody></table></div>
-      <p class="foot">Hari-hari awal cenderung <b>in-sample</b> (aturan diturunkan dari data itu), jadi edge besar di situ wajar dan bukan bukti. Yang menentukan adalah hari-hari sesudah aturan dikunci.</p>
+      <p class="foot">Verdict utama memakai <b>semua tanggal</b>, sehingga data baru otomatis memperbarui angka 30/30. Kolom status harian tetap membedakan in-sample dan evaluasi agar performa terbaru mudah diperiksa.</p>
     <?php endif; ?>
   </section>
 

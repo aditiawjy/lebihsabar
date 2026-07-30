@@ -101,15 +101,27 @@ PATTERNS = [
              f"dan gol terakhir 1H ≥ {SUPER_LAST_1H_MIN}'; total HT 3/5: gol-2 "
              f"{SUPER_NON_DRAW_SECOND_GOAL_MIN}'–{SUPER_NON_DRAW_SECOND_GOAL_MAX}')",
      "ht": "super", "first_goal_max": SUPER_FIRST_GOAL_MAX, "min_line": SUPER_MIN_LINE},
-    {"code": "SUPER1", "desc": f"total HT {SUPER1_TOTAL_HT}; gol-1 ≤ {SUPER1_FIRST_GOAL_MAX}'; HT timpang line ≥ {SUPER1_ONE_SIDED_MIN_LINE}",
+    # Catatan: legenda live = desc + ambang gol pertama/line yang ditempel otomatis,
+    # jadi desc TIDAK boleh mengulang kedua hal itu (nanti tampil dobel).
+    {"code": "SUPER1",
+     "desc": f"total gol HT tepat {SUPER1_TOTAL_HT} (HT timpang 3-0/0-3 wajib "
+             f"line ≥ {SUPER1_ONE_SIDED_MIN_LINE})",
      "ht": "total", "total_ht": SUPER1_TOTAL_HT, "first_goal_max": SUPER1_FIRST_GOAL_MAX,
      "min_line": SUPER1_MIN_LINE},
     # SUPER2 = S-LOW dengan syarat line lebih tinggi (>= 7/7.5).
-    {"code": "SUPER2", "desc": "selisih HT ≤ 1 + filter total HT 5 / HT 2-2", "ht": "diff_le1",
+    {"code": "SUPER2",
+     "desc": f"selisih HT ≤ 1 (total HT 5: gol-2 {SUPER2_TOTAL5_SECOND_GOAL_MIN}'–"
+             f"{SUPER2_TOTAL5_SECOND_GOAL_MAX}'; HT 2-2: gol-2 "
+             f"{SUPER2_DRAW4_SECOND_GOAL_MIN}'–{SUPER2_DRAW4_SECOND_GOAL_MAX}')",
+     "ht": "diff_le1",
      "first_goal_max": SUPER2_FIRST_GOAL_MAX, "min_line": SUPER2_MIN_LINE},
-    {"code": "S-LOW", "desc": "SUPER longgar: gol pertama ≤ 8'", "ht": "super",
+    {"code": "S-LOW",
+     "desc": "selisih HT ≤ 1 (syarat seri & jendela gol-2 sama seperti SUPER)", "ht": "super",
      "first_goal_max": SLOW_FIRST_GOAL_MAX, "min_line": SLOW_MIN_LINE},
-    {"code": "P1", "desc": "selisih HT 1 + filter total HT 1/5", "ht": "diff1",
+    {"code": "P1",
+     "desc": f"selisih HT tepat 1 (total HT 1: gol-1 ≤ {P1_LOW_TOTAL_FIRST_GOAL_MAX}'; "
+             f"total HT 5: gol-2 {P1_HIGH_TOTAL_SECOND_GOAL_MIN}'–{P1_HIGH_TOTAL_SECOND_GOAL_MAX}')",
+     "ht": "diff1",
      "first_goal_max": P1_FIRST_GOAL_MAX, "min_line": P1_MIN_LINE},
     {"code": "P2", "desc": "HT 2-1 / 1-2", "ht": "21",
      "first_goal_max": P2_FIRST_GOAL_MAX, "min_line": P2_MIN_LINE},

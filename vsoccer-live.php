@@ -100,7 +100,7 @@ if (isset($_GET['json'])) {
     <b>P9</b> — HT 3-3 · gol kedua ≥ 12' · gol terakhir 1H ≥ 34'<br>
     <b>P10</b> — HT 2-3 · line awal ≥ 5.75<br>
     <b>P11</b> — total gol HT tepat 3 · gol pertama ≤ 12' · line awal 5.75–7.5 · gol pertama ≤ 4': line wajib ≥ 7.25 · HT 3-0/0-3: line wajib ≥ 7.5<br>
-    <b>HAH</b> — urutan gol 1H Home–Away–Home · HT 2-1 · gol ketiga/terakhir 1H ≥ 25' · tanpa syarat line<br>
+    <b>HAH</b> — urutan gol 1H Home–Away–Home · HT 2-1 · gol kedua harus setelah gol pertama · gol ketiga/terakhir 1H ≥ 25' · line awal ≥ 4.75; jika line lebih rendah, gol ketiga wajib ≥ 38'<br>
     SUPER dan HAH aktif mulai menit 60 babak kedua; P1-P12 mulai menit 65; SUPER1/SUPER2/S-LOW/SUPER3/SUPER4 dinonaktifkan. Semua sinyal hilang begitu ada gol di babak kedua.
   </p>
 

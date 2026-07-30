@@ -129,6 +129,8 @@ P12_TOTAL_HT = int(os.environ.get("VSOCCER_P12_TOTAL_HT", "5"))
 P12_MIN_LINE = float(os.environ.get("VSOCCER_P12_MIN_LINE", "6.5"))
 P12_SECOND_GOAL_MIN = int(os.environ.get("VSOCCER_P12_SECOND_GOAL_MIN", "8"))
 HAH_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_HAH_LAST_GOAL_MIN", "25"))
+HAH_STANDARD_MIN_LINE = float(os.environ.get("VSOCCER_HAH_STANDARD_MIN_LINE", "4.75"))
+HAH_LOW_LINE_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_HAH_LOW_LINE_LAST_GOAL_MIN", "38"))
 P11_TOTAL_HT = int(os.environ.get("VSOCCER_P11_TOTAL_HT", "3"))
 P11_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P11_FIRST_GOAL_MAX", "12"))
 P11_MIN_LINE = float(os.environ.get("VSOCCER_P11_MIN_LINE", "5.75"))
@@ -203,8 +205,10 @@ PATTERNS = [
     {"code": "P11", "desc": "total HT 3; gol-1 ≤ 4' wajib line ≥ 7.25; HT 3-0/0-3 wajib line ≥ 7.5", "ht": "total",
      "total_ht": P11_TOTAL_HT, "first_goal_max": P11_FIRST_GOAL_MAX, "min_line": P11_MIN_LINE, "max_line": P11_MAX_LINE},
     # HAH: urutan gol babak pertama Home - Away - Home, berakhir HT 2-1.
-    # Tanpa syarat menit gol pertama & tanpa syarat line awal.
-    {"code": "HAH", "desc": f"urutan gol 1H Home–Away–Home, HT 2-1; gol terakhir 1H ≥ {HAH_LAST_GOAL_MIN}'", "ht": "hah",
+    # Gol pertama bebas; line rendah hanya lolos jika gol ketiga cukup terlambat.
+    {"code": "HAH", "desc": f"urutan gol 1H Home–Away–Home, HT 2-1; gol-2 harus setelah gol-1; "
+                         f"gol terakhir 1H ≥ {HAH_LAST_GOAL_MIN}'; line ≥ {HAH_STANDARD_MIN_LINE}, "
+                         f"atau jika line lebih rendah gol terakhir ≥ {HAH_LOW_LINE_LAST_GOAL_MIN}'", "ht": "hah",
      "first_goal_max": None, "min_line": None},
 ]
 
@@ -212,7 +216,7 @@ POLL_SEC = float(os.environ.get("VSOCCER_POLL_SEC", "2.5"))
 RELOAD_SEC = int(os.environ.get("VSOCCER_RELOAD_SEC", str(20 * 60)))
 O25_SIGNAL_CODES = {"SUPER1", "SUPER2", "S-LOW", "SUPER3", "SUPER4"}
 P_SIGNAL_CODES = {f"P{i}" for i in range(1, 13)}
-DISABLED_SIGNAL_CODES = {"SUPER1", "SUPER2", "S-LOW", "SUPER3", "SUPER4"}
+DISABLED_SIGNAL_CODES = set()
 SIGNAL_START_2H_O25_MINUTE = int(os.environ.get("VSOCCER_SIGNAL_START_2H_O25_MINUTE", "50"))
 SIGNAL_START_2H_OTHER_MINUTE = int(os.environ.get("VSOCCER_SIGNAL_START_2H_MINUTE", "60"))
 SIGNAL_START_2H_P_MINUTE = int(os.environ.get("VSOCCER_SIGNAL_START_2H_P_MINUTE", "65"))
@@ -466,6 +470,13 @@ def signal_check(e, st, pat):
         g1h = st.get("goal_mins_1h") or []
         if not g1h or g1h[-1] < HAH_LAST_GOAL_MIN:
             return False, f"gol terakhir 1H {g1h[-1] if g1h else 'tak terekam'}'"
+        if len(g1h) < 2 or g1h[1] <= g1h[0]:
+            return False, "gol pertama dan kedua tidak pada menit berbeda"
+        lv = line_value(st.get("ko_line"))
+        if lv is None:
+            return False, "line awal tak terekam"
+        if lv < HAH_STANDARD_MIN_LINE and g1h[-1] < HAH_LOW_LINE_LAST_GOAL_MIN:
+            return False, f"line awal {st.get('ko_line')}, gol terakhir 1H {g1h[-1]}'"
     fg = st.get("first_goal_min")
     if fg is None:
         return False, "belum ada gol"

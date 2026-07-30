@@ -85,6 +85,8 @@ const P12_TOTAL_HT = 5;
 const P12_MIN_LINE = 6.5;
 const P12_SECOND_GOAL_MIN = 8;
 const HAH_LAST_GOAL_MIN = 25;
+const HAH_STANDARD_MIN_LINE = 4.75;
+const HAH_LOW_LINE_LAST_GOAL_MIN = 38;
 
 $file = __DIR__ . '/goal_log_vsoccer.csv';
 $now = time();
@@ -101,7 +103,7 @@ $targetLabel = $isOver15Pattern
 $lineRequirements = [
     'super' => '≥ 5.75', 'super1' => '6.75–7.5', 'super2' => '≥ 7.25', 'slow' => '≥ 5.75',
     'super3' => '≥ 6', 'super4' => 'Tanpa syarat', 'p12' => '≥ 6.5',
-    'hah' => 'Tanpa syarat', 'p1' => '≥ 5.75', 'p2' => '5.75–7.5',
+    'hah' => "≥ 4.75, kecuali gol-3 ≥ 38'", 'p1' => '≥ 5.75', 'p2' => '5.75–7.5',
     'p3' => '5.5–7.5', 'p4' => '≥ 5.5', 'p5' => 'Tanpa syarat',
     'p6' => '≤ 6.25', 'p7' => 'Tanpa syarat', 'p8' => '≥ 6',
     'p9' => 'Tanpa syarat', 'p10' => '≥ 5.75', 'p11' => '5.75–7.5',
@@ -388,7 +390,10 @@ if (!is_file($file)) {
             $matchesPattern = $htHome === 2
                 && $htAway === 1
                 && $goalSides1H === ['home', 'away', 'home']
-                && $lastGoal1H >= HAH_LAST_GOAL_MIN;
+                && $lastGoal1H >= HAH_LAST_GOAL_MIN
+                && $secondGoal !== null
+                && $secondGoal > $firstGoal
+                && ($ko >= HAH_STANDARD_MIN_LINE || $lastGoal1H >= HAH_LOW_LINE_LAST_GOAL_MIN);
             $branch = 'Home–Away–Home';
         } elseif ($patternKey === 'super1') {
             $matchesPattern = ($htHome + $htAway) === SUPER1_TOTAL_HT
@@ -647,7 +652,7 @@ table{width:100%;border-collapse:collapse;white-space:nowrap;background:#10161e}
   <?php elseif ($patternKey === 'slow'): ?>
     <div class="rule"><b>S-LOW</b> — selisih HT ≤ 1; jika seri, gol ke-2 ≤ 25' dan gol terakhir 1H ≥ 35' · gol pertama ≤ 5' · line awal ≥ 5.75 · buang total HT 1 · semua HT tidak seri: gol ke-2 9'–25' · total HT 3: line ≤ 7.5 dan gol-1 ≤ 4' wajib line ≥ 7.25 · total HT 5: gol terakhir 1H ≥ 30'.</div>
   <?php elseif ($patternKey === 'hah'): ?>
-    <div class="rule"><b>HAH</b> — urutan gol 1H Home–Away–Home · skor HT 2-1 · gol ketiga/terakhir 1H ≥ 25' · tanpa syarat line.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
+    <div class="rule"><b>HAH</b> — urutan gol 1H Home–Away–Home · skor HT 2-1 · gol kedua harus setelah gol pertama · gol ketiga/terakhir 1H ≥ 25' · line awal ≥ 4.75; jika line di bawah 4.75, gol ketiga wajib ≥ 38'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php elseif ($patternKey === 'p1'): ?>
     <div class="rule"><b>P1</b> — selisih HT tepat 1 · total HT maksimal 5 · gol pertama ≤ 12' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 3: line ≤ 7.5 dan jika gol-1 ≤ 4', line ≥ 7.25 · total HT 5: gol-2 menit 9'–30'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php elseif ($patternKey === 'p2'): ?>

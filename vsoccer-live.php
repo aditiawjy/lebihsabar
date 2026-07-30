@@ -87,8 +87,8 @@ if (isset($_GET['json'])) {
     <b>SUPER2</b> — selisih HT ≤ 1 · gol pertama ≤ 8' · line awal ≥ 7.25 · total HT 5: gol-2 menit 9'–30' · HT 2-2: gol-2 menit 14'–30'<br>
     <b>S-LOW</b> — selisih HT ≤ 1 · gol-1 ≤ 8' · line ≥ 5.75 · tanpa total HT 1 · total HT 3 + gol-1 ≤ 4': line ≥ 7.25 · HT 2-2 + gol-1 ≥ 7' + gol-2 ≤ 10': line ≤ 6.25 · total HT 5 + gol-1 ≤ 5': gol terakhir 1H ≥ 30' · total HT 6: gol-1 ≤ 7'<br>
     <b>P1</b> — selisih HT tepat 1 · gol pertama ≤ 12' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 5: gol-2 menit 9'–30'<br>
-    <b>P2</b> — HT 2-1 / 1-2 · gol pertama ≤ 15' · line awal ≥ 5.5<br>
-    <b>P3</b> — total gol HT tepat 3 · gol pertama 5'–9'<br>
+    <b>P2</b> — HT 2-1 / 1-2 · gol pertama ≤ 15' · line awal 5.75–7.5 · gol pertama ≤ 4': line wajib ≥ 7.25<br>
+    <b>P3</b> — total gol HT tepat 3 · gol pertama 5'–9' · line awal 5.5–7.5<br>
     <b>P4</b> — HT 1-1 · gol pertama ≥ 15' · line awal ≥ 5.5<br>
     <b>P5</b> — HT 3-0 · gol pertama ≤ 18'<br>
     <b>P6</b> — HT 2-2 · gol pertama ≤ 8' · line awal ≤ 6.25<br>
@@ -98,7 +98,7 @@ if (isset($_GET['json'])) {
     <b>P10</b> — HT 2-3 · line awal ≥ 5.75<br>
     <b>P11</b> — total gol HT tepat 3 (low) · gol pertama ≤ 12' · line awal ≥ 5.75<br>
     <b>HAH</b> — urutan gol 1H Home–Away–Home, HT 2-1 (tanpa syarat menit / line)<br>
-    Semua sinyal muncul selama babak kedua dan hilang begitu ada gol di babak kedua.
+    Semua sinyal baru muncul mulai menit 60 babak kedua dan hilang begitu ada gol di babak kedua.
   </p>
 
   <div class="grid">
@@ -176,7 +176,8 @@ function render(d) {
       if (p.max_line != null) t += ' · line awal &le; ' + esc(p.max_line);
       return t;
     }).join('<br>') +
-      '<br>Semua sinyal muncul selama babak kedua dan hilang begitu ada gol di babak kedua.';
+      '<br>Semua sinyal baru muncul mulai menit ' + esc(d.signal_start_2h_minute == null ? 60 : d.signal_start_2h_minute) +
+      ' babak kedua dan hilang begitu ada gol di babak kedua.';
   }
   document.getElementById('cnt').textContent = m.length;
   var tb = document.getElementById('tb'), rows = '', lastLg = null;

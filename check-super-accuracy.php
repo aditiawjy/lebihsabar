@@ -19,6 +19,7 @@ const SUPER1_MIN_LINE = 6.75;
 const SUPER1_FIRST_GOAL_MAX = 18;
 const SUPER1_MAX_LINE = 7.5;
 const SUPER1_ONE_SIDED_MIN_LINE = 7.5;
+const SUPER1_TOP_LINE_FIRST_GOAL_MAX = 9;
 const SUPER2_FIRST_GOAL_MAX = 8;
 const SUPER2_MIN_LINE = 7.25;
 const SUPER2_TOTAL5_SECOND_GOAL_MIN = 9;
@@ -84,7 +85,7 @@ const SUPER3_LAST_GOAL_MIN = 42;
 const P12_TOTAL_HT = 5;
 const P12_MIN_LINE = 6.5;
 const P12_SECOND_GOAL_MIN = 8;
-const HAH_LAST_GOAL_MIN = 25;
+const HAH_LAST_GOAL_MIN = 26;
 const HAH_STANDARD_MIN_LINE = 4.75;
 const HAH_LOW_LINE_LAST_GOAL_MIN = 38;
 
@@ -400,7 +401,8 @@ if (!is_file($file)) {
                 && $ko >= SUPER1_MIN_LINE
                 && $ko <= SUPER1_MAX_LINE
                 && $firstGoal <= SUPER1_FIRST_GOAL_MAX
-                && (abs($htHome - $htAway) !== 3 || $ko >= SUPER1_ONE_SIDED_MIN_LINE);
+                && (abs($htHome - $htAway) !== 3 || $ko >= SUPER1_ONE_SIDED_MIN_LINE)
+                && ($ko < SUPER1_MAX_LINE || $firstGoal <= SUPER1_TOP_LINE_FIRST_GOAL_MAX);
             $branch = 'Total HT tepat 3';
         } elseif ($patternKey === 'slow') {
             // Sama seperti SUPER2 tapi ambang line lebih rendah; tanpa syarat khusus seri.
@@ -646,13 +648,13 @@ table{width:100%;border-collapse:collapse;white-space:nowrap;background:#10161e}
   <?php elseif ($patternKey === 'p12'): ?>
     <div class="rule"><b>P12</b> — total gol HT tepat 5 · line awal ≥ 6.5 · gol kedua ≥ 8'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php elseif ($patternKey === 'super1'): ?>
-    <div class="rule"><b>SUPER1</b> — total gol HT tepat 3 · gol pertama ≤ 18' · line awal 6.75–7.5 · jika HT 3-0/0-3, line awal tepat 7.5.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 3).</span></div>
+    <div class="rule"><b>SUPER1</b> — total gol HT tepat 3 · gol pertama ≤ 18' · line awal 6.75–7.5 · jika line awal 7.5, gol pertama wajib ≤ 9' · jika HT 3-0/0-3, line awal tepat 7.5.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 3).</span></div>
   <?php elseif ($patternKey === 'super2'): ?>
     <div class="rule"><b>SUPER2</b> — selisih HT ≤ 1 · gol pertama ≤ 8' · line awal ≥ 7.25 · jika total HT 3, gol pertama ≤ 6' · jika total HT 5, gol kedua menit 9'–30' · jika HT 2-2, gol kedua menit 14'–30' · jika total HT ≥ 7, line awal ≥ 7.5.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 3).</span></div>
   <?php elseif ($patternKey === 'slow'): ?>
     <div class="rule"><b>S-LOW</b> — selisih HT ≤ 1; jika seri, gol ke-2 ≤ 25' dan gol terakhir 1H ≥ 35' · gol pertama ≤ 5' · line awal ≥ 5.75 · buang total HT 1 · semua HT tidak seri: gol ke-2 9'–25' · total HT 3: line ≤ 7.5 dan gol-1 ≤ 4' wajib line ≥ 7.25 · total HT 5: gol terakhir 1H ≥ 30'.</div>
   <?php elseif ($patternKey === 'hah'): ?>
-    <div class="rule"><b>HAH</b> — urutan gol 1H Home–Away–Home · skor HT 2-1 · gol kedua harus setelah gol pertama · gol ketiga/terakhir 1H ≥ 25' · line awal ≥ 4.75; jika line di bawah 4.75, gol ketiga wajib ≥ 38'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
+    <div class="rule"><b>HAH</b> — urutan gol 1H Home–Away–Home · skor HT 2-1 · gol kedua harus setelah gol pertama · gol ketiga/terakhir 1H ≥ 26' · line awal ≥ 4.75; jika line di bawah 4.75, gol ketiga wajib ≥ 38'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php elseif ($patternKey === 'p1'): ?>
     <div class="rule"><b>P1</b> — selisih HT tepat 1 · total HT maksimal 5 · gol pertama ≤ 12' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 3: line ≤ 7.5 dan jika gol-1 ≤ 4', line ≥ 7.25 · total HT 5: gol-2 menit 9'–30'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php elseif ($patternKey === 'p2'): ?>

@@ -83,7 +83,7 @@ if (isset($_GET['json'])) {
   </div>
   <p class="muted" id="legend" style="margin:8px 2px 0">
     <b>SUPER</b> — selisih HT ≤ 1 (kalau seri: gol-2 ≤ 25' dan gol terakhir 1H ≥ 35') · gol pertama ≤ 5' · line awal ≥ 5.75 · semua HT tidak seri: gol-2 9'–25' · total HT 3 + gol-1 ≤ 4': line ≥ 7.25 · total HT 5: gol terakhir 1H ≥ 30' · mulai menit 60 babak kedua<br>
-    <b>SUPER1</b> <span class="noko">NONAKTIF</span> — total gol HT tepat 3 · gol pertama ≤ 18' · line awal 6.75–7.5 · HT 3-0/0-3: line tepat 7.5<br>
+    <b>SUPER1</b> <span class="noko">NONAKTIF</span> — total gol HT tepat 3 · gol pertama ≤ 18' · line awal 6.75–7.5 · line 7.5: gol pertama wajib ≤ 9' · HT 3-0/0-3: line tepat 7.5<br>
     <b>SUPER2</b> <span class="noko">NONAKTIF</span> — selisih HT ≤ 1 · gol pertama ≤ 8' · line awal ≥ 7.25 · total HT 3: gol pertama ≤ 6' · total HT 5: gol-2 menit 9'–30' · HT 2-2: gol-2 menit 14'–30' · total HT ≥ 7: line awal ≥ 7.5<br>
     <b>S-LOW</b> <span class="noko">NONAKTIF</span> — selisih HT ≤ 1 (kalau seri: gol-2 ≤ 25' dan gol terakhir 1H ≥ 35') · gol pertama ≤ 5' · line awal ≥ 5.75 · tanpa total HT 1 · semua HT tidak seri: gol-2 9'–25' · total HT 3: line ≤ 7.5 dan gol-1 ≤ 4' wajib line ≥ 7.25 · total HT 5: gol terakhir 1H ≥ 30'<br>
     <b>SUPER3</b> <span class="noko">NONAKTIF</span> — selisih skor HT tepat 3 · line awal ≥ 6 · gol terakhir 1H ≥ 42'<br>
@@ -100,7 +100,7 @@ if (isset($_GET['json'])) {
     <b>P9</b> — HT 3-3 · gol kedua ≥ 12' · gol terakhir 1H ≥ 34'<br>
     <b>P10</b> — HT 2-3 · line awal ≥ 5.75<br>
     <b>P11</b> — total gol HT tepat 3 · gol pertama ≤ 12' · line awal 5.75–7.5 · gol pertama ≤ 4': line wajib ≥ 7.25 · HT 3-0/0-3: line wajib ≥ 7.5<br>
-    <b>HAH</b> — urutan gol 1H Home–Away–Home · HT 2-1 · gol kedua harus setelah gol pertama · gol ketiga/terakhir 1H ≥ 25' · line awal ≥ 4.75; jika line lebih rendah, gol ketiga wajib ≥ 38'<br>
+    <b>HAH</b> — urutan gol 1H Home–Away–Home · HT 2-1 · gol kedua harus setelah gol pertama · gol ketiga/terakhir 1H ≥ 26' · line awal ≥ 4.75; jika line lebih rendah, gol ketiga wajib ≥ 38'<br>
     SUPER dan HAH aktif mulai menit 60 babak kedua; P1-P12 mulai menit 65; SUPER1/SUPER2/S-LOW/SUPER3/SUPER4 dinonaktifkan. Semua sinyal hilang begitu ada gol di babak kedua.
   </p>
 

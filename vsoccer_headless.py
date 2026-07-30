@@ -69,6 +69,7 @@ SUPER1_MIN_LINE = float(os.environ.get("VSOCCER_SUPER1_MIN_LINE", "6.75"))
 SUPER1_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_SUPER1_FIRST_GOAL_MAX", "18"))
 SUPER1_MAX_LINE = float(os.environ.get("VSOCCER_SUPER1_MAX_LINE", "7.5"))
 SUPER1_ONE_SIDED_MIN_LINE = float(os.environ.get("VSOCCER_SUPER1_ONE_SIDED_MIN_LINE", "7.5"))
+SUPER1_TOP_LINE_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_SUPER1_TOP_LINE_FIRST_GOAL_MAX", "9"))
 SUPER2_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_SUPER2_FIRST_GOAL_MAX", "8"))
 SUPER2_MIN_LINE = float(os.environ.get("VSOCCER_SUPER2_MIN_LINE", "7.25"))
 SUPER2_TOTAL5_SECOND_GOAL_MIN = int(os.environ.get("VSOCCER_SUPER2_TOTAL5_SECOND_GOAL_MIN", "9"))
@@ -128,7 +129,7 @@ SUPER3_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_SUPER3_LAST_GOAL_MIN", "42"))
 P12_TOTAL_HT = int(os.environ.get("VSOCCER_P12_TOTAL_HT", "5"))
 P12_MIN_LINE = float(os.environ.get("VSOCCER_P12_MIN_LINE", "6.5"))
 P12_SECOND_GOAL_MIN = int(os.environ.get("VSOCCER_P12_SECOND_GOAL_MIN", "8"))
-HAH_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_HAH_LAST_GOAL_MIN", "25"))
+HAH_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_HAH_LAST_GOAL_MIN", "26"))
 HAH_STANDARD_MIN_LINE = float(os.environ.get("VSOCCER_HAH_STANDARD_MIN_LINE", "4.75"))
 HAH_LOW_LINE_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_HAH_LOW_LINE_LAST_GOAL_MIN", "38"))
 P11_TOTAL_HT = int(os.environ.get("VSOCCER_P11_TOTAL_HT", "3"))
@@ -151,7 +152,8 @@ PATTERNS = [
     # jadi desc TIDAK boleh mengulang kedua hal itu (nanti tampil dobel).
     {"code": "SUPER1",
      "desc": f"total gol HT tepat {SUPER1_TOTAL_HT} (gol-1 ≤ {SUPER1_FIRST_GOAL_MAX}', line "
-             f"{SUPER1_MIN_LINE}–{SUPER1_MAX_LINE}; HT 3-0/0-3 line tepat {SUPER1_ONE_SIDED_MIN_LINE})",
+             f"{SUPER1_MIN_LINE}–{SUPER1_MAX_LINE}; line {SUPER1_MAX_LINE} wajib gol-1 ≤ "
+             f"{SUPER1_TOP_LINE_FIRST_GOAL_MAX}'; HT 3-0/0-3 line tepat {SUPER1_ONE_SIDED_MIN_LINE})",
      "ht": "total", "total_ht": SUPER1_TOTAL_HT, "first_goal_max": SUPER1_FIRST_GOAL_MAX,
      "min_line": SUPER1_MIN_LINE, "max_line": SUPER1_MAX_LINE},
     # SUPER2 = S-LOW dengan syarat line lebih tinggi (>= 7/7.5).
@@ -365,9 +367,13 @@ def signal_check(e, st, pat):
         g1h = st.get("goal_mins_1h") or []
         if len(g1h) < 2 or g1h[1] < P12_SECOND_GOAL_MIN:
             return False, f"gol kedua {g1h[1] if len(g1h) >= 2 else 'tak terekam'}"
-    if pat["code"] == "SUPER1" and abs(ht_h - ht_a) == 3:
+    if pat["code"] == "SUPER1":
         lv = line_value(st.get("ko_line"))
-        if lv is None or lv < SUPER1_ONE_SIDED_MIN_LINE:
+        g1h = st.get("goal_mins_1h") or []
+        if lv is not None and lv >= SUPER1_MAX_LINE:
+            if not g1h or g1h[0] > SUPER1_TOP_LINE_FIRST_GOAL_MAX:
+                return False, f"line awal {st.get('ko_line')}, gol pertama {g1h[0] if g1h else 'tak terekam'}"
+        if abs(ht_h - ht_a) == 3 and (lv is None or lv < SUPER1_ONE_SIDED_MIN_LINE):
             return False, f"HT {ht_h}-{ht_a}, line awal {st.get('ko_line')}"
     if pat["code"] == "S-LOW":
         total_ht = ht_h + ht_a

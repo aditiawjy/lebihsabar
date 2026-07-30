@@ -77,8 +77,9 @@ Urutan:
 
 Kode urutan: H-A-H
 Skor HT: 2-1
+Kondisi tambahan: gol ketiga/terakhir 1H minimal menit 25
 Target: Over 1.5 gol babak kedua
-Hasil historis: 11/11
+Hasil historis terbaru: 17/17
 Akurasi: 100%
 
 
@@ -123,6 +124,20 @@ sehingga sebaiknya dipakai sebagai filter tambahan dan bukan setup utama.
 
 OVER 2.5 BABAK KEDUA
 ====================
+
+SUPER4 - PATTERN URUTAN GOL
+----------------------------
+Kondisi:
+- Total gol HT tepat 5
+- X adalah tim yang mencetak gol pertama
+- Urutan empat gol pertama: X-Y-X-X
+- Gol kelima boleh dicetak X atau Y
+- Contoh: H-A-H-H-A, H-A-H-H-H, A-H-A-A-H, A-H-A-A-A
+- Tanpa syarat menit dan tanpa syarat line
+Target: Over 2.5 gol babak kedua
+Hasil historis terbaru: 16/16
+Akurasi: 100%
+
 
 O25-1
 Kondisi:

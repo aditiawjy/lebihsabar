@@ -79,10 +79,11 @@ const SUPER3_LAST_GOAL_MIN = 40;
 const P12_TOTAL_HT = 5;
 const P12_MIN_LINE = 6.5;
 const P12_SECOND_GOAL_MIN = 8;
+const HAH_LAST_GOAL_MIN = 25;
 
 $file = __DIR__ . '/goal_log_vsoccer.csv';
 $now = time();
-$allowedPatterns = ['super', 'super1', 'super2', 'slow', 'super3', 'p12', 'hah', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p10', 'p11'];
+$allowedPatterns = ['super', 'super1', 'super2', 'slow', 'super3', 'super4', 'p12', 'hah', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p10', 'p11'];
 $patternKey = isset($_GET['pattern']) && in_array($_GET['pattern'], $allowedPatterns, true)
     ? $_GET['pattern']
     : 'super';
@@ -94,7 +95,7 @@ $targetLabel = $isOver15Pattern
     : 'Over 2.5 gol babak kedua';
 $lineRequirements = [
     'super' => '≥ 5.75', 'super1' => '6.75–7.5', 'super2' => '≥ 7.25', 'slow' => '≥ 5.75',
-    'super3' => '≥ 6', 'p12' => '≥ 6.5',
+    'super3' => '≥ 6', 'super4' => 'Tanpa syarat', 'p12' => '≥ 6.5',
     'hah' => 'Tanpa syarat', 'p1' => '≥ 5.75', 'p2' => '5.75–7.5',
     'p3' => '5.5–7.5', 'p4' => '≥ 5.5', 'p5' => 'Tanpa syarat',
     'p6' => '≤ 6.25', 'p7' => 'Tanpa syarat', 'p8' => '≥ 6',
@@ -285,7 +286,13 @@ if (!is_file($file)) {
                 && $secondGoal >= SUPER_NON_DRAW_SECOND_GOAL_MIN
                 && $secondGoal <= SUPER_NON_DRAW_SECOND_GOAL_MAX);
 
-        if ($patternKey === 'super3') {
+        if ($patternKey === 'super4') {
+            $matchesPattern = count($goalSides1H) === 5
+                && $goalSides1H[0] !== $goalSides1H[1]
+                && $goalSides1H[2] === $goalSides1H[0]
+                && $goalSides1H[3] === $goalSides1H[0];
+            $branch = 'Urutan X–Y–X–X–bebas';
+        } elseif ($patternKey === 'super3') {
             $matchesPattern = abs($htHome - $htAway) === SUPER3_HT_DIFF
                 && $ko >= SUPER3_MIN_LINE
                 && $lastGoal1H >= SUPER3_LAST_GOAL_MIN;
@@ -373,7 +380,8 @@ if (!is_file($file)) {
         } elseif ($patternKey === 'hah') {
             $matchesPattern = $htHome === 2
                 && $htAway === 1
-                && $goalSides1H === ['home', 'away', 'home'];
+                && $goalSides1H === ['home', 'away', 'home']
+                && $lastGoal1H >= HAH_LAST_GOAL_MIN;
             $branch = 'Home–Away–Home';
         } elseif ($patternKey === 'super1') {
             $matchesPattern = ($htHome + $htAway) === SUPER1_TOTAL_HT
@@ -599,6 +607,7 @@ table{width:100%;border-collapse:collapse;white-space:nowrap;background:#10161e}
       <option value="super2" <?= $patternKey === 'super2' ? 'selected' : '' ?>>SUPER2 — Over 2.5 babak kedua</option>
       <option value="slow" <?= $patternKey === 'slow' ? 'selected' : '' ?>>S-LOW — Over 2.5 babak kedua</option>
       <option value="super3" <?= $patternKey === 'super3' ? 'selected' : '' ?>>SUPER3 — Over 2.5 babak kedua</option>
+      <option value="super4" <?= $patternKey === 'super4' ? 'selected' : '' ?>>SUPER4 — Over 2.5 babak kedua</option>
       <option value="p12" <?= $patternKey === 'p12' ? 'selected' : '' ?>>P12 — Over 1.5 babak kedua</option>
       <option value="hah" <?= $patternKey === 'hah' ? 'selected' : '' ?>>HAH — Over 1.5 babak kedua</option>
       <option value="p1" <?= $patternKey === 'p1' ? 'selected' : '' ?>>P1 — Over 1.5 babak kedua</option>
@@ -616,7 +625,9 @@ table{width:100%;border-collapse:collapse;white-space:nowrap;background:#10161e}
     <noscript><button class="btn" type="submit">Tampilkan</button></noscript>
   </form>
 
-  <?php if ($patternKey === 'super3'): ?>
+  <?php if ($patternKey === 'super4'): ?>
+    <div class="rule"><b>SUPER4</b> — total gol HT tepat 5 · urutan X–Y–X–X–bebas (X = tim pencetak gol pertama) · tanpa syarat menit atau line.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 3).</span></div>
+  <?php elseif ($patternKey === 'super3'): ?>
     <div class="rule"><b>SUPER3</b> — selisih skor HT tepat 3 · line awal ≥ 6 · gol terakhir 1H ≥ 40'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 3).</span></div>
   <?php elseif ($patternKey === 'p12'): ?>
     <div class="rule"><b>P12</b> — total gol HT tepat 5 · line awal ≥ 6.5 · gol kedua ≥ 8'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
@@ -627,7 +638,7 @@ table{width:100%;border-collapse:collapse;white-space:nowrap;background:#10161e}
   <?php elseif ($patternKey === 'slow'): ?>
     <div class="rule"><b>S-LOW</b> — selisih HT ≤ 1 · gol pertama ≤ 8' · line awal ≥ 5.75 · buang total HT 1 · total HT 3: line ≤ 7.5; gol-1 ≤ 4' wajib line ≥ 7.25; gol-1 ≥ 8' wajib line ≤ 6.25 · HT 2-2 dengan gol-1 ≥ 7' dan gol-2 ≤ 10': line ≤ 6 · total HT 5 dengan gol-1 ≤ 5': gol terakhir 1H ≥ 30' · total HT 6: gol-1 ≤ 7'.</div>
   <?php elseif ($patternKey === 'hah'): ?>
-    <div class="rule"><b>HAH</b> — urutan gol 1H Home–Away–Home, skor HT 2-1, tanpa syarat menit atau line.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
+    <div class="rule"><b>HAH</b> — urutan gol 1H Home–Away–Home · skor HT 2-1 · gol ketiga/terakhir 1H ≥ 25' · tanpa syarat line.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php elseif ($patternKey === 'p1'): ?>
     <div class="rule"><b>P1</b> — selisih HT tepat 1 · gol pertama ≤ 12' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 3: line ≤ 7.5 dan jika gol-1 ≤ 4', line ≥ 7.25 · total HT 5: gol-2 menit 9'–30'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php elseif ($patternKey === 'p2'): ?>

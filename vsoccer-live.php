@@ -87,6 +87,7 @@ if (isset($_GET['json'])) {
     <b>SUPER2</b> — selisih HT ≤ 1 · gol pertama ≤ 8' · line awal ≥ 7.25 · total HT 5: gol-2 menit 9'–30' · HT 2-2: gol-2 menit 14'–30'<br>
     <b>S-LOW</b> — selisih HT ≤ 1 · gol-1 ≤ 8' · line ≥ 5.75 · tanpa total HT 1 · total HT 3: line ≤ 7.5; gol-1 ≤ 4' wajib line ≥ 7.25; gol-1 ≥ 8' wajib line ≤ 6.25 · HT 2-2 + gol-1 ≥ 7' + gol-2 ≤ 10': line ≤ 6 · total HT 5 + gol-1 ≤ 5': gol terakhir 1H ≥ 30' · total HT 6: gol-1 ≤ 7'<br>
     <b>SUPER3</b> — selisih skor HT tepat 3 · line awal ≥ 6 · gol terakhir 1H ≥ 40'<br>
+    <b>SUPER4</b> — total gol HT tepat 5 · urutan X–Y–X–X–bebas · tanpa syarat menit / line<br>
     <b>P12</b> — total gol HT tepat 5 · line awal ≥ 6.5 · gol kedua ≥ 8'<br>
     <b>P1</b> — selisih HT tepat 1 · gol pertama ≤ 12' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 3: line ≤ 7.5 dan gol-1 ≤ 4' wajib line ≥ 7.25 · total HT 5: gol-2 9'–30'<br>
     <b>P2</b> — HT 2-1 / 1-2 · gol pertama ≤ 15' · line awal 5.75–7.5 · gol pertama ≤ 4': line wajib ≥ 7.25<br>
@@ -99,8 +100,8 @@ if (isset($_GET['json'])) {
     <b>P9</b> — HT 3-3 · gol kedua ≥ 12' · gol terakhir 1H ≥ 34'<br>
     <b>P10</b> — HT 2-3 · line awal ≥ 5.75<br>
     <b>P11</b> — total gol HT tepat 3 · gol pertama ≤ 12' · line awal 5.75–7.5 · gol pertama ≤ 4': line wajib ≥ 7.25 · HT 3-0/0-3: line wajib ≥ 7.5<br>
-    <b>HAH</b> — urutan gol 1H Home–Away–Home, HT 2-1 (tanpa syarat menit / line)<br>
-    SUPER/SUPER1/SUPER2/S-LOW/SUPER3 mulai menit 50 babak kedua; pattern lain mulai menit 60. Semua sinyal hilang begitu ada gol di babak kedua.
+    <b>HAH</b> — urutan gol 1H Home–Away–Home · HT 2-1 · gol ketiga/terakhir 1H ≥ 25' · tanpa syarat line<br>
+    SUPER/SUPER1/SUPER2/S-LOW/SUPER3/SUPER4 mulai menit 50 babak kedua; pattern lain mulai menit 60. Semua sinyal hilang begitu ada gol di babak kedua.
   </p>
 
   <div class="grid">
@@ -178,7 +179,7 @@ function render(d) {
       if (p.max_line != null) t += ' · line awal &le; ' + esc(p.max_line);
       return t;
     }).join('<br>') +
-      '<br>SUPER/SUPER1/SUPER2/S-LOW/SUPER3 mulai menit ' + esc(d.signal_start_2h_o25_minute == null ? 50 : d.signal_start_2h_o25_minute) +
+      '<br>SUPER/SUPER1/SUPER2/S-LOW/SUPER3/SUPER4 mulai menit ' + esc(d.signal_start_2h_o25_minute == null ? 50 : d.signal_start_2h_o25_minute) +
       '; pattern lain mulai menit ' + esc(d.signal_start_2h_other_minute == null ? 60 : d.signal_start_2h_other_minute) +
       ' babak kedua. Semua sinyal hilang begitu ada gol di babak kedua.';
   }

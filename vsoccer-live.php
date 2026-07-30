@@ -82,16 +82,16 @@ if (isset($_GET['json'])) {
     <span class="muted" id="err"></span>
   </div>
   <p class="muted" id="legend" style="margin:8px 2px 0">
-    <b>SUPER</b> — selisih HT ≤ 1 (kalau seri: gol-2 ≤ 25' dan gol terakhir 1H ≥ 35') · gol pertama ≤ 6' · line awal ≥ 5.75 · total HT 3/5: gol-2 9'–30' · total HT 3 + gol-1 ≤ 4': line ≥ 7.25 · total HT 5: gol terakhir 1H ≥ 30'<br>
-    <b>SUPER1</b> — total gol HT tepat 3 · gol pertama ≤ 18' · line awal 6.75–7.5 · HT 3-0/0-3: line tepat 7.5<br>
-    <b>SUPER2</b> — selisih HT ≤ 1 · gol pertama ≤ 8' · line awal ≥ 7.25 · total HT 5: gol-2 menit 9'–30' · HT 2-2: gol-2 menit 14'–30'<br>
-    <b>S-LOW</b> — selisih HT ≤ 1 · gol-1 ≤ 8' · line ≥ 5.75 · tanpa total HT 1 · total HT 3: line ≤ 7.5; gol-1 ≤ 4' wajib line ≥ 7.25; gol-1 ≥ 8' wajib line ≤ 6.25 · HT 2-2 + gol-1 ≥ 7' + gol-2 ≤ 10': line ≤ 6 · total HT 5 + gol-1 ≤ 5': gol terakhir 1H ≥ 30' · total HT 6: gol-1 ≤ 7'<br>
-    <b>SUPER3</b> — selisih skor HT tepat 3 · line awal ≥ 6 · gol terakhir 1H ≥ 40'<br>
-    <b>SUPER4</b> — total gol HT tepat 5 · urutan X–Y–X–X–bebas · tanpa syarat menit / line<br>
+    <b>SUPER</b> — selisih HT ≤ 1 (kalau seri: gol-2 ≤ 25' dan gol terakhir 1H ≥ 35') · gol pertama ≤ 5' · line awal ≥ 5.75 · semua HT tidak seri: gol-2 9'–25' · total HT 3 + gol-1 ≤ 4': line ≥ 7.25 · total HT 5: gol terakhir 1H ≥ 30' · mulai menit 60 babak kedua<br>
+    <b>SUPER1</b> <span class="noko">NONAKTIF</span> — total gol HT tepat 3 · gol pertama ≤ 18' · line awal 6.75–7.5 · HT 3-0/0-3: line tepat 7.5<br>
+    <b>SUPER2</b> <span class="noko">NONAKTIF</span> — selisih HT ≤ 1 · gol pertama ≤ 8' · line awal ≥ 7.25 · total HT 3: gol pertama ≤ 6' · total HT 5: gol-2 menit 9'–30' · HT 2-2: gol-2 menit 14'–30' · total HT ≥ 7: line awal ≥ 7.5<br>
+    <b>S-LOW</b> <span class="noko">NONAKTIF</span> — selisih HT ≤ 1 (kalau seri: gol-2 ≤ 25' dan gol terakhir 1H ≥ 35') · gol pertama ≤ 5' · line awal ≥ 5.75 · tanpa total HT 1 · semua HT tidak seri: gol-2 9'–25' · total HT 3: line ≤ 7.5 dan gol-1 ≤ 4' wajib line ≥ 7.25 · total HT 5: gol terakhir 1H ≥ 30'<br>
+    <b>SUPER3</b> <span class="noko">NONAKTIF</span> — selisih skor HT tepat 3 · line awal ≥ 6 · gol terakhir 1H ≥ 42'<br>
+    <b>SUPER4</b> <span class="noko">NONAKTIF</span> — total gol HT tepat 5 · urutan X–Y–X–X–bebas · tanpa syarat menit / line<br>
     <b>P12</b> — total gol HT tepat 5 · line awal ≥ 6.5 · gol kedua ≥ 8'<br>
-    <b>P1</b> — selisih HT tepat 1 · gol pertama ≤ 12' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 3: line ≤ 7.5 dan gol-1 ≤ 4' wajib line ≥ 7.25 · total HT 5: gol-2 9'–30'<br>
+    <b>P1</b> — selisih HT tepat 1 · total HT maksimal 5 · gol pertama ≤ 12' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 3: line ≤ 7.5 dan gol-1 ≤ 4' wajib line ≥ 7.25 · total HT 5: gol-2 9'–30'<br>
     <b>P2</b> — HT 2-1 / 1-2 · gol pertama ≤ 15' · line awal 5.75–7.5 · gol pertama ≤ 4': line wajib ≥ 7.25<br>
-    <b>P3</b> — total gol HT tepat 3 · gol pertama 5'–9' · line awal 5.5–7.5<br>
+    <b>P3</b> — total gol HT tepat 3 · gol pertama 5'–9' · line awal 5.5–7.5 · HT 3-0/0-3: line wajib ≥ 6.5<br>
     <b>P4</b> — HT 1-1 · gol pertama ≥ 15' · line awal ≥ 5.5<br>
     <b>P5</b> — HT 3-0 · gol pertama ≤ 18' · gol terakhir 1H ≤ 40'<br>
     <b>P6</b> — HT 2-2 · gol pertama ≤ 8' · line awal ≤ 6.25<br>
@@ -101,7 +101,7 @@ if (isset($_GET['json'])) {
     <b>P10</b> — HT 2-3 · line awal ≥ 5.75<br>
     <b>P11</b> — total gol HT tepat 3 · gol pertama ≤ 12' · line awal 5.75–7.5 · gol pertama ≤ 4': line wajib ≥ 7.25 · HT 3-0/0-3: line wajib ≥ 7.5<br>
     <b>HAH</b> — urutan gol 1H Home–Away–Home · HT 2-1 · gol ketiga/terakhir 1H ≥ 25' · tanpa syarat line<br>
-    SUPER/SUPER1/SUPER2/S-LOW/SUPER3/SUPER4 mulai menit 50 babak kedua; pattern lain mulai menit 60. Semua sinyal hilang begitu ada gol di babak kedua.
+    SUPER dan HAH aktif mulai menit 60 babak kedua; P1-P12 mulai menit 65; SUPER1/SUPER2/S-LOW/SUPER3/SUPER4 dinonaktifkan. Semua sinyal hilang begitu ada gol di babak kedua.
   </p>
 
   <div class="grid">
@@ -167,7 +167,8 @@ function render(d) {
   document.title = (nSig ? '(' + nSig + ') ' : '') + 'V-Soccer Live View';
   if (pats.length) {
     document.getElementById('legend').innerHTML = pats.map(function (p) {
-      var t = '<b>' + esc(p.code) + '</b> — ' + esc(p.desc);
+      var disabled = p.disabled ? ' <span class="noko">NONAKTIF</span>' : '';
+      var t = '<b>' + esc(p.code) + '</b>' + disabled + ' — ' + esc(p.desc);
       if (p.first_goal_min != null && p.first_goal_max != null) {
         t += ' · gol pertama ' + esc(p.first_goal_min) + "'–" + esc(p.first_goal_max) + "'";
       } else if (p.first_goal_min != null) {
@@ -179,8 +180,10 @@ function render(d) {
       if (p.max_line != null) t += ' · line awal &le; ' + esc(p.max_line);
       return t;
     }).join('<br>') +
-      '<br>SUPER/SUPER1/SUPER2/S-LOW/SUPER3/SUPER4 mulai menit ' + esc(d.signal_start_2h_o25_minute == null ? 50 : d.signal_start_2h_o25_minute) +
-      '; pattern lain mulai menit ' + esc(d.signal_start_2h_other_minute == null ? 60 : d.signal_start_2h_other_minute) +
+      '<br>SUPER aktif mulai menit ' + esc(d.signal_start_2h_other_minute == null ? 60 : d.signal_start_2h_other_minute) +
+      '; HAH mulai menit ' + esc(d.signal_start_2h_other_minute == null ? 60 : d.signal_start_2h_other_minute) +
+      '; P1-P12 mulai menit ' + esc(d.signal_start_2h_p_minute == null ? 65 : d.signal_start_2h_p_minute) +
+      '; SUPER1/SUPER2/S-LOW/SUPER3/SUPER4 dinonaktifkan' +
       ' babak kedua. Semua sinyal hilang begitu ada gol di babak kedua.';
   }
   document.getElementById('cnt').textContent = m.length;

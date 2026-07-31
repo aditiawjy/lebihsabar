@@ -64,6 +64,20 @@ SUPER_NON_DRAW_SECOND_GOAL_MAX = int(os.environ.get("VSOCCER_SUPER_NON_DRAW_SECO
 SUPER_TOTAL3_EARLY_FIRST_MAX = int(os.environ.get("VSOCCER_SUPER_TOTAL3_EARLY_FIRST_MAX", "4"))
 SUPER_TOTAL3_EARLY_MIN_LINE = float(os.environ.get("VSOCCER_SUPER_TOTAL3_EARLY_MIN_LINE", "7.25"))
 SUPER_TOTAL5_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_SUPER_TOTAL5_LAST_GOAL_MIN", "30"))
+# --- Aturan seragam keluarga SUPER -----------------------------------------
+# Babak pertama sudah ramai (total HT >= 5) tapi line awal rendah = pasar tidak
+# menilai match ini subur, dan babak kedua cenderung kering. Di log, sel
+# "total HT >= 5 & line < 6.5" berisi 66 match dengan O2.5 2H cuma 50,0%
+# (baseline 63,9%). Satu aturan ini membuat SUPER, SUPER1, S-LOW, SUPER3, dan
+# SUPER4 mencapai 100% sekaligus — jauh lebih kecil risiko overfitting
+# dibanding memberi aturan khusus untuk tiap pola.
+SUPER_FAMILY = ("SUPER", "SUPER1", "SUPER2", "S-LOW", "SUPER3", "SUPER4")
+SUPERFAM_HIGH_TOTAL_MIN = int(os.environ.get("VSOCCER_SUPERFAM_HIGH_TOTAL_MIN", "5"))
+SUPERFAM_HIGH_TOTAL_MIN_LINE = float(os.environ.get("VSOCCER_SUPERFAM_HIGH_TOTAL_MIN_LINE", "6.5"))
+# SUPER2 tidak tertolong aturan di atas (kegagalannya justru berline tinggi).
+# Dukungan datanya LEMAH: sel "gol terakhir 1H >= 45'" cuma 60,1% vs baseline
+# 63,9% pada 138 match — selisihnya bisa jadi kebetulan.
+SUPER2_LAST_1H_MAX = int(os.environ.get("VSOCCER_SUPER2_LAST_1H_MAX", "44"))
 SUPER1_TOTAL_HT = int(os.environ.get("VSOCCER_SUPER1_TOTAL_HT", "3"))
 SUPER1_MIN_LINE = float(os.environ.get("VSOCCER_SUPER1_MIN_LINE", "6.75"))
 SUPER1_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_SUPER1_FIRST_GOAL_MAX", "18"))
@@ -96,7 +110,9 @@ P1_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P1_FIRST_GOAL_MAX", "12"))
 P1_MIN_LINE = float(os.environ.get("VSOCCER_P1_MIN_LINE", "5.75"))
 P1_LOW_TOTAL_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P1_LOW_TOTAL_FIRST_GOAL_MAX", "6"))
 P1_HIGH_TOTAL_SECOND_GOAL_MIN = int(os.environ.get("VSOCCER_P1_HIGH_TOTAL_SECOND_GOAL_MIN", "9"))
-P1_HIGH_TOTAL_SECOND_GOAL_MAX = int(os.environ.get("VSOCCER_P1_HIGH_TOTAL_SECOND_GOAL_MAX", "30"))
+P1_HIGH_TOTAL_SECOND_GOAL_EARLY_MAX = int(os.environ.get("VSOCCER_P1_HIGH_TOTAL_SECOND_GOAL_EARLY_MAX", "18"))
+P1_HIGH_TOTAL_SECOND_GOAL_MAX = int(os.environ.get("VSOCCER_P1_HIGH_TOTAL_SECOND_GOAL_MAX", "28"))
+P1_HIGH_TOTAL_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_P1_HIGH_TOTAL_LAST_GOAL_MIN", "40"))
 P1_TOTAL3_MAX_LINE = float(os.environ.get("VSOCCER_P1_TOTAL3_MAX_LINE", "7.5"))
 P1_TOTAL3_EARLY_FIRST_MAX = int(os.environ.get("VSOCCER_P1_TOTAL3_EARLY_FIRST_MAX", "4"))
 P1_TOTAL3_EARLY_MIN_LINE = float(os.environ.get("VSOCCER_P1_TOTAL3_EARLY_MIN_LINE", "7.25"))
@@ -119,17 +135,30 @@ P5_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P5_FIRST_GOAL_MAX", "18"))
 P5_LAST_1H_GOAL_MAX = int(os.environ.get("VSOCCER_P5_LAST_1H_GOAL_MAX", "40"))
 P6_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P6_FIRST_GOAL_MAX", "8"))
 P6_MAX_LINE = float(os.environ.get("VSOCCER_P6_MAX_LINE", "6.25"))     # 6/6.5
+# Sel "HT 2-2 & line < 5.5": 21 match, O1.5 2H cuma 66,7% (baseline 82,5%).
+P6_MIN_LINE = float(os.environ.get("VSOCCER_P6_MIN_LINE", "5.5"))
 P7_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P7_FIRST_GOAL_MAX", "8"))
+# Gol pembuka terlalu dini justru pertanda buruk: sel "gol-1 <= 4'" berisi 87
+# match dengan O1.5 2H 75,9% (baseline 82,5%). Dipakai P7 dan P10.
+P7_FIRST_GOAL_MIN = int(os.environ.get("VSOCCER_P7_FIRST_GOAL_MIN", "5"))
 P8_MIN_LINE = float(os.environ.get("VSOCCER_P8_MIN_LINE", "6"))
+# Dukungan TIPIS: sel "HT 1-3 & gol-2 <= 12'" efeknya besar (62,5% vs 82,5%)
+# tapi cuma 8 match. Perlakukan sebagai dugaan, bukan temuan mapan.
+P8_SECOND_GOAL_MIN = int(os.environ.get("VSOCCER_P8_SECOND_GOAL_MIN", "13"))
 P9_SECOND_GOAL_MIN = int(os.environ.get("VSOCCER_P9_SECOND_GOAL_MIN", "12"))
 P9_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_P9_LAST_GOAL_MIN", "34"))
 P10_MIN_LINE = float(os.environ.get("VSOCCER_P10_MIN_LINE", "5.75"))   # 5.5/6
+P10_FIRST_GOAL_MIN = int(os.environ.get("VSOCCER_P10_FIRST_GOAL_MIN", "5"))
 SUPER3_HT_DIFF = int(os.environ.get("VSOCCER_SUPER3_HT_DIFF", "3"))
 SUPER3_MIN_LINE = float(os.environ.get("VSOCCER_SUPER3_MIN_LINE", "6"))
 SUPER3_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_SUPER3_LAST_GOAL_MIN", "42"))
 P12_TOTAL_HT = int(os.environ.get("VSOCCER_P12_TOTAL_HT", "5"))
 P12_MIN_LINE = float(os.environ.get("VSOCCER_P12_MIN_LINE", "6.5"))
 P12_SECOND_GOAL_MIN = int(os.environ.get("VSOCCER_P12_SECOND_GOAL_MIN", "8"))
+# Sel "gol-1 <= 3'": 30 match, O1.5 2H cuma 70,0% (baseline 82,6%). Ambangnya
+# lebih longgar dari P7/P10 (>= 5') karena >= 4' sudah cukup untuk 100% dan
+# menyisakan 36 sampel, bukan 30.
+P12_FIRST_GOAL_MIN = int(os.environ.get("VSOCCER_P12_FIRST_GOAL_MIN", "4"))
 HAH_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_HAH_LAST_GOAL_MIN", "26"))
 HAH_STANDARD_MIN_LINE = float(os.environ.get("VSOCCER_HAH_STANDARD_MIN_LINE", "4.75"))
 HAH_LOW_LINE_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_HAH_LOW_LINE_LAST_GOAL_MIN", "38"))
@@ -176,12 +205,14 @@ PATTERNS = [
      "ht": "any", "first_goal_max": None, "min_line": None},
     {"code": "P12",
      "desc": f"total HT tepat {P12_TOTAL_HT}; gol-2 ≥ {P12_SECOND_GOAL_MIN}'",
-     "ht": "total", "total_ht": P12_TOTAL_HT, "first_goal_max": None, "min_line": P12_MIN_LINE},
+     "ht": "total", "total_ht": P12_TOTAL_HT, "first_goal_min": P12_FIRST_GOAL_MIN,
+     "first_goal_max": None, "min_line": P12_MIN_LINE},
     {"code": "P1",
      "desc": f"selisih HT tepat 1; total HT maksimal {P1_MAX_TOTAL_HT} (total HT 1: gol-1 ≤ {P1_LOW_TOTAL_FIRST_GOAL_MAX}'; "
               f"total HT 3: line ≤ {P1_TOTAL3_MAX_LINE}, gol terakhir ≥ {P1_TOTAL3_LAST_GOAL_MIN}', gol-1 ≤ {P1_TOTAL3_EARLY_FIRST_MAX}' wajib "
              f"line ≥ {P1_TOTAL3_EARLY_MIN_LINE}; total HT 5: gol-2 "
-             f"{P1_HIGH_TOTAL_SECOND_GOAL_MIN}'–{P1_HIGH_TOTAL_SECOND_GOAL_MAX}')",
+             f"{P1_HIGH_TOTAL_SECOND_GOAL_MIN}'–{P1_HIGH_TOTAL_SECOND_GOAL_EARLY_MAX}', atau "
+             f"19'–{P1_HIGH_TOTAL_SECOND_GOAL_MAX}' jika gol terakhir 1H ≥ {P1_HIGH_TOTAL_LAST_GOAL_MIN}')",
      "ht": "diff1",
      "first_goal_max": P1_FIRST_GOAL_MAX, "min_line": P1_MIN_LINE},
     {"code": "P2", "desc": "HT 2-1 / 1-2; gol-1 ≤ 4' wajib line ≥ 7.25", "ht": "21",
@@ -195,14 +226,16 @@ PATTERNS = [
     {"code": "P5", "desc": f"HT 3-0; gol terakhir 1H ≤ {P5_LAST_1H_GOAL_MAX}'", "ht": "score", "score": (3, 0),
      "first_goal_max": P5_FIRST_GOAL_MAX, "min_line": None},
     {"code": "P6", "desc": "HT 2-2", "ht": "score", "score": (2, 2),
-     "first_goal_max": P6_FIRST_GOAL_MAX, "min_line": None, "max_line": P6_MAX_LINE},
+     "first_goal_max": P6_FIRST_GOAL_MAX, "min_line": P6_MIN_LINE, "max_line": P6_MAX_LINE},
     {"code": "P7", "desc": "HT 3-2", "ht": "score", "score": (3, 2),
+     "first_goal_min": P7_FIRST_GOAL_MIN,
      "first_goal_max": P7_FIRST_GOAL_MAX, "min_line": None},
-    {"code": "P8", "desc": "HT 1-3", "ht": "score", "score": (1, 3),
+    {"code": "P8", "desc": f"HT 1-3; gol kedua ≥ {P8_SECOND_GOAL_MIN}'", "ht": "score", "score": (1, 3),
      "first_goal_max": None, "min_line": P8_MIN_LINE},
     {"code": "P9", "desc": "HT 3-3 (tanpa syarat tambahan)", "ht": "score", "score": (3, 3),
      "first_goal_max": None, "min_line": None},
     {"code": "P10", "desc": "HT 2-3", "ht": "score", "score": (2, 3),
+     "first_goal_min": P10_FIRST_GOAL_MIN,
      "first_goal_max": None, "min_line": P10_MIN_LINE},
     # P11 "low": seperti P3 tapi jendela menit lebih longgar + line minimal.
     {"code": "P11", "desc": "total HT 3; gol-1 ≤ 4' wajib line ≥ 7.25; HT 3-0/0-3 wajib line ≥ 7.5", "ht": "total",
@@ -223,6 +256,8 @@ DISABLED_SIGNAL_CODES = set()
 SIGNAL_START_2H_O25_MINUTE = int(os.environ.get("VSOCCER_SIGNAL_START_2H_O25_MINUTE", "50"))
 SIGNAL_START_2H_OTHER_MINUTE = int(os.environ.get("VSOCCER_SIGNAL_START_2H_MINUTE", "60"))
 SIGNAL_START_2H_P_MINUTE = int(os.environ.get("VSOCCER_SIGNAL_START_2H_P_MINUTE", "65"))
+LATE_MARKET_MINUTE = int(os.environ.get("VSOCCER_LATE_MARKET_MINUTE", "60"))
+LATE_MARKET_HIGH_DEVIATION = float(os.environ.get("VSOCCER_LATE_MARKET_HIGH_DEVIATION", "1.25"))
 PAGE_LOAD_TIMEOUT_MS = 60_000
 
 _stop = False
@@ -326,26 +361,49 @@ def line_value(v):
     return sum(nums) / len(nums) if nums else None
 
 
+def absolute_match_minute(half, minute):
+    try:
+        value = float(minute)
+    except (TypeError, ValueError):
+        return None
+    half = str(half).upper()
+    if half not in {"1H", "2H"} or value < 0:
+        return None
+    if half == "2H" and value < 45:
+        value += 45
+    return min(value, 90)
+
+
 def line_deviation_fields(live_line, kickoff_line, half, minute, total_goals_after):
     """Projected post-goal line fields; invalid input deliberately yields empty values."""
     live = line_value(live_line)
     kickoff = line_value(kickoff_line)
     try:
-        minute_abs = float(minute)
         goals = int(total_goals_after)
     except (TypeError, ValueError):
         return {"projected_line": "", "line_deviation": "", "deviation_extreme": ""}
-    if live is None or kickoff is None or minute_abs < 0 or goals < 0:
+    minute_abs = absolute_match_minute(half, minute)
+    if live is None or kickoff is None or minute_abs is None or goals < 0:
         return {"projected_line": "", "line_deviation": "", "deviation_extreme": ""}
-    if str(half).upper() == "2H" and minute_abs < 45:
-        minute_abs += 45
-    minute_abs = min(abs(minute_abs), 90)
     projected = goals + kickoff * (1 - minute_abs / 90)
     deviation = live - projected
     return {
         "projected_line": round(projected, 3),
         "line_deviation": round(deviation, 3),
         "deviation_extreme": 1 if abs(deviation) >= 1.25 else 0,
+    }
+
+
+def late_market_fields(live_line, kickoff_line, half, minute, total_goals):
+    fields = line_deviation_fields(live_line, kickoff_line, half, minute, total_goals)
+    minute_abs = absolute_match_minute(half, minute)
+    deviation = fields["line_deviation"]
+    is_high = minute_abs is not None and minute_abs >= LATE_MARKET_MINUTE \
+        and deviation != "" and deviation >= LATE_MARKET_HIGH_DEVIATION
+    return {
+        "late_projected_line": fields["projected_line"],
+        "late_line_deviation": deviation,
+        "late_market_high": 1 if is_high else 0,
     }
 
 
@@ -366,6 +424,21 @@ def signal_check(e, st, pat):
     ht_h, ht_a = st.get("ht_h"), st.get("ht_a")
     if ht_h is None or ht_a is None:
         return False, "skor HT tak terekam"
+    # Aturan seragam keluarga SUPER: 1H ramai + line rendah = 2H cenderung kering.
+    if pat["code"] in SUPER_FAMILY and (ht_h + ht_a) >= SUPERFAM_HIGH_TOTAL_MIN:
+        lv_fam = line_value(st.get("ko_line"))
+        if lv_fam is None or lv_fam < SUPERFAM_HIGH_TOTAL_MIN_LINE:
+            return False, f"total HT {ht_h + ht_a}, line awal {st.get('ko_line')}"
+    # P8: gol kedua terlalu cepat -> babak kedua cenderung kering (sampel kecil).
+    if pat["code"] == "P8":
+        g1h_p8 = st.get("goal_mins_1h") or []
+        if len(g1h_p8) >= 2 and g1h_p8[1] < P8_SECOND_GOAL_MIN:
+            return False, f"gol kedua {g1h_p8[1]}'"
+    # SUPER2: gol terakhir babak pertama di menit akhir -> buang (bukti lemah).
+    if pat["code"] == "SUPER2":
+        g1h_s2 = st.get("goal_mins_1h") or []
+        if g1h_s2 and g1h_s2[-1] > SUPER2_LAST_1H_MAX:
+            return False, f"gol terakhir 1H {g1h_s2[-1]}'"
     if pat["ht"] == "diff1" and abs(ht_h - ht_a) != 1:
         return False, f"selisih HT {abs(ht_h - ht_a)}"
     if pat["ht"] == "diff_le1" and abs(ht_h - ht_a) > 1:
@@ -460,7 +533,10 @@ def signal_check(e, st, pat):
         if total_ht == 5:
             if len(g1h) < 2:
                 return False, "total HT 5, gol kedua tak terekam"
-            if not P1_HIGH_TOTAL_SECOND_GOAL_MIN <= g1h[1] <= P1_HIGH_TOTAL_SECOND_GOAL_MAX:
+            second_ok = P1_HIGH_TOTAL_SECOND_GOAL_MIN <= g1h[1] <= P1_HIGH_TOTAL_SECOND_GOAL_EARLY_MAX
+            late_ok = (P1_HIGH_TOTAL_SECOND_GOAL_EARLY_MAX < g1h[1] <= P1_HIGH_TOTAL_SECOND_GOAL_MAX
+                       and g1h[-1] >= P1_HIGH_TOTAL_LAST_GOAL_MIN)
+            if not (second_ok or late_ok):
                 return False, f"total HT 5, gol kedua {g1h[1]}'"
     if pat["code"] == "P3" and abs(ht_h - ht_a) == 3:
         lv = line_value(st.get("ko_line"))
@@ -774,7 +850,7 @@ def write_live(events, goals, status="running", note=""):
         st = state.get(f"{e['league']}|{e['home']}|{e['away']}") or {}
         hits, why = match_signals(e, st)
         ht = "" if st.get("ht_h") is None else f"{st['ht_h']}-{st['ht_a']}"
-        rows.append({
+        row = {
             "signal": bool(hits), "hits": hits, "signal_why": why, "ht": ht,
             "first_goal_min": st.get("first_goal_min"),
             "goal_mins_1h": list(st.get("goal_mins_1h") or []),
@@ -785,7 +861,10 @@ def write_live(events, goals, status="running", note=""):
             "line": e["line"], "over": to_decimal(e["over"]), "under": to_decimal(e["under"]),
             "ko_line": st.get("ko_line", ""), "ko_over": st.get("ko_over", ""),
             "ko_under": st.get("ko_under", ""), "tracked": bool(st.get("track")),
-        })
+        }
+        row.update(late_market_fields(e["line"], st.get("ko_line"), e["half"],
+                                      e["minute"], e["h"] + e["a"]))
+        rows.append(row)
     # Sinyal aktif ditaruh paling atas + dicatat ke log sekali saat muncul.
     rows.sort(key=lambda r: (not r["signal"], r["league"], r["home"]))
     live_keys, by_code = set(), {}
@@ -838,6 +917,9 @@ def write_live(events, goals, status="running", note=""):
         "signal_start_2h_o25_minute": SIGNAL_START_2H_O25_MINUTE,
         "signal_start_2h_other_minute": SIGNAL_START_2H_OTHER_MINUTE,
         "signal_start_2h_p_minute": SIGNAL_START_2H_P_MINUTE,
+        "superfam_high_total_min": SUPERFAM_HIGH_TOTAL_MIN,
+        "superfam_high_total_min_line": SUPERFAM_HIGH_TOTAL_MIN_LINE,
+        "super2_last_1h_max": SUPER2_LAST_1H_MAX,
         "target_url": TARGET_URL,
         "endpoint": ENDPOINT,
         "cycles": stats["cycles"],

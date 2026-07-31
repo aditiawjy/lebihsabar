@@ -64,6 +64,9 @@ if (isset($_GET['json'])) {
   .sig.supr { background:#4a3a10; color:#ffd166; border-color:#8a6a1c; }
   .sig.slow { background:#10304a; color:#8ecbff; border-color:#2b5f8a; }
   .seq { color:#c9a0ff; letter-spacing:.05em; }
+  .stk { display:inline-block; background:#3a2a10; color:#ffc95e; border:1px solid #7a5a1c;
+         border-radius:4px; padding:1px 6px; font-size:11px; font-weight:700; cursor:help; margin:1px 2px 1px 0; }
+  .stk.away { background:#2a1030; color:#e0a6ff; border-color:#6a3a7a; }
   .nosig { color:#4c5666; cursor:help; }
   tr.hit td { background:#12291d; }
   tr.hit td:first-child { box-shadow:inset 3px 0 0 #5ee39b; }
@@ -78,6 +81,7 @@ if (isset($_GET['json'])) {
   <div class="bar">
     <span id="st" class="pill warn">memuat…</span>
     <span id="sig" class="pill bad">SINYAL: 0</span>
+    <span id="stk" class="pill warn" title="Sumber kolom Peluang 100%: cache tabel streak (index.php?page=streak).">STREAK: –</span>
     <span class="muted" id="meta"></span>
     <span class="muted" id="err"></span>
   </div>
@@ -109,12 +113,14 @@ if (isset($_GET['json'])) {
       <h2>Match berjalan (<span id="cnt">0</span>)</h2>
       <table>
         <thead><tr>
-          <th>Sinyal</th><th>Match</th><th>Babak</th><th class="num">Menit</th><th class="num">Skor</th>
+          <th>Sinyal</th>
+          <th title="Peluang 100% dari tabel streak (index.php?page=streak), khusus market Over. H = tim kandang, A = tim tandang.">Peluang 100%</th>
+          <th>Match</th><th>Babak</th><th class="num">Menit</th><th class="num">Skor</th>
           <th class="num">HT</th><th class="num">Gol-1</th><th class="num">Gol 1H</th><th class="num">Urutan</th>
           <th class="num">Tot</th><th class="num">Line KO</th><th class="num">O/U KO</th>
           <th class="num">Line</th><th class="num">Over</th><th class="num">Under</th>
         </tr></thead>
-        <tbody id="tb"><tr><td colspan="15" class="empty">Menunggu data…</td></tr></tbody>
+        <tbody id="tb"><tr><td colspan="16" class="empty">Menunggu data…</td></tr></tbody>
       </table>
     </div>
     <div>
@@ -127,6 +133,7 @@ if (isset($_GET['json'])) {
   </div>
 </div>
 
+<script src="assets/streak100.js?v=<?= filemtime(__DIR__ . '/assets/streak100.js') ?>"></script>
 <script>
 var esc = function (s) {
   return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
@@ -136,6 +143,96 @@ var esc = function (s) {
 var shortLeague = function (s) {
   return String(s || '').replace('V-Soccer ', '').replace(' - 12 mins [V]', '').trim();
 };
+
+// ---- Peluang 100% dari tabel streak ---------------------------------------
+// Baris streak diambil dari streak-100-api.php (cache halaman streak, TIDAK
+// memicu rebuild), lalu disaring memakai assets/streak100.js — modul yang sama
+// dengan index.php?page=streak, jadi hasilnya tidak mungkin beda aturan.
+// Khusus market Over, sesuai pattern SUPER/P1-P12 yang semuanya bertaruh Over.
+var STREAK = {};          // nama tim -> daftar baris 100%
+var streakKey = '';       // daftar tim yang terakhir diminta
+var streakBusy = false;
+var OVER_OUTS = ['o35', 'o45', 'o55', 'o65', 'o75'];
+var STK_MAX_BADGE = 3;    // badge per tim, sisanya diringkas jadi "+n"
+
+function streakStatus(d) {
+  var el = document.getElementById('stk');
+  if (!el) return;
+  if (!d) { el.className = 'pill warn'; el.textContent = 'STREAK: memuat…'; return; }
+  if (!d.ok) {
+    el.className = 'pill bad';
+    el.textContent = 'STREAK: tidak ada data';
+    el.title = d.reason || 'Cache streak belum tersedia.';
+    return;
+  }
+  var n = 0;
+  for (var k in STREAK) n += STREAK[k].length;
+  var basi = d.age_min > 180;   // cache > 3 jam
+  el.className = 'pill ' + (n ? (basi ? 'warn' : 'ok') : 'bad');
+  el.textContent = 'STREAK: ' + n + ' peluang 100%' + (basi ? ' (cache ' + d.age_min + ' mnt)' : '');
+  el.title = 'Cache streak dibangun ' + (d.builtAt || '-') + ' (' + d.age_min + ' menit lalu). '
+    + 'Buka index.php?page=streak untuk menyegarkan.';
+}
+
+function streakCell(home, away) {
+  var out = [];
+  [['H', home, ''], ['A', away, ' away']].forEach(function (sisi) {
+    var daftar = STREAK[sisi[1]] || [];
+    daftar.slice(0, STK_MAX_BADGE).forEach(function (r) {
+      var judul = sisi[1] + ' — ' + r.outT + ' ' + r.over + '% (' + r.hits + '/' + r.samp + ')'
+        + '\nmode: ' + r.mk + (r.exp ? ' [eksperimental]' : '')
+        + '\nstreak berjalan: ' + r.cur + 'x'
+        + '\nkeandalan (Wilson 95%): ' + (r.lb === null ? '-' : r.lb + '%')
+        + '\n± baseline liga: ' + (r.lift === null ? '-' : (r.lift > 0 ? '+' : '') + r.lift + '%')
+        + '\nmeleset: ' + r.miss + 'x';
+      out.push('<span class="stk' + sisi[2] + '" title="' + esc(judul) + '">'
+        + sisi[0] + ' ' + esc(r.outT.replace('Over ', 'O')) + ' ' + r.over + '%</span>');
+    });
+    if (daftar.length > STK_MAX_BADGE) {
+      out.push('<span class="nosig" title="' + esc(sisi[1] + ': ' + (daftar.length - STK_MAX_BADGE)
+        + ' peluang lain disembunyikan') + '">+' + (daftar.length - STK_MAX_BADGE) + '</span>');
+    }
+  });
+  return out.length ? out.join(' ') : '<span class="nosig" title="Tidak ada peluang 100% market Over untuk kedua tim">–</span>';
+}
+
+function refreshStreak(matches) {
+  var teams = [];
+  (matches || []).forEach(function (m) {
+    if (m.home) teams.push(m.home);
+    if (m.away) teams.push(m.away);
+  });
+  teams = teams.filter(function (v, i, a) { return a.indexOf(v) === i; }).sort();
+  var key = teams.join('|');
+  // Tarik ulang hanya kalau daftar tim berubah — data streak bergerak lambat,
+  // tak ada gunanya menarik ~100 KB tiap 2 detik.
+  if (!key || key === streakKey || streakBusy) return;
+  streakBusy = true;
+  fetch('streak-100-api.php?teams=' + encodeURIComponent(key), { cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      streakKey = key;
+      STREAK = {};
+      if (d.ok && window.Streak100) {
+        var baris = window.Streak100.compute100(d.rows, {
+          baseOut: d.baseOut, baseOutLg: d.baseOutLg, outKeys: OVER_OUTS,
+        });
+        // Satu market bisa lolos lewat beberapa mode streak; simpan yang
+        // keandalannya paling tinggi saja supaya badge tidak menumpuk.
+        var terbaik = {};
+        baris.forEach(function (r) {
+          var k = r.t + '|' + r.outK;
+          if (!terbaik[k] || (r.lb || 0) > (terbaik[k].lb || 0)) terbaik[k] = r;
+        });
+        Object.keys(terbaik).map(function (k) { return terbaik[k]; })
+          .sort(function (a, b) { return (b.lb || 0) - (a.lb || 0); })
+          .forEach(function (r) { (STREAK[r.t] = STREAK[r.t] || []).push(r); });
+      }
+      streakStatus(d);
+      streakBusy = false;
+    })
+    .catch(function () { STREAK = {}; streakKey = ''; streakBusy = false; streakStatus({ ok: false, reason: 'Gagal memanggil streak-100-api.php' }); });
+}
 
 function render(d) {
   var st = document.getElementById('st');
@@ -157,6 +254,7 @@ function render(d) {
   document.getElementById('err').textContent = d.last_error ? '⚠ ' + d.last_error : '';
 
   var m = d.matches || [];
+  refreshStreak(m);
   var nSig = d.signals || 0;
   var byCode = d.signals_by_code || {};
   var pats = d.patterns || [];
@@ -186,13 +284,13 @@ function render(d) {
   document.getElementById('cnt').textContent = m.length;
   var tb = document.getElementById('tb'), rows = '', lastLg = null;
   if (!m.length) {
-    rows = '<tr><td colspan="15" class="empty">Tidak ada match terbaca.</td></tr>';
+    rows = '<tr><td colspan="16" class="empty">Tidak ada match terbaca.</td></tr>';
   } else {
     for (var i = 0; i < m.length; i++) {
       var r = m[i];
       if (r.league !== lastLg) {
         lastLg = r.league;
-        rows += '<tr class="lg"><td colspan="15">' + esc(shortLeague(r.league)) + '</td></tr>';
+        rows += '<tr class="lg"><td colspan="16">' + esc(shortLeague(r.league)) + '</td></tr>';
       }
       var koOu = (r.ko_over || r.ko_under) ? (esc(r.ko_over || '-') + ' / ' + esc(r.ko_under || '-')) : '-';
       var hits = r.hits || (r.signal ? ['P1'] : []);
@@ -204,6 +302,7 @@ function render(d) {
         : '<span class="nosig" title="' + esc(r.signal_why || '') + '">–</span>';
       rows += '<tr' + (r.signal ? ' class="hit"' : '') + '>' +
         '<td>' + sigCell + '</td>' +
+        '<td>' + streakCell(r.home, r.away) + '</td>' +
         '<td>' + esc(r.home) + ' vs ' + esc(r.away) + '</td>' +
         '<td>' + esc(r.half) + '</td>' +
         '<td class="num">' + (r.minute >= 0 ? r.minute + "'" : '-') + '</td>' +

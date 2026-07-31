@@ -126,8 +126,8 @@ if (isset($_GET['json'])) {
     <div>
       <h2>Gol terakhir terdeteksi</h2>
       <table>
-        <thead><tr><th>Jam</th><th>Match</th><th>Menit</th><th class="num">Skor</th></tr></thead>
-        <tbody id="gb"><tr><td colspan="4" class="empty">Belum ada.</td></tr></tbody>
+        <thead><tr><th>Jam</th><th>Match</th><th>Menit</th><th class="num">Skor</th><th class="num">Market setelah gol</th></tr></thead>
+        <tbody id="gb"><tr><td colspan="5" class="empty">Belum ada.</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -329,7 +329,7 @@ function render(d) {
 
   var g = d.recent_goals || [], gr = '';
   if (!g.length) {
-    gr = '<tr><td colspan="4" class="empty">Belum ada.</td></tr>';
+    gr = '<tr><td colspan="5" class="empty">Belum ada.</td></tr>';
   } else {
     for (var j = 0; j < g.length; j++) {
       var x = g[j];
@@ -338,6 +338,7 @@ function render(d) {
         '<td>' + esc(x.home_team) + ' vs ' + esc(x.away_team) + '</td>' +
         '<td>' + esc(x.minute) + '</td>' +
         '<td class="num ' + (x.accurate ? 'goal' : 'inacc') + '">' + esc(x.score_after) + '</td>' +
+        '<td class="num">' + esc((x.line || '-') + ' · O ' + (x.over || '-') + ' / U ' + (x.under || '-')) + '</td>' +
         '</tr>';
     }
   }

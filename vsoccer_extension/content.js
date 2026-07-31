@@ -139,7 +139,7 @@
           // Kalau scraper gabung di tengah match (skor sudah jalan), menit gol yang
           // terlewat TIDAK diketahui -> jangan dikarang. Simpan baseline, tandai skip.
           const track = (m.half === '1H' && m.h === 0 && m.a === 0);
-          st = { home: m.h, away: m.a, ms: {}, track };
+          st = { home: m.h, away: m.a, ms: {}, track, pendingMarkets: [] };
           state.set(key, st);
           if (track) matches.push({
             league, home_team: m.home, away_team: m.away,
@@ -154,6 +154,14 @@
         if (!st.track) { st.home = m.h; st.away = m.a; return; }
 
         // GOL BARU pada match yang dilacak dari kickoff: catat di menit yang teramati saat ini.
+        const marketReady = !!(m.line && m.over && m.under);
+        if (marketReady && st.pendingMarkets && st.pendingMarkets.length) {
+          st.pendingMarkets.forEach(g => goals.push(Object.assign({}, g, {
+            ou_line: m.line, over_odd: m.over, under_odd: m.under,
+            home_score: String(m.h), away_score: String(m.a), timestamp: nowIso(), market_update: 1,
+          })));
+          st.pendingMarkets = [];
+        }
         let ch = st.home, ca = st.away;
         const jump = (m.h - st.home) + (m.a - st.away);   // gol tertangkap dalam 1 poll
         const accurate = jump <= 2 ? 1 : 0;               // >=3 = ciri tab ke-throttle, menit tak andal
@@ -162,13 +170,15 @@
           // dahulukan sisi yang masih tertinggal dari target; default home
           let side;
           if (ch < m.h) { ch++; side = 'home'; } else { ca++; side = 'away'; }
-          goals.push({
+          const goal = {
             league, home_team: m.home, away_team: m.away,
             minute: minuteStr, half: m.half, min_num: Math.max(m.minute, 0),
             side, score_after: ch + '-' + ca, accurate, // 1=menit andal, 0=diragukan (throttle)
             ou_line: m.line, over_odd: m.over, under_odd: m.under, // odds saat gol
             home_score: String(m.h), away_score: String(m.a), timestamp: nowIso(),
-          });
+          };
+          goals.push(goal);
+          if (!marketReady) st.pendingMarkets.push(Object.assign({}, goal));
         }
         st.home = m.h; st.away = m.a;
       });

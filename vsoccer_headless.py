@@ -622,7 +622,7 @@ def build_payload(events):
                           "ko_over": ko_over if ko_ok else "",
                           "ko_under": ko_under if ko_ok else "",
                           "first_goal_min": None, "ht_h": None, "ht_a": None,
-                          "goal_mins_1h": [], "goal_sides_1h": []}
+                          "goal_mins_1h": [], "goal_sides_1h": [], "pending_market": []}
             # Hanya daftarkan match yang line awalnya sudah valid; kalau belum, tunggu
             # siklus berikutnya (selama skor masih 0-0) lewat cabang isi-susulan di bawah.
             if track and ko_ok:
@@ -650,6 +650,17 @@ def build_payload(events):
         # Skor HT = skor terakhir yang terlihat selagi masih babak pertama.
         if e["half"] == "1H":
             st["ht_h"], st["ht_a"] = e["h"], e["a"]
+        live_over, live_under = to_decimal(e["over"]), to_decimal(e["under"])
+        market_ready = bool(e["line"] and live_over and live_under)
+        if market_ready and st.get("pending_market"):
+            for pending in st["pending_market"]:
+                pending.update({
+                    "ou_line": e["line"], "over_odd": live_over, "under_odd": live_under,
+                    "home_score": str(e["h"]), "away_score": str(e["a"]),
+                    "timestamp": now_iso(), "market_update": 1,
+                })
+                goals.append(pending)
+            st["pending_market"] = []
         jump = (e["h"] - st["home"]) + (e["a"] - st["away"])
         accurate = 1 if jump <= 2 else 0
         minute_str = f"{e['half']} {max(e['minute'], 0)}'"
@@ -664,13 +675,16 @@ def build_payload(events):
             if e["half"] == "1H":
                 st["goal_mins_1h"].append(max(e["minute"], 0))
                 st["goal_sides_1h"].append(side)
-            goals.append({
+            goal = {
                 "league": e["league"], "home_team": e["home"], "away_team": e["away"],
                 "minute": minute_str, "half": e["half"], "min_num": max(e["minute"], 0),
                 "side": side, "score_after": f"{ch}-{ca}", "accurate": accurate,
-                "ou_line": e["line"], "over_odd": to_decimal(e["over"]), "under_odd": to_decimal(e["under"]),
+                "ou_line": e["line"], "over_odd": live_over, "under_odd": live_under,
                 "home_score": str(e["h"]), "away_score": str(e["a"]), "timestamp": now_iso(),
-            })
+            }
+            goals.append(goal)
+            if not market_ready:
+                st.setdefault("pending_market", []).append(goal.copy())
         st["home"], st["away"] = e["h"], e["a"]
     return matches, goals
 
@@ -692,11 +706,20 @@ def post(matches, goals):
 def write_live(events, goals, status="running", note=""):
     """Tulis snapshot terakhir ke vsoccer_live.json (dibaca vsoccer-live.php)."""
     for g in goals:
+        if g.get("market_update"):
+            for recent in recent_goals:
+                if (recent["home_team"], recent["away_team"], recent["score_after"]) == (
+                        g["home_team"], g["away_team"], g["score_after"]):
+                    recent.update({"line": g.get("ou_line", ""), "over": g.get("over_odd", ""),
+                                   "under": g.get("under_odd", "")})
+                    break
+            continue
         recent_goals.appendleft({
             "time": datetime.now().strftime("%H:%M:%S"),
             "league": g["league"], "home_team": g["home_team"], "away_team": g["away_team"],
             "minute": g["minute"], "side": g["side"], "score_after": g["score_after"],
-            "accurate": g["accurate"],
+            "line": g.get("ou_line", ""), "over": g.get("over_odd", ""),
+            "under": g.get("under_odd", ""), "accurate": g["accurate"],
         })
     rows = []
     for e in events or []:

@@ -31,7 +31,7 @@ if (!$hasGoals && !$hasMatches && !$hasMilestones) {
 
 // Goal log khusus Virtual Soccer (1x2aaa.com), terpisah dari goal_log.csv utama.
 $csvFile = __DIR__ . '/goal_log_vsoccer.csv';
-$headers = ['datetime', 'league', 'home_team', 'away_team', 'goals', 'goal_minutes', 'final_home', 'final_away', 'ko_line', 'ko_over', 'ko_under'];
+$headers = ['datetime', 'league', 'home_team', 'away_team', 'goals', 'goal_minutes', 'goal_markets', 'final_home', 'final_away', 'ko_line', 'ko_over', 'ko_under'];
 
 // Ambil menit gol saja dari kolom goals, mis "1H 20' (1-0) | 2H 3' (2-0)" -> "1H 20' | 2H 3'".
 function extractGoalMinutes(string $goals): string {
@@ -39,6 +39,25 @@ function extractGoalMinutes(string $goals): string {
         return implode(' | ', array_map(fn($x) => $x[1] . ' ' . $x[2] . "'", $m));
     }
     return '';
+}
+
+function upsertGoalMarket(string $markets, string $goalEntry, array $goal): string {
+    $line = trim((string)($goal['ou_line'] ?? ''));
+    $over = trim((string)($goal['over_odd'] ?? ''));
+    $under = trim((string)($goal['under_odd'] ?? ''));
+    if ($line === '' || $over === '' || $under === '') return $markets;
+
+    $entry = $goalEntry . ' Line ' . $line . ' O ' . $over . ' U ' . $under;
+    $prefix = $goalEntry . ' Line ';
+    $items = trim($markets) === '' ? [] : explode(' | ', $markets);
+    foreach ($items as $index => $item) {
+        if (strpos($item, $prefix) === 0) {
+            $items[$index] = $entry;
+            return implode(' | ', $items);
+        }
+    }
+    $items[] = $entry;
+    return implode(' | ', $items);
 }
 
 // Append satu baris per gol ke goal_events_vsoccer.csv, dedup per gol/hari.
@@ -196,6 +215,7 @@ if (is_file($csvFile) && is_readable($csvFile)) {
             'home_team'  => $home,
             'away_team'  => $away,
             'goals'      => $get($row, 'goals', 4),
+            'goal_markets' => $get($row, 'goal_markets', -1),
             'final_home' => $get($row, 'final_home', 5),
             'final_away' => $get($row, 'final_away', 6),
             'ko_line'    => $get($row, 'ko_line', -1),
@@ -233,6 +253,7 @@ if ($hasMatches) {
                 'home_team'  => $homeTeam,
                 'away_team'  => $awayTeam,
                 'goals'      => '',
+                'goal_markets' => '',
                 'final_home' => '0',
                 'final_away' => '0',
                 'ko_line'    => '',
@@ -273,7 +294,6 @@ foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
     $exactKey = $dateOnly . '|' . $hourOnly . ':' . $minuteOnly . '|' . $homeTeam . '|' . $awayTeam;
     $key = isset($rows[$exactKey]) ? $exactKey : (findExistingKey($rows, $dateOnly, $homeTeam, $awayTeam, $dt) ?? $exactKey);
     $goalEntry = $minute . ' (' . $scoreAfter . ')';
-
     $existingGoals = trim((string)($rows[$key]['goals'] ?? ''));
     $candidateGoals = $existingGoals;
     if ($candidateGoals === '') {
@@ -290,6 +310,11 @@ foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
         $skippedNoKo++;
     } else {
         $rows[$key]['goals'] = $candidateGoals;
+        $rows[$key]['goal_markets'] = upsertGoalMarket(
+            (string)($rows[$key]['goal_markets'] ?? ''),
+            $goalEntry,
+            $goal
+        );
         $rows[$key]['final_home'] = $homeFinal;
         $rows[$key]['final_away'] = $awayFinal;
     }
@@ -349,6 +374,7 @@ foreach ($rows as $row) {
         $row['away_team'],
         $row['goals'],
         extractGoalMinutes((string)($row['goals'] ?? '')),
+        $row['goal_markets'] ?? '',
         $row['final_home'],
         $row['final_away'],
         $row['ko_line']  ?? '',

@@ -12,7 +12,13 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(msg.payload),
   })
-    .then(r => r.json())
+    .then(async r => {
+      const text = await r.text();
+      let data;
+      try { data = JSON.parse(text); } catch (_) { throw new Error(`HTTP ${r.status}: ${text.slice(0, 120)}`); }
+      if (!r.ok || !data.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data;
+    })
     .then(data => sendResponse({ ok: true, data }))
     .catch(err => sendResponse({ ok: false, error: String(err) }));
   return true; // async sendResponse

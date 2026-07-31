@@ -48,6 +48,7 @@ function upsertGoalMarket(string $markets, string $goalEntry, array $goal): stri
     if ($line === '' || $over === '' || $under === '') return $markets;
 
     $entry = $goalEntry . ' Line ' . $line . ' O ' . $over . ' U ' . $under;
+    if ((string)($goal['deviation_extreme'] ?? '') === '1') $entry .= ' DEV!';
     $prefix = $goalEntry . ' Line ';
     $items = trim($markets) === '' ? [] : explode(' | ', $markets);
     foreach ($items as $index => $item) {
@@ -62,30 +63,54 @@ function upsertGoalMarket(string $markets, string $goalEntry, array $goal): stri
 
 // Append satu baris per gol ke goal_events_vsoccer.csv, dedup per gol/hari.
 function logGoalEvent(array $g): void {
-    static $seen = null;
+    static $rows = null;
+    static $headerCurrent = false;
     $file = __DIR__ . '/goal_events_vsoccer.csv';
-    $header = ['logged_at', 'league', 'home_team', 'away_team', 'half', 'minute', 'side', 'score_after', 'ou_line', 'over_odd', 'under_odd', 'accurate'];
-    if ($seen === null) {
-        $seen = [];
+    $header = ['logged_at', 'league', 'home_team', 'away_team', 'half', 'minute', 'side', 'score_after', 'ou_line', 'over_odd', 'under_odd', 'accurate', 'projected_line', 'line_deviation', 'deviation_extreme'];
+    if ($rows === null) {
+        $rows = [];
         if (is_file($file) && ($rf = fopen($file, 'r'))) {
-            $h = fgetcsv($rf);
-            while (($r = fgetcsv($rf)) !== false) {
-                // kunci: tanggal(logged_at) | teams | score_after
-                $day = substr((string)($r[0] ?? ''), 0, 10);
-                $seen[$day . '|' . ($r[2] ?? '') . '|' . ($r[3] ?? '') . '|' . ($r[7] ?? '')] = true;
+            $oldHeader = fgetcsv($rf) ?: [];
+            $headerCurrent = $oldHeader === $header;
+            while (($raw = fgetcsv($rf)) !== false) {
+                $row = array_fill_keys($header, '');
+                foreach ($oldHeader as $i => $name) if (array_key_exists($name, $row)) $row[$name] = $raw[$i] ?? '';
+                $rows[] = $row;
             }
             fclose($rf);
         }
     }
-    $day = substr((string)$g['logged_at'], 0, 10); // selaras cara baca file di atas
-    $key = $day . '|' . $g['home_team'] . '|' . $g['away_team'] . '|' . $g['score_after'];
-    if (isset($seen[$key]) || $g['score_after'] === '') return;
-    $seen[$key] = true;
-    $isNew = !is_file($file) || filesize($file) === 0;
-    if ($out = fopen($file, 'a')) {
-        if ($isNew) fputcsv($out, $header);
-        fputcsv($out, [$g['logged_at'], $g['league'], $g['home_team'], $g['away_team'], $g['half'], $g['minute'], $g['side'], $g['score_after'], $g['ou_line'] ?? '', $g['over_odd'] ?? '', $g['under_odd'] ?? '', $g['accurate'] ?? '']);
+    $timeBucket = substr((string)$g['logged_at'], 0, 16);
+    $key = $timeBucket . '|' . $g['league'] . '|' . $g['home_team'] . '|' . $g['away_team'] . '|' . $g['score_after'];
+    if ($g['score_after'] === '') return;
+    $incoming = array_fill_keys($header, '');
+    foreach ($header as $name) $incoming[$name] = (string)($g[$name] ?? '');
+    $found = false;
+    foreach ($rows as &$row) {
+        $rowKey = substr($row['logged_at'], 0, 16) . '|' . $row['league'] . '|' . $row['home_team'] . '|' . $row['away_team'] . '|' . $row['score_after'];
+        if ($rowKey !== $key) continue;
+        $found = true;
+        // Reopened-market updates enrich the original event; never duplicate/replace its identity.
+        foreach (['ou_line','over_odd','under_odd','projected_line','line_deviation','deviation_extreme'] as $name) {
+            if ($incoming[$name] !== '') $row[$name] = $incoming[$name];
+        }
+        break;
+    }
+    unset($row);
+    if (!$found && $headerCurrent) {
+        $rows[] = $incoming;
+        if ($out = fopen($file, 'a')) {
+            fputcsv($out, array_map(fn($name) => $incoming[$name], $header));
+            fclose($out);
+        }
+        return;
+    }
+    if (!$found) $rows[] = $incoming;
+    if ($out = fopen($file, 'w')) {
+        fputcsv($out, $header);
+        foreach ($rows as $row) fputcsv($out, array_map(fn($name) => $row[$name] ?? '', $header));
         fclose($out);
+        $headerCurrent = true;
     }
 }
 
@@ -335,6 +360,9 @@ foreach (($hasGoals ? $payload['goals'] : []) as $goal) {
         'over_odd'    => trim((string)($goal['over_odd'] ?? '')),
         'under_odd'   => trim((string)($goal['under_odd'] ?? '')),
         'accurate'    => (isset($goal['accurate']) && (int)$goal['accurate'] === 0) ? '0' : '1',
+        'projected_line' => trim((string)($goal['projected_line'] ?? '')),
+        'line_deviation' => trim((string)($goal['line_deviation'] ?? '')),
+        'deviation_extreme' => trim((string)($goal['deviation_extreme'] ?? '')),
         'date'        => $dateOnly,
     ]);
 }

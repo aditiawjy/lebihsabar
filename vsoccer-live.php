@@ -57,6 +57,9 @@ if (isset($_GET['json'])) {
   .score { font-weight:700; font-variant-numeric:tabular-nums; }
   .goal { color:#5ee39b; }
   .inacc { color:#ffd166; }
+  .dev-extreme { color:#ff8095; background:#4a1720; font-weight:800; border-radius:4px; padding:2px 5px; }
+  .dev-warn { color:#ffc95e; background:#3a2a10; border:1px solid #7a5a1c; font-weight:800;
+              border-radius:4px; padding:1px 6px; margin-left:6px; }
   .ko { color:#8ecbff; font-weight:600; }
   .noko { color:#ff8095; font-size:11px; }
   .sig { background:#0f3d24; color:#5ee39b; border:1px solid #2f7d54; border-radius:4px;
@@ -93,7 +96,7 @@ if (isset($_GET['json'])) {
     <b>SUPER3</b> <span class="noko">NONAKTIF</span> — selisih skor HT tepat 3 · line awal ≥ 6 · gol terakhir 1H ≥ 42'<br>
     <b>SUPER4</b> <span class="noko">NONAKTIF</span> — total gol HT tepat 5 · urutan X–Y–X–X–bebas · tanpa syarat menit / line<br>
     <b>P12</b> — total gol HT tepat 5 · line awal ≥ 6.5 · gol kedua ≥ 8'<br>
-    <b>P1</b> — selisih HT tepat 1 · total HT maksimal 5 · gol pertama ≤ 12' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 3: line ≤ 7.5 dan gol-1 ≤ 4' wajib line ≥ 7.25 · total HT 5: gol-2 9'–30'<br>
+    <b>P1</b> — selisih HT tepat 1 · total HT maksimal 5 · gol pertama ≤ 12' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 3: line ≤ 7.5, gol terakhir ≥ 20', dan gol-1 ≤ 4' wajib line ≥ 7.25 · total HT 5: gol-2 9'–30'<br>
     <b>P2</b> — HT 2-1 / 1-2 · gol pertama ≤ 15' · line awal 5.75–7.5 · gol pertama ≤ 4': line wajib ≥ 7.25<br>
     <b>P3</b> — total gol HT tepat 3 · gol pertama 5'–9' · line awal 5.5–7.5 · HT 3-0/0-3: line wajib ≥ 6.5<br>
     <b>P4</b> — HT 1-1 · gol pertama ≥ 15' · line awal ≥ 5.5<br>
@@ -126,8 +129,8 @@ if (isset($_GET['json'])) {
     <div>
       <h2>Gol terakhir terdeteksi</h2>
       <table>
-        <thead><tr><th>Jam</th><th>Match</th><th>Menit</th><th class="num">Skor</th><th class="num">Market setelah gol</th></tr></thead>
-        <tbody id="gb"><tr><td colspan="5" class="empty">Belum ada.</td></tr></tbody>
+        <thead><tr><th>Jam</th><th>Match</th><th>Menit</th><th class="num">Skor</th><th class="num">Market setelah gol</th><th class="num">Proyeksi / Deviasi</th></tr></thead>
+        <tbody id="gb"><tr><td colspan="6" class="empty">Belum ada.</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -329,16 +332,24 @@ function render(d) {
 
   var g = d.recent_goals || [], gr = '';
   if (!g.length) {
-    gr = '<tr><td colspan="5" class="empty">Belum ada.</td></tr>';
+    gr = '<tr><td colspan="6" class="empty">Belum ada.</td></tr>';
   } else {
     for (var j = 0; j < g.length; j++) {
       var x = g[j];
+      var hasDeviation = x.projected_line !== '' && x.projected_line != null && x.line_deviation !== '' && x.line_deviation != null;
+      var deviation = hasDeviation ? 'P ' + x.projected_line + ' · Δ ' + (Number(x.line_deviation) > 0 ? '+' : '') + x.line_deviation : '-';
+      var warn = Number(x.deviation_extreme) === 1
+        ? '<span class="dev-warn" title="Deviasi odds ekstrem vs proyeksi — kemungkinan mispricing">' +
+          esc('⚠ ' + (Number(x.line_deviation) > 0 ? '+' : '') + x.line_deviation) + '</span>'
+        : '';
       gr += '<tr>' +
         '<td>' + esc(x.time) + '</td>' +
         '<td>' + esc(x.home_team) + ' vs ' + esc(x.away_team) + '</td>' +
         '<td>' + esc(x.minute) + '</td>' +
         '<td class="num ' + (x.accurate ? 'goal' : 'inacc') + '">' + esc(x.score_after) + '</td>' +
-        '<td class="num">' + esc((x.line || '-') + ' · O ' + (x.over || '-') + ' / U ' + (x.under || '-')) + '</td>' +
+        '<td class="num">' + esc((x.line || '-') + ' · O ' + (x.over || '-') + ' / U ' + (x.under || '-')) + warn + '</td>' +
+        '<td class="num"><span class="' + (Number(x.deviation_extreme) === 1 ? 'dev-extreme' : '') + '">' +
+          esc((Number(x.deviation_extreme) === 1 ? '⚠ EXTREME · ' : '') + deviation) + '</span></td>' +
         '</tr>';
     }
   }

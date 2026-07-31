@@ -57,6 +57,7 @@ const P1_HIGH_TOTAL_SECOND_GOAL_MAX = 30;
 const P1_TOTAL3_MAX_LINE = 7.5;
 const P1_TOTAL3_EARLY_FIRST_MAX = 4;
 const P1_TOTAL3_EARLY_MIN_LINE = 7.25;
+const P1_TOTAL3_LAST_GOAL_MIN = 20;
 const P1_MAX_TOTAL_HT = 5;
 const P2_FIRST_GOAL_MAX = 15;
 const P2_MIN_LINE = 5.75;
@@ -319,7 +320,8 @@ if (!is_file($file)) {
                 && $totalHt <= P1_MAX_TOTAL_HT
                 && ($totalHt !== 1 || $firstGoal <= P1_LOW_TOTAL_FIRST_GOAL_MAX)
                 && ($totalHt !== 3 || ($ko <= P1_TOTAL3_MAX_LINE
-                    && ($firstGoal > P1_TOTAL3_EARLY_FIRST_MAX || $ko >= P1_TOTAL3_EARLY_MIN_LINE)))
+                    && ($firstGoal > P1_TOTAL3_EARLY_FIRST_MAX || $ko >= P1_TOTAL3_EARLY_MIN_LINE)
+                    && $lastGoal1H >= P1_TOTAL3_LAST_GOAL_MIN))
                 && ($totalHt !== 5 || ($secondGoal !== null
                     && $secondGoal >= P1_HIGH_TOTAL_SECOND_GOAL_MIN
                     && $secondGoal <= P1_HIGH_TOTAL_SECOND_GOAL_MAX));
@@ -656,7 +658,7 @@ table{width:100%;border-collapse:collapse;white-space:nowrap;background:#10161e}
   <?php elseif ($patternKey === 'hah'): ?>
     <div class="rule"><b>HAH</b> — urutan gol 1H Home–Away–Home · skor HT 2-1 · gol kedua harus setelah gol pertama · gol ketiga/terakhir 1H ≥ 26' · line awal ≥ 4.75; jika line di bawah 4.75, gol ketiga wajib ≥ 38'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php elseif ($patternKey === 'p1'): ?>
-    <div class="rule"><b>P1</b> — selisih HT tepat 1 · total HT maksimal 5 · gol pertama ≤ 12' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 3: line ≤ 7.5 dan jika gol-1 ≤ 4', line ≥ 7.25 · total HT 5: gol-2 menit 9'–30'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
+    <div class="rule"><b>P1</b> — selisih HT tepat 1 · total HT maksimal 5 · gol pertama ≤ 12' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 3: line ≤ 7.5, gol terakhir ≥ 20', dan jika gol-1 ≤ 4', line ≥ 7.25 · total HT 5: gol-2 menit 9'–30'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php elseif ($patternKey === 'p2'): ?>
     <div class="rule"><b>P2</b> — HT 2-1 / 1-2 · gol pertama ≤ 15' · line awal 5.75–7.5 · jika gol pertama ≤ 4', line wajib ≥ 7.25.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php elseif ($patternKey === 'p3'): ?>

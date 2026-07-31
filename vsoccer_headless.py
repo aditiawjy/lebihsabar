@@ -100,6 +100,7 @@ P1_HIGH_TOTAL_SECOND_GOAL_MAX = int(os.environ.get("VSOCCER_P1_HIGH_TOTAL_SECOND
 P1_TOTAL3_MAX_LINE = float(os.environ.get("VSOCCER_P1_TOTAL3_MAX_LINE", "7.5"))
 P1_TOTAL3_EARLY_FIRST_MAX = int(os.environ.get("VSOCCER_P1_TOTAL3_EARLY_FIRST_MAX", "4"))
 P1_TOTAL3_EARLY_MIN_LINE = float(os.environ.get("VSOCCER_P1_TOTAL3_EARLY_MIN_LINE", "7.25"))
+P1_TOTAL3_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_P1_TOTAL3_LAST_GOAL_MIN", "20"))
 P1_MAX_TOTAL_HT = int(os.environ.get("VSOCCER_P1_MAX_TOTAL_HT", "5"))
 P2_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P2_FIRST_GOAL_MAX", "15"))
 P2_MIN_LINE = float(os.environ.get("VSOCCER_P2_MIN_LINE", "5.75"))
@@ -178,7 +179,7 @@ PATTERNS = [
      "ht": "total", "total_ht": P12_TOTAL_HT, "first_goal_max": None, "min_line": P12_MIN_LINE},
     {"code": "P1",
      "desc": f"selisih HT tepat 1; total HT maksimal {P1_MAX_TOTAL_HT} (total HT 1: gol-1 ≤ {P1_LOW_TOTAL_FIRST_GOAL_MAX}'; "
-             f"total HT 3: line ≤ {P1_TOTAL3_MAX_LINE}, gol-1 ≤ {P1_TOTAL3_EARLY_FIRST_MAX}' wajib "
+              f"total HT 3: line ≤ {P1_TOTAL3_MAX_LINE}, gol terakhir ≥ {P1_TOTAL3_LAST_GOAL_MIN}', gol-1 ≤ {P1_TOTAL3_EARLY_FIRST_MAX}' wajib "
              f"line ≥ {P1_TOTAL3_EARLY_MIN_LINE}; total HT 5: gol-2 "
              f"{P1_HIGH_TOTAL_SECOND_GOAL_MIN}'–{P1_HIGH_TOTAL_SECOND_GOAL_MAX}')",
      "ht": "diff1",
@@ -282,6 +283,7 @@ SNAPSHOT_JS = r"""
 state = {}  # key -> {"home","away","track"}
 
 recent_goals = deque(maxlen=40)   # gol terakhir untuk live view
+post_outbox = []                   # payload belum di-ACK; retry idempotent pada poll berikutnya
 active_signals = set()            # match yang sedang kena Pattern 1
 stats = {"started_at": "", "cycles": 0, "sent_goals": 0, "sent_matches": 0,
          "last_post": "", "last_error": "", "launches": 0, "fails": 0}
@@ -322,6 +324,29 @@ def line_value(v):
         except ValueError:
             return None
     return sum(nums) / len(nums) if nums else None
+
+
+def line_deviation_fields(live_line, kickoff_line, half, minute, total_goals_after):
+    """Projected post-goal line fields; invalid input deliberately yields empty values."""
+    live = line_value(live_line)
+    kickoff = line_value(kickoff_line)
+    try:
+        minute_abs = float(minute)
+        goals = int(total_goals_after)
+    except (TypeError, ValueError):
+        return {"projected_line": "", "line_deviation": "", "deviation_extreme": ""}
+    if live is None or kickoff is None or minute_abs < 0 or goals < 0:
+        return {"projected_line": "", "line_deviation": "", "deviation_extreme": ""}
+    if str(half).upper() == "2H" and minute_abs < 45:
+        minute_abs += 45
+    minute_abs = min(abs(minute_abs), 90)
+    projected = goals + kickoff * (1 - minute_abs / 90)
+    deviation = live - projected
+    return {
+        "projected_line": round(projected, 3),
+        "line_deviation": round(deviation, 3),
+        "deviation_extreme": 1 if abs(deviation) >= 1.25 else 0,
+    }
 
 
 def signal_check(e, st, pat):
@@ -430,6 +455,8 @@ def signal_check(e, st, pat):
                 return False, f"total HT 3, line awal {st.get('ko_line')}"
             if g1h and g1h[0] <= P1_TOTAL3_EARLY_FIRST_MAX and lv < P1_TOTAL3_EARLY_MIN_LINE:
                 return False, f"total HT 3, gol pertama {g1h[0]}', line awal {st.get('ko_line')}"
+            if not g1h or g1h[-1] < P1_TOTAL3_LAST_GOAL_MIN:
+                return False, f"total HT 3, gol terakhir {g1h[-1] if g1h else 'tak terekam'}'"
         if total_ht == 5:
             if len(g1h) < 2:
                 return False, "total HT 5, gol kedua tak terekam"
@@ -657,8 +684,12 @@ def build_payload(events):
                 pending.update({
                     "ou_line": e["line"], "over_odd": live_over, "under_odd": live_under,
                     "home_score": str(e["h"]), "away_score": str(e["a"]),
-                    "timestamp": now_iso(), "market_update": 1,
+                    "market_update": 1,
                 })
+                pending.update(line_deviation_fields(
+                    e["line"], st.get("ko_line"), pending.get("half"),
+                    pending.get("min_num"), sum(map(int, pending["score_after"].split("-")))
+                ))
                 goals.append(pending)
             st["pending_market"] = []
         jump = (e["h"] - st["home"]) + (e["a"] - st["away"])
@@ -682,6 +713,8 @@ def build_payload(events):
                 "ou_line": e["line"], "over_odd": live_over, "under_odd": live_under,
                 "home_score": str(e["h"]), "away_score": str(e["a"]), "timestamp": now_iso(),
             }
+            goal.update(line_deviation_fields(e["line"], st.get("ko_line"), e["half"],
+                                              max(e["minute"], 0), ch + ca))
             goals.append(goal)
             if not market_ready:
                 st.setdefault("pending_market", []).append(goal.copy())
@@ -690,14 +723,23 @@ def build_payload(events):
 
 
 def post(matches, goals):
-    if not matches and not goals:
+    if matches or goals:
+        post_outbox.append({"matches": matches, "goals": goals})
+    if not post_outbox:
         return
+    payload = post_outbox[0]
     try:
-        r = requests.post(ENDPOINT, json={"matches": matches, "goals": goals}, timeout=10)
-        stats["sent_goals"] += len(goals)
-        stats["sent_matches"] += len(matches)
+        r = requests.post(ENDPOINT, json=payload, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+        if not data.get("ok"):
+            raise RuntimeError(data.get("error") or "Endpoint menolak payload")
+        post_outbox.pop(0)
+        stats["sent_goals"] += len(payload["goals"])
+        stats["sent_matches"] += len(payload["matches"])
         stats["last_post"] = now_iso()
-        log(f"kirim {len(goals)} gol, {len(matches)} match -> {r.status_code} {r.text[:120]}")
+        stats["last_error"] = ""
+        log(f"kirim {len(payload['goals'])} gol, {len(payload['matches'])} match -> {r.status_code} {r.text[:120]}")
     except Exception as e:
         stats["last_error"] = f"POST gagal: {e}"
         log(f"POST gagal: {e}")
@@ -711,7 +753,10 @@ def write_live(events, goals, status="running", note=""):
                 if (recent["home_team"], recent["away_team"], recent["score_after"]) == (
                         g["home_team"], g["away_team"], g["score_after"]):
                     recent.update({"line": g.get("ou_line", ""), "over": g.get("over_odd", ""),
-                                   "under": g.get("under_odd", "")})
+                                   "under": g.get("under_odd", ""),
+                                   "projected_line": g.get("projected_line", ""),
+                                   "line_deviation": g.get("line_deviation", ""),
+                                   "deviation_extreme": g.get("deviation_extreme", "")})
                     break
             continue
         recent_goals.appendleft({
@@ -720,6 +765,9 @@ def write_live(events, goals, status="running", note=""):
             "minute": g["minute"], "side": g["side"], "score_after": g["score_after"],
             "line": g.get("ou_line", ""), "over": g.get("over_odd", ""),
             "under": g.get("under_odd", ""), "accurate": g["accurate"],
+            "projected_line": g.get("projected_line", ""),
+            "line_deviation": g.get("line_deviation", ""),
+            "deviation_extreme": g.get("deviation_extreme", ""),
         })
     rows = []
     for e in events or []:

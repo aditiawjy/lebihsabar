@@ -60,6 +60,8 @@
   // state per match dalam satu siklus (12 menit). key = league|home|away
   // { home, away, ms:{'1h3','2h1','2h7'} }
   const state = new Map();
+  const outbox = [];
+  let sending = false;
 
   function expandCollapsed() {
     let opened = 0;
@@ -114,6 +116,28 @@
 
   function nowIso() { return new Date().toISOString(); }
 
+  function lineValue(v) {
+    const parts = String(v || '').split('/').map(s => s.trim()).filter(Boolean);
+    if (!parts.length) return null;
+    const nums = parts.map(Number);
+    return nums.every(Number.isFinite) ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
+  }
+
+  function deviationFields(liveLine, kickoffLine, half, minute, totalGoalsAfter) {
+    const live = lineValue(liveLine), kickoff = lineValue(kickoffLine);
+    let minuteAbs = Number(minute), goals = Number(totalGoalsAfter);
+    if (live === null || kickoff === null || !Number.isFinite(minuteAbs) || minuteAbs < 0 ||
+        !Number.isInteger(goals) || goals < 0) {
+      return { projected_line: '', line_deviation: '', deviation_extreme: '' };
+    }
+    if (String(half).toUpperCase() === '2H' && minuteAbs < 45) minuteAbs += 45;
+    minuteAbs = Math.min(Math.abs(minuteAbs), 90);
+    const projected = goals + kickoff * (1 - minuteAbs / 90);
+    const deviation = live - projected;
+    return { projected_line: +projected.toFixed(3), line_deviation: +deviation.toFixed(3),
+      deviation_extreme: Math.abs(deviation) >= 1.25 ? 1 : 0 };
+  }
+
   function collect() {
     const goals = [], matches = [], milestones = [];
     const headers = Array.from(document.querySelectorAll('[class*="leagueName"]'))
@@ -139,9 +163,11 @@
           // Kalau scraper gabung di tengah match (skor sudah jalan), menit gol yang
           // terlewat TIDAK diketahui -> jangan dikarang. Simpan baseline, tandai skip.
           const track = (m.half === '1H' && m.h === 0 && m.a === 0);
-          st = { home: m.h, away: m.a, ms: {}, track, pendingMarkets: [] };
+          const koReady = !!(m.line && m.over && m.under);
+          st = { home: m.h, away: m.a, ms: {}, track, pendingMarkets: [],
+            koReady, koLine: koReady ? m.line : '' };
           state.set(key, st);
-          if (track) matches.push({
+          if (track && koReady) matches.push({
             league, home_team: m.home, away_team: m.away,
             home_score: '0', away_score: '0',
             ko_line: m.line, ko_over: m.over, ko_under: m.under, // odds awal (kickoff)
@@ -153,13 +179,23 @@
         // Match yang tidak dilacak (gabung di tengah): perbarui baseline saja, jangan log gol palsu.
         if (!st.track) { st.home = m.h; st.away = m.a; return; }
 
+        // Kickoff market may render after the initial 0-0 observation.
+        if (!st.koReady && m.line && m.over && m.under && m.h + m.a === 0) {
+          st.koReady = true;
+          st.koLine = m.line;
+          matches.push({ league, home_team: m.home, away_team: m.away,
+            home_score: '0', away_score: '0', ko_line: m.line,
+            ko_over: m.over, ko_under: m.under, timestamp: nowIso() });
+        }
+
         // GOL BARU pada match yang dilacak dari kickoff: catat di menit yang teramati saat ini.
         const marketReady = !!(m.line && m.over && m.under);
         if (marketReady && st.pendingMarkets && st.pendingMarkets.length) {
           st.pendingMarkets.forEach(g => goals.push(Object.assign({}, g, {
             ou_line: m.line, over_odd: m.over, under_odd: m.under,
-            home_score: String(m.h), away_score: String(m.a), timestamp: nowIso(), market_update: 1,
-          })));
+            home_score: String(m.h), away_score: String(m.a), market_update: 1,
+          }, deviationFields(m.line, st.koLine, g.half, g.min_num,
+            String(g.score_after).split('-').reduce((sum, n) => sum + Number(n), 0)))));
           st.pendingMarkets = [];
         }
         let ch = st.home, ca = st.away;
@@ -177,6 +213,7 @@
             ou_line: m.line, over_odd: m.over, under_odd: m.under, // odds saat gol
             home_score: String(m.h), away_score: String(m.a), timestamp: nowIso(),
           };
+          Object.assign(goal, deviationFields(m.line, st.koLine, m.half, Math.max(m.minute, 0), ch + ca));
           goals.push(goal);
           if (!marketReady) st.pendingMarkets.push(Object.assign({}, goal));
         }
@@ -209,14 +246,26 @@
     if (!ctxAlive()) { stop('extension context invalidated'); return; }
     const payload = collect();
     const total = payload.goals.length + payload.matches.length + payload.milestones.length;
-    if (!total) return;
+    if (total) outbox.push(payload);
+    flushOutbox();
+  }
+
+  function flushOutbox() {
+    if (sending || !outbox.length || !ctxAlive()) return;
+    const payload = outbox[0];
+    sending = true;
     try {
       chrome.runtime.sendMessage({ type: 'vsoccer', payload }, (res) => {
+        sending = false;
         if (chrome.runtime.lastError) { console.warn('[v-soccer] bg error:', chrome.runtime.lastError.message); return; }
-        if (res && res.ok) console.log('[v-soccer] tersimpan:', payload.goals.length, 'gol,', payload.matches.length, 'match,', payload.milestones.length, 'ms ->', res.data);
-        else console.warn('[v-soccer] gagal:', res && res.error);
+        if (res && res.ok) {
+          outbox.shift();
+          console.log('[v-soccer] tersimpan:', payload.goals.length, 'gol,', payload.matches.length, 'match,', payload.milestones.length, 'ms ->', res.data);
+          flushOutbox();
+        } else console.warn('[v-soccer] gagal:', res && res.error);
       });
     } catch (e) {
+      sending = false;
       stop(e.message);
     }
   }

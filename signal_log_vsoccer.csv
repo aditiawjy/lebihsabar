@@ -3370,3 +3370,45 @@ logged_at,code,league,home_team,away_team,half,minute,score,ht,ht_total,target_2
 30/07/2026 15:46,P9,V-Soccer Italy Serie A - 12 mins [V],Roma [V],Atalanta BC [V],2H,60,3-3,3-3,6,2,7.5,8.5/9,1.70,1.01,7/7.5,1.98,1.72
 30/07/2026 15:56,P1,V-Soccer Copa Libertadores - 12 mins [V],Talleres [V],The Strongest [V],2H,60,3-2,3-2,5,2,6.5,7.5,1.89,1.79,5.5/6,1.75,1.94
 30/07/2026 15:58,SUPER1,V-Soccer France Ligue 1 - 12 mins [V],Olympique de Marseille [V],Olympique Lyonnais [V],2H,50,2-1,2-1,3,3,5.5,6/6.5,1.88,1.81,6.5/7,1.81,1.87
+30/07/2026 20:00,P6,V-Soccer Korea K-League 1 - 12 mins [V],Gangwon FC [V],Suwon Samsung [V],2H,60,2-2,2-2,4,2,5.5,5.5/6,1.69,1.01,4.5,1.86,1.82
+30/07/2026 20:07,SUPER,V-Soccer Champions League - 12 mins [V],Barcelona [V],Real Madrid [V],2H,50,3-2,3-2,5,3,7.5,7.5/8,1.69,1.02,5.5/6,1.89,1.79
+30/07/2026 20:07,S-LOW,V-Soccer Champions League - 12 mins [V],Barcelona [V],Real Madrid [V],2H,50,3-2,3-2,5,3,7.5,7.5/8,1.69,1.02,5.5/6,1.89,1.79
+30/07/2026 20:17,SUPER,V-Soccer Italy Serie A - 12 mins [V],Roma [V],Torino FC [V],2H,50,3-3,3-3,6,3,8.5,9.5,1.86,1.82,7/7.5,1.91,1.78
+30/07/2026 20:17,SUPER2,V-Soccer Italy Serie A - 12 mins [V],Roma [V],Torino FC [V],2H,50,3-3,3-3,6,3,8.5,9.5,1.86,1.82,7/7.5,1.91,1.78
+30/07/2026 20:17,S-LOW,V-Soccer Italy Serie A - 12 mins [V],Roma [V],Torino FC [V],2H,50,3-3,3-3,6,3,8.5,9.5,1.86,1.82,7/7.5,1.91,1.78
+30/07/2026 20:32,SUPER3,V-Soccer Italy Serie A - 12 mins [V],ACF Fiorentina [V],Bologna FC 1909 [V],2H,50,0-3,0-3,3,3,5.5,6/6.5,1.99,1.71,6/6.5,1.79,1.89
+30/07/2026 20:33,P3,V-Soccer Italy Serie A - 12 mins [V],ACF Fiorentina [V],Bologna FC 1909 [V],2H,60,0-3,0-3,3,2,4.5,5.5,1.90,1.78,6/6.5,1.79,1.89
+30/07/2026 20:43,SUPER,V-Soccer International Friendly - 12 mins [V],Portugal [V],Belgium [V],2H,50,3-4,3-4,7,3,9.5,10.5,1.79,1.89,7/7.5,1.83,1.85
+30/07/2026 20:43,SUPER2,V-Soccer International Friendly - 12 mins [V],Portugal [V],Belgium [V],2H,50,3-4,3-4,7,3,9.5,10.5,1.79,1.89,7/7.5,1.83,1.85
+30/07/2026 20:43,S-LOW,V-Soccer International Friendly - 12 mins [V],Portugal [V],Belgium [V],2H,50,3-4,3-4,7,3,9.5,10.5,1.79,1.89,7/7.5,1.83,1.85
+30/07/2026 20:44,P1,V-Soccer International Friendly - 12 mins [V],Portugal [V],Belgium [V],2H,60,3-4,3-4,7,2,8.5,9.5/10,1.79,1.89,7/7.5,1.83,1.85
+30/07/2026 20:50,P8,V-Soccer Italy Serie A - 12 mins [V],Torino FC [V],Inter Milan [V],2H,60,1-3,1-3,4,2,5.5,6.5/7,1.72,1.98,7/7.5,1.98,1.72
+30/07/2026 21:07,SUPER,V-Soccer Spain La Liga - 12 mins [V],Girona FC [V],Barcelona [V],2H,50,3-4,3-4,7,3,9.5,9.5/10,1.81,1.87,5.5/6,1.76,1.93
+30/07/2026 21:07,S-LOW,V-Soccer Spain La Liga - 12 mins [V],Girona FC [V],Barcelona [V],2H,50,3-4,3-4,7,3,9.5,9.5/10,1.81,1.87,5.5/6,1.76,1.93
+30/07/2026 21:12,P2,V-Soccer Champions League - 12 mins [V],Arsenal [V],Borussia Dortmund [V],2H,60,1-2,1-2,3,2,4.5,5/5.5,1.99,1.71,6/6.5,1.90,1.78
+30/07/2026 21:14,SUPER,V-Soccer International Friendly - 12 mins [V],France [V],Croatia [V],2H,50,2-3,2-3,5,3,7.5,8/8.5,1.87,1.81,6.5,1.82,1.86
+30/07/2026 21:14,S-LOW,V-Soccer International Friendly - 12 mins [V],France [V],Croatia [V],2H,50,2-3,2-3,5,3,7.5,8/8.5,1.87,1.81,6.5,1.82,1.86
+30/07/2026 21:15,P6,V-Soccer Copa Libertadores - 12 mins [V],Colo-Colo [V],The Strongest [V],2H,60,2-2,2-2,4,2,5.5,5.5/6,1.73,1.96,5/5.5,1.85,1.83
+30/07/2026 21:15,P12,V-Soccer International Friendly - 12 mins [V],France [V],Croatia [V],2H,60,2-3,2-3,5,2,6.5,7.5,1.76,1.93,6.5,1.82,1.86
+30/07/2026 21:15,P1,V-Soccer International Friendly - 12 mins [V],France [V],Croatia [V],2H,60,2-3,2-3,5,2,6.5,7.5,1.76,1.93,6.5,1.82,1.86
+30/07/2026 21:15,P10,V-Soccer International Friendly - 12 mins [V],France [V],Croatia [V],2H,60,2-3,2-3,5,2,6.5,7.5,1.76,1.93,6.5,1.82,1.86
+30/07/2026 21:22,SUPER3,V-Soccer Argentina Liga Profesional - 12 mins [V],Velez Sarsfield [V],Defensa [V],2H,50,4-1,4-1,5,3,7.5,7.5/8,1.84,1.84,6/6.5,1.99,1.71
+30/07/2026 22:53,P12,V-Soccer England Premier League - 12 mins [V],Crystal Palace [V],Manchester City [V],2H,65,0-5,0-5,5,2,6.5,7/7.5,1.88,1.80,7.5/8,1.86,1.82
+30/07/2026 23:13,HAH,V-Soccer Italy Serie A - 12 mins [V],ACF Fiorentina [V],Roma [V],2H,60,2-1,2-1,3,2,4.5,5/5.5,1.80,1.88,6/6.5,1.94,1.75
+30/07/2026 23:14,P1,V-Soccer Italy Serie A - 12 mins [V],ACF Fiorentina [V],Roma [V],2H,65,2-1,2-1,3,2,4.5,4.5/5,1.60,1.16,6/6.5,1.94,1.75
+30/07/2026 23:14,P2,V-Soccer Italy Serie A - 12 mins [V],ACF Fiorentina [V],Roma [V],2H,65,2-1,2-1,3,2,4.5,4.5/5,1.60,1.16,6/6.5,1.94,1.75
+30/07/2026 23:14,P3,V-Soccer Italy Serie A - 12 mins [V],ACF Fiorentina [V],Roma [V],2H,65,2-1,2-1,3,2,4.5,4.5/5,1.60,1.16,6/6.5,1.94,1.75
+30/07/2026 23:14,P11,V-Soccer Italy Serie A - 12 mins [V],ACF Fiorentina [V],Roma [V],2H,65,2-1,2-1,3,2,4.5,4.5/5,1.60,1.16,6/6.5,1.94,1.75
+30/07/2026 23:21,P8,V-Soccer Champions League - 12 mins [V],Inter Milan [V],PSG [V],2H,65,1-3,1-3,4,2,5.5,6.5,1.88,1.80,7/7.5,1.82,1.86
+30/07/2026 23:26,HAH,V-Soccer Germany Bundesliga - 12 mins [V],Bayern [V],TSG Hoffenheim [V],2H,61,2-1,2-1,3,2,4.5,4.5/5,1.97,1.73,4.5,1.83,1.85
+30/07/2026 23:43,HAH,V-Soccer France Ligue 1 - 12 mins [V],Stade Reims [V],Stade Brestois 29 [V],2H,60,2-1,2-1,3,2,4.5,5/5.5,1.78,1.90,5.5/6,1.72,1.98
+30/07/2026 23:43,P1,V-Soccer France Ligue 1 - 12 mins [V],Stade Reims [V],Stade Brestois 29 [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.05,1.67,5.5/6,1.72,1.98
+30/07/2026 23:43,P2,V-Soccer France Ligue 1 - 12 mins [V],Stade Reims [V],Stade Brestois 29 [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.05,1.67,5.5/6,1.72,1.98
+30/07/2026 23:43,P3,V-Soccer France Ligue 1 - 12 mins [V],Stade Reims [V],Stade Brestois 29 [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.05,1.67,5.5/6,1.72,1.98
+30/07/2026 23:43,P11,V-Soccer France Ligue 1 - 12 mins [V],Stade Reims [V],Stade Brestois 29 [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.05,1.67,5.5/6,1.72,1.98
+30/07/2026 23:46,P1,V-Soccer Italy Serie A - 12 mins [V],Napoli [V],Roma [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.94,1.75,6.5,1.84,1.84
+30/07/2026 23:46,P2,V-Soccer Italy Serie A - 12 mins [V],Napoli [V],Roma [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.94,1.75,6.5,1.84,1.84
+30/07/2026 23:46,P3,V-Soccer Italy Serie A - 12 mins [V],Napoli [V],Roma [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.94,1.75,6.5,1.84,1.84
+30/07/2026 23:46,P11,V-Soccer Italy Serie A - 12 mins [V],Napoli [V],Roma [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.94,1.75,6.5,1.84,1.84
+31/07/2026 00:00,SUPER1,V-Soccer Women’s Nations League - 12 mins [V],Brazil W [V],Canada W [V],2H,50,1-2,1-2,3,3,5.5,6/6.5,1.89,1.79,6.5/7,1.88,1.81
+31/07/2026 00:14,HAH,V-Soccer Germany Bundesliga - 12 mins [V],SV Werder Bremen [V],Vfb Stuttgart [V],2H,60,2-1,2-1,3,2,4.5,5/5.5,1.09,1.64,5/5.5,1.89,1.79

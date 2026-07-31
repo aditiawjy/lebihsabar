@@ -87,6 +87,7 @@ if (isset($_GET['json'])) {
     <span id="st" class="pill warn">memuat…</span>
     <span id="sig" class="pill bad">SINYAL: 0</span>
     <span id="stk" class="pill warn" title="Sumber kolom Peluang 100%: cache tabel streak (index.php?page=streak).">STREAK: –</span>
+    <a class="pill" style="text-decoration:none;background:#111720;color:#8ecbff;border:1px solid #2b3543" href="check-signal-pnl.php">💰 Hasil taruhan</a>
     <span class="muted" id="meta"></span>
     <span class="muted" id="err"></span>
   </div>

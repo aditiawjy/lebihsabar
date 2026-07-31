@@ -205,7 +205,8 @@ $error = null;
 // pembanding ini, akurasi pattern 90% tidak bisa dinilai: bisa jadi tebak-buta
 // pun sudah dapat 66%.
 $baseline = ['hits' => 0, 'total' => 0];
-$baselineEval = ['hits' => 0, 'total' => 0];   // baseline khusus data sejak aturan dikunci
+$baselineEval = ['hits' => 0, 'total' => 0];
+$semuaMinutes2H = [];   // baseline khusus data sejak aturan dikunci
 $baselineByDay = [];
 
 if (!is_file($file)) {
@@ -250,6 +251,7 @@ if (!is_file($file)) {
 
         $allFinished++;
         $minutes1H = [];
+        $minutes2H = [];
         $goalSides1H = [];
         $htHome = 0;
         $htAway = 0;
@@ -271,6 +273,7 @@ if (!is_file($file)) {
                 $htAway = $nextAway;
             } else {
                 $goals2H++;
+                $minutes2H[] = $minute;
             }
         }
 
@@ -292,6 +295,7 @@ if (!is_file($file)) {
             $baselineEval['total']++;
             $baselineEval['hits'] += $baselineHit ? 1 : 0;
         }
+        $semuaMinutes2H[] = $minutes2H;   // untuk tabel harga (semua match, tanpa filter pola)
         $baselineByDay[$day]['total'] = ($baselineByDay[$day]['total'] ?? 0) + 1;
         $baselineByDay[$day]['hits'] = ($baselineByDay[$day]['hits'] ?? 0) + ($baselineHit ? 1 : 0);
 
@@ -502,6 +506,7 @@ if (!is_file($file)) {
         }
 
         $qualified[] = [
+            'minutes_2h' => $minutes2H,
             'timestamp' => $rowTs,
             'datetime' => $dateText,
             'day' => $day,
@@ -601,6 +606,30 @@ $primaryEdge = $edge;
 $primaryCi = $ci;
 $primaryScope = 'semua tanggal';
 
+// ---- Tabel harga: kalau masuk di menit X, berapa peluang masih ada N gol lagi?
+// Persentase akurasi tidak berguna kalau line yang ditawarkan menuntut lebih
+// banyak gol daripada yang kita hitung — bandar menaikkan line begitu babak
+// pertama ramai. Angka di bawah ini yang menentukan sebuah odds layak diambil.
+$menitMasuk = [46, 50, 55, 60, 65, 70, 75];
+$tabelHarga = [];
+foreach ($menitMasuk as $mnt) {
+    $baris = ['menit' => $mnt, 'n' => count($semuaMinutes2H)];
+    foreach ([1, 2, 3] as $butuh) {
+        $kena = 0;
+        foreach ($semuaMinutes2H as $mm) {
+            $sisa = 0;
+            foreach ($mm as $m) {
+                if ($m > $mnt) $sisa++;
+            }
+            if ($sisa >= $butuh) $kena++;
+        }
+        $prob = $baris['n'] ? $kena / $baris['n'] : null;
+        $baris["p{$butuh}"] = $prob === null ? null : $prob * 100;
+        $baris["odds{$butuh}"] = ($prob === null || $prob <= 0) ? null : 1 / $prob;
+    }
+    $tabelHarga[] = $baris;
+}
+
 if ($primaryStats['total'] === 0) {
     $verdict = 'BELUM ADA SAMPEL';
     $verdictClass = 'neutral';
@@ -652,7 +681,7 @@ table{width:100%;border-collapse:collapse;white-space:nowrap;background:#10161e}
 <main class="wrap">
   <div class="top">
     <div><h1>Cek Akurasi Pattern V-Soccer</h1><p class="sub">Target mengikuti pola yang dipilih. Statistik langsung dari goal_log_vsoccer.csv.</p></div>
-    <div class="actions"><a class="btn" href="vsoccer-live.php">← Live</a><a class="btn" href="javascript:location.reload()">↻ Refresh</a></div>
+    <div class="actions"><a class="btn" href="vsoccer-live.php">← Live</a><a class="btn" href="check-signal-pnl.php">💰 Hasil taruhan</a><a class="btn" href="javascript:location.reload()">↻ Refresh</a></div>
   </div>
 
   <form class="controls" method="get" action="">
@@ -720,6 +749,7 @@ table{width:100%;border-collapse:collapse;white-space:nowrap;background:#10161e}
   <?php else: ?>
     <div class="rule"><b>SUPER</b> — <b>selisih HT ≤ 1</b>; jika HT seri, gol ke-2 ≤ 25' dan gol terakhir 1H ≥ 35' · gol pertama ≤ 5' · line awal ≥ 5.75 · semua HT tidak seri: gol ke-2 9'–25' · total HT 3 + gol-1 ≤ 4': line ≥ 7.25 · total HT 5: gol terakhir 1H ≥ 30'.<br><span class="muted">Hasil semua tanggal: <b><?= $allStats['hits'] ?>/<?= $allStats['total'] ?> (<?= pct($allStats['rate']) ?>)</b> · evaluasi: <b><?= $evalStats['hits'] ?>/<?= $evalStats['total'] ?> (<?= pct($evalStats['rate']) ?>)</b>.</span></div>
   <?php endif; ?>
+  <div class="rule" style="border-left-color:#ff7185"><b style="color:#ff7185">Angka di halaman ini BUKAN hasil taruhan.</b> Yang diukur adalah target internal (gol babak kedua ≥ 2/3) pada seluruh riwayat match. Target itu tidak dijual pasar: saat sinyal muncul di menit 60-an, line pasar rata-rata sudah 1,13 gol lebih tinggi dari yang dibutuhkan. Untuk untung/rugi sebenarnya berdasarkan line &amp; odds nyata, buka <a href="check-signal-pnl.php" style="color:#78b7ff">Hasil taruhan</a>.</div>
   <?php if ($error !== null): ?><div class="error"><?= e($error) ?></div><?php endif; ?>
 
   <section class="card verdict <?= e($verdictClass) ?>">
@@ -744,6 +774,49 @@ table{width:100%;border-collapse:collapse;white-space:nowrap;background:#10161e}
     <div class="label">Interval keyakinan Wilson 95% (semua tanggal)</div>
     <div class="value" style="font-size:18px"><?= pct($primaryCi[0]) ?> – <?= pct($primaryCi[1]) ?></div>
     <div class="muted">Dihitung dari seluruh <?= $primaryStats['hits'] ?>/<?= $primaryStats['total'] ?> match yang memenuhi <?= e($patternCode) ?>. Data baru otomatis ikut dihitung ketika masuk ke CSV. Baseline semua match: <?= pct($primaryBaselineRate) ?>.</div>
+  </section>
+
+  <section class="section">
+    <h2>Harga wajar menurut menit masuk — <?= e($patternCode) ?></h2>
+    <div class="rule" style="border-left-color:#78b7ff">
+      Dari <?= count($semuaMinutes2H) ?> match selesai (SEMUA match, sengaja bukan hanya yang memenuhi
+      <?= e($patternCode) ?> — kalau disaring pola, angkanya jadi melingkar karena pola itu sendiri sudah
+      dipilih agar menang): kalau masuk di menit tertentu,
+      berapa peluang masih ada 1/2/3 gol lagi, dan berapa <b>odds minimal</b> yang layak diambil. Di bawah angka
+      itu taruhan rugi secara teori, meski sering menang.
+      <br><span class="muted">Yang menentukan bukan menitnya, melainkan <b>berapa gol lagi yang dituntut line
+      yang ditawarkan</b>. Masuk lebih awal memberi peluang lebih besar — tapi hanya berguna kalau line-nya
+      belum ikut naik.</span>
+    </div>
+    <?php if (!$semuaMinutes2H): ?>
+      <div class="card empty">Belum ada sampel.</div>
+    <?php else: ?>
+      <div class="tablebox"><table>
+        <thead><tr>
+          <th>Masuk menit</th>
+          <th class="num">Butuh 1 gol</th><th class="num">Odds minimal</th>
+          <th class="num">Butuh 2 gol</th><th class="num">Odds minimal</th>
+          <th class="num">Butuh 3 gol</th><th class="num">Odds minimal</th>
+        </tr></thead>
+        <tbody>
+        <?php foreach ($tabelHarga as $h): ?>
+          <tr>
+            <td><b><?= $h['menit'] ?>'</b></td>
+            <td class="num"><?= pct($h['p1']) ?></td>
+            <td class="num" style="color:#f3c969;font-weight:700"><?= $h['odds1'] === null ? '–' : number_format($h['odds1'], 2, ',', '.') ?></td>
+            <td class="num"><?= pct($h['p2']) ?></td>
+            <td class="num" style="color:#f3c969;font-weight:700"><?= $h['odds2'] === null ? '–' : number_format($h['odds2'], 2, ',', '.') ?></td>
+            <td class="num"><?= pct($h['p3']) ?></td>
+            <td class="num" style="color:#f3c969;font-weight:700"><?= $h['odds3'] === null ? '–' : number_format($h['odds3'], 2, ',', '.') ?></td>
+          </tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table></div>
+      <p class="foot">Cara pakai: saat sinyal muncul, hitung berapa gol lagi yang dituntut line pasar
+        (line − skor berjalan, bulatkan ke atas). Cari kolomnya pada baris menit Bapak masuk, lalu ambil hanya
+        kalau odds pasar <b>lebih tinggi</b> daripada odds minimal. Hasil nyatanya di
+        <a href="check-signal-pnl.php" style="color:#78b7ff">Hasil taruhan</a>.</p>
+    <?php endif; ?>
   </section>
 
   <section class="section">

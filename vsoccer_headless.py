@@ -37,6 +37,7 @@ USER_DATA_DIR = PROFILE_ROOT / f"session-{os.getpid()}"
 LOG_FILE = BASE_DIR / "vsoccer_headless.log"
 LIVE_FILE = BASE_DIR / "vsoccer_live.json"   # snapshot untuk vsoccer-live.php
 SIGNAL_LOG = BASE_DIR / "signal_log_vsoccer.csv"  # odds market saat sinyal muncul
+OPEN2H_LOG = BASE_DIR / "open2h_odds_vsoccer.csv"  # odds di AWAL babak kedua, untuk semua match
 
 TARGET_HOST = "1x2aaa.com"
 TARGET_URL = os.environ.get(
@@ -667,6 +668,35 @@ def st_ht_total(row):
         return None
 
 
+OPEN2H_LOG_HEADER = [
+    "logged_at", "league", "home_team", "away_team", "minute",
+    "score", "ht", "ht_total", "live_line", "live_over", "live_under",
+    "ko_line", "ko_over", "ko_under",
+]
+OPEN2H_MAX_MINUTE = int(os.environ.get("VSOCCER_OPEN2H_MAX_MINUTE", "52"))
+_open2h_tercatat = set()   # match yang sudah dicatat, supaya tidak dobel
+
+
+def append_open2h_log(row):
+    """Catat odds di AWAL babak kedua untuk SEMUA match, bukan hanya yang bersinyal.
+
+    Alasannya: sinyal baru menyala menit 60-an, dan pada saat itu bandar sudah
+    menaikkan line (rata-rata +1,13 gol di atas kebutuhan kita) sehingga taruhan
+    yang tersedia jauh lebih berat. Dugaan yang perlu diuji: di menit 46-52 line
+    sering belum menyesuaikan, jadi harga bisa lebih murah dari nilai wajarnya.
+    Tanpa catatan ini dugaan itu tidak bisa dibuktikan maupun dibantah.
+    """
+    try:
+        baru = not OPEN2H_LOG.exists() or OPEN2H_LOG.stat().st_size == 0
+        with open(OPEN2H_LOG, "a", encoding="utf-8", newline="") as fh:
+            w = csv.writer(fh, quoting=csv.QUOTE_MINIMAL)
+            if baru:
+                w.writerow(OPEN2H_LOG_HEADER)
+            w.writerow([row.get(k, "") for k in OPEN2H_LOG_HEADER])
+    except Exception as exc:
+        log(f"Gagal catat open2h log: {exc}")
+
+
 def append_signal_log(row):
     """Catat odds market pada detik sinyal muncul.
 
@@ -867,6 +897,28 @@ def write_live(events, goals, status="running", note=""):
         rows.append(row)
     # Sinyal aktif ditaruh paling atas + dicatat ke log sekali saat muncul.
     rows.sort(key=lambda r: (not r["signal"], r["league"], r["home"]))
+
+    # Catat odds di AWAL babak kedua untuk SEMUA match (sekali per match), bukan
+    # hanya yang bersinyal — supaya dugaan "menit 46 line belum naik" bisa diuji.
+    for r in rows:
+        if r["half"] != "2H" or not r.get("tracked"):
+            continue
+        if r["minute"] < 0 or r["minute"] > OPEN2H_MAX_MINUTE:
+            continue
+        kunci = f"{r['league']}|{r['home']}|{r['away']}|{r['ht']}"
+        if kunci in _open2h_tercatat:
+            continue
+        _open2h_tercatat.add(kunci)
+        ht_total = st_ht_total(r)
+        append_open2h_log({
+            "logged_at": datetime.now().strftime("%d/%m/%Y %H:%M"),
+            "league": r["league"], "home_team": r["home"], "away_team": r["away"],
+            "minute": r["minute"], "score": r["score"], "ht": r["ht"],
+            "ht_total": "" if ht_total is None else ht_total,
+            "live_line": r["line"], "live_over": r["over"], "live_under": r["under"],
+            "ko_line": r["ko_line"], "ko_over": r["ko_over"], "ko_under": r["ko_under"],
+        })
+
     live_keys, by_code = set(), {}
     for r in rows:
         for code in r["hits"]:

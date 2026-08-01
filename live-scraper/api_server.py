@@ -286,6 +286,17 @@ def _bpvm_write_row(snap):
         return out
 
     goal_minutes = " | ".join(fmt_mins(snap["g1"], 1) + fmt_mins(snap["g2"], 2))
+
+    # Match yang tidak punya skor HT MAUPUN satu pun menit gol berarti tidak
+    # pernah benar-benar terlacak -- biasanya baru terlihat saat sudah jalan,
+    # lalu hilang. Barisnya cuma berisi skor akhir tanpa cara memverifikasinya,
+    # tidak terpakai analisis, dan mengotori CSV. Match 0-0 yang dilacak sejak
+    # kickoff tetap lolos karena skor HT-nya terisi "0-0".
+    if not str(snap.get("ht") or "").strip() and not goal_minutes:
+        print(f"[GOALLOG] dilewati (tanpa HT & tanpa menit gol): "
+              f"{snap['home']} vs {snap['away']} {fh_score}-{fa_score}")
+        return
+
     ident = (snap["league"], snap["home"], snap["away"], fh_score, fa_score, goal_minutes)
     _bpvm_load_existing()
     if ident in _bpvm_logged:

@@ -694,7 +694,7 @@ table{width:100%;border-collapse:collapse;white-space:nowrap;background:#10161e}
       <option value="super3" <?= $patternKey === 'super3' ? 'selected' : '' ?>>SUPER3 — Over 2.5 babak kedua</option>
       <option value="super4" <?= $patternKey === 'super4' ? 'selected' : '' ?>>SUPER4 — Over 2.5 babak kedua</option>
       <option value="p12" <?= $patternKey === 'p12' ? 'selected' : '' ?>>P12 — Over 1.5 babak kedua</option>
-      <option value="hah" <?= $patternKey === 'hah' ? 'selected' : '' ?>>HAH — Over 1.5 babak kedua</option>
+      <option value="hah" <?= $patternKey === 'hah' ? 'selected' : '' ?>>HAH+ — Over 1.5 babak kedua</option>
       <option value="p1" <?= $patternKey === 'p1' ? 'selected' : '' ?>>P1 — Over 1.5 babak kedua</option>
       <option value="p2" <?= $patternKey === 'p2' ? 'selected' : '' ?>>P2 — Over 1.5 babak kedua</option>
       <option value="p3" <?= $patternKey === 'p3' ? 'selected' : '' ?>>P3 — Over 1.5 babak kedua</option>
@@ -723,7 +723,7 @@ table{width:100%;border-collapse:collapse;white-space:nowrap;background:#10161e}
   <?php elseif ($patternKey === 'slow'): ?>
     <div class="rule"><b>S-LOW</b> — selisih HT ≤ 1; jika seri, gol ke-2 ≤ 25' dan gol terakhir 1H ≥ 35' · gol pertama ≤ 5' · line awal ≥ 5.75 · buang total HT 1 · semua HT tidak seri: gol ke-2 9'–25' · total HT 3: line ≤ 7.5 dan gol-1 ≤ 4' wajib line ≥ 7.25 · total HT 5: gol terakhir 1H ≥ 30'.</div>
   <?php elseif ($patternKey === 'hah'): ?>
-    <div class="rule"><b>HAH</b> — urutan gol 1H Home–Away–Home · skor HT 2-1 · gol kedua harus setelah gol pertama · gol ketiga/terakhir 1H ≥ 26' · line awal ≥ 4.75; jika line di bawah 4.75, gol ketiga wajib ≥ 38'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
+    <div class="rule"><b>HAH+</b> — urutan gol 1H Home–Away–Home · skor HT 2-1 · gol kedua harus setelah gol pertama · gol ketiga/terakhir 1H ≥ 26' · line awal ≥ 4.75; jika line di bawah 4.75, gol ketiga wajib ≥ 38'. Sinyal live menunggu tepat 1 gol 2H, live line &lt; 6, gap line−skor ≤ 1.25, dan odds Over ≥ 1.65.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2). Filter pasar live tidak tersedia lengkap pada seluruh data historis.</span></div>
   <?php elseif ($patternKey === 'p1'): ?>
     <div class="rule"><b>P1</b> — selisih HT tepat 1 · total HT maksimal 5 · gol pertama ≤ 12' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 3: line ≤ 7.5, gol terakhir ≥ 20', dan jika gol-1 ≤ 4', line ≥ 7.25 · total HT 5: gol-2 9'–18', atau 19'–28' jika gol terakhir 1H ≥ 40'.<br><span class="muted">Target: <b><?= e($targetLabel) ?></b> (HIT jika gol 2H ≥ 2).</span></div>
   <?php elseif ($patternKey === 'p2'): ?>

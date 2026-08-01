@@ -3557,3 +3557,117 @@ logged_at,code,league,home_team,away_team,half,minute,score,ht,ht_total,target_2
 31/07/2026 15:58,P2,L [V],A,B,2H,70,2-1,2-1,3,2,4.5,6/6.5,1.85,1.85,6/6.5,1.85,1.85
 31/07/2026 15:58,P3,L [V],A,B,2H,70,2-1,2-1,3,2,4.5,6/6.5,1.85,1.85,6/6.5,1.85,1.85
 31/07/2026 15:58,P11,L [V],A,B,2H,70,2-1,2-1,3,2,4.5,6/6.5,1.85,1.85,6/6.5,1.85,1.85
+31/07/2026 20:10,P8,V-Soccer Italy Serie A - 12 mins [V],Atalanta BC [V],Bologna FC 1909 [V],2H,65,1-3,1-3,4,2,5.5,6/6.5,1.91,1.78,6.5/7,1.86,1.82
+31/07/2026 20:11,SUPER2,V-Soccer International Friendly - 12 mins [V],Belgium [V],Italy [V],2H,50,3-4,3-4,7,3,9.5,11.5/12,1.81,1.87,9.5/10,1.77,1.92
+31/07/2026 20:40,SUPER1,V-Soccer Women’s Nations League - 12 mins [V],Germany W [V],China W [V],2H,50,1-2,1-2,3,3,5.5,6.5,1.90,1.78,7/7.5,1.79,1.90
+31/07/2026 20:40,P12,V-Soccer France Ligue 1 - 12 mins [V],Stade Brestois 29 [V],Monaco [V],2H,65,2-3,2-3,5,2,6.5,7/7.5,1.80,1.88,6.5/7,1.89,1.79
+31/07/2026 20:40,P1,V-Soccer France Ligue 1 - 12 mins [V],Stade Brestois 29 [V],Monaco [V],2H,65,2-3,2-3,5,2,6.5,7/7.5,1.80,1.88,6.5/7,1.89,1.79
+31/07/2026 20:40,P10,V-Soccer France Ligue 1 - 12 mins [V],Stade Brestois 29 [V],Monaco [V],2H,65,2-3,2-3,5,2,6.5,7/7.5,1.80,1.88,6.5/7,1.89,1.79
+31/07/2026 20:41,P1,V-Soccer Women’s Nations League - 12 mins [V],Germany W [V],China W [V],2H,65,1-2,1-2,3,2,4.5,5/5.5,1.82,1.86,7/7.5,1.79,1.90
+31/07/2026 20:41,P2,V-Soccer Women’s Nations League - 12 mins [V],Germany W [V],China W [V],2H,65,1-2,1-2,3,2,4.5,5/5.5,1.82,1.86,7/7.5,1.79,1.90
+31/07/2026 20:41,P3,V-Soccer Women’s Nations League - 12 mins [V],Germany W [V],China W [V],2H,65,1-2,1-2,3,2,4.5,5/5.5,1.82,1.86,7/7.5,1.79,1.90
+31/07/2026 20:41,P11,V-Soccer Women’s Nations League - 12 mins [V],Germany W [V],China W [V],2H,65,1-2,1-2,3,2,4.5,5/5.5,1.82,1.86,7/7.5,1.79,1.90
+31/07/2026 20:57,SUPER1,V-Soccer Argentina Liga Profesional - 12 mins [V],Newell's [V],Lanus [V],2H,50,1-2,1-2,3,3,5.5,6/6.5,1.07,1.66,6.5/7,1.87,1.81
+31/07/2026 21:11,P1,V-Soccer France Ligue 1 - 12 mins [V],Monaco [V],Stade Brestois 29 [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.90,1.79,6.5,1.78,1.91
+31/07/2026 21:11,P2,V-Soccer France Ligue 1 - 12 mins [V],Monaco [V],Stade Brestois 29 [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.90,1.79,6.5,1.78,1.91
+31/07/2026 21:11,P3,V-Soccer France Ligue 1 - 12 mins [V],Monaco [V],Stade Brestois 29 [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.90,1.79,6.5,1.78,1.91
+31/07/2026 21:11,P11,V-Soccer France Ligue 1 - 12 mins [V],Monaco [V],Stade Brestois 29 [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.90,1.79,6.5,1.78,1.91
+31/07/2026 21:49,P8,V-Soccer International Friendly - 12 mins [V],Argentina [V],Netherlands [V],2H,65,1-3,1-3,4,2,5.5,6/6.5,1.16,1.60,6/6.5,1.81,1.87
+31/07/2026 22:18,S-LOW,V-Soccer Argentina Liga Profesional - 12 mins [V],Boca Juniors [V],Defensa [V],2H,50,3-2,3-2,5,3,7.5,8/8.5,1.92,1.77,6.5,1.87,1.81
+31/07/2026 22:19,SUPER,V-Soccer Argentina Liga Profesional - 12 mins [V],Boca Juniors [V],Defensa [V],2H,60,3-2,3-2,5,3,7.5,7.5,1.93,1.76,6.5,1.87,1.81
+31/07/2026 22:20,P12,V-Soccer Argentina Liga Profesional - 12 mins [V],Boca Juniors [V],Defensa [V],2H,65,3-2,3-2,5,2,6.5,7/7.5,1.94,1.75,6.5,1.87,1.81
+31/07/2026 22:20,P1,V-Soccer Argentina Liga Profesional - 12 mins [V],Boca Juniors [V],Defensa [V],2H,65,3-2,3-2,5,2,6.5,7/7.5,1.94,1.75,6.5,1.87,1.81
+31/07/2026 22:20,P7,V-Soccer Argentina Liga Profesional - 12 mins [V],Boca Juniors [V],Defensa [V],2H,65,3-2,3-2,5,2,6.5,7/7.5,1.94,1.75,6.5,1.87,1.81
+31/07/2026 22:28,SUPER4,V-Soccer England Premier League - 12 mins [V],Manchester City [V],Chelsea [V],2H,50,1-4,1-4,5,3,7.5,7.5/8,1.94,1.75,5.5,1.86,1.82
+31/07/2026 22:34,SUPER4,V-Soccer Argentina Liga Profesional - 12 mins [V],River Plate [V],Estudiantes [V],2H,50,4-1,4-1,5,3,7.5,7/7.5,1.80,1.88,4.5/5,1.76,1.93
+31/07/2026 22:46,P8,V-Soccer Germany Bundesliga - 12 mins [V],Eintracht Frankfurt [V],TSG Hoffenheim [V],2H,65,1-3,1-3,4,2,5.5,6.5,1.88,1.80,8/8.5,1.91,1.78
+31/07/2026 22:48,SUPER2,V-Soccer Women’s Nations League - 12 mins [V],Brazil W [V],United States W [V],2H,50,2-1,2-1,3,3,5.5,6.5/7,1.82,1.86,7.5/8,1.81,1.87
+31/07/2026 22:53,P8,V-Soccer International Friendly - 12 mins [V],Germany [V],Belgium [V],2H,65,1-3,1-3,4,2,5.5,6/6.5,1.01,1.69,6.5,1.83,1.85
+31/07/2026 23:33,S-LOW,V-Soccer Germany Bundesliga - 12 mins [V],Borussia Dortmund [V],RB Leipzig [V],2H,51,4-3,4-3,7,3,9.5,9.5/10,1.67,1.04,6/6.5,1.79,1.90
+31/07/2026 23:34,SUPER,V-Soccer Germany Bundesliga - 12 mins [V],Borussia Dortmund [V],RB Leipzig [V],2H,60,4-3,4-3,7,3,9.5,9.5,1.90,1.79,6/6.5,1.79,1.90
+31/07/2026 23:40,P4,V-Soccer Spain La Liga - 12 mins [V],Athletic Bilbao [V],Real Betis [V],2H,65,1-1,1-1,2,2,3.5,4/4.5,1.04,1.68,6/6.5,1.97,1.72
+01/08/2026 06:14,SUPER1,V-Soccer France Ligue 1 - 12 mins [V],LOSC Lille [V],PSG [V],2H,50,1-2,1-2,3,3,5.5,6.5/7,1.84,1.84,7.5,1.79,1.89
+01/08/2026 06:14,SUPER2,V-Soccer France Ligue 1 - 12 mins [V],LOSC Lille [V],PSG [V],2H,50,1-2,1-2,3,3,5.5,6.5/7,1.84,1.84,7.5,1.79,1.89
+01/08/2026 06:14,S-LOW,V-Soccer France Ligue 1 - 12 mins [V],LOSC Lille [V],PSG [V],2H,50,1-2,1-2,3,3,5.5,6.5/7,1.84,1.84,7.5,1.79,1.89
+01/08/2026 06:31,SUPER2,V-Soccer Women’s Nations League - 12 mins [V],Spain W [V],Sweden W [V],2H,50,2-3,2-3,5,3,7.5,8.5,1.91,1.78,7/7.5,1.98,1.72
+01/08/2026 06:37,P6,V-Soccer Spain La Liga - 12 mins [V],Athletic Bilbao [V],Real Sociedad [V],2H,65,2-2,2-2,4,2,5.5,6/6.5,1.05,1.67,5.5/6,1.73,1.97
+01/08/2026 06:48,S-LOW,V-Soccer Italy Serie A - 12 mins [V],Napoli [V],Juventus [V],2H,50,2-2,2-2,4,3,6.5,6.5/7,1.68,1.03,6/6.5,1.98,1.72
+01/08/2026 07:02,SUPER3,V-Soccer Champions League - 12 mins [V],Atletico Madrid [V],PSG [V],2H,50,3-0,3-0,3,3,5.5,6/6.5,1.90,1.78,6.5/7,1.87,1.81
+01/08/2026 07:20,P4,V-Soccer Champions League - 12 mins [V],Barcelona [V],Monaco [V],2H,65,1-1,1-1,2,2,3.5,4/4.5,1.07,1.66,5.5/6,1.71,1.99
+01/08/2026 07:46,S-LOW,V-Soccer China Super League - 12 mins [V],Zhejiang Pro [V],Wuhan Three Towns [V],2H,50,2-3,2-3,5,3,7.5,8/8.5,1.89,1.79,6.5/7,1.90,1.78
+01/08/2026 07:49,SUPER2,V-Soccer Germany Bundesliga - 12 mins [V],Eintracht Frankfurt [V],Borussia Dortmund [V],2H,50,2-2,2-2,4,3,6.5,8/8.5,1.91,1.78,8.5,1.86,1.82
+01/08/2026 07:52,P8,V-Soccer Champions League - 12 mins [V],Manchester City [V],Inter Milan [V],2H,65,1-3,1-3,4,2,5.5,6/6.5,1.82,1.86,6.5/7,1.86,1.82
+01/08/2026 07:54,SUPER3,V-Soccer Argentina Liga Profesional - 12 mins [V],Lanus [V],Newell's [V],2H,50,4-1,4-1,5,3,7.5,8/8.5,1.87,1.81,6.5/7,1.87,1.81
+01/08/2026 07:54,SUPER3,V-Soccer Spain La Liga - 12 mins [V],Girona FC [V],Barcelona [V],2H,50,0-3,0-3,3,3,5.5,5.5/6,1.72,1.97,6/6.5,1.98,1.72
+01/08/2026 07:54,P1,V-Soccer Italy Serie A - 12 mins [V],Roma [V],Napoli [V],2H,65,1-2,1-2,3,2,4.5,5/5.5,1.07,1.66,6.5,1.84,1.84
+01/08/2026 07:54,P2,V-Soccer Italy Serie A - 12 mins [V],Roma [V],Napoli [V],2H,65,1-2,1-2,3,2,4.5,5/5.5,1.07,1.66,6.5,1.84,1.84
+01/08/2026 07:54,P3,V-Soccer Italy Serie A - 12 mins [V],Roma [V],Napoli [V],2H,65,1-2,1-2,3,2,4.5,5/5.5,1.07,1.66,6.5,1.84,1.84
+01/08/2026 07:54,P11,V-Soccer Italy Serie A - 12 mins [V],Roma [V],Napoli [V],2H,65,1-2,1-2,3,2,4.5,5/5.5,1.07,1.66,6.5,1.84,1.84
+01/08/2026 08:26,SUPER3,V-Soccer Spain La Liga - 12 mins [V],Barcelona [V],Girona FC [V],2H,50,3-0,3-0,3,3,5.5,5.5/6,1.69,1.01,6/6.5,1.99,1.71
+01/08/2026 08:37,SUPER4,V-Soccer France Ligue 1 - 12 mins [V],Olympique de Marseille [V],Stade Brestois 29 [V],2H,50,3-2,3-2,5,3,7.5,8.5/9,1.73,1.96,8/8.5,1.94,1.75
+01/08/2026 08:58,HAH,V-Soccer Italy Serie A - 12 mins [V],ACF Fiorentina [V],Torino FC [V],2H,60,2-1,2-1,3,2,4.5,6/6.5,1.02,1.69,7.5/8,1.88,1.80
+01/08/2026 09:02,HAH,V-Soccer Korea K-League 1 - 12 mins [V],Daegu FC [V],Suwon Samsung [V],2H,60,2-1,2-1,3,2,4.5,4.5/5,1.79,1.89,4.5/5,1.86,1.82
+01/08/2026 09:10,SUPER2,V-Soccer France Ligue 1 - 12 mins [V],PSG [V],Stade Brestois 29 [V],2H,50,2-2,2-2,4,3,6.5,8/8.5,1.83,1.85,8.5/9,1.85,1.83
+01/08/2026 09:31,SUPER,V-Soccer Spain La Liga - 12 mins [V],Villarreal CF [V],Atletico Madrid [V],2H,60,0-1,0-1,1,3,3.5,3/3.5,1.93,1.76,6/6.5,1.99,1.71
+01/08/2026 09:44,P3,V-Soccer Champions League - 12 mins [V],Bayern [V],Manchester City [V],2H,65,2-1,2-1,3,2,4.5,4.5/5,1.70,1.01,5.5,1.82,1.86
+01/08/2026 09:59,SUPER4,V-Soccer Champions League - 12 mins [V],Barcelona [V],Aston Villa [V],2H,50,4-1,4-1,5,3,7.5,7.5/8,1.93,1.76,5.5,1.84,1.84
+01/08/2026 10:02,S-LOW,V-Soccer Spain La Liga - 12 mins [V],Girona FC [V],Valencia CF [V],2H,50,1-2,1-2,3,3,5.5,6/6.5,1.99,1.71,6/6.5,1.95,1.74
+01/08/2026 10:04,SUPER,V-Soccer Spain La Liga - 12 mins [V],Girona FC [V],Valencia CF [V],2H,60,1-2,1-2,3,3,5.5,5.5,1.94,1.75,6/6.5,1.95,1.74
+01/08/2026 10:04,P1,V-Soccer Spain La Liga - 12 mins [V],Girona FC [V],Valencia CF [V],2H,65,1-2,1-2,3,2,4.5,5/5.5,1.07,1.66,6/6.5,1.95,1.74
+01/08/2026 10:04,P2,V-Soccer Spain La Liga - 12 mins [V],Girona FC [V],Valencia CF [V],2H,65,1-2,1-2,3,2,4.5,5/5.5,1.07,1.66,6/6.5,1.95,1.74
+01/08/2026 10:04,P3,V-Soccer Spain La Liga - 12 mins [V],Girona FC [V],Valencia CF [V],2H,65,1-2,1-2,3,2,4.5,5/5.5,1.07,1.66,6/6.5,1.95,1.74
+01/08/2026 10:04,P11,V-Soccer Spain La Liga - 12 mins [V],Girona FC [V],Valencia CF [V],2H,65,1-2,1-2,3,2,4.5,5/5.5,1.07,1.66,6/6.5,1.95,1.74
+01/08/2026 10:10,SUPER4,V-Soccer Copa Libertadores - 12 mins [V],Colo-Colo [V],The Strongest [V],2H,50,1-4,1-4,5,3,7.5,7.5/8,1.69,1.02,5/5.5,1.91,1.78
+01/08/2026 10:18,P9,V-Soccer Italy Serie A - 12 mins [V],Roma [V],AC Milan [V],2H,65,3-3,3-3,6,2,7.5,8.5,1.93,1.76,6.5/7,1.89,1.79
+01/08/2026 10:35,HAH,V-Soccer Argentina Liga Profesional - 12 mins [V],Velez Sarsfield [V],Estudiantes [V],2H,60,2-1,2-1,3,2,4.5,5.5,1.94,1.75,5/5.5,1.79,1.89
+01/08/2026 10:47,SUPER2,V-Soccer Women’s Nations League - 12 mins [V],Germany W [V],France W [V],2H,50,2-2,2-2,4,3,6.5,7.5,1.88,1.81,7.5,1.88,1.81
+01/08/2026 10:51,S-LOW,V-Soccer International Friendly - 12 mins [V],Netherlands [V],Belgium [V],2H,50,2-3,2-3,5,3,7.5,8/8.5,1.88,1.81,6.5/7,1.84,1.84
+01/08/2026 10:51,SUPER4,V-Soccer International Friendly - 12 mins [V],Netherlands [V],Belgium [V],2H,50,2-3,2-3,5,3,7.5,8/8.5,1.88,1.81,6.5/7,1.84,1.84
+01/08/2026 10:52,SUPER,V-Soccer International Friendly - 12 mins [V],Netherlands [V],Belgium [V],2H,60,2-3,2-3,5,3,7.5,7.5/8,1.91,1.78,6.5/7,1.84,1.84
+01/08/2026 10:53,P12,V-Soccer International Friendly - 12 mins [V],Netherlands [V],Belgium [V],2H,65,2-3,2-3,5,2,6.5,7/7.5,1.76,1.93,6.5/7,1.84,1.84
+01/08/2026 10:53,P1,V-Soccer International Friendly - 12 mins [V],Netherlands [V],Belgium [V],2H,65,2-3,2-3,5,2,6.5,7/7.5,1.76,1.93,6.5/7,1.84,1.84
+01/08/2026 10:53,P10,V-Soccer International Friendly - 12 mins [V],Netherlands [V],Belgium [V],2H,65,2-3,2-3,5,2,6.5,7/7.5,1.76,1.93,6.5/7,1.84,1.84
+01/08/2026 11:19,SUPER2,V-Soccer Women’s Nations League - 12 mins [V],Brazil W [V],Netherlands W [V],2H,50,4-3,4-3,7,3,9.5,10.5/11,1.75,1.94,7.5/8,1.76,1.93
+01/08/2026 11:19,S-LOW,V-Soccer Women’s Nations League - 12 mins [V],Brazil W [V],Netherlands W [V],2H,50,4-3,4-3,7,3,9.5,10.5/11,1.75,1.94,7.5/8,1.76,1.93
+01/08/2026 11:20,P8,V-Soccer Champions League - 12 mins [V],Borussia Dortmund [V],Barcelona [V],2H,65,1-3,1-3,4,2,5.5,6/6.5,1.75,1.94,6/6.5,1.85,1.83
+01/08/2026 11:21,SUPER,V-Soccer Women’s Nations League - 12 mins [V],Brazil W [V],Netherlands W [V],2H,60,4-3,4-3,7,3,9.5,9.5/10,1.68,1.04,7.5/8,1.76,1.93
+01/08/2026 11:24,P3,V-Soccer Spain La Liga - 12 mins [V],Valencia CF [V],Real Sociedad [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.00,1.70,5.5,1.83,1.85
+01/08/2026 11:49,SUPER1,V-Soccer France Ligue 1 - 12 mins [V],Stade Rennais FC [V],Olympique de Marseille [V],2H,51,3-0,3-0,3,3,5.5,6.5,1.80,1.88,7.5,1.84,1.84
+01/08/2026 11:52,HAH,V-Soccer Champions League - 12 mins [V],AC Milan [V],Inter Milan [V],2H,60,2-1,2-1,3,2,4.5,5/5.5,1.86,1.82,5.5,1.83,1.85
+01/08/2026 12:04,P1,V-Soccer Copa Libertadores - 12 mins [V],The Strongest [V],Talleres [V],2H,65,2-3,2-3,5,2,6.5,7/7.5,1.94,1.75,5.5/6,1.72,1.98
+01/08/2026 12:04,P10,V-Soccer Copa Libertadores - 12 mins [V],The Strongest [V],Talleres [V],2H,65,2-3,2-3,5,2,6.5,7/7.5,1.94,1.75,5.5/6,1.72,1.98
+01/08/2026 12:07,SUPER1,V-Soccer Women’s Nations League - 12 mins [V],France W [V],England W [V],2H,50,1-2,1-2,3,3,5.5,6/6.5,1.83,1.85,6.5/7,1.90,1.78
+01/08/2026 12:12,HAH,V-Soccer International Friendly - 12 mins [V],Belgium [V],England [V],2H,60,2-1,2-1,3,2,4.5,5.5,1.84,1.84,6.5/7,1.86,1.82
+01/08/2026 12:12,P6,V-Soccer Spain La Liga - 12 mins [V],Athletic Bilbao [V],D. Alaves [V],2H,65,2-2,2-2,4,2,5.5,6/6.5,1.11,1.63,5/5.5,1.96,1.73
+01/08/2026 12:13,SUPER2,V-Soccer Korea K-League 1 - 12 mins [V],Jeju United [V],FC Seoul [V],2H,50,3-3,3-3,6,3,8.5,9.5,1.84,1.84,7.5,1.83,1.85
+01/08/2026 12:13,S-LOW,V-Soccer Korea K-League 1 - 12 mins [V],Jeju United [V],FC Seoul [V],2H,50,3-3,3-3,6,3,8.5,9.5,1.84,1.84,7.5,1.83,1.85
+01/08/2026 12:15,SUPER,V-Soccer Korea K-League 1 - 12 mins [V],Jeju United [V],FC Seoul [V],2H,60,3-3,3-3,6,3,8.5,8.5/9,1.68,1.03,7.5,1.83,1.85
+01/08/2026 12:23,SUPER4,V-Soccer Champions League - 12 mins [V],Barcelona [V],AC Milan [V],2H,50,4-1,4-1,5,3,7.5,7.5/8,1.67,1.05,5.5/6,1.75,1.94
+01/08/2026 12:26,SUPER4,V-Soccer Argentina Liga Profesional - 12 mins [V],Newell's [V],River Plate [V],2H,50,1-4,1-4,5,3,7.5,8/8.5,1.91,1.77,5.5/6,1.75,1.94
+01/08/2026 12:50,HAH,V-Soccer China Super League - 12 mins [V],Henan SSLM FC [V],Rongcheng FC [V],2H,60,2-1,2-1,3,2,4.5,5/5.5,1.87,1.81,4.5,1.80,1.88
+01/08/2026 12:55,SUPER3,V-Soccer Women’s Nations League - 12 mins [V],Spain W [V],England W [V],2H,50,1-4,1-4,5,3,7.5,8/8.5,1.78,1.91,6.5/7,1.77,1.91
+01/08/2026 12:58,SUPER2,V-Soccer International Friendly - 12 mins [V],England [V],Italy [V],2H,50,2-3,2-3,5,3,7.5,8.5/9,1.79,1.89,7/7.5,1.94,1.75
+01/08/2026 12:58,S-LOW,V-Soccer International Friendly - 12 mins [V],England [V],Italy [V],2H,50,2-3,2-3,5,3,7.5,8.5/9,1.79,1.89,7/7.5,1.94,1.75
+01/08/2026 13:00,SUPER,V-Soccer International Friendly - 12 mins [V],England [V],Italy [V],2H,60,2-3,2-3,5,3,7.5,7.5/8,1.68,1.04,7/7.5,1.94,1.75
+01/08/2026 13:00,P12,V-Soccer International Friendly - 12 mins [V],England [V],Italy [V],2H,65,2-3,2-3,5,2,6.5,7.5,1.82,1.86,7/7.5,1.94,1.75
+01/08/2026 13:00,P1,V-Soccer International Friendly - 12 mins [V],England [V],Italy [V],2H,65,2-3,2-3,5,2,6.5,7.5,1.82,1.86,7/7.5,1.94,1.75
+01/08/2026 13:00,P10,V-Soccer International Friendly - 12 mins [V],England [V],Italy [V],2H,65,2-3,2-3,5,2,6.5,7.5,1.82,1.86,7/7.5,1.94,1.75
+01/08/2026 13:13,SUPER3,V-Soccer Italy Serie A - 12 mins [V],Roma [V],Bologna FC 1909 [V],2H,50,3-0,3-0,3,3,5.5,6/6.5,1.84,1.84,6.5/7,1.89,1.79
+01/08/2026 13:14,SUPER3,V-Soccer Spain La Liga - 12 mins [V],Girona FC [V],Atletico Madrid [V],2H,50,0-3,0-3,3,3,5.5,6/6.5,1.95,1.74,6.5,1.88,1.80
+01/08/2026 13:20,P1,V-Soccer Korea K-League 1 - 12 mins [V],Seongnam FC [V],Jeju United [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.04,1.67,5.5/6,1.81,1.88
+01/08/2026 13:20,P2,V-Soccer Korea K-League 1 - 12 mins [V],Seongnam FC [V],Jeju United [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.04,1.67,5.5/6,1.81,1.88
+01/08/2026 13:20,P3,V-Soccer Korea K-League 1 - 12 mins [V],Seongnam FC [V],Jeju United [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.04,1.67,5.5/6,1.81,1.88
+01/08/2026 13:20,P11,V-Soccer Korea K-League 1 - 12 mins [V],Seongnam FC [V],Jeju United [V],2H,65,2-1,2-1,3,2,4.5,5/5.5,1.04,1.67,5.5/6,1.81,1.88
+01/08/2026 13:39,HAH,V-Soccer Copa Libertadores - 12 mins [V],Atletico Mineiro [V],Talleres [V],2H,60,2-1,2-1,3,2,4.5,5/5.5,1.88,1.80,5/5.5,1.99,1.71
+01/08/2026 13:45,P4,V-Soccer Women’s Nations League - 12 mins [V],Spain W [V],Canada W [V],2H,65,1-1,1-1,2,2,3.5,4/4.5,1.96,1.73,6.5/7,1.80,1.88
+01/08/2026 13:59,SUPER2,V-Soccer Women’s Nations League - 12 mins [V],United States W [V],Germany W [V],2H,50,1-2,1-2,3,3,5.5,6.5,1.80,1.88,7.5/8,1.83,1.85
+01/08/2026 14:03,P4,V-Soccer Argentina Liga Profesional - 12 mins [V],Velez Sarsfield [V],Independiente [V],2H,65,1-1,1-1,2,2,3.5,4/4.5,1.00,1.70,6/6.5,1.94,1.75
+01/08/2026 14:07,P4,V-Soccer Korea K-League 1 - 12 mins [V],Incheon United [V],Gimcheon Sangmu [V],2H,65,1-1,1-1,2,2,3.5,4/4.5,1.10,1.64,5.5/6,1.88,1.80
+01/08/2026 14:16,P1,V-Soccer Champions League - 12 mins [V],Borussia Dortmund [V],Atletico Madrid [V],2H,65,1-2,1-2,3,2,4.5,5/5.5,1.93,1.76,5.5/6,1.73,1.97
+01/08/2026 14:16,P2,V-Soccer Champions League - 12 mins [V],Borussia Dortmund [V],Atletico Madrid [V],2H,65,1-2,1-2,3,2,4.5,5/5.5,1.93,1.76,5.5/6,1.73,1.97
+01/08/2026 14:16,P3,V-Soccer Champions League - 12 mins [V],Borussia Dortmund [V],Atletico Madrid [V],2H,65,1-2,1-2,3,2,4.5,5/5.5,1.93,1.76,5.5/6,1.73,1.97
+01/08/2026 14:16,P11,V-Soccer Champions League - 12 mins [V],Borussia Dortmund [V],Atletico Madrid [V],2H,65,1-2,1-2,3,2,4.5,5/5.5,1.93,1.76,5.5/6,1.73,1.97
+01/08/2026 14:37,SUPER4,V-Soccer Korea K-League 1 - 12 mins [V],Jeju United [V],Incheon United [V],2H,50,2-3,2-3,5,3,7.5,8/8.5,1.79,1.90,7/7.5,1.94,1.75
+01/08/2026 14:39,P12,V-Soccer Korea K-League 1 - 12 mins [V],Jeju United [V],Incheon United [V],2H,65,2-3,2-3,5,2,6.5,7/7.5,1.94,1.75,7/7.5,1.94,1.75
+01/08/2026 14:39,P1,V-Soccer Korea K-League 1 - 12 mins [V],Jeju United [V],Incheon United [V],2H,65,2-3,2-3,5,2,6.5,7/7.5,1.94,1.75,7/7.5,1.94,1.75
+01/08/2026 14:39,P10,V-Soccer Korea K-League 1 - 12 mins [V],Jeju United [V],Incheon United [V],2H,65,2-3,2-3,5,2,6.5,7/7.5,1.94,1.75,7/7.5,1.94,1.75

@@ -57,11 +57,6 @@ if (isset($_GET['json'])) {
   .score { font-weight:700; font-variant-numeric:tabular-nums; }
   .goal { color:#5ee39b; }
   .inacc { color:#ffd166; }
-  .dev-extreme { color:#ff8095; background:#4a1720; font-weight:800; border-radius:4px; padding:2px 5px; }
-  .dev-warn { color:#ffc95e; background:#3a2a10; border:1px solid #7a5a1c; font-weight:800;
-              border-radius:4px; padding:1px 6px; margin-left:6px; }
-  .market-high { display:inline-block; color:#ffd166; background:#4a3210; border:1px solid #a66d16;
-                 font-weight:800; border-radius:4px; padding:1px 6px; margin-left:5px; }
   .ko { color:#8ecbff; font-weight:600; }
   .noko { color:#ff8095; font-size:11px; }
   .sig { background:#0f3d24; color:#5ee39b; border:1px solid #2f7d54; border-radius:4px;
@@ -69,13 +64,12 @@ if (isset($_GET['json'])) {
   .sig.supr { background:#4a3a10; color:#ffd166; border-color:#8a6a1c; }
   .sig.slow { background:#10304a; color:#8ecbff; border-color:#2b5f8a; }
   .seq { color:#c9a0ff; letter-spacing:.05em; }
-  .stk { display:inline-block; background:#3a2a10; color:#ffc95e; border:1px solid #7a5a1c;
-         border-radius:4px; padding:1px 6px; font-size:11px; font-weight:700; cursor:help; margin:1px 2px 1px 0; }
-  .stk.away { background:#2a1030; color:#e0a6ff; border-color:#6a3a7a; }
   .nosig { color:#4c5666; cursor:help; }
   tr.hit td { background:#12291d; }
   tr.hit td:first-child { box-shadow:inset 3px 0 0 #5ee39b; }
   .empty { color:#8b97a8; padding:14px 4px; }
+  .odds { color:#8ecbff; font-size:12px; white-space:normal; max-width:340px; }
+  td.g1h, td.g2h { font-variant-numeric:tabular-nums; }
   .grid { display:grid; grid-template-columns:1.6fr 1fr; gap:20px; align-items:start; }
   @media (max-width:900px) { .grid { grid-template-columns:1fr; } }
 </style>
@@ -86,8 +80,6 @@ if (isset($_GET['json'])) {
   <div class="bar">
     <span id="st" class="pill warn">memuat…</span>
     <span id="sig" class="pill bad">SINYAL: 0</span>
-    <span id="stk" class="pill warn" title="Sumber kolom Peluang 100%: cache tabel streak (index.php?page=streak).">STREAK: –</span>
-    <a class="pill" style="text-decoration:none;background:#111720;color:#8ecbff;border:1px solid #2b3543" href="check-signal-pnl.php">💰 Hasil taruhan</a>
     <span class="muted" id="meta"></span>
     <span class="muted" id="err"></span>
   </div>
@@ -98,20 +90,20 @@ if (isset($_GET['json'])) {
     <b>S-LOW</b> <span class="noko">NONAKTIF</span> — selisih HT ≤ 1 (kalau seri: gol-2 ≤ 25' dan gol terakhir 1H ≥ 35') · gol pertama ≤ 5' · line awal ≥ 5.75 · tanpa total HT 1 · semua HT tidak seri: gol-2 9'–25' · total HT 3: line ≤ 7.5 dan gol-1 ≤ 4' wajib line ≥ 7.25 · total HT 5: gol terakhir 1H ≥ 30'<br>
     <b>SUPER3</b> <span class="noko">NONAKTIF</span> — selisih skor HT tepat 3 · line awal ≥ 6 · gol terakhir 1H ≥ 42'<br>
     <b>SUPER4</b> <span class="noko">NONAKTIF</span> — total gol HT tepat 5 · urutan X–Y–X–X–bebas · tanpa syarat menit / line<br>
-    <b>P12</b> — total gol HT tepat 5 · gol pertama ≥ 4' · line awal ≥ 6.5 · gol kedua ≥ 8'<br>
-    <b>P1</b> — selisih HT tepat 1 · total HT maksimal 5 · gol pertama ≤ 12' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 3: line ≤ 7.5, gol terakhir ≥ 20', dan gol-1 ≤ 4' wajib line ≥ 7.25 · total HT 5: gol-2 9'–18', atau 19'–28' jika gol terakhir 1H ≥ 40'<br>
+    <b>P12</b> — total gol HT tepat 5 · line awal ≥ 6.5 · gol kedua ≥ 8'<br>
+    <b>P1</b> — selisih HT tepat 1 · total HT maksimal 5 · gol pertama ≤ 12' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 3: line ≤ 7.5 dan gol-1 ≤ 4' wajib line ≥ 7.25 · total HT 5: gol-2 9'–30'<br>
     <b>P2</b> — HT 2-1 / 1-2 · gol pertama ≤ 15' · line awal 5.75–7.5 · gol pertama ≤ 4': line wajib ≥ 7.25<br>
     <b>P3</b> — total gol HT tepat 3 · gol pertama 5'–9' · line awal 5.5–7.5 · HT 3-0/0-3: line wajib ≥ 6.5<br>
     <b>P4</b> — HT 1-1 · gol pertama ≥ 15' · line awal ≥ 5.5<br>
     <b>P5</b> — HT 3-0 · gol pertama ≤ 18' · gol terakhir 1H ≤ 40'<br>
-    <b>P6</b> — HT 2-2 · gol pertama ≤ 8' · line awal 5.5–6.25<br>
-    <b>P7</b> — HT 3-2 · gol pertama 5'–8'<br>
-    <b>P8</b> — HT 1-3 · line awal ≥ 6 · gol kedua ≥ 13'<br>
+    <b>P6</b> — HT 2-2 · gol pertama ≤ 8' · line awal ≤ 6.25<br>
+    <b>P7</b> — HT 3-2 · gol pertama ≤ 8'<br>
+    <b>P8</b> — HT 1-3 · line awal ≥ 6<br>
     <b>P9</b> — HT 3-3 · gol kedua ≥ 12' · gol terakhir 1H ≥ 34'<br>
-    <b>P10</b> — HT 2-3 · gol pertama ≥ 5' · line awal ≥ 5.75<br>
+    <b>P10</b> — HT 2-3 · line awal ≥ 5.75<br>
     <b>P11</b> — total gol HT tepat 3 · gol pertama ≤ 12' · line awal 5.75–7.5 · gol pertama ≤ 4': line wajib ≥ 7.25 · HT 3-0/0-3: line wajib ≥ 7.5<br>
-    <b>HAH</b> — urutan gol 1H Home–Away–Home · HT 2-1 · gol kedua harus setelah gol pertama · gol ketiga/terakhir 1H ≥ 26' · line awal ≥ 4.75; jika line lebih rendah, gol ketiga wajib ≥ 38'<br>
-    SUPER dan HAH aktif mulai menit 60 babak kedua; P1-P12 mulai menit 65; SUPER1/SUPER2/S-LOW/SUPER3/SUPER4 dinonaktifkan. Semua sinyal hilang begitu ada gol di babak kedua.<br><b>Berlaku untuk semua pola SUPER*</b>: total gol HT ≥ 5 wajib line awal ≥ 6.5; khusus SUPER2 gol terakhir 1H wajib ≤ 44'.
+    <b>HAH+</b> — urutan gol 1H Home–Away–Home · HT 2-1 · gol ketiga/terakhir 1H ≥ 26' · menunggu tepat 1 gol 2H · live line &lt; 6 · gap line−skor ≤ 1.25 · odds Over ≥ 1.65<br>
+    SUPER dan HAH aktif mulai menit 60 babak kedua; P1-P12 mulai menit 65; SUPER1/SUPER2/S-LOW/SUPER3/SUPER4 dinonaktifkan. HAH+ menunggu tepat satu gol 2H; pola lainnya hilang begitu ada gol 2H.
   </p>
 
   <div class="grid">
@@ -119,27 +111,37 @@ if (isset($_GET['json'])) {
       <h2>Match berjalan (<span id="cnt">0</span>)</h2>
       <table>
         <thead><tr>
-          <th>Sinyal</th>
-          <th title="Peluang 100% dari tabel streak (index.php?page=streak), khusus market Over. H = tim kandang, A = tim tandang.">Peluang 100%</th>
-          <th>Match</th><th>Babak</th><th class="num">Menit</th><th class="num">Skor</th>
+          <th>Sinyal</th><th>Match</th><th>Babak</th><th class="num">Menit</th><th class="num">Skor</th>
           <th class="num">HT</th><th class="num">Gol-1</th><th class="num">Gol 1H</th><th class="num">Urutan</th>
           <th class="num">Tot</th><th class="num">Line KO</th><th class="num">O/U KO</th>
+          <th class="num">M46 Line</th><th class="num">M46 O/U</th>
           <th class="num">Line</th><th class="num">Over</th><th class="num">Under</th>
         </tr></thead>
-        <tbody id="tb"><tr><td colspan="16" class="empty">Menunggu data…</td></tr></tbody>
+        <tbody id="tb"><tr><td colspan="17" class="empty">Menunggu data…</td></tr></tbody>
       </table>
     </div>
     <div>
       <h2>Gol terakhir terdeteksi</h2>
       <table>
-        <thead><tr><th>Jam</th><th>Match</th><th>Menit</th><th class="num">Skor</th><th class="num">Market setelah gol</th><th class="num">Proyeksi / Deviasi</th></tr></thead>
-        <tbody id="gb"><tr><td colspan="6" class="empty">Belum ada.</td></tr></tbody>
+        <thead><tr><th>Jam</th><th>Match</th><th>Menit</th><th class="num">Skor</th></tr></thead>
+        <tbody id="gb"><tr><td colspan="4" class="empty">Belum ada.</td></tr></tbody>
       </table>
     </div>
   </div>
+
+  <h2>BPVM Match berjalan (<span id="bpvm-cnt">0</span>) <span id="bpvm-st" class="pill warn">memuat…</span></h2>
+  <p class="muted" id="bpvm-meta" style="margin:0 2px"></p>
+  <table>
+    <thead><tr>
+      <th>Match</th><th>Status</th><th class="num">Skor</th>
+      <th class="num">HT</th><th class="num">Gol 1H</th><th class="num">Gol 2H</th>
+      <th>1X2 FT</th><th>HDP FT</th><th>O/U FT</th>
+      <th>1X2 1H</th><th>HDP 1H</th><th>O/U 1H</th><th>Next Goal</th>
+    </tr></thead>
+    <tbody id="bpvm-tb"><tr><td colspan="13" class="empty">Menunggu data…</td></tr></tbody>
+  </table>
 </div>
 
-<script src="assets/streak100.js?v=<?= filemtime(__DIR__ . '/assets/streak100.js') ?>"></script>
 <script>
 var esc = function (s) {
   return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
@@ -149,96 +151,6 @@ var esc = function (s) {
 var shortLeague = function (s) {
   return String(s || '').replace('V-Soccer ', '').replace(' - 12 mins [V]', '').trim();
 };
-
-// ---- Peluang 100% dari tabel streak ---------------------------------------
-// Baris streak diambil dari streak-100-api.php (cache halaman streak, TIDAK
-// memicu rebuild), lalu disaring memakai assets/streak100.js — modul yang sama
-// dengan index.php?page=streak, jadi hasilnya tidak mungkin beda aturan.
-// Khusus market Over, sesuai pattern SUPER/P1-P12 yang semuanya bertaruh Over.
-var STREAK = {};          // nama tim -> daftar baris 100%
-var streakKey = '';       // daftar tim yang terakhir diminta
-var streakBusy = false;
-var OVER_OUTS = ['o35', 'o45', 'o55', 'o65', 'o75'];
-var STK_MAX_BADGE = 3;    // badge per tim, sisanya diringkas jadi "+n"
-
-function streakStatus(d) {
-  var el = document.getElementById('stk');
-  if (!el) return;
-  if (!d) { el.className = 'pill warn'; el.textContent = 'STREAK: memuat…'; return; }
-  if (!d.ok) {
-    el.className = 'pill bad';
-    el.textContent = 'STREAK: tidak ada data';
-    el.title = d.reason || 'Cache streak belum tersedia.';
-    return;
-  }
-  var n = 0;
-  for (var k in STREAK) n += STREAK[k].length;
-  var basi = d.age_min > 180;   // cache > 3 jam
-  el.className = 'pill ' + (n ? (basi ? 'warn' : 'ok') : 'bad');
-  el.textContent = 'STREAK: ' + n + ' peluang 100%' + (basi ? ' (cache ' + d.age_min + ' mnt)' : '');
-  el.title = 'Cache streak dibangun ' + (d.builtAt || '-') + ' (' + d.age_min + ' menit lalu). '
-    + 'Buka index.php?page=streak untuk menyegarkan.';
-}
-
-function streakCell(home, away) {
-  var out = [];
-  [['H', home, ''], ['A', away, ' away']].forEach(function (sisi) {
-    var daftar = STREAK[sisi[1]] || [];
-    daftar.slice(0, STK_MAX_BADGE).forEach(function (r) {
-      var judul = sisi[1] + ' — ' + r.outT + ' ' + r.over + '% (' + r.hits + '/' + r.samp + ')'
-        + '\nmode: ' + r.mk + (r.exp ? ' [eksperimental]' : '')
-        + '\nstreak berjalan: ' + r.cur + 'x'
-        + '\nkeandalan (Wilson 95%): ' + (r.lb === null ? '-' : r.lb + '%')
-        + '\n± baseline liga: ' + (r.lift === null ? '-' : (r.lift > 0 ? '+' : '') + r.lift + '%')
-        + '\nmeleset: ' + r.miss + 'x';
-      out.push('<span class="stk' + sisi[2] + '" title="' + esc(judul) + '">'
-        + sisi[0] + ' ' + esc(r.outT.replace('Over ', 'O')) + ' ' + r.over + '%</span>');
-    });
-    if (daftar.length > STK_MAX_BADGE) {
-      out.push('<span class="nosig" title="' + esc(sisi[1] + ': ' + (daftar.length - STK_MAX_BADGE)
-        + ' peluang lain disembunyikan') + '">+' + (daftar.length - STK_MAX_BADGE) + '</span>');
-    }
-  });
-  return out.length ? out.join(' ') : '<span class="nosig" title="Tidak ada peluang 100% market Over untuk kedua tim">–</span>';
-}
-
-function refreshStreak(matches) {
-  var teams = [];
-  (matches || []).forEach(function (m) {
-    if (m.home) teams.push(m.home);
-    if (m.away) teams.push(m.away);
-  });
-  teams = teams.filter(function (v, i, a) { return a.indexOf(v) === i; }).sort();
-  var key = teams.join('|');
-  // Tarik ulang hanya kalau daftar tim berubah — data streak bergerak lambat,
-  // tak ada gunanya menarik ~100 KB tiap 2 detik.
-  if (!key || key === streakKey || streakBusy) return;
-  streakBusy = true;
-  fetch('streak-100-api.php?teams=' + encodeURIComponent(key), { cache: 'no-store' })
-    .then(function (r) { return r.json(); })
-    .then(function (d) {
-      streakKey = key;
-      STREAK = {};
-      if (d.ok && window.Streak100) {
-        var baris = window.Streak100.compute100(d.rows, {
-          baseOut: d.baseOut, baseOutLg: d.baseOutLg, outKeys: OVER_OUTS,
-        });
-        // Satu market bisa lolos lewat beberapa mode streak; simpan yang
-        // keandalannya paling tinggi saja supaya badge tidak menumpuk.
-        var terbaik = {};
-        baris.forEach(function (r) {
-          var k = r.t + '|' + r.outK;
-          if (!terbaik[k] || (r.lb || 0) > (terbaik[k].lb || 0)) terbaik[k] = r;
-        });
-        Object.keys(terbaik).map(function (k) { return terbaik[k]; })
-          .sort(function (a, b) { return (b.lb || 0) - (a.lb || 0); })
-          .forEach(function (r) { (STREAK[r.t] = STREAK[r.t] || []).push(r); });
-      }
-      streakStatus(d);
-      streakBusy = false;
-    })
-    .catch(function () { STREAK = {}; streakKey = ''; streakBusy = false; streakStatus({ ok: false, reason: 'Gagal memanggil streak-100-api.php' }); });
-}
 
 function render(d) {
   var st = document.getElementById('st');
@@ -256,11 +168,11 @@ function render(d) {
     'update ' + (d.ts ? String(d.ts).substr(11, 8) : '-') + ' (' + age + 's lalu)' +
     ' · siklus ' + (d.cycles || 0) +
     ' · terkirim ' + (d.sent_goals || 0) + ' gol / ' + (d.sent_matches || 0) + ' match' +
+    ' / ' + (d.sent_milestones || 0) + ' M46' +
     (d.note ? ' · ' + d.note : '');
   document.getElementById('err').textContent = d.last_error ? '⚠ ' + d.last_error : '';
 
   var m = d.matches || [];
-  refreshStreak(m);
   var nSig = d.signals || 0;
   var byCode = d.signals_by_code || {};
   var pats = d.patterns || [];
@@ -288,28 +200,26 @@ function render(d) {
       '; HAH mulai menit ' + esc(d.signal_start_2h_other_minute == null ? 60 : d.signal_start_2h_other_minute) +
       '; P1-P12 mulai menit ' + esc(d.signal_start_2h_p_minute == null ? 65 : d.signal_start_2h_p_minute) +
       '; SUPER1/SUPER2/S-LOW/SUPER3/SUPER4 dinonaktifkan' +
-      ' babak kedua. Semua sinyal hilang begitu ada gol di babak kedua.' +
-      '<br><b>Berlaku untuk semua pola SUPER*</b> (SUPER, SUPER1, SUPER2, S-LOW, SUPER3, SUPER4): ' +
-      'total gol HT &ge; ' + esc(d.superfam_high_total_min == null ? 5 : d.superfam_high_total_min) +
-      ' wajib line awal &ge; ' + esc(d.superfam_high_total_min_line == null ? 6.5 : d.superfam_high_total_min_line) +
-      '; khusus SUPER2 gol terakhir 1H wajib &le; ' + esc(d.super2_last_1h_max == null ? 44 : d.super2_last_1h_max) + "'.";
+      ' babak kedua. HAH+ menunggu tepat satu gol 2H; pola lainnya hilang begitu ada gol 2H.';
   }
   document.getElementById('cnt').textContent = m.length;
   var tb = document.getElementById('tb'), rows = '', lastLg = null;
   if (!m.length) {
-    rows = '<tr><td colspan="16" class="empty">Tidak ada match terbaca.</td></tr>';
+    rows = '<tr><td colspan="17" class="empty">Tidak ada match terbaca.</td></tr>';
   } else {
     for (var i = 0; i < m.length; i++) {
       var r = m[i];
       if (r.league !== lastLg) {
         lastLg = r.league;
-        rows += '<tr class="lg"><td colspan="16">' + esc(shortLeague(r.league)) + '</td></tr>';
+        rows += '<tr class="lg"><td colspan="17">' + esc(shortLeague(r.league)) + '</td></tr>';
       }
       var koOu = (r.ko_over || r.ko_under) ? (esc(r.ko_over || '-') + ' / ' + esc(r.ko_under || '-')) : '-';
-      var highMarket = Number(r.late_market_high) === 1
-        ? '<span class="market-high" title="Line live ' + esc(r.line) + ' · proyeksi ' + esc(r.late_projected_line) +
-          ' · deviasi +' + esc(r.late_line_deviation) + '">⚠ MARKET TINGGI +' + esc(r.late_line_deviation) + '</span>'
-        : '';
+      var m46Line = r.m46_line
+        ? ((r.m46_minute == null ? "46'" : esc(r.m46_minute) + "'") + ' · ' + esc(r.m46_line))
+        : '-';
+      var m46Ou = (r.m46_over || r.m46_under)
+        ? (esc(r.m46_over || '-') + ' / ' + esc(r.m46_under || '-'))
+        : '-';
       var hits = r.hits || (r.signal ? ['P1'] : []);
       var sigCell = hits.length
         ? hits.map(function (c) {
@@ -319,7 +229,6 @@ function render(d) {
         : '<span class="nosig" title="' + esc(r.signal_why || '') + '">–</span>';
       rows += '<tr' + (r.signal ? ' class="hit"' : '') + '>' +
         '<td>' + sigCell + '</td>' +
-        '<td>' + streakCell(r.home, r.away) + '</td>' +
         '<td>' + esc(r.home) + ' vs ' + esc(r.away) + '</td>' +
         '<td>' + esc(r.half) + '</td>' +
         '<td class="num">' + (r.minute >= 0 ? r.minute + "'" : '-') + '</td>' +
@@ -333,7 +242,9 @@ function render(d) {
         '<td class="num">' + (r.total == null ? '-' : r.total) + '</td>' +
         '<td class="num ' + (r.ko_line ? 'ko' : 'noko') + '">' + esc(r.ko_line || 'belum ada') + '</td>' +
         '<td class="num">' + koOu + '</td>' +
-        '<td class="num">' + esc(r.line || '-') + highMarket + '</td>' +
+        '<td class="num ko">' + m46Line + '</td>' +
+        '<td class="num">' + m46Ou + '</td>' +
+        '<td class="num">' + esc(r.line || '-') + '</td>' +
         '<td class="num">' + esc(r.over || '-') + '</td>' +
         '<td class="num">' + esc(r.under || '-') + '</td>' +
         '</tr>';
@@ -343,24 +254,15 @@ function render(d) {
 
   var g = d.recent_goals || [], gr = '';
   if (!g.length) {
-    gr = '<tr><td colspan="6" class="empty">Belum ada.</td></tr>';
+    gr = '<tr><td colspan="4" class="empty">Belum ada.</td></tr>';
   } else {
     for (var j = 0; j < g.length; j++) {
       var x = g[j];
-      var hasDeviation = x.projected_line !== '' && x.projected_line != null && x.line_deviation !== '' && x.line_deviation != null;
-      var deviation = hasDeviation ? 'P ' + x.projected_line + ' · Δ ' + (Number(x.line_deviation) > 0 ? '+' : '') + x.line_deviation : '-';
-      var warn = Number(x.deviation_extreme) === 1
-        ? '<span class="dev-warn" title="Deviasi odds ekstrem vs proyeksi — kemungkinan mispricing">' +
-          esc('⚠ ' + (Number(x.line_deviation) > 0 ? '+' : '') + x.line_deviation) + '</span>'
-        : '';
       gr += '<tr>' +
         '<td>' + esc(x.time) + '</td>' +
         '<td>' + esc(x.home_team) + ' vs ' + esc(x.away_team) + '</td>' +
         '<td>' + esc(x.minute) + '</td>' +
         '<td class="num ' + (x.accurate ? 'goal' : 'inacc') + '">' + esc(x.score_after) + '</td>' +
-        '<td class="num">' + esc((x.line || '-') + ' · O ' + (x.over || '-') + ' / U ' + (x.under || '-')) + warn + '</td>' +
-        '<td class="num"><span class="' + (Number(x.deviation_extreme) === 1 ? 'dev-extreme' : '') + '">' +
-          esc((Number(x.deviation_extreme) === 1 ? '⚠ EXTREME · ' : '') + deviation) + '</span></td>' +
         '</tr>';
     }
   }
@@ -380,6 +282,104 @@ function tick() {
 }
 tick();
 setInterval(tick, 2000);
+
+// ---- BPVM live (data dari bpvm-live.php?json=1, sumber: live-scraper port 5000) ----
+var bpvmMatchKey = function (m) {
+  var teams = m.teams || ((m.homeTeam || 'Unknown') + ' vs ' + (m.awayTeam || 'Unknown'));
+  return JSON.stringify({ league: m.league || 'N/A', teams: teams });
+};
+var bpvmFmtMins = function (v) {
+  if (!v) return '-';
+  if (!Array.isArray(v)) v = [v];
+  if (!v.length) return '-';
+  return esc(v.map(function (x) {
+    if (x && typeof x === 'object') x = (x.minute != null ? x.minute : (x.min != null ? x.min : ''));
+    return x === '' || x == null ? '' : x + "'";
+  }).filter(Boolean).join(', ')) || '-';
+};
+var bpvmPickOdds = function (odds, prefix) {
+  if (!Array.isArray(odds) || !odds.length) return '-';
+  for (var i = 0; i < odds.length; i++) {
+    var s = String(odds[i]);
+    if (s.indexOf(prefix + ':') === 0) return esc(s.substring(prefix.length + 2));
+  }
+  return '-';
+};
+var bpvmFmtNextGoal = function (ng) {
+  if (!ng || typeof ng !== 'object') return '-';
+  var parts = [];
+  for (var k in ng) {
+    if (Object.prototype.hasOwnProperty.call(ng, k) && ng[k] != null && ng[k] !== '') {
+      parts.push(esc(k) + ' ' + esc(ng[k]));
+    }
+  }
+  return parts.length ? parts.join(' · ') : '-';
+};
+
+function renderBpvm(d) {
+  var st = document.getElementById('bpvm-st');
+  var age = d.age == null ? 999 : d.age;
+  var s = d.status || 'offline';
+  var cls = 'bad', label = 'OFFLINE';
+  if (s === 'running' && age <= 15) { cls = 'ok'; label = 'RUNNING'; }
+  else if (s === 'running') { cls = 'warn'; label = age === 999 ? 'STALE' : 'STALE (' + age + 's)'; }
+  st.className = 'pill ' + cls;
+  st.textContent = label;
+
+  var ts = d.timestamp ? String(d.timestamp).replace('T', ' ').substr(11, 8) : '-';
+  document.getElementById('bpvm-meta').textContent =
+    'update ' + ts + ' (' + (d.age == null ? '?' : d.age) + 's lalu)' +
+    (d.note ? ' · ' + d.note : '');
+
+  var m = d.matches || [];
+  document.getElementById('bpvm-cnt').textContent = m.length;
+  var rows = '', lastLg = null;
+  if (!m.length) {
+    rows = '<tr><td colspan="13" class="empty">' +
+      (s === 'offline' ? 'API server offline — jalankan live-scraper/start_headless.bat.' : 'Tidak ada match terbaca.') +
+      '</td></tr>';
+  } else {
+    var htScores = d.htScores || {}, g1 = d.allGoalMinutes || {}, g2 = d.all2HGoalMinutes || {};
+    for (var i = 0; i < m.length; i++) {
+      var r = m[i];
+      if (r.league !== lastLg) {
+        lastLg = r.league;
+        rows += '<tr class="lg"><td colspan="13">' + esc(r.league || 'Unknown League') + '</td></tr>';
+      }
+      var key = bpvmMatchKey(r);
+      rows += '<tr>' +
+        '<td>' + esc(r.homeTeam || '?') + ' vs ' + esc(r.awayTeam || '?') + '</td>' +
+        '<td>' + esc(r.status || '-') + '</td>' +
+        '<td class="num score">' + esc(r.score || '-') + '</td>' +
+        '<td class="num goal">' + esc(htScores[key] || '-') + '</td>' +
+        '<td class="g1h" title="menit gol babak pertama">' + bpvmFmtMins(g1[key]) + '</td>' +
+        '<td class="g2h" title="menit gol babak kedua">' + bpvmFmtMins(g2[key]) + '</td>' +
+        '<td class="odds">' + bpvmPickOdds(r.odds, 'FT. 1X2') + '</td>' +
+        '<td class="odds">' + bpvmPickOdds(r.odds, 'FT. HDP') + '</td>' +
+        '<td class="odds">' + bpvmPickOdds(r.odds, 'FT. O/U') + '</td>' +
+        '<td class="odds">' + bpvmPickOdds(r.odds, '1H. 1X2') + '</td>' +
+        '<td class="odds">' + bpvmPickOdds(r.odds, '1H. HDP') + '</td>' +
+        '<td class="odds">' + bpvmPickOdds(r.odds, '1H. O/U') + '</td>' +
+        '<td class="odds">' + bpvmFmtNextGoal(r.nextGoalOdds) + '</td>' +
+        '</tr>';
+    }
+  }
+  document.getElementById('bpvm-tb').innerHTML = rows;
+}
+
+function tickBpvm() {
+  fetch('bpvm-live.php?json=1&t=' + Date.now(), { cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(renderBpvm)
+    .catch(function (e) {
+      var st = document.getElementById('bpvm-st');
+      st.className = 'pill bad';
+      st.textContent = 'GAGAL AMBIL DATA';
+      document.getElementById('bpvm-meta').textContent = '⚠ ' + e;
+    });
+}
+tickBpvm();
+setInterval(tickBpvm, 2000);
 </script>
 </body>
 </html>

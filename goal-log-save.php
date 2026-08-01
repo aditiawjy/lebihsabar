@@ -14,15 +14,20 @@ $payload = json_decode($body, true);
 $hasGoals      = !empty($payload['goals'])      && is_array($payload['goals']);
 $hasMatches    = !empty($payload['matches'])    && is_array($payload['matches']);
 $hasMilestones = !empty($payload['milestones']) && is_array($payload['milestones']);
+$hasOdds       = !empty($payload['oddsSnapshots']) && is_array($payload['oddsSnapshots']);
 
-if (!$hasGoals && !$hasMatches && !$hasMilestones) {
+if (!$hasGoals && !$hasMatches && !$hasMilestones && !$hasOdds) {
     http_response_code(400);
     echo json_encode(['ok' => false, 'error' => 'No data provided']);
     exit;
 }
 
 $csvFile = __DIR__ . '/goal_log.csv';
-$headers = ['datetime', 'league', 'home_team', 'away_team', 'goals', 'final_home', 'final_away', '1h3', '2h1', '2h7'];
+// ko_* = market saat kickoff, ht_* = market saat turun minum (status "H.Time").
+// Odds sudah desimal dari extension (formatOddsValue di content.js).
+$headers = ['datetime', 'league', 'home_team', 'away_team', 'goals', 'final_home', 'final_away', '1h3', '2h1', '2h7',
+            'ko_market', 'ko_line', 'ko_over', 'ko_under',
+            'ht_market', 'ht_line', 'ht_over', 'ht_under'];
 
 function parseMinute(string $minute): array {
     if (preg_match('/^(1H|2H)\s+(\d+)\'/i', $minute, $m)) {
@@ -133,6 +138,14 @@ if (is_file($csvFile) && is_readable($csvFile)) {
             '1h3'        => $row[7] ?? '',
             '2h1'        => $row[8] ?? '',
             '2h7'        => $row[9] ?? '',
+            'ko_market'  => $row[10] ?? '',
+            'ko_line'    => $row[11] ?? '',
+            'ko_over'    => $row[12] ?? '',
+            'ko_under'   => $row[13] ?? '',
+            'ht_market'  => $row[14] ?? '',
+            'ht_line'    => $row[15] ?? '',
+            'ht_over'    => $row[16] ?? '',
+            'ht_under'   => $row[17] ?? '',
         ];
     }
     fclose($fh);
@@ -168,6 +181,14 @@ if ($hasMatches) {
                 '1h3'        => '',
                 '2h1'        => '',
                 '2h7'        => '',
+                'ko_market'  => '',
+                'ko_line'    => '',
+                'ko_over'    => '',
+                'ko_under'   => '',
+                'ht_market'  => '',
+                'ht_line'    => '',
+                'ht_over'    => '',
+                'ht_under'   => '',
             ];
         }
 
@@ -288,6 +309,14 @@ if ($hasMilestones) {
                 '1h3'        => '',
                 '2h1'        => '',
                 '2h7'        => '',
+                'ko_market'  => '',
+                'ko_line'    => '',
+                'ko_over'    => '',
+                'ko_under'   => '',
+                'ht_market'  => '',
+                'ht_line'    => '',
+                'ht_over'    => '',
+                'ht_under'   => '',
             ];
         }
 
@@ -300,6 +329,44 @@ if ($hasMilestones) {
         $ascore = trim($ms['away_score'] ?? '');
         if ($hscore !== '' && $rows[$key]['final_home'] === '') $rows[$key]['final_home'] = $hscore;
         if ($ascore !== '' && $rows[$key]['final_away'] === '') $rows[$key]['final_away'] = $ascore;
+    }
+}
+
+// Snapshot market O/U pada dua momen: kickoff (phase 'ko') dan turun minum
+// (phase 'ht', status "H.Time" di situs). Sekali terisi tidak ditimpa lagi --
+// snapshot pertama yang valid adalah yang paling dekat ke momen sebenarnya.
+if ($hasOdds) {
+    foreach ($payload['oddsSnapshots'] as $snap) {
+        $phase = trim((string)($snap['phase'] ?? ''));
+        if (!in_array($phase, ['ko', 'ht'], true)) continue;
+
+        $homeTeam = trim((string)($snap['home_team'] ?? ''));
+        $awayTeam = trim((string)($snap['away_team'] ?? ''));
+        if ($homeTeam === '' || $awayTeam === '') continue;
+
+        $line  = trim((string)($snap['line'] ?? ''));
+        $over  = trim((string)($snap['over_odd'] ?? ''));
+        $under = trim((string)($snap['under_odd'] ?? ''));
+        if ($line === '' && $over === '' && $under === '') continue;
+
+        $ts = $snap['timestamp'] ?? date('c');
+        $dt = (new DateTime($ts))->setTimezone(new DateTimeZone('Asia/Jakarta'));
+        $dateOnly   = $dt->format('Y-m-d');
+        $exactKey   = $dateOnly . '|' . $dt->format('H') . ':' . $dt->format('i') . '|' . $homeTeam . '|' . $awayTeam;
+        $key = isset($rows[$exactKey])
+            ? $exactKey
+            : (findExistingKey($rows, $dateOnly, $homeTeam, $awayTeam, $dt) ?? null);
+
+        // Tidak bikin baris baru dari snapshot odds: match harus sudah
+        // teregistrasi lewat jalur biasa supaya tidak muncul baris hantu.
+        if ($key === null || !isset($rows[$key])) continue;
+
+        if (trim((string)($rows[$key][$phase . '_line'] ?? '')) !== '') continue;
+
+        $rows[$key][$phase . '_market'] = trim((string)($snap['market'] ?? ''));
+        $rows[$key][$phase . '_line']   = $line;
+        $rows[$key][$phase . '_over']   = $over;
+        $rows[$key][$phase . '_under']  = $under;
     }
 }
 
@@ -343,6 +410,14 @@ foreach ($rows as $row) {
         $row['1h3'] ?? '',
         $row['2h1'] ?? '',
         $row['2h7'] ?? '',
+        $row['ko_market'] ?? '',
+        $row['ko_line']   ?? '',
+        $row['ko_over']   ?? '',
+        $row['ko_under']  ?? '',
+        $row['ht_market'] ?? '',
+        $row['ht_line']   ?? '',
+        $row['ht_over']   ?? '',
+        $row['ht_under']  ?? '',
     ]);
 }
 fclose($fh);

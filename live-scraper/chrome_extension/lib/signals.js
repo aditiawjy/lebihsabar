@@ -17,6 +17,7 @@ function clearThresholdAlertState(matchKey) {
 function resetMatchTrackingState(key) {
     registeredMatchKeys.delete(key);
     kickoffTimeByMatchKey.delete(key);
+    oddsSnapshotSent.delete(key);
     lastScoreByMatchKey.delete(key);
     shScoreByMatchKey.delete(key);
     sentNG1Signals.delete(key);
@@ -203,6 +204,69 @@ function buildScoreSnapshot(match, timestamp) {
         away_team: match?.awayTeam || '',
         home_score: String(match?.homeScore ?? '0'),
         away_score: String(match?.awayScore ?? '0'),
+    };
+}
+
+// -- Snapshot market O/U di dua momen: kickoff dan turun minum -------------------
+// Yang disimpan hanya market FT. O/U karena itu yang benar-benar bisa ditaruhi
+// untuk total gol. Odds sudah desimal: formatOddsValue() di content.js mengubah
+// format Hong Kong (0.94 -> 1.94) dan Malay/Indonesia (-0.97 -> 2.03).
+const oddsSnapshotSent = new Map();   // key -> Set berisi 'ko' / 'ht'
+
+// Ambil "FT. O/U: o 5.25:1.94 | u 5.25:1.90" -> {line:'5.25', over:'1.94', under:'1.90'}
+//
+// Situs memakai swiper: hanya slide market yang sedang aktif yang ada di DOM,
+// jadi "FT. O/U" sering belum tampil saat dibaca. Karena itu O/U mana pun
+// diterima dengan FT diutamakan, dan nama marketnya ikut disimpan supaya
+// nanti jelas angka itu berasal dari market yang mana.
+function parseOverUnder(oddsList) {
+    if (!Array.isArray(oddsList)) return null;
+
+    const ouRows = oddsList.filter((s) => typeof s === 'string' && /O\/U\s*:/i.test(s));
+    if (!ouRows.length) return null;
+    const row = ouRows.find((s) => /^FT\./i.test(s)) || ouRows[0];
+
+    const title = (row.split(':')[0] || '').trim();
+    const over = row.match(/\bo\s*([\d.]+)\s*:\s*([\d.]+)/i);
+    const under = row.match(/\bu\s*([\d.]+)\s*:\s*([\d.]+)/i);
+    if (!over && !under) return null;
+
+    return {
+        market: title,
+        line: (over && over[1]) || (under && under[1]) || '',
+        over: over ? over[2] : '',
+        under: under ? under[2] : '',
+    };
+}
+
+function isHalfTimeStatus(status) {
+    return /^h\.?\s*time$/i.test(String(status || '').trim());
+}
+
+// Kembalikan snapshot yang belum pernah dikirim untuk match ini.
+// 'ko' diambil sekali saat match pertama terdaftar; 'ht' saat status H.Time.
+function buildOddsSnapshot(key, match, timestamp, phase) {
+    const sent = oddsSnapshotSent.get(key) || new Set();
+    if (sent.has(phase)) return null;
+
+    const ou = parseOverUnder(match?.odds);
+    if (!ou || (!ou.over && !ou.under)) return null;   // market belum tampil, coba siklus berikutnya
+
+    sent.add(phase);
+    oddsSnapshotSent.set(key, sent);
+
+    return {
+        timestamp,
+        phase,                                   // 'ko' atau 'ht'
+        league: match?.league || '',
+        home_team: match?.homeTeam || '',
+        away_team: match?.awayTeam || '',
+        status: String(match?.status || ''),
+        score: `${match?.homeScore ?? '0'}-${match?.awayScore ?? '0'}`,
+        market: ou.market,
+        line: ou.line,
+        over_odd: ou.over,
+        under_odd: ou.under,
     };
 }
 
@@ -522,15 +586,31 @@ async function trackGoalEvents(matches) {
     }
 
     const scoreSnapshots = [];
+    const oddsSnapshots = [];
     for (const match of matches) {
         const key = createMatchKey(match);
         if (!registeredMatchKeys.has(key)) continue;
-        scoreSnapshots.push(buildScoreSnapshot(match, kickoffTimeByMatchKey.get(key) || timestamp));
+        const ts = kickoffTimeByMatchKey.get(key) || timestamp;
+        scoreSnapshots.push(buildScoreSnapshot(match, ts));
+
+        // Market kickoff: dicoba tiap siklus sampai berhasil, karena pada
+        // pembacaan pertama market kadang belum ter-render.
+        const ko = buildOddsSnapshot(key, match, ts, 'ko');
+        if (ko) oddsSnapshots.push(ko);
+
+        if (isHalfTimeStatus(match?.status)) {
+            const ht = buildOddsSnapshot(key, match, ts, 'ht');
+            if (ht) oddsSnapshots.push(ht);
+        }
     }
 
     const matchPayload = [...newMatches, ...scoreSnapshots];
     if (matchPayload.length) {
         await sendGoalLogPayload({ matches: matchPayload });
+    }
+
+    if (oddsSnapshots.length) {
+        await sendGoalLogPayload({ oddsSnapshots });
     }
 
     if (newMilestones.length) {

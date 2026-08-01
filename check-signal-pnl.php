@@ -30,6 +30,11 @@ function midline($v): ?float
 
 function pct(?float $v): string { return $v === null ? '–' : number_format($v, 1, ',', '.') . '%'; }
 
+function patternLabel(string $code): string
+{
+    return $code === 'HAH' ? 'HAH (aturan lama)' : $code;
+}
+
 function wilson95(int $hits, int $total): array
 {
     if ($total === 0) return [null, null];
@@ -242,7 +247,7 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
       <tbody>
       <?php foreach ($ringkasPola as $kode => $s): ?>
         <tr>
-          <td><b><?= e($kode) ?></b><?= $s['n'] < 10 ? ' <span class="kecil">sampel kecil</span>' : '' ?></td>
+          <td><b><?= e(patternLabel($kode)) ?></b><?= $s['n'] < 10 ? ' <span class="kecil">sampel kecil</span>' : '' ?></td>
           <td class="num"><?= $s['n'] ?></td>
           <td class="num"><?= $s['menang'] ?></td>
           <td class="num"><?= pct($s['win']) ?></td>
@@ -269,7 +274,7 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
       <?php foreach ($taruhan as $t): ?>
         <tr>
           <td><?= e($t['waktu']) ?></td>
-          <td><b><?= e($t['code']) ?></b></td>
+          <td><b><?= e(patternLabel($t['code'])) ?></b></td>
           <td><?= e($t['match']) ?></td>
           <td class="num"><?= $t['menit'] ?>'</td>
           <td class="num"><?= e($t['skor']) ?></td>

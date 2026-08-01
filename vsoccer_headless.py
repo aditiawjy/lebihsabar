@@ -37,7 +37,6 @@ USER_DATA_DIR = PROFILE_ROOT / f"session-{os.getpid()}"
 LOG_FILE = BASE_DIR / "vsoccer_headless.log"
 LIVE_FILE = BASE_DIR / "vsoccer_live.json"   # snapshot untuk vsoccer-live.php
 SIGNAL_LOG = BASE_DIR / "signal_log_vsoccer.csv"  # odds market saat sinyal muncul
-OPEN2H_LOG = BASE_DIR / "open2h_odds_vsoccer.csv"  # odds di AWAL babak kedua, untuk semua match
 
 TARGET_HOST = "1x2aaa.com"
 TARGET_URL = os.environ.get(
@@ -65,20 +64,6 @@ SUPER_NON_DRAW_SECOND_GOAL_MAX = int(os.environ.get("VSOCCER_SUPER_NON_DRAW_SECO
 SUPER_TOTAL3_EARLY_FIRST_MAX = int(os.environ.get("VSOCCER_SUPER_TOTAL3_EARLY_FIRST_MAX", "4"))
 SUPER_TOTAL3_EARLY_MIN_LINE = float(os.environ.get("VSOCCER_SUPER_TOTAL3_EARLY_MIN_LINE", "7.25"))
 SUPER_TOTAL5_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_SUPER_TOTAL5_LAST_GOAL_MIN", "30"))
-# --- Aturan seragam keluarga SUPER -----------------------------------------
-# Babak pertama sudah ramai (total HT >= 5) tapi line awal rendah = pasar tidak
-# menilai match ini subur, dan babak kedua cenderung kering. Di log, sel
-# "total HT >= 5 & line < 6.5" berisi 66 match dengan O2.5 2H cuma 50,0%
-# (baseline 63,9%). Satu aturan ini membuat SUPER, SUPER1, S-LOW, SUPER3, dan
-# SUPER4 mencapai 100% sekaligus — jauh lebih kecil risiko overfitting
-# dibanding memberi aturan khusus untuk tiap pola.
-SUPER_FAMILY = ("SUPER", "SUPER1", "SUPER2", "S-LOW", "SUPER3", "SUPER4")
-SUPERFAM_HIGH_TOTAL_MIN = int(os.environ.get("VSOCCER_SUPERFAM_HIGH_TOTAL_MIN", "5"))
-SUPERFAM_HIGH_TOTAL_MIN_LINE = float(os.environ.get("VSOCCER_SUPERFAM_HIGH_TOTAL_MIN_LINE", "6.5"))
-# SUPER2 tidak tertolong aturan di atas (kegagalannya justru berline tinggi).
-# Dukungan datanya LEMAH: sel "gol terakhir 1H >= 45'" cuma 60,1% vs baseline
-# 63,9% pada 138 match — selisihnya bisa jadi kebetulan.
-SUPER2_LAST_1H_MAX = int(os.environ.get("VSOCCER_SUPER2_LAST_1H_MAX", "44"))
 SUPER1_TOTAL_HT = int(os.environ.get("VSOCCER_SUPER1_TOTAL_HT", "3"))
 SUPER1_MIN_LINE = float(os.environ.get("VSOCCER_SUPER1_MIN_LINE", "6.75"))
 SUPER1_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_SUPER1_FIRST_GOAL_MAX", "18"))
@@ -111,13 +96,10 @@ P1_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P1_FIRST_GOAL_MAX", "12"))
 P1_MIN_LINE = float(os.environ.get("VSOCCER_P1_MIN_LINE", "5.75"))
 P1_LOW_TOTAL_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P1_LOW_TOTAL_FIRST_GOAL_MAX", "6"))
 P1_HIGH_TOTAL_SECOND_GOAL_MIN = int(os.environ.get("VSOCCER_P1_HIGH_TOTAL_SECOND_GOAL_MIN", "9"))
-P1_HIGH_TOTAL_SECOND_GOAL_EARLY_MAX = int(os.environ.get("VSOCCER_P1_HIGH_TOTAL_SECOND_GOAL_EARLY_MAX", "18"))
-P1_HIGH_TOTAL_SECOND_GOAL_MAX = int(os.environ.get("VSOCCER_P1_HIGH_TOTAL_SECOND_GOAL_MAX", "28"))
-P1_HIGH_TOTAL_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_P1_HIGH_TOTAL_LAST_GOAL_MIN", "40"))
+P1_HIGH_TOTAL_SECOND_GOAL_MAX = int(os.environ.get("VSOCCER_P1_HIGH_TOTAL_SECOND_GOAL_MAX", "30"))
 P1_TOTAL3_MAX_LINE = float(os.environ.get("VSOCCER_P1_TOTAL3_MAX_LINE", "7.5"))
 P1_TOTAL3_EARLY_FIRST_MAX = int(os.environ.get("VSOCCER_P1_TOTAL3_EARLY_FIRST_MAX", "4"))
 P1_TOTAL3_EARLY_MIN_LINE = float(os.environ.get("VSOCCER_P1_TOTAL3_EARLY_MIN_LINE", "7.25"))
-P1_TOTAL3_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_P1_TOTAL3_LAST_GOAL_MIN", "20"))
 P1_MAX_TOTAL_HT = int(os.environ.get("VSOCCER_P1_MAX_TOTAL_HT", "5"))
 P2_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P2_FIRST_GOAL_MAX", "15"))
 P2_MIN_LINE = float(os.environ.get("VSOCCER_P2_MIN_LINE", "5.75"))
@@ -136,33 +118,23 @@ P5_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P5_FIRST_GOAL_MAX", "18"))
 P5_LAST_1H_GOAL_MAX = int(os.environ.get("VSOCCER_P5_LAST_1H_GOAL_MAX", "40"))
 P6_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P6_FIRST_GOAL_MAX", "8"))
 P6_MAX_LINE = float(os.environ.get("VSOCCER_P6_MAX_LINE", "6.25"))     # 6/6.5
-# Sel "HT 2-2 & line < 5.5": 21 match, O1.5 2H cuma 66,7% (baseline 82,5%).
-P6_MIN_LINE = float(os.environ.get("VSOCCER_P6_MIN_LINE", "5.5"))
 P7_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P7_FIRST_GOAL_MAX", "8"))
-# Gol pembuka terlalu dini justru pertanda buruk: sel "gol-1 <= 4'" berisi 87
-# match dengan O1.5 2H 75,9% (baseline 82,5%). Dipakai P7 dan P10.
-P7_FIRST_GOAL_MIN = int(os.environ.get("VSOCCER_P7_FIRST_GOAL_MIN", "5"))
 P8_MIN_LINE = float(os.environ.get("VSOCCER_P8_MIN_LINE", "6"))
-# Dukungan TIPIS: sel "HT 1-3 & gol-2 <= 12'" efeknya besar (62,5% vs 82,5%)
-# tapi cuma 8 match. Perlakukan sebagai dugaan, bukan temuan mapan.
-P8_SECOND_GOAL_MIN = int(os.environ.get("VSOCCER_P8_SECOND_GOAL_MIN", "13"))
 P9_SECOND_GOAL_MIN = int(os.environ.get("VSOCCER_P9_SECOND_GOAL_MIN", "12"))
 P9_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_P9_LAST_GOAL_MIN", "34"))
 P10_MIN_LINE = float(os.environ.get("VSOCCER_P10_MIN_LINE", "5.75"))   # 5.5/6
-P10_FIRST_GOAL_MIN = int(os.environ.get("VSOCCER_P10_FIRST_GOAL_MIN", "5"))
 SUPER3_HT_DIFF = int(os.environ.get("VSOCCER_SUPER3_HT_DIFF", "3"))
 SUPER3_MIN_LINE = float(os.environ.get("VSOCCER_SUPER3_MIN_LINE", "6"))
 SUPER3_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_SUPER3_LAST_GOAL_MIN", "42"))
 P12_TOTAL_HT = int(os.environ.get("VSOCCER_P12_TOTAL_HT", "5"))
 P12_MIN_LINE = float(os.environ.get("VSOCCER_P12_MIN_LINE", "6.5"))
 P12_SECOND_GOAL_MIN = int(os.environ.get("VSOCCER_P12_SECOND_GOAL_MIN", "8"))
-# Sel "gol-1 <= 3'": 30 match, O1.5 2H cuma 70,0% (baseline 82,6%). Ambangnya
-# lebih longgar dari P7/P10 (>= 5') karena >= 4' sudah cukup untuk 100% dan
-# menyisakan 36 sampel, bukan 30.
-P12_FIRST_GOAL_MIN = int(os.environ.get("VSOCCER_P12_FIRST_GOAL_MIN", "4"))
 HAH_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_HAH_LAST_GOAL_MIN", "26"))
 HAH_STANDARD_MIN_LINE = float(os.environ.get("VSOCCER_HAH_STANDARD_MIN_LINE", "4.75"))
 HAH_LOW_LINE_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_HAH_LOW_LINE_LAST_GOAL_MIN", "38"))
+HAH_MIN_LIVE_OVER = float(os.environ.get("VSOCCER_HAH_MIN_LIVE_OVER", "1.65"))
+HAH_MAX_LIVE_LINE = float(os.environ.get("VSOCCER_HAH_MAX_LIVE_LINE", "6.0"))
+HAH_MAX_LINE_GAP = float(os.environ.get("VSOCCER_HAH_MAX_LINE_GAP", "1.25"))
 P11_TOTAL_HT = int(os.environ.get("VSOCCER_P11_TOTAL_HT", "3"))
 P11_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P11_FIRST_GOAL_MAX", "12"))
 P11_MIN_LINE = float(os.environ.get("VSOCCER_P11_MIN_LINE", "5.75"))
@@ -206,14 +178,12 @@ PATTERNS = [
      "ht": "any", "first_goal_max": None, "min_line": None},
     {"code": "P12",
      "desc": f"total HT tepat {P12_TOTAL_HT}; gol-2 ≥ {P12_SECOND_GOAL_MIN}'",
-     "ht": "total", "total_ht": P12_TOTAL_HT, "first_goal_min": P12_FIRST_GOAL_MIN,
-     "first_goal_max": None, "min_line": P12_MIN_LINE},
+     "ht": "total", "total_ht": P12_TOTAL_HT, "first_goal_max": None, "min_line": P12_MIN_LINE},
     {"code": "P1",
      "desc": f"selisih HT tepat 1; total HT maksimal {P1_MAX_TOTAL_HT} (total HT 1: gol-1 ≤ {P1_LOW_TOTAL_FIRST_GOAL_MAX}'; "
-              f"total HT 3: line ≤ {P1_TOTAL3_MAX_LINE}, gol terakhir ≥ {P1_TOTAL3_LAST_GOAL_MIN}', gol-1 ≤ {P1_TOTAL3_EARLY_FIRST_MAX}' wajib "
+             f"total HT 3: line ≤ {P1_TOTAL3_MAX_LINE}, gol-1 ≤ {P1_TOTAL3_EARLY_FIRST_MAX}' wajib "
              f"line ≥ {P1_TOTAL3_EARLY_MIN_LINE}; total HT 5: gol-2 "
-             f"{P1_HIGH_TOTAL_SECOND_GOAL_MIN}'–{P1_HIGH_TOTAL_SECOND_GOAL_EARLY_MAX}', atau "
-             f"19'–{P1_HIGH_TOTAL_SECOND_GOAL_MAX}' jika gol terakhir 1H ≥ {P1_HIGH_TOTAL_LAST_GOAL_MIN}')",
+             f"{P1_HIGH_TOTAL_SECOND_GOAL_MIN}'–{P1_HIGH_TOTAL_SECOND_GOAL_MAX}')",
      "ht": "diff1",
      "first_goal_max": P1_FIRST_GOAL_MAX, "min_line": P1_MIN_LINE},
     {"code": "P2", "desc": "HT 2-1 / 1-2; gol-1 ≤ 4' wajib line ≥ 7.25", "ht": "21",
@@ -227,25 +197,25 @@ PATTERNS = [
     {"code": "P5", "desc": f"HT 3-0; gol terakhir 1H ≤ {P5_LAST_1H_GOAL_MAX}'", "ht": "score", "score": (3, 0),
      "first_goal_max": P5_FIRST_GOAL_MAX, "min_line": None},
     {"code": "P6", "desc": "HT 2-2", "ht": "score", "score": (2, 2),
-     "first_goal_max": P6_FIRST_GOAL_MAX, "min_line": P6_MIN_LINE, "max_line": P6_MAX_LINE},
+     "first_goal_max": P6_FIRST_GOAL_MAX, "min_line": None, "max_line": P6_MAX_LINE},
     {"code": "P7", "desc": "HT 3-2", "ht": "score", "score": (3, 2),
-     "first_goal_min": P7_FIRST_GOAL_MIN,
      "first_goal_max": P7_FIRST_GOAL_MAX, "min_line": None},
-    {"code": "P8", "desc": f"HT 1-3; gol kedua ≥ {P8_SECOND_GOAL_MIN}'", "ht": "score", "score": (1, 3),
+    {"code": "P8", "desc": "HT 1-3", "ht": "score", "score": (1, 3),
      "first_goal_max": None, "min_line": P8_MIN_LINE},
     {"code": "P9", "desc": "HT 3-3 (tanpa syarat tambahan)", "ht": "score", "score": (3, 3),
      "first_goal_max": None, "min_line": None},
     {"code": "P10", "desc": "HT 2-3", "ht": "score", "score": (2, 3),
-     "first_goal_min": P10_FIRST_GOAL_MIN,
      "first_goal_max": None, "min_line": P10_MIN_LINE},
     # P11 "low": seperti P3 tapi jendela menit lebih longgar + line minimal.
     {"code": "P11", "desc": "total HT 3; gol-1 ≤ 4' wajib line ≥ 7.25; HT 3-0/0-3 wajib line ≥ 7.5", "ht": "total",
      "total_ht": P11_TOTAL_HT, "first_goal_max": P11_FIRST_GOAL_MAX, "min_line": P11_MIN_LINE, "max_line": P11_MAX_LINE},
     # HAH: urutan gol babak pertama Home - Away - Home, berakhir HT 2-1.
     # Gol pertama bebas; line rendah hanya lolos jika gol ketiga cukup terlambat.
-    {"code": "HAH", "desc": f"urutan gol 1H Home–Away–Home, HT 2-1; gol-2 harus setelah gol-1; "
+    {"code": "HAH+", "desc": f"urutan gol 1H Home–Away–Home, HT 2-1; gol-2 harus setelah gol-1; "
                          f"gol terakhir 1H ≥ {HAH_LAST_GOAL_MIN}'; line ≥ {HAH_STANDARD_MIN_LINE}, "
-                         f"atau jika line lebih rendah gol terakhir ≥ {HAH_LOW_LINE_LAST_GOAL_MIN}'", "ht": "hah",
+                         f"atau jika line lebih rendah gol terakhir ≥ {HAH_LOW_LINE_LAST_GOAL_MIN}'; "
+                         f"tepat 1 gol 2H; live line < {HAH_MAX_LIVE_LINE}; gap line-skor ≤ "
+                         f"{HAH_MAX_LINE_GAP}; odds Over ≥ {HAH_MIN_LIVE_OVER}", "ht": "hah",
      "first_goal_max": None, "min_line": None},
 ]
 
@@ -257,36 +227,63 @@ DISABLED_SIGNAL_CODES = set()
 SIGNAL_START_2H_O25_MINUTE = int(os.environ.get("VSOCCER_SIGNAL_START_2H_O25_MINUTE", "50"))
 SIGNAL_START_2H_OTHER_MINUTE = int(os.environ.get("VSOCCER_SIGNAL_START_2H_MINUTE", "60"))
 SIGNAL_START_2H_P_MINUTE = int(os.environ.get("VSOCCER_SIGNAL_START_2H_P_MINUTE", "65"))
-LATE_MARKET_MINUTE = int(os.environ.get("VSOCCER_LATE_MARKET_MINUTE", "60"))
-LATE_MARKET_HIGH_DEVIATION = float(os.environ.get("VSOCCER_LATE_MARKET_HIGH_DEVIATION", "1.25"))
+# Match hanya diregistrasi ke goal_log_vsoccer.csv kalau pertama kali terlihat
+# dalam jendela menit ini. Tanpa batas menit, match yang baru terlihat di menit
+# 30 (masih 0-0) ikut terdaftar dan kolom ko_* terisi odds menit 30 — bukan odds
+# kickoff — sehingga semua filter "line awal" jadi salah.
+KO_WINDOW_MIN_MINUTE = int(os.environ.get("VSOCCER_KO_WINDOW_MIN_MINUTE", "0"))
+KO_WINDOW_MAX_MINUTE = int(os.environ.get("VSOCCER_KO_WINDOW_MAX_MINUTE", "5"))
+# Pasangan odds over/under yang sehat punya total implied probability sedikit di
+# atas 1,0 (margin bandar). Kalau di luar rentang ini, market sedang suspended /
+# berubah dan angkanya tidak dipakai -- mis. O 1.03 / U 1.68 = 157%, terisi tapi
+# salah, dan itu jenis kerusakan yang tidak kelihatan di CSV.
+ODDS_BOOK_MIN = float(os.environ.get("VSOCCER_ODDS_BOOK_MIN", "1.0"))
+ODDS_BOOK_MAX = float(os.environ.get("VSOCCER_ODDS_BOOK_MAX", "1.20"))
+# Batas akhir mencoba menangkap market awal 2H. Lewat menit ini, market sudah
+# terlalu jauh dari kickoff babak kedua untuk disebut "market awal".
+M46_MAX_MINUTE = int(os.environ.get("VSOCCER_M46_MAX_MINUTE", "55"))
 PAGE_LOAD_TIMEOUT_MS = 60_000
 
 _stop = False
 
 # JS yang dijalankan di halaman: buka accordion tertutup + kembalikan snapshot event.
 SNAPSHOT_JS = r"""
-() => {
+async () => {
   const q = (el, s) => el.querySelector(s);
   const qa = (el, s) => Array.from(el.querySelectorAll(s));
   const txt = (el) => (el ? el.innerText.trim() : '');
-  // buka accordion V-Soccer yang tertutup
-  document.querySelectorAll('[class*="EventListLeague_container"]').forEach(c => {
-    const name = txt(q(c, '[class*="leagueName"]'));
-    if (!/mins \[V\]/i.test(name)) return;
-    const arrow = q(c, '[class*="expandCollapseArrow"]');
-    const expanded = arrow && /Expanded/.test(arrow.className);
-    const hasEv = c.querySelector('[class*="singleEvent"]');
-    if (!expanded && !hasEv) {
-      (q(c, '[class*="expandCollapse"]') || q(c, '[class*="EventListLeague_header"]'))?.click();
-    }
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+  const isVsoccer = (name) => /mins \[V\]/i.test(name);
+
+  // --- buka accordion V-Soccer yang tertutup -------------------------------
+  // Patokan tertutup: TIDAK ada singleEvent di dalam container. Sebelumnya
+  // dipakai juga kelas panah "Expanded"; kalau situs mengganti nama kelas itu,
+  // liga yang sebenarnya sudah terbuka ikut diklik -> tertutup lagi, lalu
+  // dibuka lagi siklus berikutnya (kedip-kedip) dan datanya tak pernah terbaca.
+  const containers = Array.from(document.querySelectorAll('[class*="EventListLeague_container"]'))
+    .filter(c => isVsoccer(txt(q(c, '[class*="leagueName"]'))));
+  let clicked = 0;
+  containers.forEach(c => {
+    if (c.querySelector('[class*="singleEvent"]')) return;   // sudah terbuka
+    const btn = q(c, '[class*="expandCollapse"]') || q(c, '[class*="EventListLeague_header"]');
+    if (btn) { btn.click(); clicked++; }
   });
+  // Render accordion berjalan asinkron. Dulu pembacaan dilakukan langsung di
+  // pass yang sama, jadi liga yang baru diklik selalu kosong pada siklus itu.
+  if (clicked) await sleep(900);
+
   const out = [];
+  const leaguesSeen = new Set(), leaguesWithEvents = new Set();
   Array.from(document.querySelectorAll('[class*="leagueName"]'))
-    .filter(h => /mins \[V\]/i.test(h.innerText))
+    .filter(h => isVsoccer(h.innerText))
     .forEach(h => {
       const league = h.innerText.replace(/\s*\(\d+\)\s*$/, '').trim();
-      let n = h, cont = null;
-      for (let d = 0; d < 8 && n; d++) { n = n.parentElement; if (n && n.querySelector('[class*="singleEvent"]')) { cont = n; break; } }
+      leaguesSeen.add(league);
+      // Ambil container liga secara eksplisit. Cara lama memanjat 8 tingkat ke
+      // atas sampai menemukan singleEvent -- untuk liga yang masih kosong itu
+      // bisa nyangkut di pembungkus yang memuat event LIGA LAIN, sehingga match
+      // tercatat di bawah nama liga yang salah.
+      const cont = h.closest('[class*="EventListLeague_container"]');
       if (!cont) return;
       qa(cont, '[class*="singleEvent"]').forEach(ev => {
         const teams = qa(ev, '[class*="teamNameText"]').map(t => t.innerText.trim()).filter(x => x && x.toLowerCase() !== 'draw');
@@ -308,20 +305,30 @@ SNAPSHOT_JS = r"""
             else if (/^U/i.test(label)) { under = odd; }
           });
         }
+        leaguesWithEvents.add(league);
         out.push({ league, home: teams[0], away: teams[1], half: part.toUpperCase(), minute,
                    h: parseInt(sm[1], 10), a: parseInt(sm[2], 10), line, over, under });
       });
     });
-  return out;
+  // Diagnostik liga ikut dikirim supaya "liga tidak muncul" langsung kelihatan
+  // di live view, bukan cuma terasa sebagai jumlah match yang kurang.
+  return {
+    events: out,
+    leagues_seen: leaguesSeen.size,
+    leagues_with_events: leaguesWithEvents.size,
+    leagues_empty: Array.from(leaguesSeen).filter(l => !leaguesWithEvents.has(l)),
+    clicked_to_expand: clicked,
+  };
 }
 """
 
 state = {}  # key -> {"home","away","track"}
 
 recent_goals = deque(maxlen=40)   # gol terakhir untuk live view
-post_outbox = []                   # payload belum di-ACK; retry idempotent pada poll berikutnya
 active_signals = set()            # match yang sedang kena Pattern 1
+league_stats = {"seen": 0, "with_events": 0, "empty": [], "clicked": 0}
 stats = {"started_at": "", "cycles": 0, "sent_goals": 0, "sent_matches": 0,
+         "sent_milestones": 0,
          "last_post": "", "last_error": "", "launches": 0, "fails": 0}
 
 
@@ -362,52 +369,6 @@ def line_value(v):
     return sum(nums) / len(nums) if nums else None
 
 
-def absolute_match_minute(half, minute):
-    try:
-        value = float(minute)
-    except (TypeError, ValueError):
-        return None
-    half = str(half).upper()
-    if half not in {"1H", "2H"} or value < 0:
-        return None
-    if half == "2H" and value < 45:
-        value += 45
-    return min(value, 90)
-
-
-def line_deviation_fields(live_line, kickoff_line, half, minute, total_goals_after):
-    """Projected post-goal line fields; invalid input deliberately yields empty values."""
-    live = line_value(live_line)
-    kickoff = line_value(kickoff_line)
-    try:
-        goals = int(total_goals_after)
-    except (TypeError, ValueError):
-        return {"projected_line": "", "line_deviation": "", "deviation_extreme": ""}
-    minute_abs = absolute_match_minute(half, minute)
-    if live is None or kickoff is None or minute_abs is None or goals < 0:
-        return {"projected_line": "", "line_deviation": "", "deviation_extreme": ""}
-    projected = goals + kickoff * (1 - minute_abs / 90)
-    deviation = live - projected
-    return {
-        "projected_line": round(projected, 3),
-        "line_deviation": round(deviation, 3),
-        "deviation_extreme": 1 if abs(deviation) >= 1.25 else 0,
-    }
-
-
-def late_market_fields(live_line, kickoff_line, half, minute, total_goals):
-    fields = line_deviation_fields(live_line, kickoff_line, half, minute, total_goals)
-    minute_abs = absolute_match_minute(half, minute)
-    deviation = fields["line_deviation"]
-    is_high = minute_abs is not None and minute_abs >= LATE_MARKET_MINUTE \
-        and deviation != "" and deviation >= LATE_MARKET_HIGH_DEVIATION
-    return {
-        "late_projected_line": fields["projected_line"],
-        "late_line_deviation": deviation,
-        "late_market_high": 1 if is_high else 0,
-    }
-
-
 def signal_check(e, st, pat):
     """Cek satu pattern pada satu event. Kembalikan (aktif: bool, alasan gagal: str)."""
     if e["half"] != "2H":
@@ -425,21 +386,6 @@ def signal_check(e, st, pat):
     ht_h, ht_a = st.get("ht_h"), st.get("ht_a")
     if ht_h is None or ht_a is None:
         return False, "skor HT tak terekam"
-    # Aturan seragam keluarga SUPER: 1H ramai + line rendah = 2H cenderung kering.
-    if pat["code"] in SUPER_FAMILY and (ht_h + ht_a) >= SUPERFAM_HIGH_TOTAL_MIN:
-        lv_fam = line_value(st.get("ko_line"))
-        if lv_fam is None or lv_fam < SUPERFAM_HIGH_TOTAL_MIN_LINE:
-            return False, f"total HT {ht_h + ht_a}, line awal {st.get('ko_line')}"
-    # P8: gol kedua terlalu cepat -> babak kedua cenderung kering (sampel kecil).
-    if pat["code"] == "P8":
-        g1h_p8 = st.get("goal_mins_1h") or []
-        if len(g1h_p8) >= 2 and g1h_p8[1] < P8_SECOND_GOAL_MIN:
-            return False, f"gol kedua {g1h_p8[1]}'"
-    # SUPER2: gol terakhir babak pertama di menit akhir -> buang (bukti lemah).
-    if pat["code"] == "SUPER2":
-        g1h_s2 = st.get("goal_mins_1h") or []
-        if g1h_s2 and g1h_s2[-1] > SUPER2_LAST_1H_MAX:
-            return False, f"gol terakhir 1H {g1h_s2[-1]}'"
     if pat["ht"] == "diff1" and abs(ht_h - ht_a) != 1:
         return False, f"selisih HT {abs(ht_h - ht_a)}"
     if pat["ht"] == "diff_le1" and abs(ht_h - ht_a) > 1:
@@ -529,15 +475,10 @@ def signal_check(e, st, pat):
                 return False, f"total HT 3, line awal {st.get('ko_line')}"
             if g1h and g1h[0] <= P1_TOTAL3_EARLY_FIRST_MAX and lv < P1_TOTAL3_EARLY_MIN_LINE:
                 return False, f"total HT 3, gol pertama {g1h[0]}', line awal {st.get('ko_line')}"
-            if not g1h or g1h[-1] < P1_TOTAL3_LAST_GOAL_MIN:
-                return False, f"total HT 3, gol terakhir {g1h[-1] if g1h else 'tak terekam'}'"
         if total_ht == 5:
             if len(g1h) < 2:
                 return False, "total HT 5, gol kedua tak terekam"
-            second_ok = P1_HIGH_TOTAL_SECOND_GOAL_MIN <= g1h[1] <= P1_HIGH_TOTAL_SECOND_GOAL_EARLY_MAX
-            late_ok = (P1_HIGH_TOTAL_SECOND_GOAL_EARLY_MAX < g1h[1] <= P1_HIGH_TOTAL_SECOND_GOAL_MAX
-                       and g1h[-1] >= P1_HIGH_TOTAL_LAST_GOAL_MIN)
-            if not (second_ok or late_ok):
+            if not P1_HIGH_TOTAL_SECOND_GOAL_MIN <= g1h[1] <= P1_HIGH_TOTAL_SECOND_GOAL_MAX:
                 return False, f"total HT 5, gol kedua {g1h[1]}'"
     if pat["code"] == "P3" and abs(ht_h - ht_a) == 3:
         lv = line_value(st.get("ko_line"))
@@ -587,6 +528,24 @@ def signal_check(e, st, pat):
             return False, "line awal tak terekam"
         if lv < HAH_STANDARD_MIN_LINE and g1h[-1] < HAH_LOW_LINE_LAST_GOAL_MIN:
             return False, f"line awal {st.get('ko_line')}, gol terakhir 1H {g1h[-1]}'"
+        goals_2h = (e["h"] + e["a"]) - (ht_h + ht_a)
+        if goals_2h < 1:
+            return False, "menunggu gol pertama 2H"
+        if goals_2h > 1:
+            return False, f"sudah ada {goals_2h} gol 2H"
+        live_line = line_value(e.get("line"))
+        if live_line is None:
+            return False, "live line tak tersedia"
+        if live_line >= HAH_MAX_LIVE_LINE:
+            return False, f"live line {e.get('line')} terlalu tinggi"
+        current_total = e["h"] + e["a"]
+        if live_line - current_total > HAH_MAX_LINE_GAP:
+            return False, f"gap live line {live_line - current_total:.2f}"
+        live_over = to_decimal(e.get("over"))
+        if live_over is None:
+            return False, "odds Over tak tersedia"
+        if live_over < HAH_MIN_LIVE_OVER:
+            return False, f"odds Over {live_over:.2f} terlalu rendah"
     fg = st.get("first_goal_min")
     if fg is None:
         return False, "belum ada gol"
@@ -622,7 +581,7 @@ def signal_check(e, st, pat):
             return False, f"line awal {st.get('ko_line')}"
         if pat.get("max_line") is not None and lv > pat["max_line"]:
             return False, f"line awal {st.get('ko_line')} (di atas batas)"
-    if (e["h"] + e["a"]) > (ht_h + ht_a):
+    if pat["code"] != "HAH+" and (e["h"] + e["a"]) > (ht_h + ht_a):
         return False, "sudah ada gol 2H"
     return True, ""
 
@@ -668,35 +627,6 @@ def st_ht_total(row):
         return None
 
 
-OPEN2H_LOG_HEADER = [
-    "logged_at", "league", "home_team", "away_team", "minute",
-    "score", "ht", "ht_total", "live_line", "live_over", "live_under",
-    "ko_line", "ko_over", "ko_under",
-]
-OPEN2H_MAX_MINUTE = int(os.environ.get("VSOCCER_OPEN2H_MAX_MINUTE", "52"))
-_open2h_tercatat = set()   # match yang sudah dicatat, supaya tidak dobel
-
-
-def append_open2h_log(row):
-    """Catat odds di AWAL babak kedua untuk SEMUA match, bukan hanya yang bersinyal.
-
-    Alasannya: sinyal baru menyala menit 60-an, dan pada saat itu bandar sudah
-    menaikkan line (rata-rata +1,13 gol di atas kebutuhan kita) sehingga taruhan
-    yang tersedia jauh lebih berat. Dugaan yang perlu diuji: di menit 46-52 line
-    sering belum menyesuaikan, jadi harga bisa lebih murah dari nilai wajarnya.
-    Tanpa catatan ini dugaan itu tidak bisa dibuktikan maupun dibantah.
-    """
-    try:
-        baru = not OPEN2H_LOG.exists() or OPEN2H_LOG.stat().st_size == 0
-        with open(OPEN2H_LOG, "a", encoding="utf-8", newline="") as fh:
-            w = csv.writer(fh, quoting=csv.QUOTE_MINIMAL)
-            if baru:
-                w.writerow(OPEN2H_LOG_HEADER)
-            w.writerow([row.get(k, "") for k in OPEN2H_LOG_HEADER])
-    except Exception as exc:
-        log(f"Gagal catat open2h log: {exc}")
-
-
 def append_signal_log(row):
     """Catat odds market pada detik sinyal muncul.
 
@@ -735,9 +665,38 @@ def now_iso():
     return datetime.now().isoformat()
 
 
+def odds_pair_ok(over, under):
+    """True kalau pasangan odds masuk akal (total implied prob dalam rentang).
+
+    over/under sudah dinormalisasi ke desimal oleh to_decimal().
+    """
+    try:
+        over = float(over)
+        under = float(under)
+    except (TypeError, ValueError):
+        return False
+    if over <= 1 or under <= 1:
+        return False
+    book = 1 / over + 1 / under
+    return ODDS_BOOK_MIN <= book <= ODDS_BOOK_MAX
+
+
+def in_ko_window(minute):
+    """True kalau menit masih dalam jendela kickoff.
+
+    Menit -1 (tidak terparse dari halaman) dianggap di luar jendela: kalau menit
+    tidak bisa dipastikan, odds-nya tidak bisa dijamin odds kickoff.
+    """
+    try:
+        minute = int(minute)
+    except (TypeError, ValueError):
+        return False
+    return KO_WINDOW_MIN_MINUTE <= minute <= KO_WINDOW_MAX_MINUTE
+
+
 def build_payload(events):
-    """Terapkan logika deteksi gol pada snapshot -> payload {matches, goals}."""
-    matches, goals = [], []
+    """Terapkan snapshot menjadi payload match, gol, dan market menit 46."""
+    matches, goals, milestones = [], [], []
     for e in events:
         if not e.get("half"):
             continue
@@ -747,15 +706,19 @@ def build_payload(events):
         if st and tot < (st["home"] + st["away"]):
             st = None  # siklus/match baru -> reset
         ko_over, ko_under = to_decimal(e["over"]), to_decimal(e["under"])
-        ko_ok = bool(e["line"] and ko_over and ko_under)
+        ko_ok = bool(e["line"]) and odds_pair_ok(ko_over, ko_under)
         if st is None:
-            track = (e["half"] == "1H" and e["h"] == 0 and e["a"] == 0)
+            track = (e["half"] == "1H" and e["h"] == 0 and e["a"] == 0
+                     and in_ko_window(e.get("minute", -1)))
             state[key] = {"home": e["h"], "away": e["a"], "track": track, "ko": ko_ok,
                           "ko_line": e["line"] if ko_ok else "",
                           "ko_over": ko_over if ko_ok else "",
                           "ko_under": ko_under if ko_ok else "",
                           "first_goal_min": None, "ht_h": None, "ht_a": None,
-                          "goal_mins_1h": [], "goal_sides_1h": [], "pending_market": []}
+                          "goal_mins_1h": [], "goal_sides_1h": [],
+                          "m46_captured": False, "m46_posted": False,
+                          "m46_minute": None, "m46_line": "",
+                          "m46_over": "", "m46_under": ""}
             # Hanya daftarkan match yang line awalnya sudah valid; kalau belum, tunggu
             # siklus berikutnya (selama skor masih 0-0) lewat cabang isi-susulan di bawah.
             if track and ko_ok:
@@ -771,7 +734,8 @@ def build_payload(events):
             continue
         # Odds kickoff belum sempat terekam (invalid saat mulai) & match masih 0-0:
         # kirim ulang saat odds sudah valid; endpoint hanya mengisi kolom ko_* yang masih kosong.
-        if not st.get("ko") and ko_ok and (e["h"] + e["a"]) == 0:
+        if (not st.get("ko") and ko_ok and (e["h"] + e["a"]) == 0
+                and in_ko_window(e.get("minute", -1))):
             st["ko"] = True
             st["ko_line"], st["ko_over"], st["ko_under"] = e["line"], ko_over, ko_under
             matches.append({
@@ -780,24 +744,30 @@ def build_payload(events):
                 "ko_line": e["line"], "ko_over": ko_over, "ko_under": ko_under,
                 "timestamp": now_iso(),
             })
+        # Ambil market pertama yang valid ketika 2H sudah mencapai menit 46.
+        # Jika polling melewati 46, menit aktual ikut dicatat (mis. 47).
+        # Market yang odds-nya tidak lolos odds_pair_ok() dilewati -> dicoba lagi
+        # di polling berikutnya, sampai batas M46_MAX_MINUTE.
+        if (e["half"] == "2H" and 46 <= e.get("minute", -1) <= M46_MAX_MINUTE
+                and not st.get("m46_captured")):
+            if e["line"] and odds_pair_ok(ko_over, ko_under):
+                st["m46_captured"] = True
+                st["m46_minute"] = e["minute"]
+                st["m46_line"] = e["line"]
+                st["m46_over"] = ko_over
+                st["m46_under"] = ko_under
+        # Kirim ulang sampai satu POST sukses agar snapshot tidak hilang saat endpoint gagal sesaat.
+        if st.get("m46_captured") and not st.get("m46_posted"):
+            milestones.append({
+                "kind": "m46", "league": e["league"],
+                "home_team": e["home"], "away_team": e["away"],
+                "minute": st["m46_minute"], "line": st["m46_line"],
+                "over_odd": st["m46_over"], "under_odd": st["m46_under"],
+                "timestamp": now_iso(),
+            })
         # Skor HT = skor terakhir yang terlihat selagi masih babak pertama.
         if e["half"] == "1H":
             st["ht_h"], st["ht_a"] = e["h"], e["a"]
-        live_over, live_under = to_decimal(e["over"]), to_decimal(e["under"])
-        market_ready = bool(e["line"] and live_over and live_under)
-        if market_ready and st.get("pending_market"):
-            for pending in st["pending_market"]:
-                pending.update({
-                    "ou_line": e["line"], "over_odd": live_over, "under_odd": live_under,
-                    "home_score": str(e["h"]), "away_score": str(e["a"]),
-                    "market_update": 1,
-                })
-                pending.update(line_deviation_fields(
-                    e["line"], st.get("ko_line"), pending.get("half"),
-                    pending.get("min_num"), sum(map(int, pending["score_after"].split("-")))
-                ))
-                goals.append(pending)
-            st["pending_market"] = []
         jump = (e["h"] - st["home"]) + (e["a"] - st["away"])
         accurate = 1 if jump <= 2 else 0
         minute_str = f"{e['half']} {max(e['minute'], 0)}'"
@@ -812,40 +782,40 @@ def build_payload(events):
             if e["half"] == "1H":
                 st["goal_mins_1h"].append(max(e["minute"], 0))
                 st["goal_sides_1h"].append(side)
-            goal = {
+            goals.append({
                 "league": e["league"], "home_team": e["home"], "away_team": e["away"],
                 "minute": minute_str, "half": e["half"], "min_num": max(e["minute"], 0),
                 "side": side, "score_after": f"{ch}-{ca}", "accurate": accurate,
-                "ou_line": e["line"], "over_odd": live_over, "under_odd": live_under,
+                "ou_line": e["line"], "over_odd": to_decimal(e["over"]), "under_odd": to_decimal(e["under"]),
                 "home_score": str(e["h"]), "away_score": str(e["a"]), "timestamp": now_iso(),
-            }
-            goal.update(line_deviation_fields(e["line"], st.get("ko_line"), e["half"],
-                                              max(e["minute"], 0), ch + ca))
-            goals.append(goal)
-            if not market_ready:
-                st.setdefault("pending_market", []).append(goal.copy())
+            })
         st["home"], st["away"] = e["h"], e["a"]
-    return matches, goals
+    return matches, goals, milestones
 
 
-def post(matches, goals):
-    if matches or goals:
-        post_outbox.append({"matches": matches, "goals": goals})
-    if not post_outbox:
+def post(matches, goals, milestones):
+    if not matches and not goals and not milestones:
         return
-    payload = post_outbox[0]
     try:
-        r = requests.post(ENDPOINT, json=payload, timeout=10)
-        r.raise_for_status()
-        data = r.json()
-        if not data.get("ok"):
-            raise RuntimeError(data.get("error") or "Endpoint menolak payload")
-        post_outbox.pop(0)
-        stats["sent_goals"] += len(payload["goals"])
-        stats["sent_matches"] += len(payload["matches"])
+        r = requests.post(ENDPOINT, json={"matches": matches, "goals": goals,
+                                         "milestones": milestones}, timeout=10)
+        stats["sent_goals"] += len(goals)
+        stats["sent_matches"] += len(matches)
+        response_data = {}
+        try:
+            response_data = r.json()
+        except ValueError:
+            pass
+        milestones_saved = int(response_data.get("milestones_saved", 0) or 0)
+        if r.ok and response_data.get("ok") and milestones_saved >= len(milestones):
+            stats["sent_milestones"] += len(milestones)
+            for milestone in milestones:
+                key = f"{milestone['league']}|{milestone['home_team']}|{milestone['away_team']}"
+                if key in state:
+                    state[key]["m46_posted"] = True
         stats["last_post"] = now_iso()
-        stats["last_error"] = ""
-        log(f"kirim {len(payload['goals'])} gol, {len(payload['matches'])} match -> {r.status_code} {r.text[:120]}")
+        log(f"kirim {len(goals)} gol, {len(matches)} match, {len(milestones)} market M46 "
+            f"-> {r.status_code} {r.text[:120]}")
     except Exception as e:
         stats["last_error"] = f"POST gagal: {e}"
         log(f"POST gagal: {e}")
@@ -854,33 +824,18 @@ def post(matches, goals):
 def write_live(events, goals, status="running", note=""):
     """Tulis snapshot terakhir ke vsoccer_live.json (dibaca vsoccer-live.php)."""
     for g in goals:
-        if g.get("market_update"):
-            for recent in recent_goals:
-                if (recent["home_team"], recent["away_team"], recent["score_after"]) == (
-                        g["home_team"], g["away_team"], g["score_after"]):
-                    recent.update({"line": g.get("ou_line", ""), "over": g.get("over_odd", ""),
-                                   "under": g.get("under_odd", ""),
-                                   "projected_line": g.get("projected_line", ""),
-                                   "line_deviation": g.get("line_deviation", ""),
-                                   "deviation_extreme": g.get("deviation_extreme", "")})
-                    break
-            continue
         recent_goals.appendleft({
             "time": datetime.now().strftime("%H:%M:%S"),
             "league": g["league"], "home_team": g["home_team"], "away_team": g["away_team"],
             "minute": g["minute"], "side": g["side"], "score_after": g["score_after"],
-            "line": g.get("ou_line", ""), "over": g.get("over_odd", ""),
-            "under": g.get("under_odd", ""), "accurate": g["accurate"],
-            "projected_line": g.get("projected_line", ""),
-            "line_deviation": g.get("line_deviation", ""),
-            "deviation_extreme": g.get("deviation_extreme", ""),
+            "accurate": g["accurate"],
         })
     rows = []
     for e in events or []:
         st = state.get(f"{e['league']}|{e['home']}|{e['away']}") or {}
         hits, why = match_signals(e, st)
         ht = "" if st.get("ht_h") is None else f"{st['ht_h']}-{st['ht_a']}"
-        row = {
+        rows.append({
             "signal": bool(hits), "hits": hits, "signal_why": why, "ht": ht,
             "first_goal_min": st.get("first_goal_min"),
             "goal_mins_1h": list(st.get("goal_mins_1h") or []),
@@ -890,35 +845,13 @@ def write_live(events, goals, status="running", note=""):
             "score": f"{e['h']}-{e['a']}", "total": e["h"] + e["a"],
             "line": e["line"], "over": to_decimal(e["over"]), "under": to_decimal(e["under"]),
             "ko_line": st.get("ko_line", ""), "ko_over": st.get("ko_over", ""),
-            "ko_under": st.get("ko_under", ""), "tracked": bool(st.get("track")),
-        }
-        row.update(late_market_fields(e["line"], st.get("ko_line"), e["half"],
-                                      e["minute"], e["h"] + e["a"]))
-        rows.append(row)
+            "ko_under": st.get("ko_under", ""),
+            "m46_minute": st.get("m46_minute"), "m46_line": st.get("m46_line", ""),
+            "m46_over": st.get("m46_over", ""), "m46_under": st.get("m46_under", ""),
+            "tracked": bool(st.get("track")),
+        })
     # Sinyal aktif ditaruh paling atas + dicatat ke log sekali saat muncul.
     rows.sort(key=lambda r: (not r["signal"], r["league"], r["home"]))
-
-    # Catat odds di AWAL babak kedua untuk SEMUA match (sekali per match), bukan
-    # hanya yang bersinyal — supaya dugaan "menit 46 line belum naik" bisa diuji.
-    for r in rows:
-        if r["half"] != "2H" or not r.get("tracked"):
-            continue
-        if r["minute"] < 0 or r["minute"] > OPEN2H_MAX_MINUTE:
-            continue
-        kunci = f"{r['league']}|{r['home']}|{r['away']}|{r['ht']}"
-        if kunci in _open2h_tercatat:
-            continue
-        _open2h_tercatat.add(kunci)
-        ht_total = st_ht_total(r)
-        append_open2h_log({
-            "logged_at": datetime.now().strftime("%d/%m/%Y %H:%M"),
-            "league": r["league"], "home_team": r["home"], "away_team": r["away"],
-            "minute": r["minute"], "score": r["score"], "ht": r["ht"],
-            "ht_total": "" if ht_total is None else ht_total,
-            "live_line": r["line"], "live_over": r["over"], "live_under": r["under"],
-            "ko_line": r["ko_line"], "ko_over": r["ko_over"], "ko_under": r["ko_under"],
-        })
-
     live_keys, by_code = set(), {}
     for r in rows:
         for code in r["hits"]:
@@ -969,16 +902,15 @@ def write_live(events, goals, status="running", note=""):
         "signal_start_2h_o25_minute": SIGNAL_START_2H_O25_MINUTE,
         "signal_start_2h_other_minute": SIGNAL_START_2H_OTHER_MINUTE,
         "signal_start_2h_p_minute": SIGNAL_START_2H_P_MINUTE,
-        "superfam_high_total_min": SUPERFAM_HIGH_TOTAL_MIN,
-        "superfam_high_total_min_line": SUPERFAM_HIGH_TOTAL_MIN_LINE,
-        "super2_last_1h_max": SUPER2_LAST_1H_MAX,
         "target_url": TARGET_URL,
         "endpoint": ENDPOINT,
         "cycles": stats["cycles"],
         "sent_goals": stats["sent_goals"],
         "sent_matches": stats["sent_matches"],
+        "sent_milestones": stats["sent_milestones"],
         "last_post": stats["last_post"],
         "last_error": stats["last_error"],
+        "leagues": dict(league_stats),
         "matches": rows,
         "signals": sum(1 for r in rows if r["signal"]),
         "signals_by_code": by_code,
@@ -1081,9 +1013,23 @@ def run():
             try:
                 if TARGET_HOST not in (page.url or ""):
                     load(); last_reload = time.time(); continue
-                events = page.evaluate(SNAPSHOT_JS)
-                matches, goals = build_payload(events)
-                post(matches, goals)
+                snap = page.evaluate(SNAPSHOT_JS)
+                # Bentuk lama (list) masih diterima kalau JS gagal dimuat ulang.
+                if isinstance(snap, dict):
+                    events = snap.get("events") or []
+                    league_stats.update({
+                        "seen": snap.get("leagues_seen", 0),
+                        "with_events": snap.get("leagues_with_events", 0),
+                        "empty": snap.get("leagues_empty") or [],
+                        "clicked": snap.get("clicked_to_expand", 0),
+                    })
+                else:
+                    events = snap or []
+                if league_stats["empty"]:
+                    log("Liga tanpa event: " + ", ".join(league_stats["empty"][:6])
+                        + (" ..." if len(league_stats["empty"]) > 6 else ""))
+                matches, goals, milestones = build_payload(events)
+                post(matches, goals, milestones)
                 stats["cycles"] += 1
                 write_live(events, goals)
                 if time.time() - last_reload >= RELOAD_SEC:

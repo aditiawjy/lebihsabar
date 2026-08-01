@@ -1,5 +1,9 @@
 <?php
 date_default_timezone_set('Asia/Jakarta');
+
+// Lama sebuah match boleh bertahan di CSV tanpa gol tercatat. Lewat ini, baris
+// tanpa gol dianggap pelacakan gagal dan dibuang, bukan pertandingan 0-0.
+const PENDING_GRACE_SECONDS = 7200;
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
@@ -31,7 +35,7 @@ if (!$hasGoals && !$hasMatches && !$hasMilestones) {
 
 // Goal log khusus Virtual Soccer (1x2aaa.com), terpisah dari goal_log.csv utama.
 $csvFile = __DIR__ . '/goal_log_vsoccer.csv';
-$headers = ['datetime', 'league', 'home_team', 'away_team', 'goals', 'goal_minutes', 'goal_markets', 'final_home', 'final_away', 'ko_line', 'ko_over', 'ko_under'];
+$headers = ['datetime', 'league', 'home_team', 'away_team', 'goals', 'goal_minutes', 'goal_markets', 'final_home', 'final_away', 'ko_line', 'ko_over', 'ko_under', 'm46_minute', 'm46_line', 'm46_over', 'm46_under'];
 
 // Ambil menit gol saja dari kolom goals, mis "1H 20' (1-0) | 2H 3' (2-0)" -> "1H 20' | 2H 3'".
 function extractGoalMinutes(string $goals): string {
@@ -178,9 +182,28 @@ function getLastGoalSnapshot(string $goals): ?array {
     return ['home' => (int)$last[3], 'away' => (int)$last[4]];
 }
 
+function isStillPending(array $row): bool {
+    $dt = DateTime::createFromFormat('d/m/Y H:i', (string)($row['datetime'] ?? ''));
+    if (!$dt) {
+        try {
+            $dt = new DateTime((string)($row['datetime'] ?? 'now'));
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+    $now = new DateTime('now', new DateTimeZone('Asia/Jakarta'));
+    return ($now->getTimestamp() - $dt->getTimestamp()) <= PENDING_GRACE_SECONDS;
+}
+
 function shouldKeepPendingRow(array $row): bool {
     if (trim((string)($row['goals'] ?? '')) !== '') return true;
-    if (trim((string)($row['2h7'] ?? '')) !== '') return true;
+
+    // Baris tanpa gol tercatat TIDAK boleh kebal hanya karena market sudah
+    // terekam. Dulu m46_line/2h7 yang terisi membuat baris bertahan permanen,
+    // sehingga match yang pelacakannya hilang tersimpan sebagai pertandingan
+    // 0-0 tanpa gol -- terlihat seperti data sah dan meracuni analisis.
+    // Sekarang baris seperti itu hanya ditahan selama jendela pending di bawah,
+    // lalu dibuang: match tanpa gol tercatat tidak bisa diverifikasi hasilnya.
 
     $dt = DateTime::createFromFormat('d/m/Y H:i', (string)($row['datetime'] ?? ''));
     if (!$dt) {
@@ -192,7 +215,7 @@ function shouldKeepPendingRow(array $row): bool {
     }
 
     $now = new DateTime('now', new DateTimeZone('Asia/Jakarta'));
-    return ($now->getTimestamp() - $dt->getTimestamp()) <= 7200;
+    return ($now->getTimestamp() - $dt->getTimestamp()) <= PENDING_GRACE_SECONDS;
 }
 
 // Find existing row key for same teams on same date (within +/-30 min window).
@@ -217,11 +240,28 @@ function findExistingKey(array $rows, string $dateOnly, string $homeTeam, string
 $lockFile = $csvFile . '.lock';
 $lock = fopen($lockFile, 'c');
 flock($lock, LOCK_EX);
+$abortLocked = static function (int $status, string $message) use ($lock): void {
+    flock($lock, LOCK_UN);
+    fclose($lock);
+    http_response_code($status);
+    echo json_encode(['ok' => false, 'error' => $message]);
+    exit;
+};
 
 $rows = [];
-if (is_file($csvFile) && is_readable($csvFile)) {
+if (is_file($csvFile)) {
+    if (!is_readable($csvFile)) $abortLocked(503, 'CSV exists but is not readable');
+    $existingSize = filesize($csvFile) ?: 0;
     $fh = fopen($csvFile, 'r');
+    if ($fh === false) $abortLocked(503, 'CSV could not be opened for reading');
     $hdr = fgetcsv($fh);
+    if (!is_array($hdr) || count(array_intersect(
+        ['datetime', 'league', 'home_team', 'away_team', 'goals'],
+        $hdr
+    )) !== 5) {
+        fclose($fh);
+        $abortLocked(503, 'CSV header is invalid; refusing destructive rewrite');
+    }
     $ci = is_array($hdr) ? array_flip($hdr) : [];
     // Kompat: format lama (tanpa goal_minutes, ada 1h3/2h1/2h7). Pakai nama kolom, fallback ke indeks lama.
     $get = function (array $row, string $name, int $legacyIdx) use ($ci) {
@@ -246,9 +286,16 @@ if (is_file($csvFile) && is_readable($csvFile)) {
             'ko_line'    => $get($row, 'ko_line', -1),
             'ko_over'    => $get($row, 'ko_over', -1),
             'ko_under'   => $get($row, 'ko_under', -1),
+            'm46_minute' => $get($row, 'm46_minute', -1),
+            'm46_line'   => $get($row, 'm46_line', -1),
+            'm46_over'   => $get($row, 'm46_over', -1),
+            'm46_under'  => $get($row, 'm46_under', -1),
         ];
     }
     fclose($fh);
+    if ($existingSize > 256 && count($rows) === 0) {
+        $abortLocked(503, 'CSV had data but no rows could be read; refusing destructive rewrite');
+    }
 }
 
 // Register new matches (kickoff, no goal yet)
@@ -284,6 +331,10 @@ if ($hasMatches) {
                 'ko_line'    => '',
                 'ko_over'    => '',
                 'ko_under'   => '',
+                'm46_minute' => '',
+                'm46_line'   => '',
+                'm46_over'   => '',
+                'm46_under'  => '',
             ];
         }
 
@@ -293,6 +344,41 @@ if ($hasMatches) {
         if (($rows[$key]['ko_line'] ?? '') === '' && isset($m['ko_line'])) $rows[$key]['ko_line'] = trim((string)$m['ko_line']);
         if (($rows[$key]['ko_over'] ?? '') === '' && isset($m['ko_over'])) $rows[$key]['ko_over'] = trim((string)$m['ko_over']);
         if (($rows[$key]['ko_under'] ?? '') === '' && isset($m['ko_under'])) $rows[$key]['ko_under'] = trim((string)$m['ko_under']);
+    }
+}
+
+// Simpan snapshot market pertama pada awal 2H (menit aktual pertama >= 46).
+$savedMilestones = 0;
+if ($hasMilestones) {
+    foreach ($payload['milestones'] as $milestone) {
+        if (($milestone['kind'] ?? '') !== 'm46') continue;
+        $ts = $milestone['timestamp'] ?? date('c');
+        $dt = (new DateTime($ts))->setTimezone(new DateTimeZone('Asia/Jakarta'));
+        $dateOnly = $dt->format('Y-m-d');
+        $hourOnly = $dt->format('H');
+        $minuteOnly = $dt->format('i');
+        $homeTeam = trim((string)($milestone['home_team'] ?? ''));
+        $awayTeam = trim((string)($milestone['away_team'] ?? ''));
+        if ($homeTeam === '' || $awayTeam === '') continue;
+
+        $exactKey = $dateOnly . '|' . $hourOnly . ':' . $minuteOnly . '|' . $homeTeam . '|' . $awayTeam;
+        $key = isset($rows[$exactKey]) ? $exactKey : findExistingKey($rows, $dateOnly, $homeTeam, $awayTeam, $dt);
+        if ($key === null || !isset($rows[$key])) continue;
+
+        $line = trim((string)($milestone['line'] ?? ''));
+        $over = trim((string)($milestone['over_odd'] ?? ''));
+        $under = trim((string)($milestone['under_odd'] ?? ''));
+        if ($line === '' || $over === '' || $under === '') continue;
+        if (trim((string)($rows[$key]['m46_line'] ?? '')) !== '') {
+            $savedMilestones++;
+            continue;
+        }
+
+        $rows[$key]['m46_minute'] = trim((string)($milestone['minute'] ?? '46'));
+        $rows[$key]['m46_line'] = $line;
+        $rows[$key]['m46_over'] = $over;
+        $rows[$key]['m46_under'] = $under;
+        $savedMilestones++;
     }
 }
 
@@ -381,6 +467,14 @@ $rows = array_filter($rows, static function (array $row): bool {
         return false;
     }
 
+    // goals kosong + skor 0-0: hanya sah selama match memang masih berjalan
+    // (sudah disaring shouldKeepPendingRow). Kalau match sudah lewat jendela
+    // pending dan gol tetap tidak tercatat, baris ini bukan pertandingan 0-0
+    // sungguhan melainkan pelacakan yang gagal -> jangan disimpan.
+    if ($goals === '' && !isStillPending($row)) {
+        return false;
+    }
+
     if ($goals !== '') {
         $lastSnapshot = getLastGoalSnapshot($goals);
         if (!$lastSnapshot) return false;
@@ -392,7 +486,9 @@ $rows = array_filter($rows, static function (array $row): bool {
     return $goals === '' || hasValidGoalProgression($goals);
 });
 
-$fh = fopen($csvFile, 'w');
+$tmpCsv = $csvFile . '.tmp';
+$fh = fopen($tmpCsv, 'w');
+if ($fh === false) $abortLocked(503, 'Temporary CSV could not be opened for writing');
 fputcsv($fh, $headers);
 foreach ($rows as $row) {
     fputcsv($fh, [
@@ -408,9 +504,23 @@ foreach ($rows as $row) {
         $row['ko_line']  ?? '',
         $row['ko_over']  ?? '',
         $row['ko_under'] ?? '',
+        $row['m46_minute'] ?? '',
+        $row['m46_line']   ?? '',
+        $row['m46_over']   ?? '',
+        $row['m46_under']  ?? '',
     ]);
 }
 fclose($fh);
+
+// Selalu pertahankan satu salinan valid sebelum mengganti file utama.
+if (is_file($csvFile) && filesize($csvFile) > 256) {
+    @copy($csvFile, $csvFile . '.bak');
+}
+if (!@copy($tmpCsv, $csvFile)) {
+    @unlink($tmpCsv);
+    $abortLocked(503, 'Failed to replace CSV from temporary file');
+}
+@unlink($tmpCsv);
 
 flock($lock, LOCK_UN);
 fclose($lock);
@@ -420,5 +530,6 @@ echo json_encode([
     'goals' => count($payload['goals'] ?? []),
     'matches' => count($payload['matches'] ?? []),
     'milestones' => count($payload['milestones'] ?? []),
+    'milestones_saved' => $savedMilestones,
     'skipped_no_ko_line' => $skippedNoKo
 ]);

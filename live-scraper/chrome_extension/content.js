@@ -494,39 +494,140 @@ function isLeagueCollapsed(header) {
         }
     } catch (_) {}
 
+    // SABA: tidak ada aria-expanded, kelas header tidak berubah saat dibuka, dan
+    // match-group selalu ada dengan display:flex. Satu-satunya penanda tertutup
+    // adalah grup yang KOSONG -- diverifikasi langsung di situs: scroll tidak
+    // memunculkan apa pun, sekali klik langsung memunculkan 5 match.
+    if (group.querySelectorAll('.match').length === 0) {
+        return true;
+    }
+
     return false;
 }
 
-// Buka semua liga yang tertutup supaya datanya ikut ter-scrape. Mengembalikan
-// jumlah yang dibuka; beri jeda singkat agar DOM sempat render setelah expand.
+// Grup liga ada dan terlihat, tapi belum berisi satu match pun. Ini BUKAN kondisi
+// collapsed -- jadi isLeagueCollapsed() mengembalikan false dan liga itu tidak
+// pernah diklik, padahal datanya juga tidak pernah muncul. Penyebab umumnya
+// render malas (lazy render) pada liga yang berada jauh di bawah layar.
+function isLeagueEmpty(header) {
+    const group = header.nextElementSibling;
+    if (!group || !group.classList.contains('match-group')) {
+        return true;
+    }
+    return group.querySelectorAll('.match').length === 0;
+}
+
+function leagueNameOf(header) {
+    return header.querySelector('.league-header__name')?.innerText?.trim() || '';
+}
+
+// Liga yang memang sedang tidak punya match live juga terlihat "kosong", persis
+// seperti liga tertutup. Tanpa pembatas, liga seperti itu akan diklik tiap siklus
+// -> terbuka, tertutup, terbuka lagi (kedip-kedip). Hitungan percobaan di-reset
+// begitu liga benar-benar berisi.
+const LEAGUE_CLICK_LIMIT = 2;
+const leagueClickTries = new Map();
+
+function mayClickLeague(name) {
+    return (leagueClickTries.get(name) || 0) < LEAGUE_CLICK_LIMIT;
+}
+
+function noteLeagueClick(name) {
+    leagueClickTries.set(name, (leagueClickTries.get(name) || 0) + 1);
+}
+
+function noteLeagueFilled(name) {
+    leagueClickTries.delete(name);
+}
+
+function clickLeagueHeader(header) {
+    const target = header.querySelector('.league-header__name')?.closest('.league-header') || header;
+    try {
+        target.click();
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
+// Buka semua liga yang tertutup supaya datanya ikut ter-scrape.
+//
+// Dua hal yang dulu bikin sebagian liga tidak pernah muncul datanya:
+//   1. Liga yang jauh di bawah layar belum di-render sama sekali (lazy render).
+//      Sekarang tiap header di-scroll ke viewport lebih dulu.
+//   2. Satu kali klik + jeda 400 ms kadang belum cukup; grup masih kosong saat
+//      pembacaan berjalan. Sekarang ada pass kedua khusus liga yang masih kosong.
 async function expandCollapsedLeagues() {
-    const headers = Array.from(document.querySelectorAll('.league-header'));
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    const headers = () => Array.from(document.querySelectorAll('.league-header'));
     let expanded = 0;
 
-    for (const header of headers) {
-        if (!isLeagueCollapsed(header)) {
+    // Pass 1: liga yang sudah berisi -> reset hitungan. Yang tertutup -> klik.
+    for (const header of headers()) {
+        const name = leagueNameOf(header);
+        if (!isLeagueEmpty(header)) {
+            noteLeagueFilled(name);
             continue;
         }
-        const target = header.querySelector('.league-header__name')?.closest('.league-header') || header;
         try {
-            target.click();
-            expanded++;
+            header.scrollIntoView({ block: 'center' });
         } catch (_) {}
+        if (isLeagueCollapsed(header) && mayClickLeague(name) && clickLeagueHeader(header)) {
+            noteLeagueClick(name);
+            expanded++;
+        }
     }
-
     if (expanded > 0) {
-        await new Promise((resolve) => setTimeout(resolve, 400));
+        await sleep(900);
     }
 
-    return expanded;
+    // Pass 2: sekali lagi untuk liga yang belum juga terisi. Render setelah klik
+    // kadang belum selesai di pass pertama.
+    const stillEmpty = headers().filter(isLeagueEmpty);
+    if (stillEmpty.length) {
+        for (const header of stillEmpty) {
+            const name = leagueNameOf(header);
+            if (isLeagueCollapsed(header) && mayClickLeague(name) && clickLeagueHeader(header)) {
+                noteLeagueClick(name);
+                expanded++;
+            }
+        }
+        await sleep(900);
+    }
+
+    const emptyLeagues = [];
+    for (const header of headers()) {
+        const name = leagueNameOf(header);
+        if (isLeagueEmpty(header)) {
+            emptyLeagues.push(name);
+        } else {
+            noteLeagueFilled(name);
+        }
+    }
+    return {
+        expanded,
+        totalLeagues: headers().length,
+        emptyLeagues,
+        // Liga yang sudah dicoba sampai batas tapi tetap kosong: kemungkinan
+        // besar memang tidak ada match live, bukan gagal dibuka.
+        givenUp: Array.from(leagueClickTries.entries())
+            .filter(([, n]) => n >= LEAGUE_CLICK_LIMIT)
+            .map(([n]) => n),
+    };
 }
 
 async function extractLiveDataWithDetails() {
-    const expandedLeagues = await expandCollapsedLeagues();
+    const leagueState = await expandCollapsedLeagues();
     const detailState = await ensureVisibleMatchDetails();
     const data = extractLiveData();
     data.detailState = detailState;
-    data.expandedLeagues = expandedLeagues;
+    data.expandedLeagues = leagueState.expanded;
+    // Diagnostik liga: supaya "liga tidak muncul datanya" langsung kelihatan
+    // angkanya, bukan cuma terasa sebagai jumlah match yang kurang.
+    data.leagueState = leagueState;
+    if (leagueState.emptyLeagues.length) {
+        console.warn('[BPVM] Liga tanpa match setelah expand:', leagueState.emptyLeagues);
+    }
     return data;
 }
 

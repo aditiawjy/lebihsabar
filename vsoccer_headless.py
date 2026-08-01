@@ -100,6 +100,7 @@ P1_HIGH_TOTAL_SECOND_GOAL_MAX = int(os.environ.get("VSOCCER_P1_HIGH_TOTAL_SECOND
 P1_TOTAL3_MAX_LINE = float(os.environ.get("VSOCCER_P1_TOTAL3_MAX_LINE", "7.5"))
 P1_TOTAL3_EARLY_FIRST_MAX = int(os.environ.get("VSOCCER_P1_TOTAL3_EARLY_FIRST_MAX", "4"))
 P1_TOTAL3_EARLY_MIN_LINE = float(os.environ.get("VSOCCER_P1_TOTAL3_EARLY_MIN_LINE", "7.25"))
+P1_LAST_1H_MAX = int(os.environ.get("VSOCCER_P1_LAST_1H_MAX", "34"))
 P1_MAX_TOTAL_HT = int(os.environ.get("VSOCCER_P1_MAX_TOTAL_HT", "5"))
 P2_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P2_FIRST_GOAL_MAX", "15"))
 P2_MIN_LINE = float(os.environ.get("VSOCCER_P2_MIN_LINE", "5.75"))
@@ -112,7 +113,7 @@ P3_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P3_FIRST_GOAL_MAX", "9"))
 P3_MIN_LINE = float(os.environ.get("VSOCCER_P3_MIN_LINE", "5.5"))
 P3_MAX_LINE = float(os.environ.get("VSOCCER_P3_MAX_LINE", "7.5"))
 P3_ONE_SIDED_MIN_LINE = float(os.environ.get("VSOCCER_P3_ONE_SIDED_MIN_LINE", "6.5"))
-P4_FIRST_GOAL_MIN = int(os.environ.get("VSOCCER_P4_FIRST_GOAL_MIN", "15"))
+P4_FIRST_GOAL_MIN = int(os.environ.get("VSOCCER_P4_FIRST_GOAL_MIN", "30"))
 P4_MIN_LINE = float(os.environ.get("VSOCCER_P4_MIN_LINE", "5.5"))
 P5_FIRST_GOAL_MAX = int(os.environ.get("VSOCCER_P5_FIRST_GOAL_MAX", "18"))
 P5_LAST_1H_GOAL_MAX = int(os.environ.get("VSOCCER_P5_LAST_1H_GOAL_MAX", "40"))
@@ -126,6 +127,7 @@ P10_MIN_LINE = float(os.environ.get("VSOCCER_P10_MIN_LINE", "5.75"))   # 5.5/6
 SUPER3_HT_DIFF = int(os.environ.get("VSOCCER_SUPER3_HT_DIFF", "3"))
 SUPER3_MIN_LINE = float(os.environ.get("VSOCCER_SUPER3_MIN_LINE", "6"))
 SUPER3_LAST_GOAL_MIN = int(os.environ.get("VSOCCER_SUPER3_LAST_GOAL_MIN", "42"))
+SUPER4_SECOND_GOAL_MIN = int(os.environ.get("VSOCCER_SUPER4_SECOND_GOAL_MIN", "16"))
 P12_TOTAL_HT = int(os.environ.get("VSOCCER_P12_TOTAL_HT", "5"))
 P12_MIN_LINE = float(os.environ.get("VSOCCER_P12_MIN_LINE", "6.5"))
 P12_SECOND_GOAL_MIN = int(os.environ.get("VSOCCER_P12_SECOND_GOAL_MIN", "8"))
@@ -174,7 +176,7 @@ PATTERNS = [
     {"code": "SUPER3",
      "desc": f"selisih HT tepat {SUPER3_HT_DIFF}; gol terakhir 1H ≥ {SUPER3_LAST_GOAL_MIN}'",
      "ht": "any", "first_goal_max": None, "min_line": SUPER3_MIN_LINE},
-    {"code": "SUPER4", "desc": "total HT tepat 5; urutan X–Y–X–X–bebas",
+    {"code": "SUPER4", "desc": f"total HT tepat 5; urutan X–Y–X–X–bebas; gol kedua 1H ≥ {SUPER4_SECOND_GOAL_MIN}'",
      "ht": "any", "first_goal_max": None, "min_line": None},
     {"code": "P12",
      "desc": f"total HT tepat {P12_TOTAL_HT}; gol-2 ≥ {P12_SECOND_GOAL_MIN}'",
@@ -183,7 +185,8 @@ PATTERNS = [
      "desc": f"selisih HT tepat 1; total HT maksimal {P1_MAX_TOTAL_HT} (total HT 1: gol-1 ≤ {P1_LOW_TOTAL_FIRST_GOAL_MAX}'; "
              f"total HT 3: line ≤ {P1_TOTAL3_MAX_LINE}, gol-1 ≤ {P1_TOTAL3_EARLY_FIRST_MAX}' wajib "
              f"line ≥ {P1_TOTAL3_EARLY_MIN_LINE}; total HT 5: gol-2 "
-             f"{P1_HIGH_TOTAL_SECOND_GOAL_MIN}'–{P1_HIGH_TOTAL_SECOND_GOAL_MAX}')",
+             f"{P1_HIGH_TOTAL_SECOND_GOAL_MIN}'–{P1_HIGH_TOTAL_SECOND_GOAL_MAX}'; "
+             f"gol terakhir 1H ≤ {P1_LAST_1H_MAX}')",
      "ht": "diff1",
      "first_goal_max": P1_FIRST_GOAL_MAX, "min_line": P1_MIN_LINE},
     {"code": "P2", "desc": "HT 2-1 / 1-2; gol-1 ≤ 4' wajib line ≥ 7.25", "ht": "21",
@@ -408,6 +411,9 @@ def signal_check(e, st, pat):
             return False, f"total HT {len(sides)}"
         if sides[0] == sides[1] or sides[2] != sides[0] or sides[3] != sides[0]:
             return False, "urutan bukan X–Y–X–X–bebas"
+        g1h = st.get("goal_mins_1h") or []
+        if len(g1h) < 2 or g1h[1] < SUPER4_SECOND_GOAL_MIN:
+            return False, f"gol kedua 1H {g1h[1] if len(g1h) >= 2 else 'tak terekam'}'"
     if pat["code"] == "P12":
         g1h = st.get("goal_mins_1h") or []
         if len(g1h) < 2 or g1h[1] < P12_SECOND_GOAL_MIN:
@@ -480,6 +486,8 @@ def signal_check(e, st, pat):
                 return False, "total HT 5, gol kedua tak terekam"
             if not P1_HIGH_TOTAL_SECOND_GOAL_MIN <= g1h[1] <= P1_HIGH_TOTAL_SECOND_GOAL_MAX:
                 return False, f"total HT 5, gol kedua {g1h[1]}'"
+        if not g1h or g1h[-1] > P1_LAST_1H_MAX:
+            return False, f"gol terakhir 1H {g1h[-1] if g1h else 'tak terekam'}'"
     if pat["code"] == "P3" and abs(ht_h - ht_a) == 3:
         lv = line_value(st.get("ko_line"))
         if lv is None or lv < P3_ONE_SIDED_MIN_LINE:

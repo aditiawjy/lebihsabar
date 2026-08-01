@@ -7,7 +7,8 @@
  * kelihatan apakah sebuah aturan bertahan lintas hari dan lintas pasar atau
  * cuma menumpang rentetan gol di satu jendela waktu.
  *
- * Dua pasar diukur dengan aturan yang sama persis:
+ * Aturan dasar dipakai untuk dua pasar, tetapi R10/R11 SABA punya kalibrasi
+ * sendiri karena skala waktu dan distribusi golnya berbeda dari V-Soccer:
  *   V-Soccer -> goal_log_vsoccer.csv, titik masuk = line m46
  *   SABA     -> goal_log_bpvm.csv,    titik masuk = market O/U saat "H.Time"
  *
@@ -184,6 +185,57 @@ $RULES = [
             return $a > 0 ? 'over' : 'under';
         },
     ],
+    'R9' => [
+        'label' => 'R8 arah Over saja (A ≥ 1 dan heat ≥ 1)',
+        'pick'  => static function (array $r) {
+            $a = $r['ht_total'] - $r['demand'];
+            $b = $r['heat'];
+            if ($b === null || $a < 1 || $b < 1) {
+                return null;
+            }
+            return 'over';
+        },
+    ],
+    'R10' => [
+        'label' => 'R8 + total HT 4–5 (Over)',
+        'pick'  => static function (array $r) {
+            $a = $r['ht_total'] - $r['demand'];
+            $b = $r['heat'];
+            if ($b === null || $a < 1 || $b < 1 || $r['ht_total'] < 4 || $r['ht_total'] > 5) {
+                return null;
+            }
+            return 'over';
+        },
+    ],
+    'R11' => [
+        'label' => 'R10 + gol pertama 1H > 15’ (Over)',
+        'pick'  => static function (array $r) {
+            $a = $r['ht_total'] - $r['demand'];
+            $b = $r['heat'];
+            if ($b === null || $a < 1 || $b < 1 || $r['ht_total'] < 4 || $r['ht_total'] > 5
+                || $r['first_goal'] === null || $r['first_goal'] <= 15) {
+                return null;
+            }
+            return 'over';
+        },
+    ],
+    // R12 & R13 dipilih dari 731 match V-Soccer dengan syarat lebih ketat dari
+    // aturan sebelumnya: harus positif di KEDUA paruh waktu DAN positif di
+    // kedua pasar. Keduanya belum lolos batas CI, jadi tetap kandidat.
+    'R12' => [
+        'label' => 'Total gol HT tepat 3 → Under',
+        'pick'  => static fn(array $r) => $r['ht_total'] === 3 ? 'under' : null,
+    ],
+    'R13' => [
+        'label' => 'A ≥ 1 & total HT 4–5 → Over (R10 tanpa syarat heat)',
+        'pick'  => static function (array $r) {
+            $a = $r['ht_total'] - $r['demand'];
+            if ($a < 1 || $r['ht_total'] < 4 || $r['ht_total'] > 5) {
+                return null;
+            }
+            return 'over';
+        },
+    ],
     'K1' => [
         'label' => 'KONTROL: selalu Over',
         'pick'  => static fn(array $r) => 'over',
@@ -194,6 +246,70 @@ $RULES = [
         'pick'  => static fn(array $r) => 'under',
         'control' => true,
     ],
+];
+
+/**
+ * SABA tidak boleh mewarisi ambang R10/R11 V-Soccer mentah-mentah.
+ *
+ * Pada liga 15m/16m, nilai sinyal SABA lebih kecil sehingga syarat absolut
+ * "keduanya >= 1" terlalu keras. Pada 20m, sampel yang tersedia justru
+ * mendukung filter HT 4-5 seperti R10 lama. R11 juga memakai arah menit yang
+ * berbeda: liga pendek cenderung lebih baik dengan gol pertama yang relatif
+ * lebih lambat, sedangkan 20m dengan gol pertama yang relatif awal.
+ *
+ * Ini tetap monitor-only. V-Soccer memakai $RULES asli; tabel SABA memakai
+ * salinan ini sehingga dua pasar tidak saling mengubah definisi.
+ */
+$SABA_RULES = $RULES;
+$SABA_RULES['R10'] = [
+    'label' => 'SABA: 15/16m konsensus Over; 20m R8 + HT 4-5',
+    'pick' => static function (array $r) {
+        if ($r['heat'] === null) {
+            return null;
+        }
+        $signal = $r['ht_total'] - $r['demand'];
+        $durasi = $r['half_len'] ? (int)round($r['half_len'] * 2) : null;
+
+        if (in_array($durasi, [15, 16], true)) {
+            // Skala pendek: cukup dua indikator sama-sama positif.
+            return ($signal > 0 && $r['heat'] > 0) ? 'over' : null;
+        }
+        if ($durasi === 20) {
+            // Skala 20m: pertahankan filter HT tinggi yang teruji sementara.
+            if ($signal < 1 || $r['heat'] < 1 || $r['ht_total'] < 4 || $r['ht_total'] > 5) {
+                return null;
+            }
+            return 'over';
+        }
+        return null;
+    },
+];
+$SABA_RULES['R11'] = [
+    'label' => 'SABA: R10 + ambang menit lokal sesuai durasi',
+    'pick' => static function (array $r) {
+        // Aturan khusus SABA. Baris V-Soccer tidak punya first_goal_saba/half_len,
+        // jadi diperiksa keberadaannya dulu -- tanpa ini muncul ratusan warning
+        // saat $SABA_RULES kebetulan dijalankan pada data V-Soccer.
+        if (($r['first_goal_saba'] ?? null) === null || ($r['heat'] ?? null) === null
+            || empty($r['half_len'])) {
+            return null;
+        }
+        $signal = $r['ht_total'] - $r['demand'];
+        $durasi = $r['half_len'] ? (int)round($r['half_len'] * 2) : null;
+        // 15' skala sepakbola = sepertiga babak SABA, bukan menit literal.
+        $ambangLokal = $r['half_len'] / 3;
+
+        if (in_array($durasi, [15, 16], true)) {
+            $base = $signal > 0 && $r['heat'] > 0;
+            return ($base && $r['first_goal_saba'] > $ambangLokal) ? 'over' : null;
+        }
+        if ($durasi === 20) {
+            $base = $signal >= 1 && $r['heat'] >= 1
+                && $r['ht_total'] >= 4 && $r['ht_total'] <= 5;
+            return ($base && $r['first_goal_saba'] <= $ambangLokal) ? 'over' : null;
+        }
+        return null;
+    },
 ];
 
 /**
@@ -394,8 +510,8 @@ $days = array_values(array_unique(array_column($rows, 'day')));
 $results = runRules($RULES, $rows, $days);
 
 // ---------------------------------------------------------------- data SABA
-// Bentuk barisnya dibuat sama persis dengan V-Soccer, sehingga $RULES dan
-// evaluate() dipakai ulang tanpa perubahan.
+// Bentuk barisnya dibuat sama dengan V-Soccer, sehingga evaluate() tetap
+// dipakai ulang. Definisi R10/R11 SABA berasal dari $SABA_RULES di atas.
 
 /**
  * Panjang satu babak SABA dalam menit tampilan, dibaca dari nama liga
@@ -447,7 +563,7 @@ function sabaOdds(?string $teks): ?array
 }
 
 $sabaRows = [];
-$sabaStats = ['total' => 0, 'no_ht' => 0, 'bad_odds' => 0, 'no_ko' => 0];
+$sabaStats = ['total' => 0, 'no_ht' => 0, 'bad_odds' => 0, 'invalid_ht_line' => 0, 'no_ko' => 0];
 $sabaError = null;
 
 if (!is_file(SABA_FILE)) {
@@ -479,6 +595,12 @@ if (!is_file(SABA_FILE)) {
             $sabaStats['bad_odds']++;
             continue;
         }
+        // Line FT pada H.Time tidak mungkin berada di bawah jumlah gol yang
+        // sudah tercipta. Abaikan snapshot stale/mismatch agar ROI tidak bias.
+        if ($pasar['mid'] + 0.001 < $htTotal) {
+            $sabaStats['invalid_ht_line']++;
+            continue;
+        }
         $ko = sabaOdds($r[$si['ko_ou_ft']] ?? '');
         if (!$ko) {
             $sabaStats['no_ko']++;   // tetap dipakai; R6/R7/R8 saja yang melewatinya
@@ -488,11 +610,13 @@ if (!is_file(SABA_FILE)) {
         $halfLen = sabaHalfLength($liga);
 
         $golPertama = null;
+        $golPertamaSaba = null;
         if (isset($si['goal_minutes'])) {
             preg_match_all("/1H\\s+(\\d+)'/", (string)($r[$si['goal_minutes']] ?? ''), $gm);
             $menit1H = array_map('intval', $gm[1] ?? []);
             if ($menit1H) {
-                $golPertama = sabaMinuteTo90($halfLen, min($menit1H), '1H');
+                $golPertamaSaba = min($menit1H);
+                $golPertama = sabaMinuteTo90($halfLen, $golPertamaSaba, '1H');
             }
         }
 
@@ -545,10 +669,14 @@ if (!is_file(SABA_FILE)) {
             // Sudah diskalakan ke 90 menit, jadi ambang R3/R4 berlaku sama
             // seperti di V-Soccer. null kalau durasi liga tidak terbaca --
             // lebih baik aturannya melewati match itu daripada salah menyaring.
+            // first_goal dipakai untuk ambang skala-90 R3. R11 SABA memakai
+            // first_goal_saba agar label dan logikanya tetap dalam menit lokal.
             'first_goal' => $golPertama,
+            'first_goal_saba' => $golPertamaSaba,
             'first_2h' => $first2H,
             'heat' => $ko ? $htTotal - $ko['mid'] / 2 : null,
             'half_len' => $halfLen,
+            'league' => $liga,
         ];
     }
     if (isset($sf) && is_resource($sf)) {
@@ -557,7 +685,29 @@ if (!is_file(SABA_FILE)) {
 }
 usort($sabaRows, static fn($a, $b) => $a['ts'] <=> $b['ts']);
 $sabaDays = array_values(array_unique(array_column($sabaRows, 'day')));
-$sabaResults = $sabaRows ? runRules($RULES, $sabaRows, $sabaDays) : [];
+$sabaResults = $sabaRows ? runRules($SABA_RULES, $sabaRows, $sabaDays) : [];
+
+// SABA tidak boleh dibaca sebagai satu pasar homogen: liga 15m, 16m, dan 20m
+// punya tempo serta jendela gol berbeda. Simpan evaluasi per durasi supaya
+// hasil satu durasi tidak menutupi durasi lain.
+$sabaPerDurasi = [];
+foreach ($sabaRows as $r) {
+    $durasi = $r['half_len'] ? (string)(int)($r['half_len'] * 2) : 'lain';
+    $sabaPerDurasi[$durasi][] = $r;
+}
+uksort($sabaPerDurasi, static function ($a, $b): int {
+    if ($a === 'lain') return 1;
+    if ($b === 'lain') return -1;
+    return (int)$a <=> (int)$b;
+});
+foreach ($sabaPerDurasi as $durasi => $items) {
+    $hariDurasi = array_values(array_unique(array_column($items, 'day')));
+    $sabaPerDurasi[$durasi] = [
+        'rows' => $items,
+        'days' => $hariDurasi,
+        'results' => runRules($SABA_RULES, $items, $hariDurasi),
+    ];
+}
 
 // Durasi liga yang benar-benar ada di data, untuk menerjemahkan ambang menit.
 $sabaDurasi = [];
@@ -585,6 +735,12 @@ $sabaLabel = [];
 if ($sabaDurasi) {
     $sabaLabel['R3'] = 'R1 + gol pertama ≤ ' . sabaAmbang($sabaDurasi, R3_FIRST_GOAL_MAX);
     $sabaLabel['R4'] = 'Gol 2H ≤ ' . sabaAmbang($sabaDurasi, R4_FIRST_2H_MAX, '2H') . ' → Over (line saat gol itu)';
+    $r11Ambang = [];
+    foreach ($sabaDurasi as $total => $halfLen) {
+        $operator = (int)$total === 20 ? '≤' : '>';
+        $r11Ambang[] = $operator . ' ' . number_format($halfLen / 3, 1, ',', '.') . "' (liga {$total}m)";
+    }
+    $sabaLabel['R11'] = 'R10 + gol pertama ' . implode(' / ', $r11Ambang) . ' → Over';
 }
 
 // Hubungan gol 1H vs gol 2H: dasar mekanisme R1/R2. Kalau r mengecil ke nol,
@@ -859,16 +1015,62 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
   <?php if (!$sabaRows && $sabaError === null): ?>
     <div class="card empty" style="margin-top:12px">
       Belum ada match SABA yang siap dipakai (dari <?= $sabaStats['total'] ?> baris:
-      <?= $sabaStats['no_ht'] ?> tanpa skor HT, <?= $sabaStats['bad_odds'] ?> odds H.Time tidak sah).
+      <?= $sabaStats['no_ht'] ?> tanpa skor HT, <?= $sabaStats['bad_odds'] ?> odds H.Time tidak sah,
+      <?= $sabaStats['invalid_ht_line'] ?> line H.Time di bawah skor HT).
     </div>
   <?php elseif ($sabaRows): ?>
   <section class="section">
-    <h2>Performa aturan (seluruh data)</h2>
+    <h2>Performa aturan per durasi SABA</h2>
+    <p class="hint">Evaluasi dipisah berdasarkan durasi liga. Jangan mencampur 15m, 16m, dan 20m saat mengambil keputusan.</p>
+    <p class="hint"><b>R10/R11 SABA dikalibrasi terpisah:</b> 15m/16m memakai konsensus positif
+      tanpa ambang absolut 1; 20m tetap memakai HT 4-5. Menit R11 juga mengikuti durasi.
+      Ini hanya evaluasi monitor, bukan sinyal live.</p>
+    <?php foreach ($sabaPerDurasi as $durasi => $bagian):
+        $hasilDurasi = $bagian['results'];
+        $hariDurasi = $bagian['days'];
+        $labelDurasi = $durasi === 'lain' ? 'durasi tidak dikenal' : $durasi . ' menit'; ?>
+    <div class="market-head">
+      <h2>SABA <?= e($labelDurasi) ?></h2>
+      <span class="src"><?= count($bagian['rows']) ?> match · <?= count($hariDurasi) ?> hari</span>
+    </div>
+    <div class="tablebox"><table>
+      <thead><tr>
+        <th>Kode</th><th>Aturan</th><th class="num">n</th><th class="num">Menang</th>
+        <th class="num">Win rate</th><th class="num">CI 95%</th><th class="num">Breakeven</th>
+        <th class="num">P&amp;L</th><th class="num">ROI</th><th class="num">Hari +</th><th>Terbukti</th>
+      </tr></thead>
+      <tbody>
+      <?php foreach ($hasilDurasi as $code => $res) {
+          echo barisAturan($code, $res, count($hariDurasi), $sabaLabel);
+      } ?>
+      </tbody>
+    </table></div>
+    <h3 style="margin:14px 0 4px;font-size:14px">ROI per hari — SABA <?= e($labelDurasi) ?></h3>
+    <?php if (!$hariDurasi): ?>
+      <div class="card empty">Belum ada data harian.</div>
+    <?php else: ?>
+    <div class="tablebox"><table>
+      <thead><tr><th>Kode</th><th>Aturan</th>
+        <?php foreach ($hariDurasi as $d): ?><th class="num"><?= e(substr($d, 0, 5)) ?></th><?php endforeach; ?>
+      </tr></thead>
+      <tbody>
+      <?php foreach ($hasilDurasi as $code => $res) {
+          echo barisHarian($code, $res, $hariDurasi, $sabaLabel);
+      } ?>
+      </tbody>
+    </table></div>
+    <?php endif; ?>
+    <?php endforeach; ?>
+  </section>
+
+  <section class="section">
+    <h2>Gabungan semua durasi (referensi saja)</h2>
     <p class="hint">
       <?= count($sabaRows) ?> match siap dipakai dari <?= $sabaStats['total'] ?> baris ·
-      dibuang: <?= $sabaStats['no_ht'] ?> tanpa skor HT, <?= $sabaStats['bad_odds'] ?> odds H.Time tidak sah/terkunci ·
+      dibuang: <?= $sabaStats['no_ht'] ?> tanpa skor HT, <?= $sabaStats['bad_odds'] ?> odds H.Time tidak sah/terkunci,
+      <?= $sabaStats['invalid_ht_line'] ?> line H.Time di bawah skor HT ·
       <?= $sabaStats['no_ko'] ?> tanpa odds kickoff (R6–R8 melewatinya).
-      Ambang menit di R3/R4 sudah diterjemahkan ke jam SABA.
+      Ambang menit di R3/R4 sudah diterjemahkan ke jam SABA. Gunakan tabel per durasi di atas untuk keputusan.
     </p>
     <div class="tablebox"><table>
       <thead><tr>
@@ -885,7 +1087,7 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
   </section>
 
   <section class="section">
-    <h2>ROI per hari — ini ukuran konsistensi</h2>
+    <h2>ROI per hari — gabungan semua durasi (referensi)</h2>
     <div class="tablebox"><table>
       <thead><tr><th>Kode</th><th>Aturan</th>
         <?php foreach ($sabaDays as $d): ?><th class="num"><?= e(substr($d, 0, 5)) ?></th><?php endforeach; ?>

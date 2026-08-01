@@ -14,10 +14,56 @@
  */
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 date_default_timezone_set('Asia/Jakarta');
 
 const COCOK_JAM = 3;          // toleransi pencocokan sinyal <-> hasil akhir (jam)
 const STAKE = 1.0;            // 1 satuan per sinyal
+const SUPERFAM_HIGH_TOTAL_MIN = 5;
+const SUPERFAM_HIGH_TOTAL_MIN_LINE = 6.5;
+const SUPER2_FIRST_GOAL_MAX = 8;
+const SUPER2_MIN_LINE = 7.25;
+const SUPER2_TOTAL5_SECOND_GOAL_MIN = 9;
+const SUPER2_TOTAL5_SECOND_GOAL_MAX = 30;
+const SUPER2_DRAW4_SECOND_GOAL_MIN = 14;
+const SUPER2_DRAW4_SECOND_GOAL_MAX = 30;
+const SUPER2_TOTAL3_FIRST_GOAL_MAX = 6;
+const SUPER2_HIGH_TOTAL_MIN = 7;
+const SUPER2_HIGH_TOTAL_MIN_LINE = 7.5;
+const SUPER2_LAST_1H_MAX = 44;
+const P2_FIRST_GOAL_MAX = 15;
+const P2_MIN_LINE = 5.75;
+const P2_MAX_LINE = 7.5;
+const P2_EARLY_FIRST_GOAL_MAX = 4;
+const P2_EARLY_MIN_LINE = 7.25;
+const P3_FIRST_GOAL_MIN = 5;
+const P3_FIRST_GOAL_MAX = 9;
+const P3_MIN_LINE = 5.5;
+const P3_MAX_LINE = 7.5;
+const P3_ONE_SIDED_MIN_LINE = 6.5;
+const P11_FIRST_GOAL_MAX = 12;
+const P11_MIN_LINE = 5.75;
+const P11_MAX_LINE = 7.5;
+const P11_EARLY_FIRST_GOAL_MAX = 4;
+const P11_EARLY_MIN_LINE = 7.25;
+const P11_ONE_SIDED_MIN_LINE = 7.5;
+const P1_FIRST_GOAL_MAX = 12;
+const P1_MIN_LINE = 5.75;
+const P1_LOW_TOTAL_FIRST_GOAL_MAX = 6;
+const P1_HIGH_TOTAL_SECOND_GOAL_MIN = 9;
+const P1_HIGH_TOTAL_SECOND_GOAL_EARLY_MAX = 18;
+const P1_HIGH_TOTAL_SECOND_GOAL_MAX = 28;
+const P1_HIGH_TOTAL_LAST_GOAL_MIN = 40;
+const P1_TOTAL3_MAX_LINE = 7.5;
+const P1_TOTAL3_EARLY_FIRST_MAX = 4;
+const P1_TOTAL3_EARLY_MIN_LINE = 7.25;
+const P1_TOTAL3_LAST_GOAL_MIN = 20;
+const P1_LAST_1H_MAX = 34;
+const P1_MAX_TOTAL_HT = 5;
+const P4_FIRST_GOAL_MIN = 30;
+const P4_MIN_LINE = 5.5;
+const SUPER4_SECOND_GOAL_MIN = 16;
 
 function e($v): string { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 
@@ -28,11 +74,150 @@ function midline($v): ?float
     return $p ? array_sum(array_map('floatval', $p)) / count($p) : null;
 }
 
+function scorePair($v): ?array
+{
+    if (!preg_match('/^\\s*(\\d+)\\s*-\\s*(\\d+)\\s*$/', (string)$v, $m)) return null;
+    return [(int)$m[1], (int)$m[2]];
+}
+
+function passesSuper2(array $row, array $ix, array $firstHalfMinutes): bool
+{
+    $score = scorePair($row[$ix['ht']] ?? '');
+    if ($score === null || !$firstHalfMinutes) return false;
+    [$htHome, $htAway] = $score;
+    if (abs($htHome - $htAway) > 1) return false;
+
+    $firstGoal = $firstHalfMinutes[0];
+    $secondGoal = $firstHalfMinutes[1] ?? null;
+    $lastGoal = $firstHalfMinutes[count($firstHalfMinutes) - 1];
+    $koLine = midline($row[$ix['ko_line']] ?? '');
+    $totalHt = $htHome + $htAway;
+
+    if ($firstGoal > SUPER2_FIRST_GOAL_MAX || $koLine === null || $koLine < SUPER2_MIN_LINE) return false;
+    if ($totalHt >= SUPERFAM_HIGH_TOTAL_MIN && $koLine < SUPERFAM_HIGH_TOTAL_MIN_LINE) return false;
+    if ($totalHt === 5 && ($secondGoal === null
+        || $secondGoal < SUPER2_TOTAL5_SECOND_GOAL_MIN
+        || $secondGoal > SUPER2_TOTAL5_SECOND_GOAL_MAX)) return false;
+    if ($htHome === $htAway && $totalHt === 4 && ($secondGoal === null
+        || $secondGoal < SUPER2_DRAW4_SECOND_GOAL_MIN
+        || $secondGoal > SUPER2_DRAW4_SECOND_GOAL_MAX)) return false;
+    if ($totalHt === 3 && $firstGoal > SUPER2_TOTAL3_FIRST_GOAL_MAX) return false;
+    if ($totalHt >= SUPER2_HIGH_TOTAL_MIN && $koLine < SUPER2_HIGH_TOTAL_MIN_LINE) return false;
+    if ($lastGoal > SUPER2_LAST_1H_MAX) return false;
+    return true;
+}
+
+function passesP2(array $row, array $ix, array $firstHalfMinutes): bool
+{
+    $score = scorePair($row[$ix['ht']] ?? '');
+    $koLine = midline($row[$ix['ko_line']] ?? '');
+    if ($score === null || !$firstHalfMinutes || $koLine === null) return false;
+    [$htHome, $htAway] = $score;
+    $firstGoal = $firstHalfMinutes[0];
+    return (($htHome === 2 && $htAway === 1) || ($htHome === 1 && $htAway === 2))
+        && $firstGoal <= P2_FIRST_GOAL_MAX
+        && $koLine >= P2_MIN_LINE
+        && $koLine <= P2_MAX_LINE
+        && ($firstGoal > P2_EARLY_FIRST_GOAL_MAX || $koLine >= P2_EARLY_MIN_LINE);
+}
+
+function passesP3(array $row, array $ix, array $firstHalfMinutes): bool
+{
+    $score = scorePair($row[$ix['ht']] ?? '');
+    $koLine = midline($row[$ix['ko_line']] ?? '');
+    if ($score === null || !$firstHalfMinutes || $koLine === null) return false;
+    [$htHome, $htAway] = $score;
+    $firstGoal = $firstHalfMinutes[0];
+    return ($htHome + $htAway) === 3
+        && $firstGoal >= P3_FIRST_GOAL_MIN
+        && $firstGoal <= P3_FIRST_GOAL_MAX
+        && $koLine >= P3_MIN_LINE
+        && $koLine <= P3_MAX_LINE
+        && (abs($htHome - $htAway) !== 3 || $koLine >= P3_ONE_SIDED_MIN_LINE);
+}
+
+function passesP11(array $row, array $ix, array $firstHalfMinutes): bool
+{
+    $score = scorePair($row[$ix['ht']] ?? '');
+    $koLine = midline($row[$ix['ko_line']] ?? '');
+    if ($score === null || !$firstHalfMinutes || $koLine === null) return false;
+    [$htHome, $htAway] = $score;
+    $firstGoal = $firstHalfMinutes[0];
+    return ($htHome + $htAway) === 3
+        && $firstGoal <= P11_FIRST_GOAL_MAX
+        && $koLine >= P11_MIN_LINE
+        && $koLine <= P11_MAX_LINE
+        && ($firstGoal > P11_EARLY_FIRST_GOAL_MAX || $koLine >= P11_EARLY_MIN_LINE)
+        && (abs($htHome - $htAway) !== 3 || $koLine >= P11_ONE_SIDED_MIN_LINE);
+}
+
+function passesP1(array $row, array $ix, array $firstHalfMinutes): bool
+{
+    $score = scorePair($row[$ix['ht']] ?? '');
+    $koLine = midline($row[$ix['ko_line']] ?? '');
+    if ($score === null || !$firstHalfMinutes || $koLine === null) return false;
+    [$htHome, $htAway] = $score;
+    $firstGoal = $firstHalfMinutes[0];
+    $secondGoal = $firstHalfMinutes[1] ?? null;
+    $lastGoal = $firstHalfMinutes[count($firstHalfMinutes) - 1];
+    $totalHt = $htHome + $htAway;
+    return abs($htHome - $htAway) === 1
+        && $firstGoal <= P1_FIRST_GOAL_MAX
+        && $koLine >= P1_MIN_LINE
+        && $totalHt <= P1_MAX_TOTAL_HT
+        && $lastGoal <= P1_LAST_1H_MAX
+        && ($totalHt !== 1 || $firstGoal <= P1_LOW_TOTAL_FIRST_GOAL_MAX)
+        && ($totalHt !== 3 || ($koLine <= P1_TOTAL3_MAX_LINE
+            && ($firstGoal > P1_TOTAL3_EARLY_FIRST_MAX || $koLine >= P1_TOTAL3_EARLY_MIN_LINE)
+            && $lastGoal >= P1_TOTAL3_LAST_GOAL_MIN))
+        && ($totalHt !== 5 || ($secondGoal !== null
+            && $secondGoal >= P1_HIGH_TOTAL_SECOND_GOAL_MIN
+            && ($secondGoal <= P1_HIGH_TOTAL_SECOND_GOAL_EARLY_MAX
+                || ($secondGoal <= P1_HIGH_TOTAL_SECOND_GOAL_MAX
+                    && $lastGoal >= P1_HIGH_TOTAL_LAST_GOAL_MIN))));
+}
+
+function passesP4(array $row, array $ix, array $firstHalfMinutes): bool
+{
+    $score = scorePair($row[$ix['ht']] ?? '');
+    $koLine = midline($row[$ix['ko_line']] ?? '');
+    if ($score === null || !$firstHalfMinutes || $koLine === null) return false;
+    [$htHome, $htAway] = $score;
+    return $htHome === 1
+        && $htAway === 1
+        && $firstHalfMinutes[0] >= P4_FIRST_GOAL_MIN
+        && $koLine >= P4_MIN_LINE;
+}
+
 function pct(?float $v): string { return $v === null ? '–' : number_format($v, 1, ',', '.') . '%'; }
 
 function patternLabel(string $code): string
 {
-    return $code === 'HAH' ? 'HAH (aturan lama)' : $code;
+    if ($code === 'HAH+') {
+        return "HAH+ (aturan baru: Home–Away–Home, HT 2-1)";
+    }
+    if ($code === 'P2') {
+        return "P2 (HT 2-1/1-2, gol-1 ≤15', line 5,75–7,5)";
+    }
+    if ($code === 'P3') {
+        return "P3 (HT 3, gol-1 5'–9', line 5,5–7,5)";
+    }
+    if ($code === 'P11') {
+        return "P11 (HT 3, gol-1 ≤12', line 5,75–7,5)";
+    }
+    if ($code === 'SUPER2') {
+        return "SUPER2 (HT ≤1, gol-1 ≤8', line awal ≥7,25, gol terakhir 1H ≤" . SUPER2_LAST_1H_MAX . "')";
+    }
+    if ($code === 'SUPER4') {
+        return "SUPER4 (HT 5, X–Y–X–X, gol-2 1H ≥ " . SUPER4_SECOND_GOAL_MIN . "')";
+    }
+    if ($code === 'P1') {
+        return "P1 (selisih HT 1, gol-1 ≤12', gol terakhir 1H ≤" . P1_LAST_1H_MAX . "', line awal ≥5,75)";
+    }
+    if ($code === 'P4') {
+        return "P4 (HT 1-1, gol-1 ≥" . P4_FIRST_GOAL_MIN . "', line awal ≥5,5)";
+    }
+    return $code;
 }
 
 function wilson95(int $hits, int $total): array
@@ -46,7 +231,7 @@ function wilson95(int $hits, int $total): array
 }
 
 // ---- hasil akhir tiap match ------------------------------------------------
-$hasil = [];   // "home|away" => [[timestamp, total gol], ...]
+$hasil = [];   // "home|away" => [[timestamp, total gol, menit gol 1H], ...]
 $logFile = __DIR__ . '/goal_log_vsoccer.csv';
 if (is_file($logFile) && ($fh = fopen($logFile, 'r')) !== false) {
     $hdr = fgetcsv($fh);
@@ -58,7 +243,18 @@ if (is_file($logFile) && ($fh = fopen($logFile, 'r')) !== false) {
         $dt = DateTime::createFromFormat('d/m/Y H:i', trim((string)($row[$ix['datetime']] ?? '')));
         if (!$dt) continue;
         $k = trim((string)$row[$ix['home_team']]) . '|' . trim((string)$row[$ix['away_team']]);
-        $hasil[$k][] = [$dt->getTimestamp(), (int)round((float)$fhome + (float)$faway)];
+        $goalMinutes = isset($ix['goal_minutes'])
+            ? trim((string)($row[$ix['goal_minutes']] ?? ''))
+            : '';
+        $firstHalfMinutes = [];
+        if ($goalMinutes !== '' && preg_match_all("/1H\s+(\d+)'/i", $goalMinutes, $m)) {
+            $firstHalfMinutes = array_map('intval', $m[1]);
+        }
+        $hasil[$k][] = [
+            $dt->getTimestamp(),
+            (int)round((float)$fhome + (float)$faway),
+            $firstHalfMinutes,
+        ];
     }
     fclose($fh);
 }
@@ -74,6 +270,8 @@ if (!is_file($sigFile)) {
     $hdr = fgetcsv($fh);
     $ix = array_flip($hdr ?: []);
     while (($row = fgetcsv($fh)) !== false) {
+        $code = trim((string)($row[$ix['code']] ?? ''));
+        if ($code === 'HAH') continue; // jangan campur sinyal dengan aturan lama
         $home = trim((string)($row[$ix['home_team']] ?? ''));
         $away = trim((string)($row[$ix['away_team']] ?? ''));
         if ($home === '' || $home === 'A') continue;          // baris uji
@@ -84,16 +282,43 @@ if (!is_file($sigFile)) {
         $odds = (float)($row[$ix['live_over']] ?? 0);
         if ($live === null || $odds <= 1) continue;
 
-        $totalFt = null; $selisih = PHP_INT_MAX;
-        foreach ($hasil[$home . '|' . $away] ?? [] as [$ts, $tot]) {
+        $totalFt = null; $firstHalfMinutes = []; $selisih = PHP_INT_MAX;
+        foreach ($hasil[$home . '|' . $away] ?? [] as [$ts, $tot, $goalMins]) {
             $d = abs($dt->getTimestamp() - $ts);
-            if ($d <= COCOK_JAM * 3600 && $d < $selisih) { $selisih = $d; $totalFt = $tot; }
+            if ($d <= COCOK_JAM * 3600 && $d < $selisih) {
+                $selisih = $d;
+                $totalFt = $tot;
+                $firstHalfMinutes = $goalMins;
+            }
         }
         if ($totalFt === null) { $tanpaHasil++; continue; }
 
+        $secondGoal1H = $firstHalfMinutes[1] ?? null;
+        if ($code === 'P2' && !passesP2($row, $ix, $firstHalfMinutes)) {
+            continue;
+        }
+        if ($code === 'P3' && !passesP3($row, $ix, $firstHalfMinutes)) {
+            continue;
+        }
+        if ($code === 'P11' && !passesP11($row, $ix, $firstHalfMinutes)) {
+            continue;
+        }
+        if ($code === 'P1' && !passesP1($row, $ix, $firstHalfMinutes)) {
+            continue;
+        }
+        if ($code === 'P4' && !passesP4($row, $ix, $firstHalfMinutes)) {
+            continue;
+        }
+        if ($code === 'SUPER2' && !passesSuper2($row, $ix, $firstHalfMinutes)) {
+            continue;
+        }
+        if ($code === 'SUPER4' && ($secondGoal1H === null || $secondGoal1H < SUPER4_SECOND_GOAL_MIN)) {
+            continue;
+        }
+
         $menang = $totalFt > $live;
         $taruhan[] = [
-            'code' => trim((string)($row[$ix['code']] ?? '')),
+            'code' => $code,
             'ts' => $dt->getTimestamp(),
             'waktu' => $dt->format('d/m H:i'),
             'match' => $home . ' vs ' . $away,

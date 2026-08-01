@@ -895,7 +895,6 @@ datetime,league,home_team,away_team,goals,final_home,final_away,1h3,2h1,2h7,ko_m
 "01/08/2026 12:47","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Manchester United (V)","Getafe CF (V)","1H 7' (1-0) | 2H 3' (2-0) | 2H 6' (2-1)",2,1,OK,OK,OK,,,,,,,,
 "01/08/2026 13:16","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","Song Lam Nghe An (V)","Becamex Binh Duong (V)","1H 3' (0-1)",0,1,OK,OK,OK,,,,,"FT. O/U",1.75,1.73,2.03
 "01/08/2026 13:01","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Olympique de Marseille (V)","FSV Mainz 05 (V)","1H 6' (1-0) | 2H 4' (1-1) | 2H 5' (1-2) | 2H 5' (2-2)",2,2,OK,OK,OK,,,,,,,,
-"01/08/2026 13:19","SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play","Colombia (V)","Portugal (V)",,0,0,,,,,,,,"FT. O/U",0.5,2.20,1.63
 "01/08/2026 13:16","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","Ha Noi FC (V)","Nam Dinh (V)","1H 3' (0-1) | 1H 4' (0-2) | 1H 6' (0-3)",0,3,OK,OK,OK,,,,,"FT. O/U",3.5,1.90,1.86
 "01/08/2026 13:02","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Spain (V)","Russia (V)","1H 0' (1-0) | 1H 4' (1-1) | 2H 8' (2-1)",2,1,OK,OK,OK,,,,,,,,
 "01/08/2026 13:17","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Denmark (V)","Nigeria (V)","1H 4' (0-1) | 1H 9' (1-1)",1,1,OK,OK,OK,,,,,"FT. O/U",3.5,2.01,1.75
@@ -903,13 +902,11 @@ datetime,league,home_team,away_team,goals,final_home,final_away,1h3,2h1,2h7,ko_m
 "01/08/2026 13:16","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Arsenal (V)","Inter Milan (V)","1H 2' (1-0) | 1H 6' (1-1) | 2H 3' (1-2)",1,2,OK,OK,OK,,,,,,,,
 "01/08/2026 13:32","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Romania (V)","Israel (V)",,0,0,OK,OK,OK,"FT. O/U",2.25,1.81,1.95,"FT. O/U",1,1.78,1.98
 "01/08/2026 13:15","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Hungary (V)","Wales  (V)","1H 4' (1-0) | 1H 7' (1-1) | 2H 4' (1-2)",1,2,OK,OK,OK,,,,,,,,
-"01/08/2026 13:36","SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play","Manchester United (V)","Liverpool (V)",,0,0,,,,,,,,"FT. O/U",0.5,1.52,2.39
 "01/08/2026 13:17","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Germany (V)","Bosnia-Herzegovina (V)","1H 4' (1-0) | 1H 10' (2-0) | 2H 4' (2-1) | 2H 7' (3-1)",3,1,OK,OK,OK,,,,,,,,
 "01/08/2026 13:31","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Real Sociedad (V)","AC Milan (V)","2H 3' (0-1)",0,1,OK,OK,OK,,,,,,,,
 "01/08/2026 13:31","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Bayer 04 Leverkusen (V)","Lille OSC (V)","1H 3' (1-0) | 1H 7' (1-1) | 2H 7' (2-1)",2,1,OK,OK,OK,,,,,,,,
 "01/08/2026 13:31","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Napoli (V)","Real Madrid (V)","1H 1' (0-1) | 1H 5' (1-1) | 2H 7' (2-1)",2,1,OK,OK,OK,,,,,,,,
 "01/08/2026 13:32","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Croatia (V)","Austria (V)","2H 3' (1-0) | 2H 9' (2-0)",2,0,OK,OK,OK,,,,,,,,
-"01/08/2026 14:00","SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play","Switzerland (V)","Denmark (V)",,0,0,OK,OK,,"FT. O/U",0.5,1.81,1.99,"FT. O/U",0.5,2.56,1.44
 "01/08/2026 13:44","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","USA (V)","Morocco (V)","2H 2' (0-1)",0,1,OK,OK,OK,"FT. O/U",2,2.01,1.75,,,,
 "01/08/2026 13:46","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Bayern Munchen (V)","Udinese (V)","1H 3' (1-0) | 2H 5' (2-0)",2,0,OK,OK,OK,,,,,,,,
 "01/08/2026 13:46","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","AS Monaco (V)","AS Roma (V)","2H 4' (0-1) | 2H 4' (1-1) | 2H 7' (1-2)",1,2,OK,OK,OK,,,,,,,,
@@ -922,15 +919,138 @@ datetime,league,home_team,away_team,goals,final_home,final_away,1h3,2h1,2h7,ko_m
 "01/08/2026 14:01","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Atletico de Madrid (V)","Manchester United (V)","1H 6' (0-1) | 2H 3' (0-2) | 2H 7' (1-2)",1,2,OK,OK,OK,,,,,,,,
 "01/08/2026 14:16","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Manchester City (V)","AC Milan (V)","1H 3' (1-0)",1,0,OK,OK,,"FT. O/U",2.25,1.73,2.03,"FT. O/U",2.25,1.80,1.96
 "01/08/2026 14:25","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","Ho Chi Minh City FC (V)","Cong An Ha Noi FC (V)","1H 6' (0-1)",0,1,OK,OK,,,,,,"FT. O/U",1.5,2.03,1.73
-"01/08/2026 14:30","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Mexico (V)","Finland (V)",,0,0,OK,OK,,"FT. O/U",2.25,1.85,1.91,,,,
-"01/08/2026 14:30","SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play","Switzerland (V)","Denmark (V)",,0,0,,,,"FT. O/U",0.5,1.81,1.99,"FT. O/U",0.5,2.52,1.46
 "01/08/2026 14:41","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Valencia CF (V)","Real Sociedad (V)","2H 1' (1-0)",1,0,OK,OK,,"FT. O/U",2,2.03,1.73,,,,
 "01/08/2026 14:41","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Real Madrid (V)","Arsenal (V)","1H 7' (1-0) | 2H 0' (1-1)",1,1,OK,OK,,"FT. O/U",3.25,1.86,1.90,,,,
 "01/08/2026 14:43","SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play","PSV Eindhoven (V)","Ajax (V)","1H 0' (0-1)",0,1,,,,,,,,,,,
-"01/08/2026 15:02","SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play","Barcelona (V)","Real Madrid (V)",,0,0,,,,"FT. O/U",0.5,1.86,1.94,"FT. O/U",0.5,2.09,1.72
-"01/08/2026 15:02","SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play","Germany (V)","Spain (V)",,0,0,,,,"FT. O/U",0.5,2.32,1.56,"FT. O/U",0.5,2.32,1.56
-"01/08/2026 15:02","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Ghana (V)","Argentina (V)",,0,0,,,,"FT. O/U",2.75,1.87,1.89,,,,
-"01/08/2026 15:02","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Getafe CF (V)","Atalanta (V)",,0,0,,,,"FT. O/U",2,1.89,1.87,,,,
-"01/08/2026 15:02","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Bosnia-Herzegovina (V)","Algeria (V)",,0,0,,,,"FT. O/U",3.25,1.91,1.85,,,,
-"01/08/2026 15:02","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Tunisia (V)","Israel (V)",,0,0,,,,"FT. O/U",2.5,1.89,1.87,,,,
-"01/08/2026 15:02","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Atletico de Madrid (V)","AS Roma (V)","1H 1' (1-0)",1,0,,,,,,,,,,,
+"01/08/2026 15:02","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Getafe CF (V)","Atalanta (V)",,0,0,OK,OK,OK,"FT. O/U",2,1.89,1.87,"FT. O/U",1,1.71,2.05
+"01/08/2026 15:02","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Bosnia-Herzegovina (V)","Algeria (V)","1H 4' (1-0) | 1H 7' (1-1) | 1H 7' (2-1)",2,1,OK,OK,OK,"FT. O/U",4.75,1.89,1.87,"FT. O/U",4.5,1.82,1.94
+"01/08/2026 15:17","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Georgia (V)","Cyprus (V)",,0,0,OK,OK,OK,"FT. O/U",2,1.73,2.03,"FT. O/U",1,1.84,1.92
+"01/08/2026 15:14","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Ghana (V)","Argentina (V)","2H 4' (0-1) | 2H 7' (0-2)",0,2,OK,OK,OK,,,,,,,,
+"01/08/2026 15:16","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","Hong Linh Ha Tinh (V)","Becamex Binh Duong (V)","1H 3' (0-1) | 1H 6' (0-2)",0,2,OK,OK,OK,,,,,"FT. O/U",2.75,1.77,1.99
+"01/08/2026 15:16","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","AS Monaco (V)","Olympique de Marseille (V)","2H 2' (1-0)",1,0,OK,OK,OK,"FT. O/U",1.75,1.72,2.04,,,,
+"01/08/2026 15:15","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Poland (V)","Morocco (V)","1H 0' (1-0) | 2H 3' (2-0)",2,0,OK,OK,OK,,,,,,,,
+"01/08/2026 15:16","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","CA Osasuna (V)","Manchester United (V)","1H 3' (0-1) | 2H 3' (0-2)",0,2,OK,OK,OK,,,,,,,,
+"01/08/2026 15:16","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","Ha Noi FC (V)","Hoang Anh Gia Lai (V)","1H 3' (1-0) | 2H 6' (2-0)",2,0,OK,OK,OK,,,,,,,,
+"01/08/2026 15:31","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Arsenal (V)","Lazio (V)","1H 1' (1-0) | 1H 3' (1-1) | 1H 5' (1-2)",1,2,OK,OK,OK,,,,,"FT. O/U",4,1.70,2.06
+"01/08/2026 15:31","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Bayer 04 Leverkusen (V)","Bayern Munchen (V)","1H 4' (0-1) | 1H 4' (1-1) | 1H 6' (2-1)",2,1,OK,OK,OK,,,,,"FT. O/U",4.25,2.01,1.75
+"01/08/2026 15:31","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Real Sociedad (V)","Udinese (V)","1H 0' (0-1) | 1H 1' (1-1) | 1H 6' (1-2)",1,2,OK,OK,OK,,,,,"FT. O/U",4,1.79,1.97
+"01/08/2026 15:17","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Korea Republic (V)","Finland (V)","2H 5' (0-1) | 2H 8' (0-2)",0,2,OK,OK,OK,,,,,,,,
+"01/08/2026 15:30","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Germany (V)","Portugal (V)","2H 0' (1-0)",1,0,OK,OK,OK,"FT. O/U",2.5,1.92,1.84,,,,
+"01/08/2026 15:32","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Switzerland (V)","Poland (V)","1H 2' (0-1) | 1H 8' (0-2)",0,2,OK,OK,OK,,,,,"FT. O/U",3.25,2.05,1.71
+"01/08/2026 15:31","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Chelsea (V)","Everton (V)","1H 1' (1-0) | 1H 6' (2-0) | 2H 2' (3-0)",3,0,OK,OK,OK,"FT. O/U",3.75,1.79,1.97,,,,
+"01/08/2026 15:47","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Brazil (V)","Czech Republic (V)",,0,0,OK,OK,OK,"FT. O/U",2.25,1.79,1.97,"FT. O/U",1.25,1.95,1.81
+"01/08/2026 15:46","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Barcelona (V)","Tottenham Hotspur (V)","1H 3' (0-1) | 1H 4' (1-1) | 1H 5' (1-2) | 1H 5' (1-3)",1,3,OK,OK,OK,,,,,"FT. O/U",5.25,1.79,1.97
+"01/08/2026 15:47","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Tunisia (V)","Austria (V)","1H 9' (0-1)",0,1,OK,OK,OK,,,,,"FT. O/U",2.25,1.87,1.89
+"01/08/2026 15:45","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Hungary (V)","Croatia (V)","1H 3' (0-1) | 1H 3' (1-1) | 1H 5' (1-2) | 2H 0' (1-3)",1,3,OK,OK,OK,"FT. O/U",5.25,2.02,1.74,,,,
+"01/08/2026 15:46","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Getafe CF (V)","Manchester City (V)","2H 6' (0-1) | 2H 7' (1-1)",1,1,OK,OK,OK,,,,,,,,
+"01/08/2026 16:07","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Argentina (V)","Slovakia (V)","1H 5' (1-0)",1,0,OK,OK,OK,,,,,"FT. O/U",2.25,1.79,1.97
+"01/08/2026 16:00","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","New Zealand (V)","Wales  (V)","2H 3' (0-1)",0,1,OK,OK,OK,,,,,,,,
+"01/08/2026 16:16","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","Hai Phong FC (V)","Song Lam Nghe An (V)",,0,0,OK,OK,OK,"FT. O/U",1.75,1.80,1.96,"FT. O/U",0.75,1.80,1.96
+"01/08/2026 16:05","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Atletico de Madrid (V)","CA Osasuna (V)","2H 0' (1-0)",1,0,OK,OK,OK,"FT. O/U",2,1.97,1.79,,,,
+"01/08/2026 16:16","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","Nam Dinh (V)","Hong Linh Ha Tinh (V)","1H 0' (1-0) | 1H 5' (1-1)",1,1,OK,OK,OK,,,,,"FT. O/U",2.75,1.86,1.90
+"01/08/2026 16:16","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Leicester City (V)","FSV Mainz 05 (V)","1H 3' (1-0) | 2H 1' (1-1)",1,1,OK,OK,OK,"FT. O/U",2.75,1.76,2.00,,,,
+"01/08/2026 16:07","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Sweden (V)","Portugal (V)","1H 1' (1-0) | 1H 3' (2-0) | 1H 8' (2-1) | 2H 9' (2-2)",2,2,OK,OK,OK,,,,,,,,
+"01/08/2026 16:17","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Philippines (V)","Oman (V)","1H 3' (0-1) | 1H 4' (1-1) | 2H 8' (1-2)",1,2,OK,OK,OK,,,,,,,,
+"01/08/2026 16:46","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Torino (V)","CA Osasuna (V)",,0,0,OK,OK,OK,"FT. O/U",2,2.00,1.76,"FT. O/U",1,2.03,1.73
+"01/08/2026 16:17","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","USA (V)","Germany (V)","2H 9' (0-1) | 2H 9' (0-2) | 2H 10' (0-3)",0,3,OK,OK,OK,,,,,,,,
+"01/08/2026 16:31","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Getafe CF (V)","Valencia CF (V)","2H 3' (1-0) | 2H 6' (2-0)",2,0,OK,OK,OK,,,,,,,,
+"01/08/2026 16:45","SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play","Inter Milan (V)","Juventus (V)","1H 1' (0-1) | 2H 1' (1-1)",1,1,OK,OK,,"FT. O/U",2.5,3.94,1.18,,,,
+"01/08/2026 16:32","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Hungary (V)","Venezuela (V)","1H 9' (1-0) | 2H 4' (2-0)",2,0,OK,OK,OK,,,,,,,,
+"01/08/2026 16:32","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Burkina Faso (V)","China (V)","2H 6' (1-0)",1,0,OK,OK,OK,,,,,,,,
+"01/08/2026 16:29","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Netherlands (V)","Spain (V)","1H 2' (0-1) | 1H 4' (0-2) | 2H 3' (1-2) | 2H 4' (1-3) | 2H 6' (2-3) | 2H 8' (2-4)",2,4,OK,OK,OK,,,,,,,,
+"01/08/2026 17:02","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Georgia (V)","Belarus (V)",,0,0,OK,OK,OK,"FT. O/U",1.75,1.74,2.02,"FT. O/U",1,2.04,1.72
+"01/08/2026 16:46","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Inter Milan (V)","Manchester United (V)","1H 1' (0-1) | 1H 2' (0-2) | 1H 3' (1-2) | 1H 4' (2-2) | 2H 2' (3-2)",3,2,OK,OK,OK,"FT. O/U",6,2.05,1.71,,,,
+"01/08/2026 16:45","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Norway (V)","France (V)","1H 0' (0-1) | 1H 4' (1-1) | 1H 6' (2-1) | 2H 5' (2-2)",2,2,OK,OK,OK,,,,,,,,
+"01/08/2026 16:47","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Nigeria (V)","Norway (V)","1H 8' (0-1) | 1H 10' (0-2) | 2H 0' (1-2)",1,2,OK,OK,OK,"FT. O/U",4.5,1.86,1.90,,,,
+"01/08/2026 17:01","SABA ENGLISH PREMIER LEAGUE Virtual PES 26 - 15 Mins Play","Arsenal (V)","Brentford (V)","1H 5' (0-1)",0,1,OK,OK,OK,,,,,"FT. O/U",1.75,1.69,2.08
+"01/08/2026 16:47","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Mexico (V)","Spain (V)","2H 6' (1-0) | 2H 10' (2-0)",2,0,OK,OK,OK,,,,,,,,
+"01/08/2026 17:01","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Everton (V)","Juventus (V)","1H 1' (1-0) | 1H 4' (2-0) | 1H 7' (3-0) | 2H 1' (4-0)",4,0,OK,OK,OK,"FT. O/U",4.75,1.77,1.99,,,,
+"01/08/2026 17:16","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Arminia Bielefeld (V)","Udinese (V)","1H 5' (1-0)",1,0,OK,OK,OK,,,,,"FT. O/U",2,1.93,1.83
+"01/08/2026 17:02","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Finland (V)","Qatar (V)","2H 9' (1-0)",1,0,OK,OK,OK,,,,,,,,
+"01/08/2026 17:17","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Kuwait (V)","Singapore (V)","1H 4' (0-1) | 1H 9' (1-1) | 2H 0' (1-2)",1,2,OK,OK,OK,"FT. O/U",4,2.05,1.71,,,,
+"01/08/2026 17:31","SABA ENGLISH PREMIER LEAGUE Virtual PES 26 - 15 Mins Play","Brighton & Hove Albion (V)","AFC Bournemouth (V)","1H 2' (1-0) | 1H 5' (1-1)",1,1,OK,OK,OK,,,,,"FT. O/U",3,1.97,1.79
+"01/08/2026 17:16","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","AC Milan (V)","FC Koln (V)","2H 6' (1-0) | 2H 7' (2-0)",2,0,OK,OK,OK,,,,,,,,
+"01/08/2026 17:15","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Italy (V)","Croatia (V)","1H 1' (0-1) | 2H 2' (1-1) | 2H 8' (1-2)",1,2,OK,OK,OK,,,,,,,,
+"01/08/2026 17:46","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Atletico de Madrid (V)","Inter Milan (V)",,0,0,OK,OK,OK,"FT. O/U",2.25,1.97,1.79,"FT. O/U",1,1.71,2.05
+"01/08/2026 17:31","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Real Madrid (V)","Bayern Munchen (V)","2H 5' (1-0)",1,0,OK,OK,OK,,,,,,,,
+"01/08/2026 17:30","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Spain (V)","Czech Republic (V)","2H 5' (1-0)",1,0,OK,OK,OK,,,,,,,,
+"01/08/2026 18:00","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","USA (V)","Mexico (V)","1H 2' (1-0)",1,0,OK,OK,OK,,,,,"FT. O/U",2.25,2.03,1.73
+"01/08/2026 17:46","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","AS Roma (V)","Torino (V)","1H 2' (0-1) | 1H 7' (0-2) | 2H 3' (1-2) | 2H 4' (2-2)",2,2,OK,OK,OK,,,,,,,,
+"01/08/2026 18:01","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Napoli (V)","Sevilla (V)","1H 5' (0-1)",0,1,OK,OK,OK,,,,,"FT. O/U",2,1.92,1.84
+"01/08/2026 17:48","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Nigeria (V)","Belgium (V)","1H 0' (0-1) | 2H 6' (1-1)",1,1,OK,OK,OK,,,,,,,,
+"01/08/2026 17:47","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Georgia (V)","New Zealand (V)","1H 9' (0-1) | 2H 6' (0-2) | 2H 9' (1-2)",1,2,OK,OK,OK,,,,,,,,
+"01/08/2026 18:01","SABA ENGLISH PREMIER LEAGUE Virtual PES 26 - 15 Mins Play","Crystal Palace (V)","Chelsea (V)","1H 0' (1-0) | 1H 6' (2-0) | 2H 1' (3-0)",3,0,OK,OK,OK,"FT. O/U",3.5,1.71,2.05,,,,
+"01/08/2026 18:02","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Burkina Faso (V)","South Africa (V)","1H 7' (0-1) | 2H 8' (1-1)",1,1,OK,OK,OK,,,,,,,,
+"01/08/2026 18:17","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Bayern Munchen (V)","Paris Saint Germain (V)","1H 1' (1-0) | 1H 5' (1-1)",1,1,OK,OK,OK,,,,,"FT. O/U",3.5,1.76,2.00
+"01/08/2026 18:02","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Bulgaria (V)","Israel (V)","1H 1' (0-1) | 2H 8' (0-2)",0,2,OK,OK,OK,,,,,,,,
+"01/08/2026 18:17","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Philippines (V)","India (V)","1H 4' (1-0) | 1H 8' (2-0)",2,0,OK,OK,OK,,,,,"FT. O/U",3.5,1.92,1.84
+"01/08/2026 18:17","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","Hai Phong FC (V)","Becamex Binh Duong (V)","2H 3' (0-1)",0,1,OK,OK,OK,,,,,,,,
+"01/08/2026 18:31","SABA ENGLISH PREMIER LEAGUE Virtual PES 26 - 15 Mins Play","Everton (V)","Aston Villa (V)",,0,0,OK,OK,OK,"FT. O/U",1.5,1.78,1.98,"FT. O/U",0.75,1.80,1.96
+"01/08/2026 18:17","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","Nam Dinh (V)","Ho Chi Minh City FC (V)","1H 5' (0-1) | 2H 4' (1-1)",1,1,OK,OK,OK,,,,,,,,
+"01/08/2026 18:17","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Girondins de Bordeaux (V)","Olympique Lyonnais (V)","1H 6' (1-0) | 2H 7' (1-1)",1,1,OK,OK,OK,,,,,,,,
+"01/08/2026 18:17","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Russia (V)","Germany (V)","1H 0' (0-1) | 1H 2' (0-2) | 2H 3' (1-2) | 2H 9' (2-2)",2,2,OK,OK,OK,,,,,,,,
+"01/08/2026 18:46","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Arminia Bielefeld (V)","Real Sociedad (V)",,0,0,OK,OK,OK,"FT. O/U",2.75,1.95,1.81,"FT. O/U",1.25,1.88,1.88
+"01/08/2026 18:32","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","North Korea (V)","Bahrain (V)","1H 2' (0-1) | 2H 6' (0-2)",0,2,OK,OK,OK,,,,,,,,
+"01/08/2026 18:32","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Netherlands (V)","Nigeria (V)","1H 2' (1-0) | 1H 6' (2-0) | 1H 9' (3-0) | 1H 9' (3-1) | 2H 8' (4-1) | 2H 10' (4-2)",4,2,OK,OK,OK,,,,,,,,
+"01/08/2026 19:01","SABA ENGLISH PREMIER LEAGUE Virtual PES 26 - 15 Mins Play","Fulham (V)","Tottenham Hotspur (V)",,0,0,OK,OK,OK,"FT. O/U",1.75,1.79,1.97,"FT. O/U",0.75,1.71,2.05
+"01/08/2026 18:46","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Everton (V)","FC Koln (V)","1H 5' (1-0) | 2H 2' (1-1)",1,1,OK,OK,OK,"FT. O/U",2.75,2.05,1.71,,,,
+"01/08/2026 19:01","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Lille OSC (V)","Bayer 04 Leverkusen (V)","1H 2' (1-0)",1,0,OK,OK,OK,,,,,"FT. O/U",2,2.06,1.70
+"01/08/2026 18:46","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","England (V)","Portugal (V)","1H 0' (1-0) | 1H 2' (2-0) | 2H 4' (3-0)",3,0,OK,OK,OK,,,,,,,,
+"01/08/2026 18:47","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Portugal (V)","Italy (V)","1H 1' (0-1) | 1H 7' (1-1) | 1H 10' (1-2) | 2H 4' (1-3)",1,3,OK,OK,OK,,,,,,,,
+"01/08/2026 19:00","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Romania (V)","Finland (V)","2H 1' (1-0)",1,0,OK,OK,OK,"FT. O/U",1.75,1.83,1.93,,,,
+"01/08/2026 19:17","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","The Cong - Viettel (V)","Becamex Binh Duong (V)","1H 0' (1-0)",1,0,OK,OK,OK,,,,,"FT. O/U",1.75,1.85,1.91
+"01/08/2026 19:02","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Juventus (V)","Torino (V)","2H 2' (1-0)",1,0,OK,OK,OK,"FT. O/U",1.75,1.66,2.11,,,,
+"01/08/2026 19:17","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Bosnia-Herzegovina (V)","Austria (V)","1H 1' (0-1)",0,1,OK,OK,OK,,,,,"FT. O/U",2.25,2.02,1.74
+"01/08/2026 19:02","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Czech Republic (V)","Norway (V)","2H 3' (1-0)",1,0,OK,OK,OK,,,,,,,,
+"01/08/2026 19:02","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Tunisia (V)","Ukraine (V)","1H 1' (0-1) | 1H 7' (1-1) | 1H 10' (2-1) | 2H 5' (3-1)",3,1,OK,OK,OK,,,,,,,,
+"01/08/2026 19:17","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","Song Lam Nghe An (V)","SHB Da Nang FC (V)","1H 4' (1-0) | 2H 2' (2-0)",2,0,OK,OK,OK,"FT. O/U",2.5,1.97,1.79,,,,
+"01/08/2026 19:16","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Ghana (V)","Belgium (V)","1H 1' (0-1) | 2H 5' (0-2)",0,2,OK,OK,OK,,,,,,,,
+"01/08/2026 19:31","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Everton (V)","Manchester United (V)","1H 2' (0-1) | 1H 5' (0-2)",0,2,OK,OK,OK,,,,,"FT. O/U",3.25,1.74,2.02
+"01/08/2026 19:31","SABA ENGLISH PREMIER LEAGUE Virtual PES 26 - 15 Mins Play","Ipswich Town (V)","Coventry City (V)","1H 2' (0-1) | 2H 2' (0-2)",0,2,OK,OK,OK,"FT. O/U",2.75,1.91,1.85,,,,
+"01/08/2026 19:31","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","FC Koln (V)","Bayern Munchen (V)","2H 5' (0-1)",0,1,OK,OK,OK,,,,,,,,
+"01/08/2026 19:30","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Ukraine (V)","Argentina (V)","2H 3' (1-0) | 2H 5' (1-1)",1,1,OK,OK,OK,,,,,,,,
+"01/08/2026 19:32","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Belarus (V)","Canada (V)","2H 2' (0-1)",0,1,OK,OK,OK,"FT. O/U",1.75,1.97,1.79,,,,
+"01/08/2026 19:46","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Leicester City (V)","AS Roma (V)","1H 0' (0-1) | 1H 2' (0-2) | 1H 3' (0-3) | 1H 6' (1-3) | 2H 0' (1-4)",1,4,OK,OK,OK,"FT. O/U",5.5,1.87,1.89,,,,
+"01/08/2026 19:46","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Borussia Dortmund (V)","Inter Milan (V)","1H 2' (1-0) | 2H 3' (1-1)",1,1,OK,OK,OK,,,,,,,,
+"01/08/2026 19:47","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","France (V)","Portugal (V)","1H 6' (0-1) | 1H 7' (1-1) | 2H 1' (1-2)",1,2,OK,OK,OK,"FT. O/U",4.5,1.87,1.89,,,,
+"01/08/2026 19:46","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Norway (V)","Finland (V)","1H 5' (0-1) | 2H 6' (0-2)",0,2,OK,OK,OK,,,,,,,,
+"01/08/2026 19:47","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Croatia (V)","England (V)","2H 7' (0-1) | 2H 9' (1-1)",1,1,OK,OK,OK,,,,,,,,
+"01/08/2026 20:01","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Manchester City (V)","Lille OSC (V)","1H 4' (1-0) | 1H 4' (1-1) | 2H 0' (1-2)",1,2,OK,OK,OK,"FT. O/U",4,1.80,1.96,,,,
+"01/08/2026 20:01","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Barcelona (V)","CA Osasuna (V)","2H 4' (1-0)",1,0,OK,OK,OK,,,,,,,,
+"01/08/2026 20:01","SABA ENGLISH PREMIER LEAGUE Virtual PES 26 - 15 Mins Play","Leeds United (V)","Manchester City (V)","2H 7' (0-1)",0,1,OK,OK,OK,,,,,,,,
+"01/08/2026 20:15","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Wales  (V)","Belgium (V)","1H 3' (1-0)",1,0,OK,OK,OK,,,,,"FT. O/U",2.25,1.96,1.80
+"01/08/2026 20:02","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Argentina (V)","Norway (V)","1H 1' (1-0) | 1H 1' (2-0) | 1H 6' (3-0) | 1H 8' (4-0) | 1H 8' (4-1) | 2H 5' (4-2)",4,2,OK,OK,OK,,,,,,,,
+"01/08/2026 20:16","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Real Madrid (V)","Real Sociedad (V)","2H 0' (1-0)",1,0,OK,OK,OK,"FT. O/U",2,1.81,1.95,,,,
+"01/08/2026 20:16","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","SHB Da Nang FC (V)","Binh Dinh (V)","1H 2' (0-1) | 2H 5' (0-2)",0,2,OK,OK,OK,,,,,,,,
+"01/08/2026 20:16","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Getafe CF (V)","Paris Saint Germain (V)","1H 1' (1-0) | 2H 4' (2-0)",2,0,OK,OK,OK,,,,,,,,
+"01/08/2026 20:16","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","Thanh Hoa FC (V)","The Cong - Viettel (V)","1H 5' (1-0) | 1H 6' (2-0) | 2H 7' (3-0)",3,0,OK,OK,OK,,,,,,,,
+"01/08/2026 20:30","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Hungary (V)","Ukraine (V)","1H 1' (0-1) | 1H 2' (0-2) | 1H 4' (0-3)",0,3,OK,OK,OK,,,,,"FT. O/U",4.25,1.74,2.02
+"01/08/2026 20:17","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Egypt (V)","Japan (V)","1H 0' (1-0) | 2H 6' (2-0)",2,0,OK,OK,OK,,,,,,,,
+"01/08/2026 20:17","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Tunisia (V)","Australia (V)","1H 2' (1-0) | 2H 6' (2-0) | 2H 9' (2-1)",2,1,OK,OK,OK,,,,,,,,
+"01/08/2026 20:46","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Liverpool (V)","Napoli (V)",,0,0,OK,OK,OK,"FT. O/U",3,2.00,1.76,"FT. O/U",1.25,1.75,2.01
+"01/08/2026 20:31","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Borussia Dortmund (V)","Bayer 04 Leverkusen (V)","1H 6' (1-0) | 2H 5' (1-1)",1,1,OK,OK,OK,,,,,,,,
+"01/08/2026 20:31","SABA ENGLISH PREMIER LEAGUE Virtual PES 26 - 15 Mins Play","Manchester United (V)","Newcastle United (V)","1H 4' (0-1) | 2H 3' (0-2) | 2H 6' (1-2)",1,2,OK,OK,OK,,,,,,,,
+"01/08/2026 20:31","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Torino (V)","Tottenham Hotspur (V)","2H 3' (0-1) | 2H 4' (0-2) | 2H 5' (1-2) | 2H 6' (1-3)",1,3,OK,OK,OK,,,,,,,,
+"01/08/2026 20:47","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Nigeria (V)","Slovakia (V)","1H 4' (1-0)",1,0,OK,OK,OK,,,,,"FT. O/U",2.25,1.87,1.89
+"01/08/2026 20:33","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Armenia (V)","Georgia (V)","1H 3' (0-1) | 1H 7' (1-1) | 2H 9' (1-2)",1,2,OK,OK,OK,,,,,,,,
+"01/08/2026 20:33","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Colombia (V)","Algeria (V)","1H 4' (1-0) | 2H 10' (2-0)",2,0,OK,OK,OK,,,,,,,,
+"01/08/2026 20:47","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Hungary (V)","Costa Rica (V)","1H 8' (1-0) | 2H 1' (1-1)",1,1,OK,OK,OK,"FT. O/U",3,1.96,1.80,,,,
+"01/08/2026 20:46","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","AS Monaco (V)","Arminia Bielefeld (V)","1H 0' (1-0) | 1H 7' (2-0) | 2H 3' (3-0) | 2H 5' (3-1) | 2H 5' (3-2)",3,2,OK,OK,OK,,,,,,,,
+"01/08/2026 20:59","SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play","Brazil (V)","Argentina (V)",,0,0,,,,,,,,,,,
+"01/08/2026 21:01","SABA ENGLISH PREMIER LEAGUE Virtual PES 26 - 15 Mins Play","Nottingham Forest (V)","Hull City (V)","1H 1' (1-0) | 2H 5' (1-1)",1,1,OK,OK,OK,,,,,,,,
+"01/08/2026 21:02","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Wales  (V)","Bosnia-Herzegovina (V)","2H 3' (0-1)",0,1,OK,OK,OK,,,,,,,,
+"01/08/2026 21:01","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Getafe CF (V)","Valencia CF (V)","2H 7' (1-0)",1,0,OK,OK,OK,,,,,,,,
+"01/08/2026 21:16","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","The Cong - Viettel (V)","SHB Da Nang FC (V)","1H 4' (1-0)",1,0,OK,OK,OK,,,,,"FT. O/U",1.75,1.98,1.78
+"01/08/2026 21:16","SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play","Nam Dinh (V)","Hoang Anh Gia Lai (V)","1H 2' (1-0) | 1H 3' (2-0) | 1H 4' (3-0) | 2H 3' (3-1) | 2H 4' (4-1)",4,1,OK,OK,OK,,,,,,,,
+"01/08/2026 21:16","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Manchester United (V)","FC Koln (V)","1H 6' (0-1) | 2H 4' (1-1) | 2H 5' (2-1)",2,1,OK,OK,OK,,,,,,,,
+"01/08/2026 21:17","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Kuwait (V)","Singapore (V)","2H 4' (0-1) | 2H 7' (1-1)",1,1,OK,OK,OK,,,,,,,,
+"01/08/2026 21:32","SABA ENGLISH PREMIER LEAGUE Virtual PES 26 - 15 Mins Play","Sunderland (V)","Liverpool (V)","1H 5' (0-1)",0,1,OK,OK,OK,,,,,"FT. O/U",2,1.84,1.92
+"01/08/2026 21:31","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","AS Monaco (V)","Lazio (V)","2H 3' (1-0)",1,0,OK,OK,OK,,,,,,,,
+"01/08/2026 21:32","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Senegal (V)","Belgium (V)","1H 3' (1-0) | 1H 10' (1-1) | 2H 0' (1-2)",1,2,OK,OK,OK,"FT. O/U",4,1.70,2.06,,,,
+"01/08/2026 21:22","SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play","Manchester United (V)","Liverpool (V)","1H 1' (1-0) | 2H 1' (2-0)",2,0,OK,OK,,"FT. O/U",2.5,2.67,1.40,,,,
+"01/08/2026 21:30","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Ukraine (V)","Croatia (V)","1H 3' (0-1) | 1H 6' (1-1) | 1H 7' (2-1) | 2H 6' (3-1)",3,1,OK,OK,OK,,,,,,,,
+"01/08/2026 21:48","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Sweden (V)","France (V)","1H 2' (0-1)",0,1,OK,,,,,,,,,,
+"01/08/2026 21:47","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Paris Saint Germain (V)","Tottenham Hotspur (V)","1H 1' (0-1) | 1H 3' (1-1) | 1H 6' (1-2)",1,2,OK,,,,,,,,,,
+"01/08/2026 21:46","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play","Spain (V)","Norway (V)","1H 8' (0-1)",0,1,OK,,,,,,,"FT. O/U",2.5,1.79,1.97
+"01/08/2026 21:48","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play","Brazil (V)","Italy (V)","1H 1' (1-0) | 1H 4' (1-1) | 1H 7' (1-2)",1,2,OK,,,,,,,,,,
+"01/08/2026 21:47","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play","Manchester City (V)","Liverpool (V)","1H 5' (0-1) | 2H 0' (0-2)",0,2,OK,,,,,,,,,,

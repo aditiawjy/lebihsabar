@@ -89,12 +89,12 @@ if (isset($_GET['json'])) {
     <b>SUPER2</b> <span class="noko">NONAKTIF</span> — selisih HT ≤ 1 · gol pertama ≤ 8' · line awal ≥ 7.25 · total HT 3: gol pertama ≤ 6' · total HT 5: gol-2 menit 9'–30' · HT 2-2: gol-2 menit 14'–30' · total HT ≥ 7: line awal ≥ 7.5<br>
     <b>S-LOW</b> <span class="noko">NONAKTIF</span> — selisih HT ≤ 1 (kalau seri: gol-2 ≤ 25' dan gol terakhir 1H ≥ 35') · gol pertama ≤ 5' · line awal ≥ 5.75 · tanpa total HT 1 · semua HT tidak seri: gol-2 9'–25' · total HT 3: line ≤ 7.5 dan gol-1 ≤ 4' wajib line ≥ 7.25 · total HT 5: gol terakhir 1H ≥ 30'<br>
     <b>SUPER3</b> <span class="noko">NONAKTIF</span> — selisih skor HT tepat 3 · line awal ≥ 6 · gol terakhir 1H ≥ 42'<br>
-    <b>SUPER4</b> <span class="noko">NONAKTIF</span> — total gol HT tepat 5 · urutan X–Y–X–X–bebas · tanpa syarat menit / line<br>
+    <b>SUPER4</b> — total gol HT tepat 5 · urutan X–Y–X–X–bebas · gol kedua 1H ≥ 16'<br>
     <b>P12</b> — total gol HT tepat 5 · line awal ≥ 6.5 · gol kedua ≥ 8'<br>
-    <b>P1</b> — selisih HT tepat 1 · total HT maksimal 5 · gol pertama ≤ 12' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 3: line ≤ 7.5 dan gol-1 ≤ 4' wajib line ≥ 7.25 · total HT 5: gol-2 9'–30'<br>
+    <b>P1</b> — selisih HT tepat 1 · total HT maksimal 5 · gol pertama ≤ 12' · gol terakhir 1H ≤ 34' · line awal ≥ 5.75 · total HT 1: gol-1 ≤ 6' · total HT 3: line ≤ 7.5 dan gol-1 ≤ 4' wajib line ≥ 7.25 · total HT 5: gol-2 9'–30'<br>
     <b>P2</b> — HT 2-1 / 1-2 · gol pertama ≤ 15' · line awal 5.75–7.5 · gol pertama ≤ 4': line wajib ≥ 7.25<br>
     <b>P3</b> — total gol HT tepat 3 · gol pertama 5'–9' · line awal 5.5–7.5 · HT 3-0/0-3: line wajib ≥ 6.5<br>
-    <b>P4</b> — HT 1-1 · gol pertama ≥ 15' · line awal ≥ 5.5<br>
+    <b>P4</b> — HT 1-1 · gol pertama ≥ 30' · line awal ≥ 5.5<br>
     <b>P5</b> — HT 3-0 · gol pertama ≤ 18' · gol terakhir 1H ≤ 40'<br>
     <b>P6</b> — HT 2-2 · gol pertama ≤ 8' · line awal ≤ 6.25<br>
     <b>P7</b> — HT 3-2 · gol pertama ≤ 8'<br>
@@ -103,7 +103,7 @@ if (isset($_GET['json'])) {
     <b>P10</b> — HT 2-3 · line awal ≥ 5.75<br>
     <b>P11</b> — total gol HT tepat 3 · gol pertama ≤ 12' · line awal 5.75–7.5 · gol pertama ≤ 4': line wajib ≥ 7.25 · HT 3-0/0-3: line wajib ≥ 7.5<br>
     <b>HAH+</b> — urutan gol 1H Home–Away–Home · HT 2-1 · gol ketiga/terakhir 1H ≥ 26' · menunggu tepat 1 gol 2H · live line &lt; 6 · gap line−skor ≤ 1.25 · odds Over ≥ 1.65<br>
-    SUPER dan HAH aktif mulai menit 60 babak kedua; P1-P12 mulai menit 65; SUPER1/SUPER2/S-LOW/SUPER3/SUPER4 dinonaktifkan. HAH+ menunggu tepat satu gol 2H; pola lainnya hilang begitu ada gol 2H.
+    SUPER dan HAH aktif mulai menit 60 babak kedua; P1-P12 mulai menit 65. HAH+ menunggu tepat satu gol 2H; pola lainnya hilang begitu ada gol 2H.
   </p>
 
   <div class="grid">
@@ -199,7 +199,6 @@ function render(d) {
       '<br>SUPER aktif mulai menit ' + esc(d.signal_start_2h_other_minute == null ? 60 : d.signal_start_2h_other_minute) +
       '; HAH mulai menit ' + esc(d.signal_start_2h_other_minute == null ? 60 : d.signal_start_2h_other_minute) +
       '; P1-P12 mulai menit ' + esc(d.signal_start_2h_p_minute == null ? 65 : d.signal_start_2h_p_minute) +
-      '; SUPER1/SUPER2/S-LOW/SUPER3/SUPER4 dinonaktifkan' +
       ' babak kedua. HAH+ menunggu tepat satu gol 2H; pola lainnya hilang begitu ada gol 2H.';
   }
   document.getElementById('cnt').textContent = m.length;

@@ -50,3 +50,6 @@ matches.csv.bak-*
 # Virtual soccer profile directory
 .vsoccer-profile/
 
+
+# Lock file sementara dari penulisan CSV (goal-log-save*.php, odd-log-save.php)
+*.csv.lock

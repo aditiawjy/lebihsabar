@@ -261,26 +261,6 @@ $RULES = [
  * salinan ini sehingga dua pasar tidak saling mengubah definisi.
  */
 $SABA_RULES = $RULES;
-$SABA_RULES['R1A'] = [
-    'weak'  => true,
-    'label' => 'R1 + tuntutan market ≤ 1 gol → arah R1',
-    'pick'  => static function (array $r) {
-        if (!isset($r['demand']) || $r['demand'] > 1.0) {
-            return null;
-        }
-        return $r['ht_total'] > $r['demand'] ? 'over' : 'under';
-    },
-];
-$SABA_RULES['R1B'] = [
-    'weak'  => true,
-    'label' => 'R1 + margin ≥ 1 gol → Over saja',
-    'pick'  => static function (array $r) {
-        if (!isset($r['demand'])) {
-            return null;
-        }
-        return ($r['ht_total'] - $r['demand']) >= 1.0 ? 'over' : null;
-    },
-];
 $SABA_RULES['R10'] = [
     'label' => 'SABA: 15/16m konsensus Over; 20m R8 + HT 4-5',
     'pick' => static function (array $r) {

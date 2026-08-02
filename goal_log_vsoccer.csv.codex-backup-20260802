@@ -1,4 +1,4 @@
-datetime,league,home_team,away_team,goals,goal_minutes,goal_markets,final_home,final_away,ko_line,ko_over,ko_under
+datetime,league,home_team,away_team,goals,goal_minutes,goal_markets,final_home,final_away,ko_line,ko_over,ko_under,m46_minute,m46_line,m46_over,m46_under
 "23/07/2026 12:31","V-Soccer Champions League - 12 mins [V]","Bayern [V]","Juventus [V]","1H 12' (1-0) | 1H 39' (2-0) | 2H 45' (2-1) | 2H 74' (3-1) | 2H 81' (4-1) | 2H 90' (5-1)","1H 12' | 1H 39' | 2H 45' | 2H 74' | 2H 81' | 2H 90'",,5,1,5.5/6,1.88,1.80
 "23/07/2026 12:34","V-Soccer China Super League - 12 mins [V]","Changchun Yatai [V]","Zhejiang Pro [V]","1H 4' (0-1) | 1H 22' (1-1) | 1H 26' (2-1) | 1H 46' (2-2) | 2H 63' (3-2) | 2H 66' (3-3) | 2H 88' (4-3)","1H 4' | 1H 22' | 1H 26' | 1H 46' | 2H 63' | 2H 66' | 2H 88'",,4,3,5/5.5,1.97,1.72
 "23/07/2026 12:35","V-Soccer Copa Libertadores - 12 mins [V]","The Strongest [V]","Palmeiras [V]","1H 8' (1-0) | 1H 18' (2-0) | 1H 21' (2-1) | 1H 41' (2-2) | 2H 46' (2-3) | 2H 60' (2-4) | 2H 69' (3-4) | 2H 72' (3-5) | 2H 87' (4-5) | 2H 91' (5-5)","1H 8' | 1H 18' | 1H 21' | 1H 41' | 2H 46' | 2H 60' | 2H 69' | 2H 72' | 2H 87' | 2H 91'",,5,5,6.5/7,1.72,1.98

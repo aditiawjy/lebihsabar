@@ -9,6 +9,7 @@ import sys
 import re
 import threading
 import csv
+import io
 import json
 import time
 import signal
@@ -210,18 +211,39 @@ _bpvm_file_lock = threading.Lock()
 
 
 def _bpvm_migrate_header():
-    """Tambahkan kolom baru ke file lama tanpa mengubah isi baris lama."""
+    """Pulihkan schema CSV lama sebelum append, termasuk NUL trailing."""
     if not BPVM_GOAL_LOG.exists():
         return
     try:
         with open(BPVM_GOAL_LOG, newline="", encoding="utf-8-sig") as fh:
-            rows = list(csv.reader(fh))
-    except Exception:
+            raw_text = fh.read()
+        clean_text = raw_text.rstrip("\x00")
+        if "\x00" in clean_text:
+            print(f"[GOALLOG] migrasi DIBATALKAN: NUL berada di tengah {BPVM_GOAL_LOG.name}")
+            return
+        rows = list(csv.reader(io.StringIO(clean_text, newline="")))
+    except Exception as e:
+        print(f"[GOALLOG] gagal membaca {BPVM_GOAL_LOG.name} untuk migrasi: {e}")
         return
-    if not rows or rows[0] == BPVM_HEADER:
+    if not rows:
         return
-    missing = len(BPVM_HEADER) - len(rows[0])
-    if missing <= 0:
+    source_header = rows[0]
+    missing = len(BPVM_HEADER) - len(source_header)
+    if source_header != BPVM_HEADER and missing <= 0:
+        return
+
+    data_rows = rows[1:]
+    if any(len(row) > len(BPVM_HEADER) for row in data_rows):
+        print(f"[GOALLOG] migrasi DIBATALKAN: ada baris lebih lebar dari schema {BPVM_GOAL_LOG.name}")
+        return
+    normalized_rows = [row + [""] * (len(BPVM_HEADER) - len(row)) for row in data_rows]
+    needs_rewrite = (
+        source_header != BPVM_HEADER
+        or raw_text != clean_text
+        or not clean_text.endswith(("\n", "\r"))
+        or any(len(row) != len(BPVM_HEADER) for row in data_rows)
+    )
+    if not needs_rewrite:
         return
 
     # Tulis ke file sementara lalu ganti secara atomik. Versi sebelumnya membuka
@@ -234,21 +256,25 @@ def _bpvm_migrate_header():
         with open(tmp, "w", newline="", encoding="utf-8") as fh:
             w = csv.writer(fh)
             w.writerow(BPVM_HEADER)
-            for r in rows[1:]:
-                w.writerow(r + [""] * (len(BPVM_HEADER) - len(r)))
+            w.writerows(normalized_rows)
             fh.flush()
             os.fsync(fh.fileno())
 
-        # Jaring pengaman: hasil migrasi tidak boleh kehilangan satu baris pun.
+        # Jaring pengaman: hasil migrasi tidak boleh kehilangan baris atau kolom.
         with open(tmp, newline="", encoding="utf-8-sig") as fh:
             hasil = list(csv.reader(fh))
-        if len(hasil) < len(rows):
-            print(f"[GOALLOG] migrasi DIBATALKAN: {len(hasil)} baris < {len(rows)} baris asal")
+        if (
+            len(hasil) != len(normalized_rows) + 1
+            or not hasil
+            or hasil[0] != BPVM_HEADER
+            or any(len(row) != len(BPVM_HEADER) for row in hasil[1:])
+        ):
+            print(f"[GOALLOG] migrasi DIBATALKAN: hasil tidak cocok dengan schema {BPVM_GOAL_LOG.name}")
             tmp.unlink(missing_ok=True)
             return
 
         os.replace(tmp, BPVM_GOAL_LOG)
-        print(f"[GOALLOG] header {BPVM_GOAL_LOG.name} dimigrasi (+{missing} kolom, {len(rows) - 1} baris utuh)")
+        print(f"[GOALLOG] {BPVM_GOAL_LOG.name} dinormalisasi (+{max(missing, 0)} kolom, {len(normalized_rows)} baris, NUL trailing dipangkas bila ada)")
     except Exception as e:
         tmp.unlink(missing_ok=True)
         print(f"[GOALLOG] gagal migrasi header: {e}")

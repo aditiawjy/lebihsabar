@@ -59,14 +59,23 @@ function bookOk(float $over, float $under): bool
     return $book >= ODDS_BOOK_MIN && $book <= ODDS_BOOK_MAX;
 }
 
-/** Pecah line Asian: "3/3.5" -> [3.0, 3.5]. */
+/**
+ * Pecah line Asian: "3/3.5" -> [3.0, 3.5]. Bentuk desimal seperempat juga
+ * dipecah: "2.25" -> [2.0, 2.5], "1.75" -> [1.5, 2.0]. Tanpa ini, line .25/.75
+ * disettle sebagai satu leg penuh sehingga separuh-menang dan separuh-kalah
+ * hilang. Titik tengahnya tetap sama, jadi pemakai legs() yang lain tak berubah.
+ */
 function legs($v): array
 {
     $p = array_values(array_filter(
         array_map('trim', explode('/', (string)$v)),
         static fn($x) => $x !== '' && is_numeric($x)
     ));
-    return array_map('floatval', $p);
+    $out = array_map('floatval', $p);
+    if (count($out) === 1 && abs(fmod(abs($out[0]), 0.5)) > 1e-9) {
+        $out = [$out[0] - 0.25, $out[0] + 0.25];
+    }
+    return $out;
 }
 
 /**
@@ -281,6 +290,60 @@ $SABA_RULES['R1B'] = [
         return ($r['ht_total'] - $r['demand']) >= 1.0 ? 'over' : null;
     },
 ];
+$SABA_RULES['R2A'] = [
+    'weak'  => true,
+    'label' => 'R2 + HT genap (>=4) -> Over; HT ganjil (<=3) -> Under',
+    'pick'  => static function (array $r) {
+        // Yang dibagi genap/ganjil adalah TOTAL GOL HT, bukan skor FT.
+        // Cabang terbaik pada data SABA: HT >= 4 genap untuk Over, sedangkan
+        // HT <= 3 ganjil untuk Under.
+        $ht = (int)($r['ht_total'] ?? -1);
+        if ($ht < 0) {
+            return null;
+        }
+        if ($ht >= 4) {
+            return ($ht % 2 === 0) ? 'over' : null;
+        }
+        return ($ht % 2 !== 0) ? 'under' : null;
+    },
+];
+$SABA_RULES['R2B'] = [
+    'weak'  => true,
+    'label' => 'R2 terbalik + HT ganjil (>=4) -> Over; HT genap (<=3) -> Under',
+    'pick'  => static function (array $r) {
+        // Kebalikan paritas R2A: HT tinggi ganjil untuk Over, HT rendah
+        // genap untuk Under.
+        $ht = (int)($r['ht_total'] ?? -1);
+        if ($ht < 0) {
+            return null;
+        }
+        if ($ht >= 4) {
+            return ($ht % 2 !== 0) ? 'over' : null;
+        }
+        return ($ht % 2 === 0) ? 'under' : null;
+    },
+];
+$SABA_PARITY_RULES = [
+    'R2C' => [
+        'label' => 'R2 -> hasil FT genap jika HT >= 4; ganjil jika HT <= 3',
+        'predict' => static function (array $r): string {
+            // Target R2C adalah paritas total gol FT, bukan Over/Under.
+            return $r['ht_total'] >= 4 ? 'even' : 'odd';
+        },
+    ],
+];
+
+$SABA_RULES['R2'] = [
+    'weak'  => true,
+    'label' => 'SABA: 15/16m htTot ≥ 3 → Over, ≤ 2 → Under; 20m ≥ 4 / ≤ 3',
+    'pick'  => static function (array $r) {
+        // Babak 15/16 menit terlalu pendek untuk mencetak 4 gol, jadi ambang
+        // ≥4 nyaris tak pernah kena di sana. 20m dibiarkan pakai ambang asli.
+        $durasi = $r['half_len'] ? (int)round($r['half_len'] * 2) : null;
+        $ambang = in_array($durasi, [15, 16], true) ? 3 : 4;
+        return $r['ht_total'] >= $ambang ? 'over' : 'under';
+    },
+];
 $SABA_RULES['R10'] = [
     'label' => 'SABA: 15/16m konsensus Over; 20m R8 + HT 4-5',
     'pick' => static function (array $r) {
@@ -395,6 +458,58 @@ function evaluate(array $rows, callable $pick): ?array
     ];
 }
 
+/** Evaluasi prediksi paritas hasil akhir (bukan taruhan Over/Under). */
+function evaluateParity(array $rows, callable $predict): ?array
+{
+    $correct = 0;
+    $wrong = 0;
+    foreach ($rows as $r) {
+        $guess = $predict($r);
+        if ($guess !== 'even' && $guess !== 'odd') {
+            continue;
+        }
+        $actual = ((int)$r['ft'] % 2 === 0) ? 'even' : 'odd';
+        if ($guess === $actual) {
+            $correct++;
+        } else {
+            $wrong++;
+        }
+    }
+    $n = $correct + $wrong;
+    if ($n === 0) {
+        return null;
+    }
+    $p = $correct / $n;
+    $se = sqrt($p * (1 - $p) / $n);
+    return [
+        'n' => $n,
+        'correct' => $correct,
+        'wrong' => $wrong,
+        'accuracy' => $p * 100,
+        'ci_lo' => max(0, $p - 1.96 * $se) * 100,
+        'ci_hi' => min(1, $p + 1.96 * $se) * 100,
+        'proven' => (($p - 1.96 * $se) * 100) > 50,
+    ];
+}
+
+/** Jalankan aturan paritas dengan rincian harian. */
+function runParityRules(array $rules, array $rows, array $days): array
+{
+    $out = [];
+    foreach ($rules as $code => $rule) {
+        $perDay = [];
+        foreach ($days as $d) {
+            $seg = array_values(array_filter($rows, static fn($r) => $r['day'] === $d));
+            $perDay[$d] = evaluateParity($seg, $rule['predict']);
+        }
+        $out[$code] = $rule + [
+            'all' => evaluateParity($rows, $rule['predict']),
+            'per_day' => $perDay,
+            'positive_days' => count(array_filter($perDay, static fn($x) => $x && $x['accuracy'] >= 50)),
+        ];
+    }
+    return $out;
+}
 /** Jalankan semua aturan pada satu kumpulan match, lengkap dengan rincian harian. */
 function runRules(array $RULES, array $rows, array $days): array
 {
@@ -706,6 +821,7 @@ if (!is_file(SABA_FILE)) {
 usort($sabaRows, static fn($a, $b) => $a['ts'] <=> $b['ts']);
 $sabaDays = array_values(array_unique(array_column($sabaRows, 'day')));
 $sabaResults = $sabaRows ? runRules($SABA_RULES, $sabaRows, $sabaDays) : [];
+$sabaParityResults = $sabaRows ? runParityRules($SABA_PARITY_RULES, $sabaRows, $sabaDays) : [];
 
 // SABA tidak boleh dibaca sebagai satu pasar homogen: liga 15m, 16m, dan 20m
 // punya tempo serta jendela gol berbeda. Simpan evaluasi per durasi supaya
@@ -728,6 +844,14 @@ foreach ($sabaPerDurasi as $durasi => $items) {
         'results' => runRules($SABA_RULES, $items, $hariDurasi),
     ];
 }
+$sabaParityPerDurasi = [];
+foreach ($sabaPerDurasi as $durasi => $bagian) {
+    $sabaParityPerDurasi[$durasi] = [
+        'days' => $bagian['days'],
+        'results' => runParityRules($SABA_PARITY_RULES, $bagian['rows'], $bagian['days']),
+    ];
+}
+
 
 // Durasi liga yang benar-benar ada di data, untuk menerjemahkan ambang menit.
 $sabaDurasi = [];
@@ -839,6 +963,45 @@ function barisHarian(string $code, array $res, array $hari, array $labelKhusus):
     }
     return $html . '</tr>';
 }
+/** Baris tabel untuk prediksi paritas hasil akhir. */
+function barisParitas(string $code, array $res, int $jumlahHari): string
+{
+    $a = $res['all'];
+    $label = e($res['label']);
+    if (!$a) {
+        return '<tr><td><b>' . e($code) . '</b></td><td>' . $label
+            . '</td><td class="num" colspan="7"><span class="muted">tidak ada sampel</span></td></tr>';
+    }
+    $status = $a['proven'] ? 'YA' : 'BELUM';
+    return '<tr><td><b>' . e($code) . '</b></td><td>' . $label . '</td>'
+        . '<td class="num">' . $a['n'] . '</td>'
+        . '<td class="num">' . $a['correct'] . '/' . $a['n'] . '</td>'
+        . '<td class="num">' . pct($a['accuracy']) . '</td>'
+        . '<td class="num">' . pct($a['ci_lo'], 0) . ' - ' . pct($a['ci_hi'], 0) . '</td>'
+        . '<td class="num muted">N/A</td>'
+        . '<td class="num">' . $res['positive_days'] . '/' . $jumlahHari . '</td>'
+        . '<td><span class="tag ' . ($a['proven'] ? 'yes' : 'no') . '">' . $status . '</span></td></tr>';
+}
+
+/** Baris paritas dengan lebar kolom tabel performa Over/Under. */
+function barisParitasLebar(string $code, array $res, int $jumlahHari): string
+{
+    $a = $res['all'];
+    if (!$a) {
+        return '<tr><td><b>' . e($code) . '</b></td><td>' . e($res['label'])
+            . '</td><td class="num" colspan="9"><span class="muted">tidak ada sampel</span></td></tr>';
+    }
+    $status = $a['proven'] ? 'YA' : 'BELUM';
+    return '<tr><td><b>' . e($code) . '</b></td><td>' . e($res['label']) . '</td>'
+        . '<td class="num">' . $a['n'] . '</td>'
+        . '<td class="num">' . $a['correct'] . '/' . $a['n'] . '</td>'
+        . '<td class="num">' . pct($a['accuracy']) . '</td>'
+        . '<td class="num">' . pct($a['ci_lo'], 0) . ' - ' . pct($a['ci_hi'], 0) . '</td>'
+        . '<td class="num">-</td><td class="num">-</td><td class="num muted">N/A</td>'
+        . '<td class="num">' . $res['positive_days'] . '/' . $jumlahHari . '</td>'
+        . '<td><span class="tag ' . ($a['proven'] ? 'yes' : 'no') . '">' . $status . '</span></td></tr>';
+}
+
 ?>
 <!doctype html>
 <html lang="id">
@@ -1042,7 +1205,8 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
   <section class="section">
     <h2>Performa aturan per durasi SABA</h2>
     <p class="hint">Evaluasi dipisah berdasarkan durasi liga. Jangan mencampur 15m, 16m, dan 20m saat mengambil keputusan.</p>
-    <p class="hint"><b>R10/R11 SABA dikalibrasi terpisah:</b> 15m/16m memakai konsensus positif
+    <p class="hint"><b>R2/R10/R11 SABA dikalibrasi terpisah:</b> R2 memakai ambang htTot ≥ 3 pada
+      15m/16m dan ≥ 4 pada 20m. R10/R11 pada 15m/16m memakai konsensus positif
       tanpa ambang absolut 1; 20m tetap memakai HT 4-5. Menit R11 juga mengikuti durasi.
       Ini hanya evaluasi monitor, bukan sinyal live.</p>
     <?php foreach ($sabaPerDurasi as $durasi => $bagian):
@@ -1063,6 +1227,11 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
       <?php foreach ($hasilDurasi as $code => $res) {
           echo barisAturan($code, $res, count($hariDurasi), $sabaLabel);
       } ?>
+       <?php foreach (($sabaParityPerDurasi[$durasi]['results'] ?? []) as $code => $res) {
+           echo barisParitasLebar(
+               $code, $res, count($sabaParityPerDurasi[$durasi]['days'] ?? [])
+           );
+       } ?>
       </tbody>
     </table></div>
     <h3 style="margin:14px 0 4px;font-size:14px">ROI per hari — SABA <?= e($labelDurasi) ?></h3>
@@ -1102,6 +1271,9 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
       <?php foreach ($sabaResults as $code => $res) {
           echo barisAturan($code, $res, count($sabaDays), $sabaLabel);
       } ?>
+      <?php foreach ($sabaParityResults as $code => $res) {
+          echo barisParitasLebar($code, $res, count($sabaDays));
+      } ?>
       </tbody>
     </table></div>
   </section>
@@ -1122,6 +1294,27 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
       Aturan yang nyata mestinya bertahan di <b>dua pasar</b>, bukan cuma satu — bandingkan dengan tabel V-Soccer.
     </p>
   </section>
+  <section class="section">
+    <h2>Prediksi hasil genap/ganjil SABA</h2>
+    <p class="hint">
+      <b>R2C</b> bukan taruhan Over/Under. Prediksi hasil akhir: jika HT total
+      >= 4, targetnya <b>genap</b>; jika HT total <= 3, targetnya <b>ganjil</b>.
+      Akurasi dihitung dari total gol FT home + away.
+      ROI tidak dihitung karena CSV belum menyimpan odds market Odd/Even.
+    </p>
+    <div class="tablebox"><table>
+      <thead><tr>
+        <th>Kode</th><th>Formula</th><th class="num">n</th><th class="num">Tepat</th>
+        <th class="num">Akurasi</th><th class="num">CI 95%</th><th class="num">ROI</th><th class="num">Hari >=50%</th><th>Status</th>
+      </tr></thead>
+      <tbody>
+      <?php foreach ($sabaParityResults as $code => $res) {
+          echo barisParitas($code, $res, count($sabaDays));
+      } ?>
+      </tbody>
+    </table></div>
+  </section>
+
   <?php endif; ?>
   <?php endif; /* tampilSaba */ ?>
 

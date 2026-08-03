@@ -66,18 +66,70 @@ foreach ($rows as $r) {
 }
 uksort($byHt, static fn($a, $b) => (float)$a <=> (float)$b);
 
-/** Satu baris tabel performa aturan. */
-function barisAturan(string $code, array $res, int $jumlahHari, array $labelKhusus): string
+/** Rincian match yang dipakai satu aturan, untuk simulator stake di browser. */
+function simulasiMatchRows(array $rows, callable $pick): array
 {
+    $matches = [];
+    foreach ($rows as $r) {
+        $out = $pick($r);
+        if ($out === null) {
+            continue;
+        }
+        if (is_array($out)) {
+            [$side, $lineText, $odds] = $out;
+        } else {
+            $side = $out;
+            $lineText = $r['line'];
+            $odds = $side === 'over' ? $r['over'] : $r['under'];
+        }
+        $detail = settleRinci((int)$r['ft'], (string)$lineText, (float)$odds, (string)$side);
+        if ($detail === null) {
+            continue;
+        }
+        $pl = (float)$detail['pl'];
+        $matches[] = [
+            'date' => (string)($r['datetime'] ?? ''),
+            'home' => (string)($r['home'] ?? ''),
+            'away' => (string)($r['away'] ?? ''),
+            'ht' => (string)($r['ht'] ?? ''),
+            'goals2h' => (int)($r['goals_2h'] ?? 0),
+            'ft' => (int)($r['ft'] ?? 0),
+            'side' => strtoupper((string)$side),
+            'line' => (string)$lineText,
+            'odds' => (float)$odds,
+            'pl' => $pl,
+            'outcome' => $pl > 0 ? 'WIN' : ($pl < 0 ? 'LOSE' : 'PUSH'),
+        ];
+    }
+    return $matches;
+}
+
+$SIMULATION_REGISTRY = [];
+
+/** Satu baris tabel performa aturan. */
+function barisAturan(
+    string $code,
+    array $res,
+    int $jumlahHari,
+    array $labelKhusus,
+    array $rows = [],
+    string $simId = '',
+    string $marketLabel = 'Market'
+): string
+{
+    global $SIMULATION_REGISTRY;
     $a = $res['all'];
     $kelas = !empty($res['control']) ? ' class="ctrl"' : '';
     $tagLemah = !empty($res['weak'])
         ? ' <span class="tag weak" title="Dibangun di atas patokan line titik masuk (sinyal-A). Uji menunjukkan patokan line kickoff lebih baik.">lemah</span>'
         : '';
     $label = e($labelKhusus[$code] ?? $res['label']);
+    if ($a && $rows && $simId !== '' && isset($res['pick'])) {
+        $SIMULATION_REGISTRY[$simId] = simulasiMatchRows($rows, $res['pick']);
+    }
     $html = "<tr{$kelas}><td><b>" . e($code) . "</b>{$tagLemah}</td><td>{$label}</td>";
     if (!$a) {
-        return $html . '<td class="num" colspan="9"><span class="muted">tidak ada sampel</span></td></tr>';
+        return $html . '<td class="num" colspan="10"><span class="muted">tidak ada sampel</span></td></tr>';
     }
     $push = $a['push'] ? ' <span class="muted">(' . angka($a['push']) . ' push)</span>' : '';
     $plKelas = $a['pl'] >= 0 ? 'pos' : 'neg';
@@ -100,7 +152,16 @@ function barisAturan(string $code, array $res, int $jumlahHari, array $labelKhus
         . '<td class="num ' . $plKelas . '">' . $plTeks . '</td>'
         . '<td class="num ' . ($a['roi'] >= 0 ? 'pos' : 'neg') . '">' . signed($a['roi']) . '</td>'
         . '<td class="num">' . $res['positive_days'] . '/' . $jumlahHari . '</td>'
-        . '<td><span class="tag ' . $tagKelas . '">' . $tagTeks . '</span></td>';
+        . '<td><span class="tag ' . $tagKelas . '">' . $tagTeks . '</span></td>'
+        . '<td class="sim-cell"><button type="button" class="sim-btn"'
+        . ' data-simulate'
+        . ' data-sim-id="' . e($simId) . '"'
+        . ' data-sim-market="' . e($marketLabel) . '"'
+        . ' data-sim-code="' . e($code) . '"'
+        . ' data-sim-label="' . e($labelKhusus[$code] ?? $res['label']) . '"'
+        . ' data-sim-n="' . e($a['n']) . '"'
+        . ' data-sim-roi="' . e(number_format((float)$a['roi'], 6, '.', '')) . '">'
+        . 'Coba</button></td>';
     return $html . '</tr>';
 }
 
@@ -144,7 +205,7 @@ function barisParitasLebar(string $code, array $res, int $jumlahHari): string
     $a = $res['all'];
     if (!$a) {
         return '<tr><td><b>' . e($code) . '</b></td><td>' . e($res['label'])
-            . '</td><td class="num" colspan="9"><span class="muted">tidak ada sampel</span></td></tr>';
+            . '</td><td class="num" colspan="10"><span class="muted">tidak ada sampel</span></td></tr>';
     }
     $status = $a['proven'] ? 'YA' : 'BELUM';
     return '<tr><td><b>' . e($code) . '</b></td><td>' . e($res['label']) . '</td>'
@@ -154,7 +215,8 @@ function barisParitasLebar(string $code, array $res, int $jumlahHari): string
         . '<td class="num">' . pct($a['ci_lo'], 0) . ' - ' . pct($a['ci_hi'], 0) . '</td>'
         . '<td class="num">-</td><td class="num">-</td><td class="num muted">N/A</td>'
         . '<td class="num">' . $res['positive_days'] . '/' . $jumlahHari . '</td>'
-        . '<td><span class="tag ' . ($a['proven'] ? 'yes' : 'no') . '">' . $status . '</span></td></tr>';
+        . '<td><span class="tag ' . ($a['proven'] ? 'yes' : 'no') . '">' . $status . '</span></td>'
+        . '<td class="sim-cell"><span class="muted">N/A</span></td></tr>';
 }
 
 ?>
@@ -191,6 +253,22 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
 .tag{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.06em;padding:2px 6px;border-radius:4px}
 .tag.no{background:#3a1f27;color:var(--red)}.tag.yes{background:#1d3d2a;color:var(--green)}
 .tag.weak{background:#2b2620;color:var(--yellow);font-weight:600}
+.sim-btn{border:1px solid #3a6b98;background:#162536;color:var(--blue);border-radius:5px;padding:4px 8px;font-family:inherit;font-size:11px;line-height:1.2;font-weight:700;cursor:pointer}
+.sim-btn:hover,.sim-btn:focus-visible{background:#1d3a55;border-color:var(--blue);outline:none}
+.sim-dialog{width:min(980px,calc(100% - 28px));padding:0;border:1px solid var(--border);border-radius:14px;background:var(--card);color:var(--text);box-shadow:0 24px 70px #0009}
+.sim-dialog::backdrop{background:#05080dcc}
+.sim-card{padding:20px}
+.sim-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:16px}
+.sim-kicker{color:var(--blue);font-size:10px;font-weight:800;letter-spacing:.1em;margin:0 0 3px;text-transform:uppercase}
+.sim-head h2{font-size:18px;margin:0}.sim-close{border:0;background:transparent;color:var(--muted);font-size:24px;line-height:1;cursor:pointer;padding:0 2px}.sim-close:hover{color:var(--text)}
+.sim-summary{color:var(--muted);font-size:12px;margin:0 0 16px}.sim-form-label{display:block;color:var(--muted);font-size:12px;font-weight:700;margin-bottom:6px}
+.sim-input{width:100%;border:1px solid var(--border);border-radius:7px;background:#0d141d;color:var(--text);font:700 16px/1.2 ui-monospace,Consolas,monospace;padding:10px 11px}.sim-input:focus{border-color:var(--blue);outline:2px solid #78b7ff33}
+.sim-results{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:16px}.sim-result{border:1px solid var(--border);border-radius:8px;background:#111a23;padding:10px}.sim-result .label{color:var(--muted);font-size:11px}.sim-result strong{display:block;font:700 15px/1.3 ui-monospace,Consolas,monospace;margin-top:4px}
+.sim-result.pnl-positive{border-color:#2f7d54;background:#142a20}.sim-result.pnl-negative{border-color:#7d3042;background:#2a171d}
+.sim-note{color:var(--muted);font-size:11px;margin:14px 0 0}.sim-actions{display:flex;justify-content:flex-end;margin-top:16px}.sim-actions .btn{cursor:pointer;font:inherit}
+.sim-matches{margin-top:18px;border-top:1px solid var(--border);padding-top:14px}.sim-matches-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:8px}.sim-matches-head strong{font-size:13px}.sim-matches-head span{color:var(--muted);font-size:11px}
+.sim-match-list{max-height:250px;overflow:auto;border:1px solid var(--border);border-radius:8px;background:#10161e}.sim-match-table{width:100%;min-width:520px;border:0;font-size:11px}.sim-match-table th,.sim-match-table td{padding:7px 8px}.sim-match-table th{position:sticky;top:0;background:#151f2b;z-index:1}.sim-match-table td{vertical-align:top}.sim-match-table .match-name{white-space:normal;min-width:150px}.sim-match-table .score{color:var(--muted)}.sim-match-table .outcome{font-size:9px;font-weight:800;letter-spacing:.05em}.sim-match-table .outcome.win{color:var(--green)}.sim-match-table .outcome.lose{color:var(--red)}.sim-match-table .outcome.push{color:var(--yellow)}.sim-empty{padding:14px;color:var(--muted);font-size:12px}
+@media(max-width:600px){.sim-dialog{width:calc(100% - 16px)}.sim-card{padding:16px}.sim-results{grid-template-columns:1fr 1fr}.sim-match-list{max-height:220px}}
 .switch{display:flex;gap:8px;align-items:center;margin:14px 0 4px;flex-wrap:wrap}
 .switch .btn.on{background:#1d3d2a;border-color:#2f7d54;color:var(--green);font-weight:700}
 .market-head{margin:26px 0 0;padding:10px 14px;border-radius:10px;background:#131a24;border:1px solid var(--border);border-left:4px solid var(--blue)}
@@ -293,11 +371,11 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
       <thead><tr>
         <th>Kode</th><th>Aturan</th><th class="num">n</th><th class="num">Menang</th>
         <th class="num" title="Push tidak dihitung di penyebut.">Win rate</th><th class="num" title="Uji-t atas P/L per taruhan.">t</th><th class="num">Breakeven</th>
-        <th class="num">P&amp;L</th><th class="num">ROI</th><th class="num">Hari +</th><th>Terbukti</th>
+        <th class="num">P&amp;L</th><th class="num">ROI</th><th class="num">Hari +</th><th>Terbukti</th><th>Simulasi</th>
       </tr></thead>
       <tbody>
       <?php foreach ($results as $code => $res) {
-          echo barisAturan($code, $res, count($days), []);
+          echo barisAturan($code, $res, count($days), [], $rows, 'vsoccer-' . $code, 'M46 market');
       } ?>
       </tbody>
     </table></div>
@@ -387,11 +465,14 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
       <thead><tr>
         <th>Kode</th><th>Aturan</th><th class="num">n</th><th class="num">Menang</th>
         <th class="num" title="Push tidak dihitung di penyebut.">Win rate</th><th class="num" title="Uji-t atas P/L per taruhan.">t</th><th class="num">Breakeven</th>
-        <th class="num">P&amp;L</th><th class="num">ROI</th><th class="num">Hari +</th><th>Terbukti</th>
+        <th class="num">P&amp;L</th><th class="num">ROI</th><th class="num">Hari +</th><th>Terbukti</th><th>Simulasi</th>
       </tr></thead>
       <tbody>
       <?php foreach ($hasilDurasi as $code => $res) {
-          echo barisAturan($code, $res, count($hariDurasi), $sabaLabel);
+          echo barisAturan(
+              $code, $res, count($hariDurasi), $sabaLabel,
+              $bagian['rows'], 'saba-' . $durasi . '-' . $code, 'H.Time market'
+          );
       } ?>
        <?php foreach (($sabaParityPerDurasi[$durasi]['results'] ?? []) as $code => $res) {
            echo barisParitasLebar(
@@ -431,11 +512,14 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
       <thead><tr>
         <th>Kode</th><th>Aturan</th><th class="num">n</th><th class="num">Menang</th>
         <th class="num" title="Push tidak dihitung di penyebut.">Win rate</th><th class="num" title="Uji-t atas P/L per taruhan.">t</th><th class="num">Breakeven</th>
-        <th class="num">P&amp;L</th><th class="num">ROI</th><th class="num">Hari +</th><th>Terbukti</th>
+        <th class="num">P&amp;L</th><th class="num">ROI</th><th class="num">Hari +</th><th>Terbukti</th><th>Simulasi</th>
       </tr></thead>
       <tbody>
       <?php foreach ($sabaResults as $code => $res) {
-          echo barisAturan($code, $res, count($sabaDays), $sabaLabel);
+          echo barisAturan(
+              $code, $res, count($sabaDays), $sabaLabel,
+              $sabaRows, 'saba-all-' . $code, 'H.Time market'
+          );
       } ?>
       <?php foreach ($sabaParityResults as $code => $res) {
           echo barisParitasLebar($code, $res, count($sabaDays));
@@ -490,5 +574,122 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
     (implied probability) dibuang · halaman refresh otomatis tiap 2 menit.
   </p>
 </main>
+<dialog id="simulationDialog" class="sim-dialog" aria-labelledby="simulationTitle">
+  <form method="dialog" class="sim-card">
+    <div class="sim-head">
+      <div>
+        <p class="sim-kicker">Simulasi historis</p>
+        <h2 id="simulationTitle">R1</h2>
+      </div>
+      <button class="sim-close" type="submit" value="cancel" aria-label="Tutup simulasi">&times;</button>
+    </div>
+    <p id="simulationSummary" class="sim-summary"></p>
+    <label class="sim-form-label" for="simulationStake">Stake per taruhan (Rp)</label>
+    <input id="simulationStake" class="sim-input" type="number" min="0" step="1000" value="100000" inputmode="numeric">
+    <div class="sim-results">
+      <div class="sim-result"><span class="label">Total taruhan</span><strong id="simulationTotalStake">Rp0</strong></div>
+      <div id="simulationPnlBox" class="sim-result"><span class="label">P/L historis</span><strong id="simulationPnl">Rp0</strong></div>
+      <div class="sim-result"><span class="label">Saldo akhir historis</span><strong id="simulationBalance">Rp0</strong></div>
+      <div class="sim-result"><span class="label">ROI aturan</span><strong id="simulationRoi">0%</strong></div>
+    </div>
+    <div class="sim-matches">
+      <div class="sim-matches-head"><strong>Match historis</strong><span id="simulationMatchCount"></span></div>
+      <div class="sim-match-list">
+        <table class="sim-match-table">
+          <thead><tr><th>Tanggal</th><th>Match</th><th>Skor</th><th>Pick</th><th id="simulationMarketHeader">Market</th><th>Odd</th><th>P/L</th></tr></thead>
+          <tbody id="simulationMatches"></tbody>
+        </table>
+      </div>
+    </div>
+    <p class="sim-note">Perkiraan ini mengalikan ROI historis aturan dengan total stake. Bukan jaminan hasil taruhan berikutnya.</p>
+    <div class="sim-actions"><button class="btn" type="submit" value="close">Tutup</button></div>
+  </form>
+</dialog>
+<script id="simulationData" type="application/json"><?= json_encode(
+    $SIMULATION_REGISTRY,
+    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+) ?></script>
+<script>
+(() => {
+  const dialog = document.getElementById('simulationDialog');
+  const stakeInput = document.getElementById('simulationStake');
+  const title = document.getElementById('simulationTitle');
+  const summary = document.getElementById('simulationSummary');
+  const totalStake = document.getElementById('simulationTotalStake');
+  const pnl = document.getElementById('simulationPnl');
+  const balance = document.getElementById('simulationBalance');
+  const roi = document.getElementById('simulationRoi');
+  const pnlBox = document.getElementById('simulationPnlBox');
+  const marketHeader = document.getElementById('simulationMarketHeader');
+  const matchCount = document.getElementById('simulationMatchCount');
+  const matchesBody = document.getElementById('simulationMatches');
+  const simulationData = JSON.parse(document.getElementById('simulationData').textContent || '{}');
+  let activeSimulation = { n: 0, roi: 0, matches: [] };
+  const rupiah = (value) => new Intl.NumberFormat('id-ID', {
+    style: 'currency', currency: 'IDR', maximumFractionDigits: 0
+  }).format(Math.round(value));
+  const signedRupiah = (value) => `${value >= 0 ? '+' : '−'}${rupiah(Math.abs(value))}`;
+  const escapeHtml = (value) => String(value ?? '').replace(/[&<>\"']/g, (char) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#039;'
+  }[char]));
+  const renderMatches = (stake) => {
+    const matches = activeSimulation.matches;
+    matchCount.textContent = `${matches.length} match yang masuk aturan`;
+    if (!matches.length) {
+      matchesBody.innerHTML = '<tr><td class="sim-empty" colspan="7">Tidak ada rincian match untuk aturan ini.</td></tr>';
+      return;
+    }
+    matchesBody.innerHTML = matches.map((match) => {
+      const matchPnl = Number(match.pl || 0) * stake;
+      const outcomeClass = String(match.outcome || '').toLowerCase();
+      return `<tr>
+        <td>${escapeHtml(match.date)}</td>
+        <td class="match-name">${escapeHtml(match.home)}<br><span class="muted">vs</span> ${escapeHtml(match.away)}</td>
+        <td><b>${escapeHtml(match.ht)}</b><br><span class="score">2H ${escapeHtml(match.goals2h)} · FT ${escapeHtml(match.ft)}</span></td>
+        <td><b>${escapeHtml(match.side)}</b><br><span class="outcome ${outcomeClass}">${escapeHtml(match.outcome)}</span></td>
+        <td>${escapeHtml(match.line)}</td>
+        <td>@ ${Number(match.odds).toFixed(2)}</td>
+        <td class="${matchPnl >= 0 ? 'pos' : 'neg'}">${signedRupiah(matchPnl)}</td>
+      </tr>`;
+    }).join('');
+  };
+  const update = () => {
+    const stake = Math.max(0, Number(stakeInput.value) || 0);
+    const turnover = stake * activeSimulation.n;
+    const resultPerUnit = activeSimulation.matches.reduce((sum, match) => sum + Number(match.pl || 0), 0);
+    const result = activeSimulation.matches.length ? resultPerUnit * stake : turnover * activeSimulation.roi / 100;
+    const effectiveRoi = turnover > 0 ? result / turnover * 100 : activeSimulation.roi;
+    totalStake.textContent = rupiah(turnover);
+    pnl.textContent = signedRupiah(result);
+    balance.textContent = rupiah(turnover + result);
+    roi.textContent = `${effectiveRoi >= 0 ? '+' : '-'}${Math.abs(effectiveRoi).toFixed(1)}%`;
+    roi.textContent = `${activeSimulation.roi >= 0 ? '+' : '−'}${Math.abs(activeSimulation.roi).toFixed(1)}%`;
+    pnlBox.classList.toggle('pnl-positive', result >= 0);
+    pnlBox.classList.toggle('pnl-negative', result < 0);
+    renderMatches(stake);
+  };
+  document.querySelectorAll('[data-simulate]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const matches = simulationData[button.dataset.simId] || [];
+      activeSimulation = {
+        n: matches.length || Number(button.dataset.simN) || 0,
+        roi: Number(button.dataset.simRoi) || 0,
+        matches
+      };
+      marketHeader.textContent = button.dataset.simMarket || 'Market';
+      title.textContent = `${button.dataset.simCode} · Simulasi`;
+      summary.textContent = `${button.dataset.simLabel} · ${activeSimulation.n} taruhan historis`;
+      update();
+      dialog.showModal();
+      stakeInput.focus();
+      stakeInput.select();
+    });
+  });
+  stakeInput.addEventListener('input', update);
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+})();
+</script>
 </body>
 </html>

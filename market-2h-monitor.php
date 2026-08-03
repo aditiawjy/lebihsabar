@@ -226,12 +226,20 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
   </div>
 
   <div class="note">
-    <b>Cara membaca halaman ini.</b> ROI tinggi bukan bukti. Yang menentukan dua hal:
-    <b>(1)</b> batas bawah CI 95% harus di atas breakeven, dan
-    <b>(2)</b> ROI harus positif di banyak hari berbeda, bukan cuma satu.
+    <b>Cara membaca halaman ini.</b> ROI tinggi bukan bukti. Yang menentukan tiga hal:
+    <b>(1)</b> kolom <b>t</b> harus melewati <?= T_BONFERRONI ?> — itu uji-t atas P/L per taruhan,
+    sudah diperketat karena halaman ini menguji sekitar 50 kombinasi aturan × durasi
+    sehingga t 1,96 saja akan meloloskan dua-tiga aturan kosong;
+    <b>(2)</b> ROI harus positif di banyak hari berbeda, bukan cuma satu; dan
+    <b>(3)</b> kedua kaki (Over dan Under) sebaiknya sama-sama positif — aturan yang untungnya
+    menumpuk di satu kaki saja biasanya cuma mengikuti arah yang kebetulan panas.
     Baris <span class="muted">KONTROL</span> adalah aturan tanpa logika apa pun — kalau aturan sungguhan
     tidak jelas mengalahkannya, aturan itu tidak menambah nilai. Kalau kedua kontrol
     berkebalikan tajam antar hari, yang terlihat rentetan gol, bukan edge.
+    <br><br>
+    <b>Win rate di sini tidak menghitung push di penyebut</b>, supaya sebanding dengan breakeven
+    yang dihitung dari odds. Line seperempat yang berakhir setengah-menang dihitung 0,5 —
+    itu sebabnya kolom menang kadang berkoma.
     <br><br>
     Aturan bertanda <span class="tag weak">lemah</span> (R1–R5) memakai patokan line titik masuk.
     Uji perbandingan menunjukkan patokan <b>line kickoff</b> (R6–R8) lebih baik. Utamakan R6–R8.
@@ -274,7 +282,9 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
 
   <section class="section">
     <h2>Performa aturan (seluruh data)</h2>
-    <p class="hint">Kolom <b>TERBUKTI</b> hanya menyala kalau batas bawah CI 95% melewati breakeven.</p>
+    <p class="hint">Kolom <b>TERBUKTI</b> hanya menyala kalau t &gt; <?= T_BONFERRONI ?>.
+      <span class="tag weak">LEWAT 95%</span> berarti t &gt; 1,96 — menarik, tapi belum tahan
+      terhadap banyaknya aturan yang diuji di halaman ini.</p>
     <?php if (!$rows): ?>
       <div class="card empty">Belum ada match yang bisa dipakai.</div>
     <?php else: ?>

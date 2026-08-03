@@ -79,18 +79,28 @@ function barisAturan(string $code, array $res, int $jumlahHari, array $labelKhus
     if (!$a) {
         return $html . '<td class="num" colspan="9"><span class="muted">tidak ada sampel</span></td></tr>';
     }
-    $push = $a['push'] ? ' <span class="muted">(' . $a['push'] . ' push)</span>' : '';
+    $push = $a['push'] ? ' <span class="muted">(' . angka($a['push']) . ' push)</span>' : '';
     $plKelas = $a['pl'] >= 0 ? 'pos' : 'neg';
     $plTeks = ($a['pl'] >= 0 ? '+' : '−') . number_format(abs($a['pl']), 2, ',', '.');
+    // Tiga tingkat, bukan lolos/tidak. Lihat T_BONFERRONI di market-lib.php.
+    if ($a['proven']) {
+        [$tagKelas, $tagTeks] = ['yes', 'TERBUKTI'];
+    } elseif ($a['lewat95']) {
+        [$tagKelas, $tagTeks] = ['weak', 'LEWAT 95%'];
+    } else {
+        [$tagKelas, $tagTeks] = ['no', 'BELUM'];
+    }
     $html .= '<td class="num">' . $a['n'] . '</td>'
-        . '<td class="num">' . $a['win'] . $push . '</td>'
-        . '<td class="num">' . pct($a['winrate']) . '</td>'
-        . '<td class="num">' . pct($a['ci_lo'], 0) . ' – ' . pct($a['ci_hi'], 0) . '</td>'
+        . '<td class="num">' . angka($a['win']) . $push . '</td>'
+        . '<td class="num" title="Atas ' . angka($a['n_decided']) . ' taruhan yang diputuskan; push tidak dihitung.">'
+        . pct($a['winrate']) . '</td>'
+        . '<td class="num" title="Uji-t atas P/L per taruhan. Terbukti butuh t &gt; ' . T_BONFERRONI . '.">'
+        . number_format($a['t'], 2, ',', '.') . '</td>'
         . '<td class="num">' . pct($a['breakeven'], 0) . '</td>'
         . '<td class="num ' . $plKelas . '">' . $plTeks . '</td>'
         . '<td class="num ' . ($a['roi'] >= 0 ? 'pos' : 'neg') . '">' . signed($a['roi']) . '</td>'
         . '<td class="num">' . $res['positive_days'] . '/' . $jumlahHari . '</td>'
-        . '<td><span class="tag ' . ($a['proven'] ? 'yes' : 'no') . '">' . ($a['proven'] ? 'YA' : 'BELUM') . '</span></td>';
+        . '<td><span class="tag ' . $tagKelas . '">' . $tagTeks . '</span></td>';
     return $html . '</tr>';
 }
 
@@ -271,7 +281,7 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
     <div class="tablebox"><table>
       <thead><tr>
         <th>Kode</th><th>Aturan</th><th class="num">n</th><th class="num">Menang</th>
-        <th class="num">Win rate</th><th class="num">CI 95%</th><th class="num">Breakeven</th>
+        <th class="num" title="Push tidak dihitung di penyebut.">Win rate</th><th class="num" title="Uji-t atas P/L per taruhan.">t</th><th class="num">Breakeven</th>
         <th class="num">P&amp;L</th><th class="num">ROI</th><th class="num">Hari +</th><th>Terbukti</th>
       </tr></thead>
       <tbody>
@@ -365,7 +375,7 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
     <div class="tablebox"><table>
       <thead><tr>
         <th>Kode</th><th>Aturan</th><th class="num">n</th><th class="num">Menang</th>
-        <th class="num">Win rate</th><th class="num">CI 95%</th><th class="num">Breakeven</th>
+        <th class="num" title="Push tidak dihitung di penyebut.">Win rate</th><th class="num" title="Uji-t atas P/L per taruhan.">t</th><th class="num">Breakeven</th>
         <th class="num">P&amp;L</th><th class="num">ROI</th><th class="num">Hari +</th><th>Terbukti</th>
       </tr></thead>
       <tbody>
@@ -409,7 +419,7 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
     <div class="tablebox"><table>
       <thead><tr>
         <th>Kode</th><th>Aturan</th><th class="num">n</th><th class="num">Menang</th>
-        <th class="num">Win rate</th><th class="num">CI 95%</th><th class="num">Breakeven</th>
+        <th class="num" title="Push tidak dihitung di penyebut.">Win rate</th><th class="num" title="Uji-t atas P/L per taruhan.">t</th><th class="num">Breakeven</th>
         <th class="num">P&amp;L</th><th class="num">ROI</th><th class="num">Hari +</th><th>Terbukti</th>
       </tr></thead>
       <tbody>

@@ -20,6 +20,11 @@ date_default_timezone_set('Asia/Jakarta');
 
 const ODDS_BOOK_MIN = 1.0;   // sama dengan validasi di vsoccer_headless.py
 const ODDS_BOOK_MAX = 1.20;
+// Ambang uji-t untuk cap "Terbukti". Halaman menguji ~50 kombinasi aturan x
+// durasi; pada 50 uji, ambang 95% biasa (t 1,96) akan diloloskan dua-tiga
+// aturan kosong semata-mata karena kebetulan. Koreksi Bonferroni 0,05/50
+// menuntut p < 0,001, yang setara t sekitar 3,3.
+const T_BONFERRONI = 3.3;
 // Ambang selisih minimal untuk R5. Sengaja dijadikan konstanta supaya kelihatan
 // bahwa R5 punya angka yang di-tuning -- R1 tidak punya satu pun.
 const R5_MIN_MARGIN = 1.5;
@@ -128,6 +133,13 @@ function settleRinci(int $total, string $lineText, float $odds, string $side): ?
     }
     $out['pl'] *= $bagian;
     return $out;
+}
+
+/** Pecahan menang/kalah/push: "59" atau "58,5" — tanpa nol di belakang koma. */
+function angka(float $v): string
+{
+    $s = number_format($v, 1, ',', '.');
+    return substr($s, -2) === ',0' ? substr($s, 0, -2) : $s;
 }
 
 function pct(?float $v, int $dec = 1): string
@@ -486,15 +498,18 @@ function evaluate(array $rows, callable $pick): ?array
     $t = $sd > 0 ? $mean / ($sd / sqrt($n)) : 0.0;
     return [
         'n' => $n, 'win' => $win, 'lose' => $lose, 'push' => $push,
+        'n_decided' => $diputuskan,
         'winrate' => $p * 100,
         'pl' => $pl,
         'roi' => $pl / $n * 100,
-        'ci_lo' => max(0, $p - 1.96 * $se) * 100,
-        'ci_hi' => min(1, $p + 1.96 * $se) * 100,
+        'sd' => $sd,
+        't' => $t,
         'breakeven' => $breakeven,
-        // Satu-satunya lampu hijau yang berarti: batas bawah CI 95% di atas
-        // breakeven. ROI tinggi dengan CI menyentuh breakeven belum apa-apa.
-        'proven' => (($p - 1.96 * $se) * 100) > $breakeven,
+        // Tiga tingkat, bukan lampu hijau/merah. Halaman ini menguji sekitar 50
+        // kombinasi aturan x durasi, jadi t > 1,96 saja belum cukup: dari 50 uji,
+        // dua-tiga akan melewatinya semata-mata karena kebetulan.
+        'proven' => $t > T_BONFERRONI,
+        'lewat95' => $t > 1.96,
     ];
 }
 

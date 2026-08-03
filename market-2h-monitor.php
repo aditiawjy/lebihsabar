@@ -211,6 +211,7 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
     <div class="actions">
       <a class="btn" href="vsoccer-live.php">← Live</a>
       <a class="btn" href="check-super-accuracy.php">Akurasi pattern</a>
+      <a class="btn" href="forward-test.php">Tes maju</a>
       <a class="btn" href="javascript:location.reload()">↻ Refresh</a>
     </div>
   </div>

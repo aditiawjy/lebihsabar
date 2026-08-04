@@ -194,7 +194,8 @@ function barisParitas(string $code, array $res, int $jumlahHari): string
         . '<td class="num">' . $a['correct'] . '/' . $a['n'] . '</td>'
         . '<td class="num">' . pct($a['accuracy']) . '</td>'
         . '<td class="num">' . pct($a['ci_lo'], 0) . ' - ' . pct($a['ci_hi'], 0) . '</td>'
-        . '<td class="num muted">N/A</td>'
+        . '<td class="num" title="Odds minimal supaya akurasi ini menghasilkan untung. Di bawah angka ini, tebakan benar pun tetap rugi.">'
+        . ($a['odds_min'] === null ? '–' : number_format($a['odds_min'], 2, ',', '.')) . '</td>'
         . '<td class="num">' . $res['positive_days'] . '/' . $jumlahHari . '</td>'
         . '<td><span class="tag ' . ($a['proven'] ? 'yes' : 'no') . '">' . $status . '</span></td></tr>';
 }
@@ -426,6 +427,33 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
     </table></div>
     <?php endif; ?>
   </section>
+
+  <?php if ($parityResults): ?>
+  <section class="section">
+    <h2>Prediksi hasil genap/ganjil V-Soccer</h2>
+    <p class="hint">
+      Ditampilkan justru karena hasilnya negatif. Babak kedua V-Soccer menghasilkan
+      rata-rata ~3,1 gol, dan pada tingkat itu paritas praktis lempar koin —
+      keunggulan teoretisnya hanya <b>0,09% di atas 50%</b>. Kolom <b>Odds min</b>
+      akan menunjukkan angka di sekitar 2,00 atau lebih, yang tidak pernah ditawarkan
+      bandar. Artinya market genap/ganjil V-Soccer <b>pasti rugi</b>, bukan sekadar
+      belum terbukti. Bandingkan dengan tabel SABA di bawah, yang babaknya jauh lebih pendek.
+    </p>
+    <div class="tablebox"><table>
+      <thead><tr>
+        <th>Kode</th><th>Formula</th><th class="num">n</th><th class="num">Tepat</th>
+        <th class="num">Akurasi</th><th class="num">CI 95%</th>
+        <th class="num" title="Odds minimal supaya untung.">Odds min</th>
+        <th class="num">Hari >=50%</th><th>Status</th>
+      </tr></thead>
+      <tbody>
+      <?php foreach ($parityResults as $code => $res) {
+          echo barisParitas($code, $res, count($days));
+      } ?>
+      </tbody>
+    </table></div>
+  </section>
+  <?php endif; ?>
   <?php endif; /* tampilVsoccer */ ?>
 
   <?php if ($tampilSaba): ?>
@@ -547,15 +575,27 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
   <section class="section">
     <h2>Prediksi hasil genap/ganjil SABA</h2>
     <p class="hint">
-      <b>R2C</b> bukan taruhan Over/Under. Prediksi hasil akhir: jika HT total
-      >= 4, targetnya <b>genap</b>; jika HT total <= 3, targetnya <b>ganjil</b>.
-      Akurasi dihitung dari total gol FT home + away.
-      ROI tidak dihitung karena CSV belum menyimpan odds market Odd/Even.
+      Bukan taruhan Over/Under — yang ditebak paritas <b>total gol FT (home + away)</b>.
+      Skor 2–1 → total 3 → ganjil; 2–2 → total 4 → genap.
+      <b>ROI tidak bisa dihitung</b> karena CSV tidak menyimpan odds market Odd/Even;
+      kolom <b>Odds min</b> menggantikannya — itu harga terendah yang masih membuat
+      akurasi tersebut untung. Menang 58% pun tetap rugi kalau dibayar 1,55.
+    </p>
+    <p class="hint">
+      <b>P-HT punya dasar matematis, bukan hasil mengaduk data.</b> Paritas FT =
+      paritas HT + paritas gol babak kedua, dan skor HT sudah diketahui — jadi
+      menebak paritas FT sama saja menebak paritas gol babak kedua saja. Untuk
+      sebaran Poisson berrata-rata λ, peluang jumlah genap = (1 + e<sup>−2λ</sup>) / 2.
+      Babak SABA sangat pendek (~0,9 gol pada liga 15 menit) sehingga condong genap
+      ~58%; babak V-Soccer menghasilkan ~3,1 gol sehingga peluangnya 50,1% —
+      lempar koin, dan mustahil menutup potongan bandar.
     </p>
     <div class="tablebox"><table>
       <thead><tr>
         <th>Kode</th><th>Formula</th><th class="num">n</th><th class="num">Tepat</th>
-        <th class="num">Akurasi</th><th class="num">CI 95%</th><th class="num">ROI</th><th class="num">Hari >=50%</th><th>Status</th>
+        <th class="num">Akurasi</th><th class="num">CI 95%</th>
+        <th class="num" title="Odds minimal supaya untung. CSV tidak menyimpan odds ganjil/genap, jadi ROI tak bisa dihitung.">Odds min</th>
+        <th class="num">Hari >=50%</th><th>Status</th>
       </tr></thead>
       <tbody>
       <?php foreach ($sabaParityResults as $code => $res) {

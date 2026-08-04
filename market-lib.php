@@ -365,7 +365,25 @@ $SABA_RULES['R2B'] = [
         return ($ht % 2 === 0) ? 'under' : null;
     },
 ];
-$SABA_PARITY_RULES = [
+$PARITY_RULES = [
+    // Satu-satunya aturan di seluruh berkas ini yang mekanismenya pasti secara
+    // matematis, bukan hasil mengaduk data.
+    //
+    // Paritas FT = paritas HT + paritas gol babak kedua. Skor HT sudah diketahui
+    // di titik masuk, jadi menebak paritas FT sama saja menebak paritas gol
+    // babak kedua saja. Untuk sebaran Poisson dengan rata-rata lambda, peluang
+    // jumlah genap = (1 + e^-2lambda) / 2. Babak SABA sangat pendek (rata-rata
+    // ~0,9 gol pada liga 15 menit) sehingga peluang genapnya ~58%; babak
+    // V-Soccer menghasilkan ~3,1 gol sehingga peluangnya 50,1% -- praktis
+    // lempar koin dan tidak mungkin dikalahkan setelah potongan bandar.
+    //
+    // Karena itu tebakannya: ikuti paritas HT.
+    'P-HT' => [
+        'label' => 'Ikut paritas HT: total HT genap -> tebak genap, ganjil -> tebak ganjil',
+        'predict' => static function (array $r): string {
+            return ((int)$r['ht_total']) % 2 === 0 ? 'even' : 'odd';
+        },
+    ],
     'R2C' => [
         'label' => 'R2 -> hasil FT genap jika HT >= 4; ganjil jika HT <= 3',
         'predict' => static function (array $r): string {
@@ -374,6 +392,7 @@ $SABA_PARITY_RULES = [
         },
     ],
 ];
+$SABA_PARITY_RULES = $PARITY_RULES;
 
 $SABA_RULES['R2'] = [
     'weak'  => true,
@@ -543,6 +562,12 @@ function evaluateParity(array $rows, callable $predict): ?array
         'accuracy' => $p * 100,
         'ci_lo' => max(0, $p - 1.96 * $se) * 100,
         'ci_hi' => min(1, $p + 1.96 * $se) * 100,
+        // CSV tidak menyimpan odds ganjil/genap, jadi ROI tak bisa dihitung.
+        // Yang bisa diberikan: harga minimal supaya akurasi ini menghasilkan
+        // untung. Di bawah angka ini, tebakan benar pun tetap rugi.
+        'odds_min' => $p > 0 ? 1 / $p : null,
+        // Ini uji "lebih baik dari lempar koin", BUKAN uji untung. Untung atau
+        // tidak tetap bergantung pada odds yang tidak kita punya.
         'proven' => (($p - 1.96 * $se) * 100) > 50,
     ];
 }
@@ -698,6 +723,9 @@ if (!is_file(VSOCCER_FILE)) {
 usort($rows, static fn($a, $b) => $a['ts'] <=> $b['ts']);
 $days = array_values(array_unique(array_column($rows, 'day')));
 $results = runRules($RULES, $rows, $days);
+// Paritas juga dihitung untuk V-Soccer. Hasilnya penting justru karena negatif:
+// babak kedua V-Soccer terlalu banyak gol sehingga paritasnya lempar koin.
+$parityResults = $rows ? runParityRules($PARITY_RULES, $rows, $days) : [];
 
 // ---------------------------------------------------------------- data SABA
 // Bentuk barisnya dibuat sama dengan V-Soccer, sehingga evaluate() tetap

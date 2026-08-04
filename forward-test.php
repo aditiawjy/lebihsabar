@@ -34,6 +34,47 @@ $mulaiTs = $mulaiDt->setTime(0, 0)->getTimestamp();
  * supaya terlihat bahwa keduanya ditetapkan sebelum datanya ada.
  */
 $KANDIDAT = [
+    // ---- V-Soccer. Temuan yang paling kuat sejauh ini bukan sebuah aturan,
+    // melainkan arah: memasang Over di V-Soccer rugi -20,4% dengan t -4,61,
+    // satu-satunya angka yang lolos ambang Bonferroni di seluruh monitor.
+    // Kandidat di bawah semuanya memasang Under; yang diuji adalah KAPAN.
+    [
+        'kode' => 'VS-HT34', 'pasar' => 'vsoccer', 'durasi' => null, 'target' => 200,
+        'label' => 'V-Soccer: total gol HT 3–4 → Under',
+        'pick' => static fn(array $r) => ($r['ht_total'] >= 3 && $r['ht_total'] <= 4) ? 'under' : null,
+        'alasan' => 'Kandidat terkuat yang pernah ditemukan: t 3,02 dan positif di ketiga hari '
+            . '(+13% / +35% / +8%). Sel yang dibuang besar dan netral (170 match, −4,6% ≈ sebesar '
+            . 'potongan bandar saja), jadi keunggulannya benar-benar terkonsentrasi di HT 3–4, '
+            . 'bukan hasil mengecilkan sampel. Mekanismenya masuk akal: saat babak pertama '
+            . 'menghasilkan 3–4 gol, pasar menaikkan line seolah tempo itu berlanjut. '
+            . 'CATATAN JUJUR: batas 3–4 dipilih SETELAH melihat sel mana yang bagus, jadi +19,4% '
+            . 'hampir pasti menyusut pada data baru.',
+    ],
+    [
+        'kode' => 'VS-HT34-ODD', 'pasar' => 'vsoccer', 'durasi' => null, 'target' => 100,
+        'label' => 'V-Soccer: HT 3–4 + odds Under ≥ 1,90 → Under',
+        'pick' => static fn(array $r) => ($r['ht_total'] >= 3 && $r['ht_total'] <= 4
+            && (float)$r['under'] >= 1.90) ? 'under' : null,
+        'alasan' => 'Menguji pengamatan bahwa odds mendekati 2,00 lebih menguntungkan — odds Under '
+            . 'tinggi berarti pasar sedang condong ke Over, dan di situlah biasnya paling kuat. '
+            . 'ROI in-sample memang tertinggi (+29,1%), tapi sampelnya tinggal 66 dan hari ketiga '
+            . 'sudah −18%. Diuji berdampingan dengan VS-HT34 untuk menjawab satu pertanyaan: '
+            . 'apakah saringan odds menambah nilai, atau cuma membuang data?',
+    ],
+    [
+        'kode' => 'VS-UNDER', 'pasar' => 'vsoccer', 'durasi' => null, 'target' => 300,
+        'label' => 'V-Soccer: KONTROL — selalu Under',
+        'pick' => static fn(array $r) => 'under',
+        'alasan' => 'Kontrol tanpa logika apa pun. Kalau VS-HT34 tidak jelas mengalahkan baris ini, '
+            . 'seluruh seleksi HT 3–4 tidak menambah nilai dan cukup pasang Under ke semua match.',
+    ],
+    [
+        'kode' => 'R12', 'pasar' => 'vsoccer', 'durasi' => null, 'target' => 200,
+        'alasan' => 'Pembanding sempit untuk VS-HT34 (R12 = HT tepat 3 saja). Keunggulannya '
+            . 'bertumpu pada satu hari: +6% / +46% / −22%. Kalau VS-HT34 lolos sementara R12 '
+            . 'tidak, berarti sel HT 4 memang menyumbang dan bukan pengganggu.',
+    ],
+    // ---- SABA
     [
         'kode' => 'R1A', 'durasi' => '15', 'target' => 200,
         'alasan' => 'Kedua kaki positif (Under +16,0% n=49, Over +15,0% n=68), kedua hari '
@@ -58,13 +99,19 @@ $KANDIDAT = [
     ],
 ];
 
-/** Baris SABA untuk satu kandidat: durasi tertentu, atau semua durasi. */
-function barisKandidat(?string $durasi, array $perDurasi, array $semua): array
+/**
+ * Baris untuk satu kandidat. V-Soccer selalu satu kumpulan; SABA dipisah per
+ * durasi karena tempo 15m, 16m, dan 20m berbeda dan tidak boleh dicampur.
+ */
+function barisKandidat(array $k, array $vsoccer, array $sabaPerDurasi, array $sabaSemua): array
 {
-    if ($durasi === null) {
-        return $semua;
+    if (($k['pasar'] ?? 'saba') === 'vsoccer') {
+        return $vsoccer;
     }
-    return $perDurasi[$durasi]['rows'] ?? [];
+    if (($k['durasi'] ?? null) === null) {
+        return $sabaSemua;
+    }
+    return $sabaPerDurasi[$k['durasi']]['rows'] ?? [];
 }
 
 /** Log per taruhan supaya bisa dicocokkan satu per satu dengan taruhan nyata. */
@@ -98,16 +145,21 @@ function logTaruhan(array $rows, callable $pick): array
 
 $hasil = [];
 foreach ($KANDIDAT as $k) {
-    $aturan = $SABA_RULES[$k['kode']] ?? null;
-    if (!$aturan) {
+    $pasar = $k['pasar'] ?? 'saba';
+    // Kandidat boleh membawa pick sendiri (aturan baru yang belum ada di monitor),
+    // atau merujuk kode aturan yang sudah dipakai halaman monitor.
+    $daftar = $pasar === 'vsoccer' ? $RULES : $SABA_RULES;
+    $pick = $k['pick'] ?? ($daftar[$k['kode']]['pick'] ?? null);
+    $label = $k['label'] ?? ($daftar[$k['kode']]['label'] ?? $k['kode']);
+    if (!$pick) {
         continue;
     }
-    $semuaBaris = barisKandidat($k['durasi'], $sabaPerDurasi, $sabaRows);
+    $semuaBaris = barisKandidat($k, $rows, $sabaPerDurasi, $sabaRows);
     $sebelum = array_values(array_filter($semuaBaris, static fn($r) => $r['ts'] < $mulaiTs));
     $sesudah = array_values(array_filter($semuaBaris, static fn($r) => $r['ts'] >= $mulaiTs));
 
-    $insample = $sebelum ? evaluate($sebelum, $aturan['pick']) : null;
-    $maju = $sesudah ? evaluate($sesudah, $aturan['pick']) : null;
+    $insample = $sebelum ? evaluate($sebelum, $pick) : null;
+    $maju = $sesudah ? evaluate($sesudah, $pick) : null;
 
     // Ambang dihitung dari sd in-sample dan target -- bukan dari hasil pasca-kunci.
     $sd = $insample['sd'] ?? null;
@@ -116,10 +168,15 @@ foreach ($KANDIDAT as $k) {
         : null;
 
     $n = $maju['n'] ?? 0;
-    if ($n < $k['target']) {
+    if ($ambang === null) {
+        // Tanpa data in-sample tidak ada sd, jadi tidak ada ambang yang sah.
+        // Menyebutnya GUGUR di sini keliru -- yang benar: belum bisa dinilai.
+        $status = 'AMBANG BELUM ADA';
+        $statusKelas = 'no';
+    } elseif ($n < $k['target']) {
         $status = 'BELUM CUKUP';
         $statusKelas = 'no';
-    } elseif ($ambang !== null && $maju['roi'] >= $ambang) {
+    } elseif ($maju['roi'] >= $ambang) {
         $status = 'LOLOS';
         $statusKelas = 'yes';
     } else {
@@ -128,9 +185,9 @@ foreach ($KANDIDAT as $k) {
     }
 
     $hasil[] = [
-        'k' => $k, 'label' => $aturan['label'], 'insample' => $insample, 'maju' => $maju,
+        'k' => $k, 'label' => $label, 'insample' => $insample, 'maju' => $maju,
         'ambang' => $ambang, 'status' => $status, 'kelas' => $statusKelas,
-        'log' => logTaruhan($sesudah, $aturan['pick']),
+        'log' => logTaruhan($sesudah, $pick),
     ];
 }
 ?>
@@ -208,7 +265,9 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
       $n = $maju['n'] ?? 0;
       $persen = $k['target'] > 0 ? min(100, 100 * $n / $k['target']) : 0; ?>
     <section class="kand">
-      <h2><?= e($k['kode']) ?> · SABA <?= $k['durasi'] === null ? 'semua durasi' : e($k['durasi']) . ' menit' ?>
+      <h2><?= e($k['kode']) ?> · <?= ($k['pasar'] ?? 'saba') === 'vsoccer'
+            ? 'V-Soccer'
+            : 'SABA ' . ($k['durasi'] === null ? 'semua durasi' : e($k['durasi']) . ' menit') ?>
         <span class="tag <?= $h['kelas'] ?>" style="margin-left:6px"><?= $h['status'] ?></span></h2>
       <p class="rule"><?= e($h['label']) ?></p>
 

@@ -433,6 +433,101 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
     <?php endif; ?>
   </section>
 
+  <?php
+  // Per liga. Tempo gol antar liga benar-benar berbeda (4,9 sampai 7,7 gol),
+  // tapi bandar sudah menyesuaikan line-nya, jadi yang tersisa cuma selisih
+  // kecil yang sejauh ini tidak terbedakan dari derau. Ditampilkan supaya bisa
+  // diuji ulang sendiri saat datanya sudah jauh lebih banyak.
+  $perLiga = [];
+  foreach ($rows as $r) {
+      $L = $r['league'] ?? '';
+      if ($L === '') {
+          continue;
+      }
+      $d = settleRinci($r['ft'], $r['line'], (float)$r['under'], 'under');
+      if ($d === null) {
+          continue;
+      }
+      $perLiga[$L]['n'] = ($perLiga[$L]['n'] ?? 0) + 1;
+      $perLiga[$L]['gol'] = ($perLiga[$L]['gol'] ?? 0) + $r['ft'];
+      $perLiga[$L]['line'] = ($perLiga[$L]['line'] ?? 0) + $r['mid'];
+      $perLiga[$L]['pl'][] = $d['pl'];
+  }
+  $semuaPl = array_merge(...array_column($perLiga, 'pl') ?: [[]]);
+  $chi = 0.0;
+  $db = -1;
+  if (count($semuaPl) > 2) {
+      $mAll = array_sum($semuaPl) / count($semuaPl);
+      $vAll = 0.0;
+      foreach ($semuaPl as $s) {
+          $vAll += ($s - $mAll) ** 2;
+      }
+      $sdAll = sqrt($vAll / (count($semuaPl) - 1));
+      uasort($perLiga, static fn($a, $b) => array_sum($b['pl']) / $b['n'] <=> array_sum($a['pl']) / $a['n']);
+      foreach ($perLiga as $v) {
+          if ($v['n'] < 10 || $sdAll <= 0) {
+              continue;
+          }
+          $chi += (array_sum($v['pl']) / $v['n'] - $mAll) ** 2 / ($sdAll * $sdAll / $v['n']);
+          $db++;
+      }
+  }
+  $kritis = $db > 0 ? $db + 1.645 * sqrt(2 * $db) : null;
+  ?>
+  <?php if ($db > 0): ?>
+  <section class="section">
+    <h2>V-Soccer per liga — apakah ada liga yang harus dihindari?</h2>
+    <p class="hint">
+      Tempo gol antar liga memang jauh berbeda, tapi <b>bandar sudah menyesuaikan line untuk tiap
+      liga</b> — kolom selisih menunjukkan sisa ketidaktepatannya. Yang menentukan bukan liga mana
+      yang ROI-nya tinggi, melainkan uji di bawah tabel: apakah sebarannya lebih lebar daripada
+      kebetulan. Kalau tidak, menghindari liga hanya mengecilkan sampel tanpa menambah apa pun —
+      dan besok liga lain yang gantian merah.
+    </p>
+    <div class="tablebox"><table>
+      <thead><tr>
+        <th>Liga</th><th class="num">n</th><th class="num">Gol FT</th><th class="num">Line m46</th>
+        <th class="num">Selisih</th><th class="num">ROI Under</th><th class="num">t</th>
+      </tr></thead>
+      <tbody>
+      <?php foreach ($perLiga as $L => $v):
+          if ($v['n'] < 10) {
+              continue;
+          }
+          $m = array_sum($v['pl']) / $v['n'];
+          $vv = 0.0;
+          foreach ($v['pl'] as $s) {
+              $vv += ($s - $m) ** 2;
+          }
+          $sd = sqrt($vv / ($v['n'] - 1));
+          $t = $sd > 0 ? $m / ($sd / sqrt($v['n'])) : 0;
+          $sel = $v['gol'] / $v['n'] - $v['line'] / $v['n']; ?>
+        <tr>
+          <td><?= e(str_replace([' - 12 mins [V]', 'V-Soccer '], '', $L)) ?></td>
+          <td class="num"><?= $v['n'] ?></td>
+          <td class="num"><?= number_format($v['gol'] / $v['n'], 2, ',', '.') ?></td>
+          <td class="num"><?= number_format($v['line'] / $v['n'], 2, ',', '.') ?></td>
+          <td class="num"><?= ($sel >= 0 ? '+' : '−') . number_format(abs($sel), 2, ',', '.') ?></td>
+          <td class="num <?= $m >= 0 ? 'pos' : 'neg' ?>"><?= signed($m * 100) ?></td>
+          <td class="num"><?= number_format($t, 2, ',', '.') ?></td>
+        </tr>
+      <?php endforeach; ?>
+      </tbody>
+    </table></div>
+    <p class="hint" style="margin-top:10px">
+      <b>Uji keseragaman:</b> chi-kuadrat <b><?= number_format($chi, 2, ',', '.') ?></b> pada
+      derajat bebas <?= $db ?> (nilai harapan kalau semua liga sama = <?= $db ?>;
+      nilai kritis 95% ≈ <?= number_format($kritis, 1, ',', '.') ?>).
+      <?php if ($chi > $kritis): ?>
+        <b>Sebarannya lebih lebar daripada kebetulan</b> — perbedaan antar liga mulai layak diselidiki.
+      <?php else: ?>
+        <b>Tidak ada bukti liga berbeda.</b> Sebaran ROI-nya wajar untuk kebetulan semata, jadi
+        jangan menghindari liga mana pun berdasarkan tabel ini.
+      <?php endif; ?>
+    </p>
+  </section>
+  <?php endif; ?>
+
   <?php if ($parityResults): ?>
   <section class="section">
     <h2>Prediksi hasil genap/ganjil V-Soccer</h2>

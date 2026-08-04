@@ -712,6 +712,10 @@ if (!is_file(VSOCCER_FILE)) {
             'ts' => $dt ? $dt->getTimestamp() : 0,
             'datetime' => $dateText,
             'day' => substr($dateText, 0, 10),
+            // Disimpan supaya perbedaan antar liga bisa dipantau otomatis.
+            // Sejauh ini sebarannya murni derau (chi2 11,51 pada db 11), tapi
+            // itu justru perlu diuji ulang saat datanya sudah jauh lebih banyak.
+            'league' => trim((string)($r[$idx['league']] ?? '')),
             'home' => trim((string)($r[$idx['home_team']] ?? '')),
             'away' => trim((string)($r[$idx['away_team']] ?? '')),
             'ht' => "{$htHome}-{$htAway}",

@@ -287,6 +287,21 @@ $RULES = [
             return 'over';
         },
     ],
+    // R14 lahir dari mencari sel mana yang bagus, BUKAN dari hipotesis lebih
+    // dulu. Karena itu ia ditandai in-sample: angkanya di tabel ini hampir pasti
+    // menyusut pada data baru. Penilaian sebenarnya ada di forward-test.php
+    // (kode VS-HT34), bukan di sini.
+    //
+    // Dasarnya: di V-Soccer, memasang Over rugi -20,4% dengan t -4,61 -- satu-
+    // satunya angka yang lolos ambang Bonferroni. Arah Under itulah yang bekerja,
+    // dan keunggulannya terkonsentrasi saat babak pertama menghasilkan 3-4 gol:
+    // pasar menaikkan line seolah tempo itu berlanjut, padahal tidak.
+    'R14' => [
+        'insample' => true,
+        'label' => 'Total gol HT 3–4 → Under',
+        'pick' => static fn(array $r) => ($r['ht_total'] >= 3 && $r['ht_total'] <= 4)
+            ? 'under' : null,
+    ],
     'K1' => [
         'label' => 'KONTROL: selalu Over',
         'pick'  => static fn(array $r) => 'over',

@@ -123,6 +123,11 @@ function barisAturan(
     $tagLemah = !empty($res['weak'])
         ? ' <span class="tag weak" title="Dibangun di atas patokan line titik masuk (sinyal-A). Uji menunjukkan patokan line kickoff lebih baik.">lemah</span>'
         : '';
+    // Aturan yang lahir dari mencari sel terbaik di data ini juga. Angkanya di
+    // sini otomatis terlalu bagus; penilaian sebenarnya ada di forward-test.php.
+    if (!empty($res['insample'])) {
+        $tagLemah .= ' <span class="tag no" title="Diturunkan dari data ini juga, jadi angkanya di tabel ini terlalu bagus. Penilaian sebenarnya ada di halaman Tes maju.">in-sample</span>';
+    }
     $label = e($labelKhusus[$code] ?? $res['label']);
     if ($a && $rows && $simId !== '' && isset($res['pick'])) {
         $SIMULATION_REGISTRY[$simId] = simulasiMatchRows($rows, $res['pick']);

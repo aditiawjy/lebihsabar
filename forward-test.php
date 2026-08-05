@@ -136,6 +136,18 @@ $KANDIDAT = [
             . 'lolos sementara R2 tidak.',
     ],
     [
+        'kode' => 'R2', 'durasi' => '15', 'target' => 200,
+        'alasan' => 'Ambang ≥3 untuk liga 15 menit ini SAYA yang kalibrasi setelah melihat data, '
+            . 'jadi wajib diuji terpisah dari varian 20 menit. In-sample hanya +1,3% dan pasca-kunci '
+            . 'sudah −8,7% (tanpa hari terbaik −13,9%) — sejauh ini gagal, dan baris ini ada supaya '
+            . 'kegagalan itu tercatat, bukan tersembunyi di balik angka gabungan semua durasi.',
+    ],
+    [
+        'kode' => 'R2', 'durasi' => '16', 'target' => 100,
+        'alasan' => 'Varian 16 menit dari kalibrasi yang sama. Volumenya paling kecil (~12 taruhan '
+            . 'per hari), jadi paling lama terjawab. In-sample −5,2%, pasca-kunci −20,7%.',
+    ],
+    [
         'kode' => 'R10', 'durasi' => null, 'target' => 100,
         'alasan' => 'Satu-satunya aturan yang positif di ketiga durasi SABA (+11,3% / +28,9% / '
             . '+44,3%). Konsistensi lintas durasi lebih meyakinkan daripada ROI tinggi di satu tempat.',

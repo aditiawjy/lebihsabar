@@ -82,7 +82,7 @@ $KANDIDAT = [
     [
         'kode' => 'PAR-SABA15', 'pasar' => 'saba', 'durasi' => '15', 'target' => 200,
         'jenis' => 'paritas',
-        'fixed_odds' => 1.90,
+        'fixed_odds' => ODDS_PARITAS,
         'label' => 'SABA 15m: ikut paritas HT (genap→genap, ganjil→ganjil)',
         'predict' => static fn(array $r) => ((int)$r['ht_total']) % 2 === 0 ? 'even' : 'odd',
         'alasan' => 'Satu-satunya aturan yang mekanismenya pasti secara matematis. Babak SABA 15 '
@@ -93,6 +93,7 @@ $KANDIDAT = [
     [
         'kode' => 'PAR-VS', 'pasar' => 'vsoccer', 'durasi' => null, 'target' => 300,
         'jenis' => 'paritas',
+        'fixed_odds' => ODDS_PARITAS,
         'label' => 'V-Soccer: ikut paritas HT',
         'predict' => static fn(array $r) => ((int)$r['ht_total']) % 2 === 0 ? 'even' : 'odd',
         'alasan' => 'Kontrol teori. Babak kedua V-Soccer menghasilkan ~3,1 gol sehingga peluang '
@@ -103,6 +104,7 @@ $KANDIDAT = [
     [
         'kode' => 'R2C-VS', 'pasar' => 'vsoccer', 'durasi' => null, 'target' => 300,
         'jenis' => 'paritas',
+        'fixed_odds' => ODDS_PARITAS,
         'label' => 'V-Soccer: HT ≥ 4 → tebak genap; HT ≤ 3 → tebak ganjil',
         'predict' => static fn(array $r) => $r['ht_total'] >= 4 ? 'even' : 'odd',
         'alasan' => 'Tampak kuat (56,2% dari 413, cap YA) padahal matematikanya bilang paritas '
@@ -128,6 +130,18 @@ $KANDIDAT = [
         'kode' => 'R2', 'durasi' => '20', 'target' => 100,
         'alasan' => 'Pembanding untuk R2A: kalau R2A memang menambah nilai di atas R2, R2A harus '
             . 'lolos sementara R2 tidak.',
+    ],
+    [
+        'kode' => 'R2', 'durasi' => '15', 'target' => 200,
+        'alasan' => 'Ambang ≥3 untuk liga 15 menit ini SAYA yang kalibrasi setelah melihat data, '
+            . 'jadi wajib diuji terpisah dari varian 20 menit. In-sample hanya +1,3% dan pasca-kunci '
+            . 'sudah −8,7% (tanpa hari terbaik −13,9%) — sejauh ini gagal, dan baris ini ada supaya '
+            . 'kegagalan itu tercatat, bukan tersembunyi di balik angka gabungan semua durasi.',
+    ],
+    [
+        'kode' => 'R2', 'durasi' => '16', 'target' => 100,
+        'alasan' => 'Varian 16 menit dari kalibrasi yang sama. Volumenya paling kecil (~12 taruhan '
+            . 'per hari), jadi paling lama terjawab. In-sample −5,2%, pasca-kunci −20,7%.',
     ],
     [
         'kode' => 'R10', 'durasi' => null, 'target' => 100,
@@ -212,51 +226,6 @@ function logParitas(array $rows, callable $predict, ?float $odds = null): array
     }
     return $log;
 }
-/** Evaluasi paritas sebagai taruhan dengan odds tetap, bukan sekadar akurasi. */
-function evaluateParityBet(array $rows, callable $predict, float $odds): ?array
-{
-    if ($odds <= 1) {
-        return null;
-    }
-    $correct = 0;
-    $wrong = 0;
-    $sampel = [];
-    foreach ($rows as $r) {
-        $guess = $predict($r);
-        if ($guess !== 'even' && $guess !== 'odd') {
-            continue;
-        }
-        $actual = ((int)$r['ft'] % 2 === 0) ? 'even' : 'odd';
-        $menang = $guess === $actual;
-        $menang ? $correct++ : $wrong++;
-        $sampel[] = $menang ? $odds - 1 : -1;
-    }
-    $n = $correct + $wrong;
-    if ($n === 0) {
-        return null;
-    }
-    $p = $correct / $n;
-    $pl = array_sum($sampel);
-    $mean = $pl / $n;
-    $varian = 0.0;
-    foreach ($sampel as $s) {
-        $varian += ($s - $mean) ** 2;
-    }
-    $sd = $n > 1 ? sqrt($varian / ($n - 1)) : 0.0;
-    $se = sqrt($p * (1 - $p) / $n);
-    $t = $sd > 0 ? $mean / ($sd / sqrt($n)) : 0.0;
-    return [
-        'n' => $n, 'correct' => $correct, 'wrong' => $wrong,
-        'win' => $correct, 'lose' => $wrong, 'push' => 0,
-        'accuracy' => $p * 100, 'winrate' => $p * 100,
-        'ci_lo' => max(0, $p - 1.96 * $se) * 100,
-        'ci_hi' => min(1, $p + 1.96 * $se) * 100,
-        'odds_min' => 1 / $p, 'breakeven' => 100 / $odds,
-        'odds' => $odds, 'pl' => $pl, 'roi' => $pl / $n * 100,
-        'sd' => $sd, 't' => $t,
-        'proven' => (($p - 1.96 * $se) * 100) > (100 / $odds),
-    ];
-}
 
 
 $hasil = [];
@@ -337,9 +306,52 @@ foreach ($KANDIDAT as $k) {
         $statusKelas = 'no';
     }
 
+    // --- Dua diagnostik yang menentukan setiap keputusan sejauh ini.
+    //
+    // (1) ROI tanpa hari penyumbang terbesar. Hampir semua kandidat V-Soccer
+    //     runtuh di sini: keunggulannya ternyata cuma dari satu hari kering gol.
+    // (2) Kontrol pada kumpulan match yang sama. Kalau aturan tidak jelas
+    //     mengalahkan "pasang satu arah tanpa logika", seleksinya tidak bernilai.
+    $perHari = [];
+    foreach ($sesudah as $r) {
+        $perHari[$r['day']][] = $r;
+    }
+    $nilai = static fn(array $set) => $paritas
+        ? ($fixedOdds !== null ? evaluateParityBet($set, $pick, $fixedOdds) : evaluateParity($set, $pick))
+        : evaluate($set, $pick);
+    $puncak = null;
+    $plPuncak = null;
+    foreach ($perHari as $d => $x) {
+        $e = $nilai($x);
+        if ($e && isset($e['pl']) && ($plPuncak === null || $e['pl'] > $plPuncak)) {
+            $plPuncak = $e['pl'];
+            $puncak = $d;
+        }
+    }
+    $exPeak = null;
+    if ($puncak !== null && count($perHari) > 1) {
+        $sisa = [];
+        foreach ($perHari as $d => $x) {
+            if ($d !== $puncak) {
+                $sisa = array_merge($sisa, $x);
+            }
+        }
+        $exPeak = $sisa ? $nilai($sisa) : null;
+    }
+    // Kontrol: arah tetap pada kumpulan match yang sama persis.
+    $kontrol = null;
+    if ($sesudah) {
+        $kontrol = $paritas
+            ? ($fixedOdds !== null
+                ? evaluateParityBet($sesudah, static fn(array $r) => 'even', $fixedOdds)
+                : evaluateParity($sesudah, static fn(array $r) => 'even'))
+            : evaluate($sesudah, static fn(array $r) => 'under');
+    }
+
     $hasil[] = [
         'k' => $k, 'label' => $label, 'insample' => $insample, 'maju' => $maju,
         'ambang' => $ambang, 'ambangKini' => $ambangKini,
+        'exPeak' => $exPeak, 'peakDay' => $puncak, 'kontrol' => $kontrol,
         'status' => $status, 'kelas' => $statusKelas,
         'paritas' => $paritas && $fixedOdds === null,
         'parity_bet' => $paritas && $fixedOdds !== null, 'fixed_odds' => $fixedOdds, 'capai' => $capai,
@@ -400,28 +412,20 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
     </div>
   </div>
 
-  <div class="note">
-    <b>Kenapa halaman ini ada.</b> ROI di halaman monitor dihitung atas data yang sama dengan data
-    yang melahirkan aturannya, jadi angka bagus di sana belum berarti apa-apa — aturan apa pun bisa
-    dibuat bagus kalau boleh disetel sambil melihat jawabannya. Di sini aturannya tidak boleh diubah
-    lagi, dan <b>ambang lolos sudah dikunci di muka</b>: ambang ROI = 1,645 × sd in-sample ÷ √target.
-    Kalau ROI pasca-kunci tidak mencapai ambang setelah target taruhan terpenuhi, aturan itu gugur.
-    <br><br>
-    Yang membuat tes ini sah cuma satu hal: <b>ambangnya ditetapkan sebelum datanya ada.</b> Kalau
-    nanti angkanya meleset sedikit lalu ambangnya diturunkan, tesnya kehilangan seluruh maknanya.
-    <br><br>
-    <b>Baca "Ambang setara", bukan "Ambang lolos", selama target belum tercapai.</b> Ambang lolos
-    dihitung untuk jumlah taruhan di target; membandingkannya dengan ROI pada sampel yang masih
-    sedikit itu tidak adil, karena sampel kecil berayun lebih lebar sehingga barnya seharusnya
-    lebih tinggi. Ambang setara memakai n yang benar-benar sudah terkumpul. Sebuah kandidat baru
-    layak dianggap menjanjikan kalau ia melewati <b>ambang setara</b>, bukan sekadar ambang target.
-  </div>
 
   <?php if (!$sabaRows): ?>
     <div class="empty card">Belum ada data SABA yang bisa dipakai (<?= e($sabaError ?? 'goal_log_bpvm.csv kosong') ?>).</div>
   <?php endif; ?>
 
-  <?php foreach ($hasil as $h):
+  <?php
+  // Kandidat gugur dikeluarkan dari daftar utama supaya halaman tidak penuh
+  // baris mati, tapi TIDAK dihapus -- diringkas jadi satu baris di bawah.
+  // Menghapusnya sama saja menyisakan hanya yang sedang bagus, dan itu bentuk
+  // penipuan diri yang justru ingin dicegah halaman ini.
+  $aktif = array_values(array_filter($hasil, static fn($h) => $h['status'] !== 'GUGUR'));
+  $gugur = array_values(array_filter($hasil, static fn($h) => $h['status'] === 'GUGUR'));
+  ?>
+  <?php foreach ($aktif as $h):
       $k = $h['k'];
       $maju = $h['maju'];
       $n = $maju['n'] ?? 0;
@@ -493,6 +497,26 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
               echo $maju ? pct($maju['winrate']) : '–';
           } ?></div>
         </div>
+        <?php
+        $skala = static fn(?float $v) => $v === null ? '–' : ($h['paritas'] ? pct($v) : signed($v));
+        $xp = $h['exPeak'];
+        $kt = $h['kontrol'];
+        $nilaiXp = $xp ? ($h['paritas'] ? $xp['accuracy'] : $xp['roi']) : null;
+        $nilaiKt = $kt ? ($h['paritas'] ? $kt['accuracy'] : $kt['roi']) : null;
+        ?>
+        <div class="m">
+          <div class="label">Tanpa hari terbaik</div>
+          <div class="value <?= $nilaiXp === null ? '' : ($nilaiXp >= ($h['ambangKini'] ?? 0) ? 'pos' : 'neg') ?>"
+               title="<?= $h['peakDay'] ? 'Hari ' . e((string)$h['peakDay']) . ' dibuang, sisa ' . ($xp['n'] ?? 0) . ' taruhan. Kalau angka ini runtuh, keunggulannya cuma bertumpu satu hari.' : 'Butuh lebih dari satu hari.' ?>">
+            <?= $skala($nilaiXp) ?></div>
+        </div>
+        <div class="m">
+          <div class="label">Kontrol <span class="muted">(<?= $h['paritas'] ? 'selalu genap' : 'selalu Under' ?>)</span></div>
+          <div class="value muted" style="font-size:15px"
+               title="Arah tetap tanpa logika, pada kumpulan match yang sama persis. Kalau aturan tidak jelas mengalahkan angka ini, seleksinya tidak menambah nilai.">
+            <?= $skala($nilaiKt) ?><?= $nilaiKt !== null && $h['capai'] !== null
+                ? ' <span style="font-size:12px">(selisih ' . signed($h['capai'] - $nilaiKt) . ')</span>' : '' ?></div>
+        </div>
         <div class="m">
           <div class="label">In-sample <span class="muted">(pembanding)</span></div>
           <div class="value muted" style="font-size:15px">
@@ -524,83 +548,120 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
       <?php if (!$h['log']): ?>
         <div class="empty">Belum ada match yang memenuhi syarat sejak <?= e($mulaiTeks) ?>.
           Halaman ini akan terisi sendiri begitu data baru masuk.</div>
-      <?php elseif ($h['paritas']): ?>
-       <?php elseif ($h['parity_bet']): ?>
-         <div class="tablebox"><table>
-           <thead><tr>
-             <th>Waktu</th><th>Match</th><th>HT</th><th class="num">Total HT</th>
-             <th>Tebakan</th><th class="num">Odds</th><th class="num">Stake</th>
-             <th class="num">Total (stake x odd)</th><th class="num">FT</th><th>Nyata</th><th class="num">P/L (Rp)</th>
-           </tr></thead>
-           <tbody>
-           <?php foreach ($h['log'] as $b): ?>
-             <tr>
-               <td><?= e($b['waktu']) ?></td>
-               <td><?= e($b['match']) ?></td>
-               <td><?= e($b['ht']) ?></td>
-               <td class="num"><?= $b['ht_total'] ?></td>
-               <td><?= $b['tebak'] === 'even' ? 'genap' : 'ganjil' ?></td>
-               <td class="num"><?= number_format($b['odds'], 2, ',', '.') ?></td>
-               <td class="num">Rp<?= number_format($b['stake'], 0, ',', '.') ?></td>
-               <td class="num">Rp<?= number_format($b['total'], 0, ',', '.') ?></td>
-               <td class="num"><?= $b['ft'] ?></td>
-               <td><?= $b['nyata'] === 'even' ? 'genap' : 'ganjil' ?></td>
-               <td class="num <?= $b['pnl_nominal'] >= 0 ? 'pos' : 'neg' ?>"><?= $b['pnl_nominal'] >= 0 ? '+' : '-' ?>Rp<?= number_format(abs($b['pnl_nominal']), 0, ',', '.') ?></td>
-             </tr>
-           <?php endforeach; ?>
-           </tbody>
-         </table></div>
-        <div class="tablebox"><table>
-          <thead><tr>
-            <th>Waktu</th><th>Match</th><th>HT</th><th class="num">Total HT</th>
-            <th>Tebakan</th><th class="num">FT</th><th>Nyata</th><th>Hasil</th>
-          </tr></thead>
-          <tbody>
-          <?php foreach ($h['log'] as $b): ?>
-            <tr>
-              <td><?= e($b['waktu']) ?></td>
-              <td><?= e($b['match']) ?></td>
-              <td><?= e($b['ht']) ?></td>
-              <td class="num"><?= $b['ht_total'] ?></td>
-              <td><?= $b['tebak'] === 'even' ? 'genap' : 'ganjil' ?></td>
-              <td class="num"><?= $b['ft'] ?></td>
-              <td><?= $b['nyata'] === 'even' ? 'genap' : 'ganjil' ?></td>
-              <td class="<?= $b['benar'] ? 'pos' : 'neg' ?>"><?= $b['benar'] ? 'benar' : 'salah' ?></td>
-            </tr>
-          <?php endforeach; ?>
-          </tbody>
-        </table></div>
       <?php else: ?>
-        <div class="tablebox"><table>
-          <thead><tr>
-            <th>Waktu</th><th>Match</th><th>HT</th><th>Line</th><th class="num">Mid</th>
-            <th>Sisi</th><th class="num">Odds</th><th class="num">FT</th><th class="num">P/L (unit)</th><th class="num">Stake</th><th class="num">Total (stake x odd)</th><th class="num">P/L (Rp)</th>
-          </tr></thead>
-          <tbody>
-          <?php foreach ($h['log'] as $b): ?>
-            <tr>
-              <td><?= e($b['waktu']) ?></td>
-              <td><?= e($b['match']) ?></td>
-              <td><?= e($b['ht']) ?></td>
-              <td><?= e($b['line']) ?></td>
-              <td class="num"><?= number_format($b['mid'], 2, ',', '.') ?></td>
-              <td><?= $b['sisi'] === 'over' ? 'Over' : 'Under' ?></td>
-              <td class="num"><?= number_format((float)$b['odds'], 2, ',', '.') ?></td>
-              <td class="num"><?= (int)$b['ft'] ?></td>
-              <td class="num <?= $b['pl'] > 0 ? 'pos' : ($b['pl'] < 0 ? 'neg' : 'muted') ?>">
-                <?= abs($b['pl']) < 1e-9
-                      ? 'push'
-                      : ($b['pl'] > 0 ? '+' : '−') . number_format(abs($b['pl']), 2, ',', '.') ?></td>
-              <td class="num">Rp<?= number_format($b['stake'], 0, ',', '.') ?></td>
-              <td class="num">Rp<?= number_format($b['total'], 0, ',', '.') ?></td>
-              <td class="num <?= $b['pnl_nominal'] > 0 ? 'pos' : ($b['pnl_nominal'] < 0 ? 'neg' : 'muted') ?>"><?= $b['pnl_nominal'] > 0 ? '+' : ($b['pnl_nominal'] < 0 ? '-' : '') ?>Rp<?= number_format(abs($b['pnl_nominal']), 0, ',', '.') ?></td>
-            </tr>
-          <?php endforeach; ?>
-          </tbody>
-        </table></div>
+        <details class="acc-history" style="margin-top:12px">
+          <summary style="cursor:pointer;padding:8px 12px;background:#10161e;border:1px solid var(--border);border-radius:8px;font-weight:600;color:var(--text);user-select:none">
+            📋 Riwayat Taruhan (<?= count($h['log']) ?> match) — Klik untuk membuka/menutup
+          </summary>
+          <?php if ($h['paritas'] && $h['fixed_odds'] === null): ?>
+            <div class="tablebox" style="margin-top:8px"><table>
+              <thead><tr>
+                <th>Waktu</th><th>Match</th><th>HT</th><th class="num">Total HT</th>
+                <th>Tebakan</th><th class="num">FT</th><th>Nyata</th><th>Hasil</th>
+              </tr></thead>
+              <tbody>
+              <?php foreach ($h['log'] as $b): ?>
+                <tr>
+                  <td><?= e($b['waktu']) ?></td>
+                  <td><?= e($b['match']) ?></td>
+                  <td><?= e($b['ht']) ?></td>
+                  <td class="num"><?= $b['ht_total'] ?></td>
+                  <td><?= $b['tebak'] === 'even' ? 'genap' : 'ganjil' ?></td>
+                  <td class="num"><?= $b['ft'] ?></td>
+                  <td><?= $b['nyata'] === 'even' ? 'genap' : 'ganjil' ?></td>
+                  <td class="<?= $b['benar'] ? 'pos' : 'neg' ?>"><?= $b['benar'] ? 'benar' : 'salah' ?></td>
+                </tr>
+              <?php endforeach; ?>
+              </tbody>
+            </table></div>
+          <?php elseif ($h['parity_bet']): ?>
+            <div class="tablebox" style="margin-top:8px"><table>
+              <thead><tr>
+                <th>Waktu</th><th>Match</th><th>HT</th><th class="num">Total HT</th>
+                <th>Tebakan</th><th class="num">Odds</th><th class="num">Stake</th>
+                <th class="num">Total (stake x odd)</th><th class="num">FT</th><th>Nyata</th><th class="num">P/L (Rp)</th>
+              </tr></thead>
+              <tbody>
+              <?php foreach ($h['log'] as $b): ?>
+                <tr>
+                  <td><?= e($b['waktu']) ?></td>
+                  <td><?= e($b['match']) ?></td>
+                  <td><?= e($b['ht']) ?></td>
+                  <td class="num"><?= $b['ht_total'] ?></td>
+                  <td><?= $b['tebak'] === 'even' ? 'genap' : 'ganjil' ?></td>
+                  <td class="num"><?= number_format($b['odds'], 2, ',', '.') ?></td>
+                  <td class="num">Rp<?= number_format($b['stake'], 0, ',', '.') ?></td>
+                  <td class="num">Rp<?= number_format($b['total'], 0, ',', '.') ?></td>
+                  <td class="num"><?= $b['ft'] ?></td>
+                  <td><?= $b['nyata'] === 'even' ? 'genap' : 'ganjil' ?></td>
+                  <td class="num <?= $b['pnl_nominal'] >= 0 ? 'pos' : 'neg' ?>"><?= $b['pnl_nominal'] >= 0 ? '+' : '-' ?>Rp<?= number_format(abs($b['pnl_nominal']), 0, ',', '.') ?></td>
+                </tr>
+              <?php endforeach; ?>
+              </tbody>
+            </table></div>
+          <?php else: ?>
+            <div class="tablebox" style="margin-top:8px"><table>
+              <thead><tr>
+                <th>Waktu</th><th>Match</th><th>HT</th><th>Line</th><th class="num">Mid</th>
+                <th>Sisi</th><th class="num">Odds</th><th class="num">FT</th><th class="num">P/L (unit)</th><th class="num">Stake</th><th class="num">Total (stake x odd)</th><th class="num">P/L (Rp)</th>
+              </tr></thead>
+              <tbody>
+              <?php foreach ($h['log'] as $b): ?>
+                <tr>
+                  <td><?= e($b['waktu']) ?></td>
+                  <td><?= e($b['match']) ?></td>
+                  <td><?= e($b['ht']) ?></td>
+                  <td><?= e($b['line']) ?></td>
+                  <td class="num"><?= number_format($b['mid'], 2, ',', '.') ?></td>
+                  <td><?= $b['sisi'] === 'over' ? 'Over' : 'Under' ?></td>
+                  <td class="num"><?= number_format((float)$b['odds'], 2, ',', '.') ?></td>
+                  <td class="num"><?= (int)$b['ft'] ?></td>
+                  <td class="num <?= $b['pl'] > 0 ? 'pos' : ($b['pl'] < 0 ? 'neg' : 'muted') ?>">
+                    <?= abs($b['pl']) < 1e-9
+                          ? 'push'
+                          : ($b['pl'] > 0 ? '+' : '−') . number_format(abs($b['pl']), 2, ',', '.') ?></td>
+                  <td class="num">Rp<?= number_format($b['stake'], 0, ',', '.') ?></td>
+                  <td class="num">Rp<?= number_format($b['total'], 0, ',', '.') ?></td>
+                  <td class="num <?= $b['pnl_nominal'] > 0 ? 'pos' : ($b['pnl_nominal'] < 0 ? 'neg' : 'muted') ?>"><?= $b['pnl_nominal'] > 0 ? '+' : ($b['pnl_nominal'] < 0 ? '-' : '') ?>Rp<?= number_format(abs($b['pnl_nominal']), 0, ',', '.') ?></td>
+                </tr>
+              <?php endforeach; ?>
+              </tbody>
+            </table></div>
+          <?php endif; ?>
+        </details>
       <?php endif; ?>
     </section>
   <?php endforeach; ?>
+
+  <?php if ($gugur): ?>
+  <section class="kand" style="border-color:#3a1f27">
+    <h2>Sudah gugur <span class="muted" style="font-weight:400;font-size:13px">(<?= count($gugur) ?> kandidat)</span></h2>
+    <p class="rule">Sudah mencapai target taruhan tetapi tidak menembus ambang yang dikunci di muka.
+      Sengaja tidak dihapus: daftar yang hanya memuat kandidat bagus akan membuat seluruh halaman ini
+      terlihat jauh lebih meyakinkan daripada kenyataannya.</p>
+    <div class="tablebox"><table>
+      <thead><tr>
+        <th>Kode</th><th>Aturan</th><th class="num">n</th><th class="num">Hasil</th>
+        <th class="num">Ambang</th><th class="num">Selisih</th>
+      </tr></thead>
+      <tbody>
+      <?php foreach ($gugur as $h):
+          $kurang = $h['capai'] !== null && $h['ambang'] !== null ? $h['capai'] - $h['ambang'] : null; ?>
+        <tr>
+          <td><b><?= e($h['k']['kode']) ?></b></td>
+          <td><?= e($h['label']) ?></td>
+          <td class="num"><?= $h['maju']['n'] ?? 0 ?> / <?= $h['k']['target'] ?></td>
+          <td class="num"><?= $h['capai'] === null ? '–'
+              : ($h['paritas'] ? pct($h['capai']) : signed($h['capai'])) ?></td>
+          <td class="num"><?= $h['ambang'] === null ? '–'
+              : ($h['paritas'] ? pct($h['ambang']) : signed($h['ambang'])) ?></td>
+          <td class="num neg"><?= $kurang === null ? '–' : signed($kurang) ?></td>
+        </tr>
+      <?php endforeach; ?>
+      </tbody>
+    </table></div>
+  </section>
+  <?php endif; ?>
 
   <p class="foot">
     Baca-saja · sumber <code>goal_log_bpvm.csv</code> · definisi aturan, loader, dan settlement

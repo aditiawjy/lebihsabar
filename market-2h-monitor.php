@@ -134,8 +134,9 @@ function barisAturan(
     }
     $html = "<tr{$kelas}><td><b>" . e($code) . "</b>{$tagLemah}</td><td>{$label}</td>";
     if (!$a) {
-        return $html . '<td class="num" colspan="10"><span class="muted">tidak ada sampel</span></td></tr>';
+        return $html . '<td class="num" colspan="11"><span class="muted">tidak ada sampel</span></td></tr>';
     }
+    $xp = $res['ex_peak'] ?? null;
     $push = $a['push'] ? ' <span class="muted">(' . angka($a['push']) . ' push)</span>' : '';
     $plKelas = $a['pl'] >= 0 ? 'pos' : 'neg';
     $plTeks = ($a['pl'] >= 0 ? '+' : '−') . number_format(abs($a['pl']), 2, ',', '.');
@@ -156,6 +157,12 @@ function barisAturan(
         . '<td class="num">' . pct($a['breakeven'], 0) . '</td>'
         . '<td class="num ' . $plKelas . '">' . $plTeks . '</td>'
         . '<td class="num ' . ($a['roi'] >= 0 ? 'pos' : 'neg') . '">' . signed($a['roi']) . '</td>'
+        . '<td class="num ' . ($xp ? ($xp['roi'] >= 0 ? 'pos' : 'neg') : 'muted') . '"'
+        . ' title="' . ($xp
+            ? 'ROI setelah hari ' . e((string)$res['peak_day']) . ' (penyumbang terbesar) dibuang, sisa '
+              . $xp['n'] . ' taruhan. Kalau angka ini runtuh, keunggulannya cuma bertumpu satu hari.'
+            : 'Butuh lebih dari satu hari data.') . '">'
+        . ($xp ? signed($xp['roi']) : '–') . '</td>'
         . '<td class="num">' . $res['positive_days'] . '/' . $jumlahHari . '</td>'
         . '<td><span class="tag ' . $tagKelas . '">' . $tagTeks . '</span></td>'
         . '<td class="sim-cell"><button type="button" class="sim-btn"'
@@ -211,15 +218,24 @@ function barisParitasLebar(string $code, array $res, int $jumlahHari): string
     $a = $res['all'];
     if (!$a) {
         return '<tr><td><b>' . e($code) . '</b></td><td>' . e($res['label'])
-            . '</td><td class="num" colspan="10"><span class="muted">tidak ada sampel</span></td></tr>';
+            . '</td><td class="num" colspan="11"><span class="muted">tidak ada sampel</span></td></tr>';
     }
+    $xpP = $res['ex_peak'] ?? null;
     $status = $a['proven'] ? 'YA' : 'BELUM';
+    $plP = ($a['pl'] >= 0 ? '+' : '−') . number_format(abs($a['pl']), 2, ',', '.');
     return '<tr><td><b>' . e($code) . '</b></td><td>' . e($res['label']) . '</td>'
         . '<td class="num">' . $a['n'] . '</td>'
         . '<td class="num">' . $a['correct'] . '/' . $a['n'] . '</td>'
         . '<td class="num">' . pct($a['accuracy']) . '</td>'
-        . '<td class="num">' . pct($a['ci_lo'], 0) . ' - ' . pct($a['ci_hi'], 0) . '</td>'
-        . '<td class="num">-</td><td class="num">-</td><td class="num muted">N/A</td>'
+        . '<td class="num">' . number_format($a['t'], 2, ',', '.') . '</td>'
+        . '<td class="num">' . pct($a['breakeven'], 0) . '</td>'
+        . '<td class="num ' . ($a['pl'] >= 0 ? 'pos' : 'neg') . '">' . $plP . '</td>'
+        . '<td class="num ' . ($a['roi'] >= 0 ? 'pos' : 'neg') . '"'
+        . ' title="Dihitung pada odds ASUMSI ' . number_format(ODDS_PARITAS, 2, ',', '.')
+        . ' — CSV tidak menyimpan odds Odd/Even. Odds minimal agar untung: '
+        . number_format($a['odds_min'], 2, ',', '.') . '.">' . signed($a['roi']) . '</td>'
+        . '<td class="num ' . ($xpP ? ($xpP['roi'] >= 0 ? 'pos' : 'neg') : 'muted') . '">'
+        . ($xpP ? signed($xpP['roi']) : '–') . '</td>'
         . '<td class="num">' . $res['positive_days'] . '/' . $jumlahHari . '</td>'
         . '<td><span class="tag ' . ($a['proven'] ? 'yes' : 'no') . '">' . $status . '</span></td>'
         . '<td class="sim-cell"><span class="muted">N/A</span></td></tr>';
@@ -377,7 +393,7 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
       <thead><tr>
         <th>Kode</th><th>Aturan</th><th class="num">n</th><th class="num">Menang</th>
         <th class="num" title="Push tidak dihitung di penyebut.">Win rate</th><th class="num" title="Uji-t atas P/L per taruhan.">t</th><th class="num">Breakeven</th>
-        <th class="num">P&amp;L</th><th class="num">ROI</th><th class="num">Hari +</th><th>Terbukti</th><th>Simulasi</th>
+        <th class="num">P&amp;L</th><th class="num">ROI</th><th class="num" title="ROI setelah hari penyumbang terbesar dibuang. Kalau angka ini runtuh, keunggulannya cuma bertumpu satu hari.">ROI −hari terbaik</th><th class="num">Hari +</th><th>Terbukti</th><th>Simulasi</th>
       </tr></thead>
       <tbody>
       <?php foreach ($results as $code => $res) {
@@ -593,7 +609,7 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
       <thead><tr>
         <th>Kode</th><th>Aturan</th><th class="num">n</th><th class="num">Menang</th>
         <th class="num" title="Push tidak dihitung di penyebut.">Win rate</th><th class="num" title="Uji-t atas P/L per taruhan.">t</th><th class="num">Breakeven</th>
-        <th class="num">P&amp;L</th><th class="num">ROI</th><th class="num">Hari +</th><th>Terbukti</th><th>Simulasi</th>
+        <th class="num">P&amp;L</th><th class="num">ROI</th><th class="num" title="ROI setelah hari penyumbang terbesar dibuang. Kalau angka ini runtuh, keunggulannya cuma bertumpu satu hari.">ROI −hari terbaik</th><th class="num">Hari +</th><th>Terbukti</th><th>Simulasi</th>
       </tr></thead>
       <tbody>
       <?php foreach ($hasilDurasi as $code => $res) {
@@ -640,7 +656,7 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
       <thead><tr>
         <th>Kode</th><th>Aturan</th><th class="num">n</th><th class="num">Menang</th>
         <th class="num" title="Push tidak dihitung di penyebut.">Win rate</th><th class="num" title="Uji-t atas P/L per taruhan.">t</th><th class="num">Breakeven</th>
-        <th class="num">P&amp;L</th><th class="num">ROI</th><th class="num">Hari +</th><th>Terbukti</th><th>Simulasi</th>
+        <th class="num">P&amp;L</th><th class="num">ROI</th><th class="num" title="ROI setelah hari penyumbang terbesar dibuang. Kalau angka ini runtuh, keunggulannya cuma bertumpu satu hari.">ROI −hari terbaik</th><th class="num">Hari +</th><th>Terbukti</th><th>Simulasi</th>
       </tr></thead>
       <tbody>
       <?php foreach ($sabaResults as $code => $res) {

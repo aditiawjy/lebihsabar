@@ -50,8 +50,11 @@ def cleanup_stale_profiles():
 
 # Portable: kalau .playwright ada di folder ini dan PLAYWRIGHT_BROWSERS_PATH belum
 # diset, arahkan ke sana supaya Chromium ikut pindah bareng folder (flash disk dll).
+# Diperiksa isinya, bukan cuma foldernya: instalasi yang terputus meninggalkan
+# .playwright kosong dan itu cukup untuk lolos exists(), lalu Playwright berhenti
+# mencari di lokasi bawaannya dan gagal padahal Chromium sudah terpasang di sana.
 _local_browsers = BASE_DIR / ".playwright"
-if _local_browsers.exists() and not os.environ.get("PLAYWRIGHT_BROWSERS_PATH"):
+if any(_local_browsers.glob("chromium-*")) and not os.environ.get("PLAYWRIGHT_BROWSERS_PATH"):
     os.environ["PLAYWRIGHT_BROWSERS_PATH"] = str(_local_browsers)
 
 TARGET_HOST = "g943gp.bpvmr7u6.com"               # selaras constants.js

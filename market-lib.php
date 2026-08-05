@@ -25,6 +25,11 @@ const ODDS_BOOK_MAX = 1.20;
 // aturan kosong semata-mata karena kebetulan. Koreksi Bonferroni 0,05/50
 // menuntut p < 0,001, yang setara t sekitar 3,3.
 const T_BONFERRONI = 3.3;
+// Odds ganjil/genap yang dipakai untuk menghitung ROI paritas. CSV tidak
+// menyimpannya, jadi ini ANGKA ASUMSI. Ditaruh di sini supaya monitor dan
+// forward-test memakai harga yang sama -- kalau berbeda, kedua halaman akan
+// menampilkan ROI berlainan untuk aturan yang persis sama.
+const ODDS_PARITAS = 1.80;
 // Ambang selisih minimal untuk R5. Sengaja dijadikan konstanta supaya kelihatan
 // bahwa R5 punya angka yang di-tuning -- R1 tidak punya satu pun.
 const R5_MIN_MARGIN = 1.5;
@@ -587,19 +592,81 @@ function evaluateParity(array $rows, callable $predict): ?array
     ];
 }
 
+/** Evaluasi paritas sebagai taruhan dengan odds tetap, bukan sekadar akurasi. */
+function evaluateParityBet(array $rows, callable $predict, float $odds): ?array
+{
+    if ($odds <= 1) {
+        return null;
+    }
+    $correct = 0;
+    $wrong = 0;
+    $sampel = [];
+    foreach ($rows as $r) {
+        $guess = $predict($r);
+        if ($guess !== 'even' && $guess !== 'odd') {
+            continue;
+        }
+        $actual = ((int)$r['ft'] % 2 === 0) ? 'even' : 'odd';
+        $menang = $guess === $actual;
+        $menang ? $correct++ : $wrong++;
+        $sampel[] = $menang ? $odds - 1 : -1;
+    }
+    $n = $correct + $wrong;
+    if ($n === 0) {
+        return null;
+    }
+    $p = $correct / $n;
+    $pl = array_sum($sampel);
+    $mean = $pl / $n;
+    $varian = 0.0;
+    foreach ($sampel as $s) {
+        $varian += ($s - $mean) ** 2;
+    }
+    $sd = $n > 1 ? sqrt($varian / ($n - 1)) : 0.0;
+    $se = sqrt($p * (1 - $p) / $n);
+    $t = $sd > 0 ? $mean / ($sd / sqrt($n)) : 0.0;
+    return [
+        'n' => $n, 'correct' => $correct, 'wrong' => $wrong,
+        'win' => $correct, 'lose' => $wrong, 'push' => 0,
+        'accuracy' => $p * 100, 'winrate' => $p * 100,
+        'ci_lo' => max(0, $p - 1.96 * $se) * 100,
+        'ci_hi' => min(1, $p + 1.96 * $se) * 100,
+        'odds_min' => 1 / $p, 'breakeven' => 100 / $odds,
+        'odds' => $odds, 'pl' => $pl, 'roi' => $pl / $n * 100,
+        'sd' => $sd, 't' => $t,
+        'proven' => (($p - 1.96 * $se) * 100) > (100 / $odds),
+    ];
+}
+
 /** Jalankan aturan paritas dengan rincian harian. */
 function runParityRules(array $rules, array $rows, array $days): array
 {
     $out = [];
     foreach ($rules as $code => $rule) {
+        // Dinilai pada ODDS_PARITAS supaya kolom ROI dan "ROI -hari terbaik"
+        // terisi seperti aturan Over/Under, dan supaya angkanya sama persis
+        // dengan forward-test.php yang memakai konstanta yang sama.
         $perDay = [];
         foreach ($days as $d) {
             $seg = array_values(array_filter($rows, static fn($r) => $r['day'] === $d));
-            $perDay[$d] = evaluateParity($seg, $rule['predict']);
+            $perDay[$d] = evaluateParityBet($seg, $rule['predict'], ODDS_PARITAS);
+        }
+        $puncak = null;
+        foreach ($perDay as $d => $x) {
+            if ($x && ($puncak === null || $x['pl'] > $perDay[$puncak]['pl'])) {
+                $puncak = $d;
+            }
+        }
+        $tanpaPuncak = null;
+        if ($puncak !== null && count($days) > 1) {
+            $sisa = array_values(array_filter($rows, static fn($r) => $r['day'] !== $puncak));
+            $tanpaPuncak = $sisa ? evaluateParityBet($sisa, $rule['predict'], ODDS_PARITAS) : null;
         }
         $out[$code] = $rule + [
-            'all' => evaluateParity($rows, $rule['predict']),
+            'all' => evaluateParityBet($rows, $rule['predict'], ODDS_PARITAS),
             'per_day' => $perDay,
+            'peak_day' => $puncak,
+            'ex_peak' => $tanpaPuncak,
             'positive_days' => count(array_filter($perDay, static fn($x) => $x && $x['accuracy'] >= 50)),
         ];
     }
@@ -615,9 +682,27 @@ function runRules(array $RULES, array $rows, array $days): array
             $seg = array_values(array_filter($rows, static fn($r) => $r['day'] === $d));
             $perDay[$d] = evaluate($seg, $rule['pick']);
         }
+        // ROI tanpa hari penyumbang terbesar. Sebuah aturan yang seluruh
+        // keunggulannya berasal dari satu hari akan runtuh di kolom ini, dan itu
+        // ketahuan seketika. Tanpa uji ini, satu hari luar biasa bisa membuat n
+        // besar terlihat meyakinkan padahal tidak -- persis yang pernah terjadi
+        // pada K1 V-Soccer (t -3,54 seluruhnya ditopang satu hari).
+        $puncak = null;
+        foreach ($perDay as $d => $x) {
+            if ($x && ($puncak === null || $x['pl'] > $perDay[$puncak]['pl'])) {
+                $puncak = $d;
+            }
+        }
+        $tanpaPuncak = null;
+        if ($puncak !== null && count($days) > 1) {
+            $sisa = array_values(array_filter($rows, static fn($r) => $r['day'] !== $puncak));
+            $tanpaPuncak = $sisa ? evaluate($sisa, $rule['pick']) : null;
+        }
         $out[$code] = $rule + [
             'all' => evaluate($rows, $rule['pick']),
             'per_day' => $perDay,
+            'peak_day' => $puncak,
+            'ex_peak' => $tanpaPuncak,
             'positive_days' => count(array_filter($perDay, static fn($x) => $x && $x['roi'] > 0)),
         ];
     }
@@ -820,12 +905,50 @@ if (!is_file(SABA_FILE)) {
         $sabaStats['total']++;
 
         // Skor babak pertama wajib: tanpa itu tidak ada sinyal yang bisa dihitung.
-        $htTeks = trim((string)($r[$si['ht']] ?? ''));
-        if (!preg_match('/^(\d+)\s*-\s*(\d+)$/', $htTeks, $hm)) {
-            $sabaStats['no_ht']++;
-            continue;
+        // Skor HT diambil dari event gol, BUKAN dari kolom "ht".
+        //
+        // Kolom itu sering tercatat sesaat setelah babak kedua dimulai sehingga
+        // gol-gol awal 2H ikut terhitung: 22% baris SABA punya kolom ht yang
+        // tidak cocok dengan event golnya. Contohnya Colombia v Bosnia
+        // 03/08/2026 22:32 -- kolom ht menulis 2-2 padahal saat turun minum
+        // skornya 1-2, dan gol keempat baru masuk pada menit 1 babak kedua.
+        // Line H.Time-nya 4, yang masuk akal untuk 3 gol tetapi tampak mustahil
+        // untuk 4 gol (Under tak akan pernah bisa menang).
+        //
+        // Kesalahan ini paling merusak aturan paritas, karena satu gol tambahan
+        // membalik genap/ganjil sepenuhnya. Loader V-Soccer sejak awal sudah
+        // memakai event gol; SABA kini disamakan.
+        preg_match_all(
+            "/(1H|2H)\\s+\\d+'\\s*\\((\\d+)-(\\d+)\\)/",
+            (string)($r[$si['goal_markets']] ?? ''),
+            $evt,
+            PREG_SET_ORDER
+        );
+        $htHomeS = null;
+        $htAwayS = null;
+        foreach ($evt as $ev) {
+            if ($ev[1] === '1H') {
+                $htHomeS = (int)$ev[2];
+                $htAwayS = (int)$ev[3];
+            }
         }
-        $htTotal = (int)$hm[1] + (int)$hm[2];
+        if ($htHomeS === null && $evt) {
+            // Ada event tapi tak satu pun di babak pertama: benar-benar 0-0 saat HT.
+            $htHomeS = 0;
+            $htAwayS = 0;
+        }
+        if ($htHomeS === null) {
+            // Tidak ada event sama sekali -- jatuh kembali ke kolom ht.
+            $htTeks = trim((string)($r[$si['ht']] ?? ''));
+            if (!preg_match('/^(\d+)\s*-\s*(\d+)$/', $htTeks, $hm)) {
+                $sabaStats['no_ht']++;
+                continue;
+            }
+            $htHomeS = (int)$hm[1];
+            $htAwayS = (int)$hm[2];
+        }
+        $htTeks = "{$htHomeS}-{$htAwayS}";
+        $htTotal = $htHomeS + $htAwayS;
 
         $pasar = sabaOdds($r[$si['ht_ou_ft']] ?? '');
         if (!$pasar) {

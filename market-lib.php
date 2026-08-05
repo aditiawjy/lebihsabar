@@ -615,9 +615,27 @@ function runRules(array $RULES, array $rows, array $days): array
             $seg = array_values(array_filter($rows, static fn($r) => $r['day'] === $d));
             $perDay[$d] = evaluate($seg, $rule['pick']);
         }
+        // ROI tanpa hari penyumbang terbesar. Sebuah aturan yang seluruh
+        // keunggulannya berasal dari satu hari akan runtuh di kolom ini, dan itu
+        // ketahuan seketika. Tanpa uji ini, satu hari luar biasa bisa membuat n
+        // besar terlihat meyakinkan padahal tidak -- persis yang pernah terjadi
+        // pada K1 V-Soccer (t -3,54 seluruhnya ditopang satu hari).
+        $puncak = null;
+        foreach ($perDay as $d => $x) {
+            if ($x && ($puncak === null || $x['pl'] > $perDay[$puncak]['pl'])) {
+                $puncak = $d;
+            }
+        }
+        $tanpaPuncak = null;
+        if ($puncak !== null && count($days) > 1) {
+            $sisa = array_values(array_filter($rows, static fn($r) => $r['day'] !== $puncak));
+            $tanpaPuncak = $sisa ? evaluate($sisa, $rule['pick']) : null;
+        }
         $out[$code] = $rule + [
             'all' => evaluate($rows, $rule['pick']),
             'per_day' => $perDay,
+            'peak_day' => $puncak,
+            'ex_peak' => $tanpaPuncak,
             'positive_days' => count(array_filter($perDay, static fn($x) => $x && $x['roi'] > 0)),
         ];
     }

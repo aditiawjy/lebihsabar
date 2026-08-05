@@ -905,12 +905,50 @@ if (!is_file(SABA_FILE)) {
         $sabaStats['total']++;
 
         // Skor babak pertama wajib: tanpa itu tidak ada sinyal yang bisa dihitung.
-        $htTeks = trim((string)($r[$si['ht']] ?? ''));
-        if (!preg_match('/^(\d+)\s*-\s*(\d+)$/', $htTeks, $hm)) {
-            $sabaStats['no_ht']++;
-            continue;
+        // Skor HT diambil dari event gol, BUKAN dari kolom "ht".
+        //
+        // Kolom itu sering tercatat sesaat setelah babak kedua dimulai sehingga
+        // gol-gol awal 2H ikut terhitung: 22% baris SABA punya kolom ht yang
+        // tidak cocok dengan event golnya. Contohnya Colombia v Bosnia
+        // 03/08/2026 22:32 -- kolom ht menulis 2-2 padahal saat turun minum
+        // skornya 1-2, dan gol keempat baru masuk pada menit 1 babak kedua.
+        // Line H.Time-nya 4, yang masuk akal untuk 3 gol tetapi tampak mustahil
+        // untuk 4 gol (Under tak akan pernah bisa menang).
+        //
+        // Kesalahan ini paling merusak aturan paritas, karena satu gol tambahan
+        // membalik genap/ganjil sepenuhnya. Loader V-Soccer sejak awal sudah
+        // memakai event gol; SABA kini disamakan.
+        preg_match_all(
+            "/(1H|2H)\\s+\\d+'\\s*\\((\\d+)-(\\d+)\\)/",
+            (string)($r[$si['goal_markets']] ?? ''),
+            $evt,
+            PREG_SET_ORDER
+        );
+        $htHomeS = null;
+        $htAwayS = null;
+        foreach ($evt as $ev) {
+            if ($ev[1] === '1H') {
+                $htHomeS = (int)$ev[2];
+                $htAwayS = (int)$ev[3];
+            }
         }
-        $htTotal = (int)$hm[1] + (int)$hm[2];
+        if ($htHomeS === null && $evt) {
+            // Ada event tapi tak satu pun di babak pertama: benar-benar 0-0 saat HT.
+            $htHomeS = 0;
+            $htAwayS = 0;
+        }
+        if ($htHomeS === null) {
+            // Tidak ada event sama sekali -- jatuh kembali ke kolom ht.
+            $htTeks = trim((string)($r[$si['ht']] ?? ''));
+            if (!preg_match('/^(\d+)\s*-\s*(\d+)$/', $htTeks, $hm)) {
+                $sabaStats['no_ht']++;
+                continue;
+            }
+            $htHomeS = (int)$hm[1];
+            $htAwayS = (int)$hm[2];
+        }
+        $htTeks = "{$htHomeS}-{$htAwayS}";
+        $htTotal = $htHomeS + $htAwayS;
 
         $pasar = sabaOdds($r[$si['ht_ou_ft']] ?? '');
         if (!$pasar) {

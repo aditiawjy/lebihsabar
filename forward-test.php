@@ -306,9 +306,52 @@ foreach ($KANDIDAT as $k) {
         $statusKelas = 'no';
     }
 
+    // --- Dua diagnostik yang menentukan setiap keputusan sejauh ini.
+    //
+    // (1) ROI tanpa hari penyumbang terbesar. Hampir semua kandidat V-Soccer
+    //     runtuh di sini: keunggulannya ternyata cuma dari satu hari kering gol.
+    // (2) Kontrol pada kumpulan match yang sama. Kalau aturan tidak jelas
+    //     mengalahkan "pasang satu arah tanpa logika", seleksinya tidak bernilai.
+    $perHari = [];
+    foreach ($sesudah as $r) {
+        $perHari[$r['day']][] = $r;
+    }
+    $nilai = static fn(array $set) => $paritas
+        ? ($fixedOdds !== null ? evaluateParityBet($set, $pick, $fixedOdds) : evaluateParity($set, $pick))
+        : evaluate($set, $pick);
+    $puncak = null;
+    $plPuncak = null;
+    foreach ($perHari as $d => $x) {
+        $e = $nilai($x);
+        if ($e && isset($e['pl']) && ($plPuncak === null || $e['pl'] > $plPuncak)) {
+            $plPuncak = $e['pl'];
+            $puncak = $d;
+        }
+    }
+    $exPeak = null;
+    if ($puncak !== null && count($perHari) > 1) {
+        $sisa = [];
+        foreach ($perHari as $d => $x) {
+            if ($d !== $puncak) {
+                $sisa = array_merge($sisa, $x);
+            }
+        }
+        $exPeak = $sisa ? $nilai($sisa) : null;
+    }
+    // Kontrol: arah tetap pada kumpulan match yang sama persis.
+    $kontrol = null;
+    if ($sesudah) {
+        $kontrol = $paritas
+            ? ($fixedOdds !== null
+                ? evaluateParityBet($sesudah, static fn(array $r) => 'even', $fixedOdds)
+                : evaluateParity($sesudah, static fn(array $r) => 'even'))
+            : evaluate($sesudah, static fn(array $r) => 'under');
+    }
+
     $hasil[] = [
         'k' => $k, 'label' => $label, 'insample' => $insample, 'maju' => $maju,
         'ambang' => $ambang, 'ambangKini' => $ambangKini,
+        'exPeak' => $exPeak, 'peakDay' => $puncak, 'kontrol' => $kontrol,
         'status' => $status, 'kelas' => $statusKelas,
         'paritas' => $paritas && $fixedOdds === null,
         'parity_bet' => $paritas && $fixedOdds !== null, 'fixed_odds' => $fixedOdds, 'capai' => $capai,
@@ -453,6 +496,26 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
           } else {
               echo $maju ? pct($maju['winrate']) : '–';
           } ?></div>
+        </div>
+        <?php
+        $skala = static fn(?float $v) => $v === null ? '–' : ($h['paritas'] ? pct($v) : signed($v));
+        $xp = $h['exPeak'];
+        $kt = $h['kontrol'];
+        $nilaiXp = $xp ? ($h['paritas'] ? $xp['accuracy'] : $xp['roi']) : null;
+        $nilaiKt = $kt ? ($h['paritas'] ? $kt['accuracy'] : $kt['roi']) : null;
+        ?>
+        <div class="m">
+          <div class="label">Tanpa hari terbaik</div>
+          <div class="value <?= $nilaiXp === null ? '' : ($nilaiXp >= ($h['ambangKini'] ?? 0) ? 'pos' : 'neg') ?>"
+               title="<?= $h['peakDay'] ? 'Hari ' . e((string)$h['peakDay']) . ' dibuang, sisa ' . ($xp['n'] ?? 0) . ' taruhan. Kalau angka ini runtuh, keunggulannya cuma bertumpu satu hari.' : 'Butuh lebih dari satu hari.' ?>">
+            <?= $skala($nilaiXp) ?></div>
+        </div>
+        <div class="m">
+          <div class="label">Kontrol <span class="muted">(<?= $h['paritas'] ? 'selalu genap' : 'selalu Under' ?>)</span></div>
+          <div class="value muted" style="font-size:15px"
+               title="Arah tetap tanpa logika, pada kumpulan match yang sama persis. Kalau aturan tidak jelas mengalahkan angka ini, seleksinya tidak menambah nilai.">
+            <?= $skala($nilaiKt) ?><?= $nilaiKt !== null && $h['capai'] !== null
+                ? ' <span style="font-size:12px">(selisih ' . signed($h['capai'] - $nilaiKt) . ')</span>' : '' ?></div>
         </div>
         <div class="m">
           <div class="label">In-sample <span class="muted">(pembanding)</span></div>

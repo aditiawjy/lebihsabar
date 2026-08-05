@@ -20,10 +20,6 @@ require __DIR__ . '/market-lib.php';
 const TES_MULAI_DEFAULT = '03/08/2026';
 // Satu sisi, 95%. Ambang ROI = Z * sd / sqrt(target).
 const Z_SATU_SISI = 1.645;
-// Odds ganjil/genap yang dipakai untuk menghitung ROI. CSV tidak menyimpannya,
-// jadi ini ANGKA ASUMSI -- disamakan untuk semua kandidat paritas supaya bisa
-// dibandingkan setara. Ganti di sini kalau harga sebenarnya sudah diketahui.
-const ODDS_PARITAS = 1.80;
 // Nilai stake tetap yang ditampilkan pada log taruhan.
 const STAKE_RUPIAH = 20000;
 
@@ -229,51 +225,6 @@ function logParitas(array $rows, callable $predict, ?float $odds = null): array
         $log[] = $item;
     }
     return $log;
-}
-/** Evaluasi paritas sebagai taruhan dengan odds tetap, bukan sekadar akurasi. */
-function evaluateParityBet(array $rows, callable $predict, float $odds): ?array
-{
-    if ($odds <= 1) {
-        return null;
-    }
-    $correct = 0;
-    $wrong = 0;
-    $sampel = [];
-    foreach ($rows as $r) {
-        $guess = $predict($r);
-        if ($guess !== 'even' && $guess !== 'odd') {
-            continue;
-        }
-        $actual = ((int)$r['ft'] % 2 === 0) ? 'even' : 'odd';
-        $menang = $guess === $actual;
-        $menang ? $correct++ : $wrong++;
-        $sampel[] = $menang ? $odds - 1 : -1;
-    }
-    $n = $correct + $wrong;
-    if ($n === 0) {
-        return null;
-    }
-    $p = $correct / $n;
-    $pl = array_sum($sampel);
-    $mean = $pl / $n;
-    $varian = 0.0;
-    foreach ($sampel as $s) {
-        $varian += ($s - $mean) ** 2;
-    }
-    $sd = $n > 1 ? sqrt($varian / ($n - 1)) : 0.0;
-    $se = sqrt($p * (1 - $p) / $n);
-    $t = $sd > 0 ? $mean / ($sd / sqrt($n)) : 0.0;
-    return [
-        'n' => $n, 'correct' => $correct, 'wrong' => $wrong,
-        'win' => $correct, 'lose' => $wrong, 'push' => 0,
-        'accuracy' => $p * 100, 'winrate' => $p * 100,
-        'ci_lo' => max(0, $p - 1.96 * $se) * 100,
-        'ci_hi' => min(1, $p + 1.96 * $se) * 100,
-        'odds_min' => 1 / $p, 'breakeven' => 100 / $odds,
-        'odds' => $odds, 'pl' => $pl, 'roi' => $pl / $n * 100,
-        'sd' => $sd, 't' => $t,
-        'proven' => (($p - 1.96 * $se) * 100) > (100 / $odds),
-    ];
 }
 
 

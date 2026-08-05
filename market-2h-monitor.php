@@ -220,14 +220,22 @@ function barisParitasLebar(string $code, array $res, int $jumlahHari): string
         return '<tr><td><b>' . e($code) . '</b></td><td>' . e($res['label'])
             . '</td><td class="num" colspan="11"><span class="muted">tidak ada sampel</span></td></tr>';
     }
+    $xpP = $res['ex_peak'] ?? null;
     $status = $a['proven'] ? 'YA' : 'BELUM';
+    $plP = ($a['pl'] >= 0 ? '+' : '−') . number_format(abs($a['pl']), 2, ',', '.');
     return '<tr><td><b>' . e($code) . '</b></td><td>' . e($res['label']) . '</td>'
         . '<td class="num">' . $a['n'] . '</td>'
         . '<td class="num">' . $a['correct'] . '/' . $a['n'] . '</td>'
         . '<td class="num">' . pct($a['accuracy']) . '</td>'
-        . '<td class="num">' . pct($a['ci_lo'], 0) . ' - ' . pct($a['ci_hi'], 0) . '</td>'
-        . '<td class="num">-</td><td class="num">-</td><td class="num muted">N/A</td>'
-        . '<td class="num muted" title="ROI tak terukur tanpa odds Odd/Even.">N/A</td>'
+        . '<td class="num">' . number_format($a['t'], 2, ',', '.') . '</td>'
+        . '<td class="num">' . pct($a['breakeven'], 0) . '</td>'
+        . '<td class="num ' . ($a['pl'] >= 0 ? 'pos' : 'neg') . '">' . $plP . '</td>'
+        . '<td class="num ' . ($a['roi'] >= 0 ? 'pos' : 'neg') . '"'
+        . ' title="Dihitung pada odds ASUMSI ' . number_format(ODDS_PARITAS, 2, ',', '.')
+        . ' — CSV tidak menyimpan odds Odd/Even. Odds minimal agar untung: '
+        . number_format($a['odds_min'], 2, ',', '.') . '.">' . signed($a['roi']) . '</td>'
+        . '<td class="num ' . ($xpP ? ($xpP['roi'] >= 0 ? 'pos' : 'neg') : 'muted') . '">'
+        . ($xpP ? signed($xpP['roi']) : '–') . '</td>'
         . '<td class="num">' . $res['positive_days'] . '/' . $jumlahHari . '</td>'
         . '<td><span class="tag ' . ($a['proven'] ? 'yes' : 'no') . '">' . $status . '</span></td>'
         . '<td class="sim-cell"><span class="muted">N/A</span></td></tr>';

@@ -25,6 +25,11 @@ const ODDS_BOOK_MAX = 1.20;
 // aturan kosong semata-mata karena kebetulan. Koreksi Bonferroni 0,05/50
 // menuntut p < 0,001, yang setara t sekitar 3,3.
 const T_BONFERRONI = 3.3;
+// Odds ganjil/genap yang dipakai untuk menghitung ROI paritas. CSV tidak
+// menyimpannya, jadi ini ANGKA ASUMSI. Ditaruh di sini supaya monitor dan
+// forward-test memakai harga yang sama -- kalau berbeda, kedua halaman akan
+// menampilkan ROI berlainan untuk aturan yang persis sama.
+const ODDS_PARITAS = 1.80;
 // Ambang selisih minimal untuk R5. Sengaja dijadikan konstanta supaya kelihatan
 // bahwa R5 punya angka yang di-tuning -- R1 tidak punya satu pun.
 const R5_MIN_MARGIN = 1.5;
@@ -587,19 +592,81 @@ function evaluateParity(array $rows, callable $predict): ?array
     ];
 }
 
+/** Evaluasi paritas sebagai taruhan dengan odds tetap, bukan sekadar akurasi. */
+function evaluateParityBet(array $rows, callable $predict, float $odds): ?array
+{
+    if ($odds <= 1) {
+        return null;
+    }
+    $correct = 0;
+    $wrong = 0;
+    $sampel = [];
+    foreach ($rows as $r) {
+        $guess = $predict($r);
+        if ($guess !== 'even' && $guess !== 'odd') {
+            continue;
+        }
+        $actual = ((int)$r['ft'] % 2 === 0) ? 'even' : 'odd';
+        $menang = $guess === $actual;
+        $menang ? $correct++ : $wrong++;
+        $sampel[] = $menang ? $odds - 1 : -1;
+    }
+    $n = $correct + $wrong;
+    if ($n === 0) {
+        return null;
+    }
+    $p = $correct / $n;
+    $pl = array_sum($sampel);
+    $mean = $pl / $n;
+    $varian = 0.0;
+    foreach ($sampel as $s) {
+        $varian += ($s - $mean) ** 2;
+    }
+    $sd = $n > 1 ? sqrt($varian / ($n - 1)) : 0.0;
+    $se = sqrt($p * (1 - $p) / $n);
+    $t = $sd > 0 ? $mean / ($sd / sqrt($n)) : 0.0;
+    return [
+        'n' => $n, 'correct' => $correct, 'wrong' => $wrong,
+        'win' => $correct, 'lose' => $wrong, 'push' => 0,
+        'accuracy' => $p * 100, 'winrate' => $p * 100,
+        'ci_lo' => max(0, $p - 1.96 * $se) * 100,
+        'ci_hi' => min(1, $p + 1.96 * $se) * 100,
+        'odds_min' => 1 / $p, 'breakeven' => 100 / $odds,
+        'odds' => $odds, 'pl' => $pl, 'roi' => $pl / $n * 100,
+        'sd' => $sd, 't' => $t,
+        'proven' => (($p - 1.96 * $se) * 100) > (100 / $odds),
+    ];
+}
+
 /** Jalankan aturan paritas dengan rincian harian. */
 function runParityRules(array $rules, array $rows, array $days): array
 {
     $out = [];
     foreach ($rules as $code => $rule) {
+        // Dinilai pada ODDS_PARITAS supaya kolom ROI dan "ROI -hari terbaik"
+        // terisi seperti aturan Over/Under, dan supaya angkanya sama persis
+        // dengan forward-test.php yang memakai konstanta yang sama.
         $perDay = [];
         foreach ($days as $d) {
             $seg = array_values(array_filter($rows, static fn($r) => $r['day'] === $d));
-            $perDay[$d] = evaluateParity($seg, $rule['predict']);
+            $perDay[$d] = evaluateParityBet($seg, $rule['predict'], ODDS_PARITAS);
+        }
+        $puncak = null;
+        foreach ($perDay as $d => $x) {
+            if ($x && ($puncak === null || $x['pl'] > $perDay[$puncak]['pl'])) {
+                $puncak = $d;
+            }
+        }
+        $tanpaPuncak = null;
+        if ($puncak !== null && count($days) > 1) {
+            $sisa = array_values(array_filter($rows, static fn($r) => $r['day'] !== $puncak));
+            $tanpaPuncak = $sisa ? evaluateParityBet($sisa, $rule['predict'], ODDS_PARITAS) : null;
         }
         $out[$code] = $rule + [
-            'all' => evaluateParity($rows, $rule['predict']),
+            'all' => evaluateParityBet($rows, $rule['predict'], ODDS_PARITAS),
             'per_day' => $perDay,
+            'peak_day' => $puncak,
+            'ex_peak' => $tanpaPuncak,
             'positive_days' => count(array_filter($perDay, static fn($x) => $x && $x['accuracy'] >= 50)),
         ];
     }

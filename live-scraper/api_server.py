@@ -67,8 +67,13 @@ def start_scraper(url: str = None):
 
     target = (url or _scraper["url"] or DEFAULT_URL).strip()
     env = dict(os.environ)
+    # Diperiksa isinya, bukan cuma foldernya: instalasi yang terputus meninggalkan
+    # .playwright kosong (hanya .links dan __dirlock). Folder kosong itu lolos
+    # exists(), lalu Playwright berhenti mencari di lokasi bawaannya dan gagal
+    # dengan "Executable doesn't exist" padahal Chromium sudah ada di
+    # %LOCALAPPDATA%\ms-playwright.
     browsers = BASE_DIR / ".playwright"
-    if browsers.exists():
+    if any(browsers.glob("chromium-*")):
         env["PLAYWRIGHT_BROWSERS_PATH"] = str(browsers)
     env["BPVM_URL"] = target
 

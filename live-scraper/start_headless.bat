@@ -12,7 +12,10 @@ REM Kalau diset tanpa syarat sementara .playwright belum pernah dibuat (setup.ba
 REM belum dijalankan di PC ini), Playwright berhenti mencari di lokasi bawaannya
 REM dan gagal, padahal Chromium-nya sudah terpasang di
 REM %LOCALAPPDATA%\ms-playwright. Pola ini sama dengan headless_runner.py.
-if exist "%SCRIPT_DIR%.playwright" set "PLAYWRIGHT_BROWSERS_PATH=%SCRIPT_DIR%.playwright"
+REM Diperiksa isinya, bukan cuma foldernya: instalasi yang terputus meninggalkan
+REM .playwright kosong (hanya .links dan __dirlock), dan itu cukup untuk membuat
+REM pemeriksaan "if exist" polos lolos lalu gagal saat browser diluncurkan.
+if exist "%SCRIPT_DIR%.playwright\chromium-*" set "PLAYWRIGHT_BROWSERS_PATH=%SCRIPT_DIR%.playwright"
 
 REM URL live yang di-scrape (SABA Football). Ganti di sini atau dari dashboard.
 set "BPVM_URL=https://g943gp.bpvmr7u6.com/en-US/live/997"

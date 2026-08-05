@@ -423,7 +423,15 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
     <div class="empty card">Belum ada data SABA yang bisa dipakai (<?= e($sabaError ?? 'goal_log_bpvm.csv kosong') ?>).</div>
   <?php endif; ?>
 
-  <?php foreach ($hasil as $h):
+  <?php
+  // Kandidat gugur dikeluarkan dari daftar utama supaya halaman tidak penuh
+  // baris mati, tapi TIDAK dihapus -- diringkas jadi satu baris di bawah.
+  // Menghapusnya sama saja menyisakan hanya yang sedang bagus, dan itu bentuk
+  // penipuan diri yang justru ingin dicegah halaman ini.
+  $aktif = array_values(array_filter($hasil, static fn($h) => $h['status'] !== 'GUGUR'));
+  $gugur = array_values(array_filter($hasil, static fn($h) => $h['status'] === 'GUGUR'));
+  ?>
+  <?php foreach ($aktif as $h):
       $k = $h['k'];
       $maju = $h['maju'];
       $n = $maju['n'] ?? 0;
@@ -610,6 +618,36 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
       <?php endif; ?>
     </section>
   <?php endforeach; ?>
+
+  <?php if ($gugur): ?>
+  <section class="kand" style="border-color:#3a1f27">
+    <h2>Sudah gugur <span class="muted" style="font-weight:400;font-size:13px">(<?= count($gugur) ?> kandidat)</span></h2>
+    <p class="rule">Sudah mencapai target taruhan tetapi tidak menembus ambang yang dikunci di muka.
+      Sengaja tidak dihapus: daftar yang hanya memuat kandidat bagus akan membuat seluruh halaman ini
+      terlihat jauh lebih meyakinkan daripada kenyataannya.</p>
+    <div class="tablebox"><table>
+      <thead><tr>
+        <th>Kode</th><th>Aturan</th><th class="num">n</th><th class="num">Hasil</th>
+        <th class="num">Ambang</th><th class="num">Selisih</th>
+      </tr></thead>
+      <tbody>
+      <?php foreach ($gugur as $h):
+          $kurang = $h['capai'] !== null && $h['ambang'] !== null ? $h['capai'] - $h['ambang'] : null; ?>
+        <tr>
+          <td><b><?= e($h['k']['kode']) ?></b></td>
+          <td><?= e($h['label']) ?></td>
+          <td class="num"><?= $h['maju']['n'] ?? 0 ?> / <?= $h['k']['target'] ?></td>
+          <td class="num"><?= $h['capai'] === null ? '–'
+              : ($h['paritas'] ? pct($h['capai']) : signed($h['capai'])) ?></td>
+          <td class="num"><?= $h['ambang'] === null ? '–'
+              : ($h['paritas'] ? pct($h['ambang']) : signed($h['ambang'])) ?></td>
+          <td class="num neg"><?= $kurang === null ? '–' : signed($kurang) ?></td>
+        </tr>
+      <?php endforeach; ?>
+      </tbody>
+    </table></div>
+  </section>
+  <?php endif; ?>
 
   <p class="foot">
     Baca-saja · sumber <code>goal_log_bpvm.csv</code> · definisi aturan, loader, dan settlement

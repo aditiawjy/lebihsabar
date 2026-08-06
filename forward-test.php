@@ -245,6 +245,30 @@ foreach ($KANDIDAT as $k) {
     $sebelum = array_values(array_filter($semuaBaris, static fn($r) => $r['ts'] < $mulaiTs));
     $sesudah = array_values(array_filter($semuaBaris, static fn($r) => $r['ts'] >= $mulaiTs));
 
+    // Vonis DIBEKUKAN pada taruhan ke-target. Tanpa ini, kandidat yang sudah
+    // melewati targetnya terus dinilai ulang atas seluruh taruhan yang masuk
+    // sesudahnya -- dan sebuah kandidat yang gugur bisa berbalik jadi LOLOS
+    // hanya karena kita menunggu cukup lama. Itu persis "cari sampai lolos",
+    // kesalahan yang justru ingin dicegah halaman ini.
+    usort($sesudah, static fn($a, $b) => $a['ts'] <=> $b['ts']);
+    $lewatTarget = 0;
+    $potong = [];
+    $terpakai = 0;
+    foreach ($sesudah as $r) {
+        if ($pick($r) === null) {
+            continue;
+        }
+        if ($terpakai >= $k['target']) {
+            $lewatTarget++;
+            continue;
+        }
+        $potong[] = $r;
+        $terpakai++;
+    }
+    if ($terpakai >= $k['target']) {
+        $sesudah = $potong;
+    }
+
     if ($paritas && $fixedOdds !== null) {
         $insample = $sebelum ? evaluateParityBet($sebelum, $pick, $fixedOdds) : null;
         $maju = $sesudah ? evaluateParityBet($sesudah, $pick, $fixedOdds) : null;
@@ -352,6 +376,7 @@ foreach ($KANDIDAT as $k) {
         'k' => $k, 'label' => $label, 'insample' => $insample, 'maju' => $maju,
         'ambang' => $ambang, 'ambangKini' => $ambangKini,
         'exPeak' => $exPeak, 'peakDay' => $puncak, 'kontrol' => $kontrol,
+        'lewatTarget' => $lewatTarget,
         'status' => $status, 'kelas' => $statusKelas,
         'paritas' => $paritas && $fixedOdds === null,
         'parity_bet' => $paritas && $fixedOdds !== null, 'fixed_odds' => $fixedOdds, 'capai' => $capai,
@@ -650,7 +675,10 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
         <tr>
           <td><b><?= e($h['k']['kode']) ?></b></td>
           <td><?= e($h['label']) ?></td>
-          <td class="num"><?= $h['maju']['n'] ?? 0 ?> / <?= $h['k']['target'] ?></td>
+          <td class="num"><?= $h['maju']['n'] ?? 0 ?> / <?= $h['k']['target'] ?><?= $h['lewatTarget']
+              ? ' <span class="muted" title="Vonis dibekukan pada taruhan ke-' . $h['k']['target']
+                . '. ' . $h['lewatTarget'] . ' taruhan sesudahnya tidak lagi mengubah hasil, supaya kandidat yang gugur tidak bisa berbalik lolos hanya karena ditunggu lebih lama.">beku</span>'
+              : '' ?></td>
           <td class="num"><?= $h['capai'] === null ? '–'
               : ($h['paritas'] ? pct($h['capai']) : signed($h['capai'])) ?></td>
           <td class="num"><?= $h['ambang'] === null ? '–'

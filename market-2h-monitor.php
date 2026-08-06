@@ -454,54 +454,81 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
   // sedikit-sedikit tiap hari; ia rugi tipis berhari-hari lalu dibayar besar
   // pada hari yang salah harga. Jadi yang menentukan untung-rugi jangka panjang
   // bukan ROI rata-rata, melainkan SEBERAPA SERING hari seperti itu datang.
+  // Diukur pada aturan yang UTUH -- termasuk syarat odds Under >= 1,90. Tanpa
+  // syarat itu angkanya beda jauh (03/08 jadi +35,5% bukan +59,1%) dan tidak
+  // cocok dengan kandidat VS-HT34-ODD yang dipantau di halaman tes maju.
+  // Kolom pembanding di sebelahnya menampilkan HT 3-4 tanpa syarat odds.
   $hariKering = [];
   foreach ($rows as $r) {
       if ($r['ht_total'] < 3 || $r['ht_total'] > 4) {
           continue; // ukur pada kelompok yang memang ditaruhi
       }
       $d = $r['day'];
+      $s = settleRinci($r['ft'], $r['line'], (float)$r['under'], 'under');
+      // Pembanding: HT 3-4 saja, tanpa syarat odds.
+      if ($s !== null) {
+          $hariKering[$d]['pl_polos'] = ($hariKering[$d]['pl_polos'] ?? 0) + $s['pl'];
+          $hariKering[$d]['nb_polos'] = ($hariKering[$d]['nb_polos'] ?? 0) + 1;
+      }
+      if ((float)$r['under'] < ODDS_UNDER_MIN) {
+          continue;
+      }
       $hariKering[$d]['n'] = ($hariKering[$d]['n'] ?? 0) + 1;
       $hariKering[$d]['minta'] = ($hariKering[$d]['minta'] ?? 0) + $r['demand'];
       $hariKering[$d]['nyata'] = ($hariKering[$d]['nyata'] ?? 0) + $r['goals_2h'];
-      $s = settleRinci($r['ft'], $r['line'], (float)$r['under'], 'under');
       if ($s !== null) {
           $hariKering[$d]['pl'] = ($hariKering[$d]['pl'] ?? 0) + $s['pl'];
           $hariKering[$d]['nb'] = ($hariKering[$d]['nb'] ?? 0) + 1;
       }
   }
+  $kunciTs = DateTime::createFromFormat('d/m/Y', KUNCI_TES_MAJU)->setTime(0, 0)->getTimestamp();
   $jmlKering = 0;
   $jmlHari = 0;
   $roiKering = [];
   $roiBiasa = [];
   foreach ($hariKering as $d => $v) {
-      if ($v['n'] < 5) {
+      if (($v['n'] ?? 0) < 5) {
           continue;
       }
-      $jmlHari++;
       $sel = $v['nyata'] / $v['n'] - $v['minta'] / $v['n'];
       $roi = !empty($v['nb']) ? 100 * $v['pl'] / $v['nb'] : 0;
-      if ($sel <= HARI_KERING_AMBANG) {
-          $jmlKering++;
-          $roiKering[] = $roi;
-      } else {
-          $roiBiasa[] = $roi;
+      $kering = $sel <= HARI_KERING_AMBANG;
+      // Hari in-sample tetap ditampilkan tetapi TIDAK ikut menghitung laju:
+      // aturannya lahir dari hari-hari itu, jadi memasukkannya menggelembungkan
+      // laju hari kering sekaligus rata-rata hari biasa.
+      $dt = DateTime::createFromFormat('d/m/Y', $d);
+      $insample = !$dt || $dt->setTime(0, 0)->getTimestamp() < $kunciTs;
+      if (!$insample) {
+          $jmlHari++;
+          if ($kering) {
+              $jmlKering++;
+              $roiKering[] = $roi;
+          } else {
+              $roiBiasa[] = $roi;
+          }
       }
       $hariKering[$d]['sel'] = $sel;
       $hariKering[$d]['roi'] = $roi;
-      $hariKering[$d]['kering'] = $sel <= HARI_KERING_AMBANG;
+      $hariKering[$d]['kering'] = $kering;
+      $hariKering[$d]['insample'] = $insample;
   }
   $laju = $jmlHari > 0 ? $jmlKering / $jmlHari : null;
   $rKering = $roiKering ? array_sum($roiKering) / count($roiKering) : null;
   $rBiasa = $roiBiasa ? array_sum($roiBiasa) / count($roiBiasa) : null;
   // Laju impas: berapa sering hari kering harus datang supaya rata-ratanya nol.
-  $lajuImpas = ($rKering !== null && $rBiasa !== null && $rKering > $rBiasa)
+  // Hanya bermakna kalau hari biasa memang merugi. Kalau hari biasa saja sudah
+  // positif, tidak ada laju minimum yang perlu dipenuhi.
+  $lajuImpas = ($rKering !== null && $rBiasa !== null && $rBiasa < 0 && $rKering > $rBiasa)
       ? -$rBiasa / ($rKering - $rBiasa) : null;
   ?>
   <?php if ($jmlHari > 1): ?>
   <section class="section">
-    <h2>Penghitung hari kering gol — V-Soccer HT 3–4</h2>
+    <h2>Penghitung hari kering gol — V-Soccer HT 3–4 + odds Under ≥ <?= number_format(ODDS_UNDER_MIN, 2, ',', '.') ?></h2>
     <p class="hint">
-      Aturan "HT 3–4 → Under" tidak untung sedikit-sedikit tiap hari. Ia rugi tipis
+      Diukur pada aturan yang <b>utuh</b>, termasuk syarat odds Under ≥ <?= number_format(ODDS_UNDER_MIN, 2, ',', '.') ?>,
+      supaya angkanya cocok dengan kandidat <b>VS-HT34-ODD</b> di halaman Tes maju.
+      Kolom terakhir menampilkan HT 3–4 tanpa syarat odds sebagai pembanding.
+      Aturan ini tidak untung sedikit-sedikit tiap hari. Ia rugi tipis
       berhari-hari, lalu dibayar besar pada hari ketika gol babak kedua jauh di bawah
       tuntutan market. Karena itu yang menentukan untung-rugi jangka panjangnya bukan
       ROI rata-rata, melainkan <b>seberapa sering hari seperti itu datang</b>.
@@ -512,7 +539,8 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
     <div class="tablebox"><table>
       <thead><tr>
         <th>Hari</th><th class="num">n</th><th class="num">Market minta</th>
-        <th class="num">Kenyataan</th><th class="num">Selisih</th><th class="num">ROI Under</th><th>Hari kering?</th>
+        <th class="num">Kenyataan</th><th class="num">Selisih</th>
+        <th class="num">ROI (dgn odds)</th><th class="num">ROI (tanpa syarat odds)</th><th>Hari kering?</th>
       </tr></thead>
       <tbody>
       <?php foreach ($hariKering as $d => $v):
@@ -527,15 +555,19 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
           <td class="num <?= $v['kering'] ? 'pos' : '' ?>">
             <?= ($v['sel'] >= 0 ? '+' : '−') . number_format(abs($v['sel']), 2, ',', '.') ?></td>
           <td class="num <?= $v['roi'] >= 0 ? 'pos' : 'neg' ?>"><?= signed($v['roi']) ?></td>
+          <?php $rp = !empty($v['nb_polos']) ? 100 * $v['pl_polos'] / $v['nb_polos'] : null; ?>
+          <td class="num muted"><?= $rp === null ? '–' : signed($rp) ?></td>
           <td><?= $v['kering']
               ? '<span class="tag yes">KERING</span>'
-              : '<span class="muted">biasa</span>' ?></td>
+              : '<span class="muted">biasa</span>' ?><?= $v['insample']
+              ? ' <span class="tag no" title="Hari yang melahirkan aturannya. Ditampilkan sebagai konteks, tidak ikut menghitung laju.">in-sample</span>' : '' ?></td>
         </tr>
       <?php endforeach; ?>
       </tbody>
     </table></div>
     <p class="hint" style="margin-top:10px">
       <b>Laju sejauh ini: <?= $jmlKering ?> hari kering dari <?= $jmlHari ?> hari</b>
+      <span class="muted">(hanya hari sejak <?= e(KUNCI_TES_MAJU) ?>; hari in-sample tidak ikut dihitung)</span>
       (<?= $laju !== null ? pct($laju * 100, 0) : '–' ?>).
       <?php if ($rKering !== null && $rBiasa !== null): ?>
         Hari kering rata-rata <?= signed($rKering) ?>, hari biasa <?= signed($rBiasa) ?>.
@@ -544,6 +576,9 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
           dari setiap <?= number_format(1 / $lajuImpas, 0, ',', '.') ?> hari.
           Selama laju sebenarnya di atas itu, aturannya menguntungkan dalam jangka panjang;
           di bawahnya tidak.
+        <?php elseif ($rBiasa !== null && $rBiasa >= 0): ?>
+          <br><b>Hari biasa pun sudah positif</b>, jadi tidak ada laju minimum yang harus
+          dipenuhi — tetapi dengan hari sesedikit ini, angka itu belum bisa dipercaya.
         <?php endif; ?>
       <?php endif; ?>
       <br><br>

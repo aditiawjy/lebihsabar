@@ -37,6 +37,13 @@ const ODDS_PARITAS = 1.80;
 // hari seperti itu datang -- itulah yang menentukan untung-rugi jangka panjang
 // aturan yang menunggu peluang langka, bukan ROI rata-ratanya.
 const HARI_KERING_AMBANG = -0.25;
+// Syarat odds pada VS-HT34-ODD: odds Under tinggi berarti pasar sedang condong
+// ke Over, dan di situlah salah harganya paling besar.
+const ODDS_UNDER_MIN = 1.90;
+// Tanggal kunci tes maju. Hari sebelum ini adalah data yang melahirkan
+// aturannya, jadi tidak boleh ikut menghitung laju hari kering -- kalau ikut,
+// lajunya digelembungkan oleh hari yang memang dipilih karena bagus.
+const KUNCI_TES_MAJU = '03/08/2026';
 // Ambang selisih minimal untuk R5. Sengaja dijadikan konstanta supaya kelihatan
 // bahwa R5 punya angka yang di-tuning -- R1 tidak punya satu pun.
 const R5_MIN_MARGIN = 1.5;

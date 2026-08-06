@@ -657,7 +657,11 @@ function evaluateParityBet(array $rows, callable $predict, float $odds): ?array
         'accuracy' => $p * 100, 'winrate' => $p * 100,
         'ci_lo' => max(0, $p - 1.96 * $se) * 100,
         'ci_hi' => min(1, $p + 1.96 * $se) * 100,
-        'odds_min' => 1 / $p, 'breakeven' => 100 / $odds,
+        // Bisa nol kalau SEMUA tebakan salah -- terjadi pada hari bersampel
+        // kecil sejak fungsi ini dipanggil per hari. Tanpa penjaga ini,
+        // 1/$p melempar DivisionByZeroError dan seluruh halaman mati.
+        'odds_min' => $p > 0 ? 1 / $p : null,
+        'breakeven' => 100 / $odds,
         'odds' => $odds, 'pl' => $pl, 'roi' => $pl / $n * 100,
         'sd' => $sd, 't' => $t,
         'proven' => (($p - 1.96 * $se) * 100) > (100 / $odds),

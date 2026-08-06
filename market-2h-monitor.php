@@ -233,7 +233,8 @@ function barisParitasLebar(string $code, array $res, int $jumlahHari): string
         . '<td class="num ' . ($a['roi'] >= 0 ? 'pos' : 'neg') . '"'
         . ' title="Dihitung pada odds ASUMSI ' . number_format(ODDS_PARITAS, 2, ',', '.')
         . ' — CSV tidak menyimpan odds Odd/Even. Odds minimal agar untung: '
-        . number_format($a['odds_min'], 2, ',', '.') . '.">' . signed($a['roi']) . '</td>'
+        . ($a['odds_min'] === null ? 'tak terhingga (tak pernah benar)' : number_format($a['odds_min'], 2, ',', '.'))
+        . '.">' . signed($a['roi']) . '</td>'
         . '<td class="num ' . ($xpP ? ($xpP['roi'] >= 0 ? 'pos' : 'neg') : 'muted') . '">'
         . ($xpP ? signed($xpP['roi']) : '–') . '</td>'
         . '<td class="num">' . $res['positive_days'] . '/' . $jumlahHari . '</td>'

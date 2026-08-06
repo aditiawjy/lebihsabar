@@ -321,6 +321,18 @@ $RULES = [
         'pick' => static fn(array $r) => ($r['ht_total'] >= 3 && $r['ht_total'] <= 4)
             ? 'under' : null,
     ],
+    // R15 = R14 ditambah syarat odds. Odds Under yang tinggi berarti pasar
+    // sedang condong ke Over, dan di situlah salah harganya paling besar --
+    // terlihat di penghitung hari kering: pada hari yang sama R15 memberi
+    // +59,1% sementara R14 hanya +35,5%, dan pada hari buruk ruginya pun lebih
+    // kecil (-2,9% lawan -15,6%). Sama seperti R14, ini diturunkan dari data
+    // ini juga, jadi penilaian sebenarnya ada di forward-test.php (VS-HT34-ODD).
+    'R15' => [
+        'insample' => true,
+        'label' => 'Total gol HT 3–4 + odds Under ≥ ' . number_format(ODDS_UNDER_MIN, 2, ',', '.') . ' → Under',
+        'pick' => static fn(array $r) => ($r['ht_total'] >= 3 && $r['ht_total'] <= 4
+            && (float)$r['under'] >= ODDS_UNDER_MIN) ? 'under' : null,
+    ],
     'K1' => [
         'label' => 'KONTROL: selalu Over',
         'pick'  => static fn(array $r) => 'over',

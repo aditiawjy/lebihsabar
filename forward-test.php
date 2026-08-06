@@ -76,6 +76,28 @@ $KANDIDAT = [
             . 'bertumpu pada satu hari: +6% / +46% / −22%. Kalau VS-HT34 lolos sementara R12 '
             . 'tidak, berarti sel HT 4 memang menyumbang dan bukan pengganggu.',
     ],
+    [
+        'kode' => 'SB20-HT34-ODD', 'pasar' => 'saba', 'durasi' => '20', 'target' => 100,
+        'label' => 'SABA 20m: HT 3–4 + odds Under ≥ 1,90 → Under',
+        'pick' => static fn(array $r) => ($r['ht_total'] >= 3 && $r['ht_total'] <= 4
+            && (float)$r['under'] >= ODDS_UNDER_MIN) ? 'under' : null,
+        'alasan' => 'Menguji apakah aturan yang menonjol di V-Soccer juga bekerja di pasar lain — '
+            . 'bertahan lintas pasar adalah bukti yang jauh lebih kuat daripada ROI tinggi di satu '
+            . 'tempat. PERINGATAN VOLUME: match SABA 20 menit jarang gol, sehingga HT 3–4 hanya 19% '
+            . 'dari match dan setelah saringan odds tinggal 8% — sekitar 2 taruhan per hari, jadi '
+            . 'target 100 baru tercapai kira-kira 50 hari lagi. Varian semua-durasi di bawah jauh '
+            . 'lebih cepat menjawab.',
+    ],
+    [
+        'kode' => 'SB-HT34-ODD', 'pasar' => 'saba', 'durasi' => null, 'target' => 100,
+        'label' => 'SABA semua durasi: HT 3–4 + odds Under ≥ 1,90 → Under',
+        'pick' => static fn(array $r) => ($r['ht_total'] >= 3 && $r['ht_total'] <= 4
+            && (float)$r['under'] >= ODDS_UNDER_MIN) ? 'under' : null,
+        'alasan' => 'Aturan yang sama tanpa dibatasi durasi, semata-mata demi volume: 6,5 taruhan '
+            . 'per hari, jadi target 100 tercapai sekitar 15 hari — bukan 50. Kalau keunggulannya '
+            . 'memang berasal dari salah harga odds tinggi, ia mestinya muncul di ketiga durasi, '
+            . 'bukan hanya satu.',
+    ],
     // ---- Ganjil/genap. CSV tidak menyimpan odds Odd/Even, jadi yang diuji
     // BUKAN untung-rugi melainkan "lebih baik dari lempar koin". Ambangnya pun
     // pada akurasi, bukan ROI. Untung tetap bergantung harga yang tidak kita punya.

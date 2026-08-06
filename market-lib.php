@@ -30,6 +30,13 @@ const T_BONFERRONI = 3.3;
 // forward-test memakai harga yang sama -- kalau berbeda, kedua halaman akan
 // menampilkan ROI berlainan untuk aturan yang persis sama.
 const ODDS_PARITAS = 1.80;
+// Sebuah hari disebut "kering gol" kalau gol babak kedua yang benar-benar
+// tercipta tertinggal sejauh ini di bawah yang dituntut market. Potongan bandar
+// sudah tertutup pada selisih sekitar -0,10, jadi -0,25 adalah hari yang jelas
+// salah harga, bukan sekadar riak. Dipakai untuk menghitung SEBERAPA SERING
+// hari seperti itu datang -- itulah yang menentukan untung-rugi jangka panjang
+// aturan yang menunggu peluang langka, bukan ROI rata-ratanya.
+const HARI_KERING_AMBANG = -0.25;
 // Ambang selisih minimal untuk R5. Sengaja dijadikan konstanta supaya kelihatan
 // bahwa R5 punya angka yang di-tuning -- R1 tidak punya satu pun.
 const R5_MIN_MARGIN = 1.5;

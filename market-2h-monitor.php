@@ -450,6 +450,111 @@ th{color:var(--muted);font-size:11px;text-transform:uppercase}
   </section>
 
   <?php
+  // Penghitung hari kering gol. Aturan seperti "HT 3-4 -> Under" tidak untung
+  // sedikit-sedikit tiap hari; ia rugi tipis berhari-hari lalu dibayar besar
+  // pada hari yang salah harga. Jadi yang menentukan untung-rugi jangka panjang
+  // bukan ROI rata-rata, melainkan SEBERAPA SERING hari seperti itu datang.
+  $hariKering = [];
+  foreach ($rows as $r) {
+      if ($r['ht_total'] < 3 || $r['ht_total'] > 4) {
+          continue; // ukur pada kelompok yang memang ditaruhi
+      }
+      $d = $r['day'];
+      $hariKering[$d]['n'] = ($hariKering[$d]['n'] ?? 0) + 1;
+      $hariKering[$d]['minta'] = ($hariKering[$d]['minta'] ?? 0) + $r['demand'];
+      $hariKering[$d]['nyata'] = ($hariKering[$d]['nyata'] ?? 0) + $r['goals_2h'];
+      $s = settleRinci($r['ft'], $r['line'], (float)$r['under'], 'under');
+      if ($s !== null) {
+          $hariKering[$d]['pl'] = ($hariKering[$d]['pl'] ?? 0) + $s['pl'];
+          $hariKering[$d]['nb'] = ($hariKering[$d]['nb'] ?? 0) + 1;
+      }
+  }
+  $jmlKering = 0;
+  $jmlHari = 0;
+  $roiKering = [];
+  $roiBiasa = [];
+  foreach ($hariKering as $d => $v) {
+      if ($v['n'] < 5) {
+          continue;
+      }
+      $jmlHari++;
+      $sel = $v['nyata'] / $v['n'] - $v['minta'] / $v['n'];
+      $roi = !empty($v['nb']) ? 100 * $v['pl'] / $v['nb'] : 0;
+      if ($sel <= HARI_KERING_AMBANG) {
+          $jmlKering++;
+          $roiKering[] = $roi;
+      } else {
+          $roiBiasa[] = $roi;
+      }
+      $hariKering[$d]['sel'] = $sel;
+      $hariKering[$d]['roi'] = $roi;
+      $hariKering[$d]['kering'] = $sel <= HARI_KERING_AMBANG;
+  }
+  $laju = $jmlHari > 0 ? $jmlKering / $jmlHari : null;
+  $rKering = $roiKering ? array_sum($roiKering) / count($roiKering) : null;
+  $rBiasa = $roiBiasa ? array_sum($roiBiasa) / count($roiBiasa) : null;
+  // Laju impas: berapa sering hari kering harus datang supaya rata-ratanya nol.
+  $lajuImpas = ($rKering !== null && $rBiasa !== null && $rKering > $rBiasa)
+      ? -$rBiasa / ($rKering - $rBiasa) : null;
+  ?>
+  <?php if ($jmlHari > 1): ?>
+  <section class="section">
+    <h2>Penghitung hari kering gol — V-Soccer HT 3–4</h2>
+    <p class="hint">
+      Aturan "HT 3–4 → Under" tidak untung sedikit-sedikit tiap hari. Ia rugi tipis
+      berhari-hari, lalu dibayar besar pada hari ketika gol babak kedua jauh di bawah
+      tuntutan market. Karena itu yang menentukan untung-rugi jangka panjangnya bukan
+      ROI rata-rata, melainkan <b>seberapa sering hari seperti itu datang</b>.
+      Sebuah hari dihitung kering kalau selisihnya ≤ <?= number_format(HARI_KERING_AMBANG, 2, ',', '.') ?> gol
+      (potongan bandar sudah tertutup pada sekitar −0,10, jadi ambang ini menandai
+      salah harga yang jelas, bukan riak biasa).
+    </p>
+    <div class="tablebox"><table>
+      <thead><tr>
+        <th>Hari</th><th class="num">n</th><th class="num">Market minta</th>
+        <th class="num">Kenyataan</th><th class="num">Selisih</th><th class="num">ROI Under</th><th>Hari kering?</th>
+      </tr></thead>
+      <tbody>
+      <?php foreach ($hariKering as $d => $v):
+          if (!isset($v['sel'])) {
+              continue;
+          } ?>
+        <tr>
+          <td><?= e($d) ?></td>
+          <td class="num"><?= $v['n'] ?></td>
+          <td class="num"><?= number_format($v['minta'] / $v['n'], 2, ',', '.') ?></td>
+          <td class="num"><?= number_format($v['nyata'] / $v['n'], 2, ',', '.') ?></td>
+          <td class="num <?= $v['kering'] ? 'pos' : '' ?>">
+            <?= ($v['sel'] >= 0 ? '+' : '−') . number_format(abs($v['sel']), 2, ',', '.') ?></td>
+          <td class="num <?= $v['roi'] >= 0 ? 'pos' : 'neg' ?>"><?= signed($v['roi']) ?></td>
+          <td><?= $v['kering']
+              ? '<span class="tag yes">KERING</span>'
+              : '<span class="muted">biasa</span>' ?></td>
+        </tr>
+      <?php endforeach; ?>
+      </tbody>
+    </table></div>
+    <p class="hint" style="margin-top:10px">
+      <b>Laju sejauh ini: <?= $jmlKering ?> hari kering dari <?= $jmlHari ?> hari</b>
+      (<?= $laju !== null ? pct($laju * 100, 0) : '–' ?>).
+      <?php if ($rKering !== null && $rBiasa !== null): ?>
+        Hari kering rata-rata <?= signed($rKering) ?>, hari biasa <?= signed($rBiasa) ?>.
+        <?php if ($lajuImpas !== null): ?>
+          <br><b>Laju impas: <?= pct($lajuImpas * 100, 1) ?></b> — kira-kira 1 hari kering
+          dari setiap <?= number_format(1 / $lajuImpas, 0, ',', '.') ?> hari.
+          Selama laju sebenarnya di atas itu, aturannya menguntungkan dalam jangka panjang;
+          di bawahnya tidak.
+        <?php endif; ?>
+      <?php endif; ?>
+      <br><br>
+      <b>Angka ini butuh berminggu-minggu, bukan berhari-hari.</b> Dengan <?= $jmlHari ?> hari,
+      laju yang terukur masih sangat kasar — beda antara "1 dari 4" dan "1 dari 30" belum bisa
+      dibedakan, padahal keduanya berujung pada kesimpulan yang berlawanan.
+    </p>
+  </section>
+  <?php endif; ?>
+
+  <?php
   // Per liga. Tempo gol antar liga benar-benar berbeda (4,9 sampai 7,7 gol),
   // tapi bandar sudah menyesuaikan line-nya, jadi yang tersisa cuma selisih
   // kecil yang sejauh ini tidak terbedakan dari derau. Ditampilkan supaya bisa

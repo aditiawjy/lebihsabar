@@ -1,0 +1,178 @@
+{
+  "start": "2026-10-01",
+  "end": "2026-10-27",
+  "timezone": "WIB (UTC+7)",
+  "days": [
+    {
+      "date": "2026-10-01",
+      "matches": 0,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-02",
+      "matches": 0,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-03",
+      "matches": 0,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-04",
+      "matches": 0,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-05",
+      "matches": 0,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-06",
+      "matches": 0,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-07",
+      "matches": 0,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-08",
+      "matches": 0,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-09",
+      "matches": 0,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-10",
+      "matches": 0,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-11",
+      "matches": 0,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-12",
+      "matches": 0,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-13",
+      "matches": 694,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-14",
+      "matches": 1081,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-15",
+      "matches": 1080,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-16",
+      "matches": 1077,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-17",
+      "matches": 1077,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-18",
+      "matches": 1076,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-19",
+      "matches": 1075,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-20",
+      "matches": 1077,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-21",
+      "matches": 1072,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-22",
+      "matches": 1068,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-23",
+      "matches": 1077,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-24",
+      "matches": 1079,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-25",
+      "matches": 1078,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-26",
+      "matches": 1037,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-27",
+      "matches": 371,
+      "missing_ht": 3
+    }
+  ],
+  "inserted": 14648,
+  "updated": 0,
+  "unchanged": 371,
+  "invalid": 0,
+  "saved_batches": 4,
+  "unique_completed": 15019,
+  "leagues": {
+    "V-Soccer Italy Serie A - 12 mins [V]": 1254,
+    "V-Soccer Women’s Nations League - 12 mins [V]": 1249,
+    "V-Soccer France Ligue 1 - 12 mins [V]": 1255,
+    "V-Soccer Germany Bundesliga - 12 mins [V]": 1252,
+    "V-Soccer Copa Libertadores - 12 mins [V]": 1254,
+    "V-Soccer China Super League - 12 mins [V]": 1255,
+    "V-Soccer England Premier League - 12 mins [V]": 1251,
+    "V-Soccer Champions League - 12 mins [V]": 1251,
+    "V-Soccer International Friendly - 12 mins [V]": 1254,
+    "V-Soccer Korea K-League 1 - 12 mins [V]": 1238,
+    "V-Soccer Spain La Liga - 12 mins [V]": 1254,
+    "V-Soccer Argentina Liga Profesional - 12 mins [V]": 1252
+  },
+  "failed_dates": [],
+  "empty_dates": [
+    "2026-10-01",
+    "2026-10-02",
+    "2026-10-03",
+    "2026-10-04",
+    "2026-10-05",
+    "2026-10-06",
+    "2026-10-07",
+    "2026-10-08",
+    "2026-10-09",
+    "2026-10-10",
+    "2026-10-11",
+    "2026-10-12"
+  ],
+  "complete": false
+}

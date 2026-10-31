@@ -1,0 +1,176 @@
+{
+  "end": "2026-10-18",
+  "split": "2026-10-12",
+  "rows": 4824,
+  "note": "One/two-filter candidates (top five by training only; test not used in ranking) selected on older data only. Recent data has been used in earlier research; not untouched prospective validation. Prior fixtures require 30-minute gap. No production rules changed.",
+  "results": [
+    {
+      "code": "L16-55",
+      "baseline": {
+        "win": 67,
+        "fail": 10,
+        "total": 77,
+        "pct": 87.01
+      },
+      "train": {
+        "win": 56,
+        "fail": 8,
+        "total": 64,
+        "pct": 87.5
+      },
+      "test": {
+        "win": 11,
+        "fail": 2,
+        "total": 13,
+        "pct": 84.62
+      },
+      "trials": 1176,
+      "candidate": {
+        "conditions": [
+          "Away previous 2H ≥1",
+          "Away previous 2H ≤2"
+        ],
+        "train": {
+          "win": 34,
+          "fail": 2,
+          "total": 36,
+          "pct": 94.44
+        },
+        "test": {
+          "win": 7,
+          "fail": 2,
+          "total": 9,
+          "pct": 77.78
+        },
+        "overall": {
+          "win": 41,
+          "fail": 4,
+          "total": 45,
+          "pct": 91.11
+        }
+      },
+      "finalists": [
+        {
+          "conditions": [
+            "Away previous 2H ≥1",
+            "Away previous 2H ≤2"
+          ],
+          "train": {
+            "win": 34,
+            "fail": 2,
+            "total": 36,
+            "pct": 94.44
+          },
+          "test": {
+            "win": 7,
+            "fail": 2,
+            "total": 9,
+            "pct": 77.78
+          },
+          "overall": {
+            "win": 41,
+            "fail": 4,
+            "total": 45,
+            "pct": 91.11
+          }
+        },
+        {
+          "conditions": [
+            "Away previous FT ≥2",
+            "Away previous FT ≤4"
+          ],
+          "train": {
+            "win": 30,
+            "fail": 2,
+            "total": 32,
+            "pct": 93.75
+          },
+          "test": {
+            "win": 7,
+            "fail": 2,
+            "total": 9,
+            "pct": 77.78
+          },
+          "overall": {
+            "win": 37,
+            "fail": 4,
+            "total": 41,
+            "pct": 90.24
+          }
+        },
+        {
+          "conditions": [
+            "Home previous FT ≥2",
+            "Away previous HT ≤1"
+          ],
+          "train": {
+            "win": 29,
+            "fail": 2,
+            "total": 31,
+            "pct": 93.55
+          },
+          "test": {
+            "win": 5,
+            "fail": 0,
+            "total": 5,
+            "pct": 100
+          },
+          "overall": {
+            "win": 34,
+            "fail": 2,
+            "total": 36,
+            "pct": 94.44
+          }
+        },
+        {
+          "conditions": [
+            "Home previous FT ≤3",
+            "Away previous 2H ≤4"
+          ],
+          "train": {
+            "win": 28,
+            "fail": 2,
+            "total": 30,
+            "pct": 93.33
+          },
+          "test": {
+            "win": 8,
+            "fail": 1,
+            "total": 9,
+            "pct": 88.89
+          },
+          "overall": {
+            "win": 36,
+            "fail": 3,
+            "total": 39,
+            "pct": 92.31
+          }
+        },
+        {
+          "conditions": [
+            "Home previous HT ≤1",
+            "Away previous FT ≤4"
+          ],
+          "train": {
+            "win": 27,
+            "fail": 2,
+            "total": 29,
+            "pct": 93.1
+          },
+          "test": {
+            "win": 5,
+            "fail": 1,
+            "total": 6,
+            "pct": 83.33
+          },
+          "overall": {
+            "win": 32,
+            "fail": 3,
+            "total": 35,
+            "pct": 91.43
+          }
+        }
+      ]
+    }
+  ]
+}

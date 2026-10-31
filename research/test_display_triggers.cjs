@@ -1,0 +1,30 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');
+let source=fs.readFileSync(path.join(__dirname,'../patternsaba.js'),'utf8');
+source=source.slice(0,source.indexOf('  function renderPatternTable(lines)'))+
+  'globalThis.testTriggers={load(rows){patternCsvRecords=rows},index:records=>patternDisplayedTriggers(L16_ACTIVE_RULES,records),base:()=>patternMatchTriggers(L16_ACTIVE_RULES),stats:id=>csvRuleStats(L16_RULE_BY_NUMBER.get(id))};})();';
+const ctx={document:{createElement:()=>({}),getElementById:()=>null,head:{append(){}},body:{append(){}}},setTimeout:()=>0,clearTimeout(){}};
+vm.createContext(ctx);vm.runInContext(source,ctx);
+const league='SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play';
+const t=Date.parse('2026-10-18T12:00:00+08:00');
+const history={id:'history',league,t:t-30*60000,teams:['Italy','France'],fh:[1,0],ft:[2,1],complete:true};
+ctx.testTriggers.load([history]);
+const before=JSON.stringify(ctx.testTriggers.stats(1));
+const match={id:'api:16:live',league,t,teams:['Norway','France'],fh:null,ft:null,complete:false,
+  live:{fresh:true,signals:[{id:'L16-01',state:'active'},{id:'L16-05',state:'active'}]}};
+let index=ctx.testTriggers.index([history,match]);
+assert.equal(index.get(match.id).length,1,'Unknown/deleted rule must stay excluded');
+assert.equal(index.get(match.id)[0].rule.id,'L16-01');
+assert.equal(index.get(match.id)[0].liveState,'active');
+assert.equal(index.get(match.id)[0].result,null,'Live is not WIN/FAIL');
+assert(!ctx.testTriggers.base().has(match.id),'Live badge cannot mutate CSV trigger cache');
+assert.equal(JSON.stringify(ctx.testTriggers.stats(1)),before,'Displaying triggers cannot change historical statistics');
+index=ctx.testTriggers.index([history,{...match,live:{...match.live,fresh:false}}]);
+assert(!index.has(match.id),'Stale live signal must not be advertised');
+index=ctx.testTriggers.index([history,{...match,live:{fresh:true,signals:[{id:'L16-01',state:'achieved'}]}}]);
+assert.equal(index.get(match.id)[0].liveState,'achieved');assert.equal(index.get(match.id)[0].result,null,'Achieved live target is not settled WIN');
+index=ctx.testTriggers.index([history,{...match,live:null}]);assert(!index.has(match.id),'No invented signals on a scheduled fixture');
+const settled={id:'api:16:finished',league,t,teams:['Belgium','France'],fh:[1,1],ft:[2,1],complete:true};
+const records=[history,{...history,id:'belgium-history',teams:['Belgium','Italy']},settled];index=ctx.testTriggers.index(records);
+assert(index.get(settled.id).some(trigger=>trigger.rule.id==='L16-16'&&trigger.result==='BERHASIL'),'Completed API trigger must be displayed before CSV save');
+assert.strictEqual(ctx.testTriggers.index(records),index,'Reuse the evaluated display index until data changes');
+console.log('Display trigger badges: live mapping, deleted IDs, stale data, achieved-vs-WIN, completed API history, stats isolation and cache passed.');

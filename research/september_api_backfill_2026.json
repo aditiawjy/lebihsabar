@@ -1,0 +1,338 @@
+{
+  "start": "2026-09-01",
+  "end": "2026-09-30",
+  "days": [
+    {
+      "date": "2026-08-31",
+      "api_rows": 27,
+      "completed_in_month": 0,
+      "efootball_completed": 0,
+      "missing_ht_in_session": 0,
+      "returned_dates": []
+    },
+    {
+      "date": "2026-09-01",
+      "api_rows": 29,
+      "completed_in_month": 2,
+      "efootball_completed": 0,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-02"
+      ]
+    },
+    {
+      "date": "2026-09-02",
+      "api_rows": 55,
+      "completed_in_month": 0,
+      "efootball_completed": 0,
+      "missing_ht_in_session": 0,
+      "returned_dates": []
+    },
+    {
+      "date": "2026-09-03",
+      "api_rows": 32,
+      "completed_in_month": 0,
+      "efootball_completed": 0,
+      "missing_ht_in_session": 0,
+      "returned_dates": []
+    },
+    {
+      "date": "2026-09-04",
+      "api_rows": 38,
+      "completed_in_month": 0,
+      "efootball_completed": 0,
+      "missing_ht_in_session": 0,
+      "returned_dates": []
+    },
+    {
+      "date": "2026-09-05",
+      "api_rows": 137,
+      "completed_in_month": 0,
+      "efootball_completed": 0,
+      "missing_ht_in_session": 0,
+      "returned_dates": []
+    },
+    {
+      "date": "2026-09-06",
+      "api_rows": 115,
+      "completed_in_month": 0,
+      "efootball_completed": 0,
+      "missing_ht_in_session": 0,
+      "returned_dates": []
+    },
+    {
+      "date": "2026-09-07",
+      "api_rows": 39,
+      "completed_in_month": 0,
+      "efootball_completed": 0,
+      "missing_ht_in_session": 0,
+      "returned_dates": []
+    },
+    {
+      "date": "2026-09-08",
+      "api_rows": 74,
+      "completed_in_month": 1,
+      "efootball_completed": 0,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-08"
+      ]
+    },
+    {
+      "date": "2026-09-09",
+      "api_rows": 93,
+      "completed_in_month": 0,
+      "efootball_completed": 0,
+      "missing_ht_in_session": 0,
+      "returned_dates": []
+    },
+    {
+      "date": "2026-09-10",
+      "api_rows": 91,
+      "completed_in_month": 17,
+      "efootball_completed": 0,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-10",
+        "2026-09-11"
+      ]
+    },
+    {
+      "date": "2026-09-11",
+      "api_rows": 1290,
+      "completed_in_month": 882,
+      "efootball_completed": 272,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-11",
+        "2026-09-12"
+      ]
+    },
+    {
+      "date": "2026-09-12",
+      "api_rows": 1560,
+      "completed_in_month": 783,
+      "efootball_completed": 213,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-12",
+        "2026-09-13"
+      ]
+    },
+    {
+      "date": "2026-09-13",
+      "api_rows": 1429,
+      "completed_in_month": 729,
+      "efootball_completed": 186,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-13",
+        "2026-09-14"
+      ]
+    },
+    {
+      "date": "2026-09-14",
+      "api_rows": 1026,
+      "completed_in_month": 793,
+      "efootball_completed": 240,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-14",
+        "2026-09-15"
+      ]
+    },
+    {
+      "date": "2026-09-15",
+      "api_rows": 1174,
+      "completed_in_month": 880,
+      "efootball_completed": 269,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-15",
+        "2026-09-16"
+      ]
+    },
+    {
+      "date": "2026-09-16",
+      "api_rows": 1182,
+      "completed_in_month": 788,
+      "efootball_completed": 267,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-16",
+        "2026-09-17"
+      ]
+    },
+    {
+      "date": "2026-09-17",
+      "api_rows": 1210,
+      "completed_in_month": 937,
+      "efootball_completed": 331,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-17",
+        "2026-09-18"
+      ]
+    },
+    {
+      "date": "2026-09-18",
+      "api_rows": 1297,
+      "completed_in_month": 859,
+      "efootball_completed": 244,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-18",
+        "2026-09-19"
+      ]
+    },
+    {
+      "date": "2026-09-19",
+      "api_rows": 1529,
+      "completed_in_month": 804,
+      "efootball_completed": 204,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-19",
+        "2026-09-20"
+      ]
+    },
+    {
+      "date": "2026-09-20",
+      "api_rows": 1410,
+      "completed_in_month": 736,
+      "efootball_completed": 192,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-20",
+        "2026-09-21"
+      ]
+    },
+    {
+      "date": "2026-09-21",
+      "api_rows": 1139,
+      "completed_in_month": 941,
+      "efootball_completed": 306,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-21",
+        "2026-09-22"
+      ]
+    },
+    {
+      "date": "2026-09-22",
+      "api_rows": 1061,
+      "completed_in_month": 882,
+      "efootball_completed": 249,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-22",
+        "2026-09-23"
+      ]
+    },
+    {
+      "date": "2026-09-23",
+      "api_rows": 1093,
+      "completed_in_month": 859,
+      "efootball_completed": 244,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-23",
+        "2026-09-24"
+      ]
+    },
+    {
+      "date": "2026-09-24",
+      "api_rows": 1037,
+      "completed_in_month": 834,
+      "efootball_completed": 226,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-24",
+        "2026-09-25"
+      ]
+    },
+    {
+      "date": "2026-09-25",
+      "api_rows": 1140,
+      "completed_in_month": 817,
+      "efootball_completed": 245,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-25",
+        "2026-09-26"
+      ]
+    },
+    {
+      "date": "2026-09-26",
+      "api_rows": 1420,
+      "completed_in_month": 836,
+      "efootball_completed": 290,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-26",
+        "2026-09-27"
+      ]
+    },
+    {
+      "date": "2026-09-27",
+      "api_rows": 1323,
+      "completed_in_month": 813,
+      "efootball_completed": 263,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-27",
+        "2026-09-28"
+      ]
+    },
+    {
+      "date": "2026-09-28",
+      "api_rows": 1042,
+      "completed_in_month": 874,
+      "efootball_completed": 305,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-28",
+        "2026-09-29"
+      ]
+    },
+    {
+      "date": "2026-09-29",
+      "api_rows": 1159,
+      "completed_in_month": 935,
+      "efootball_completed": 328,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-29",
+        "2026-09-30"
+      ]
+    },
+    {
+      "date": "2026-09-30",
+      "api_rows": 1210,
+      "completed_in_month": 531,
+      "efootball_completed": 184,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-09-30"
+      ]
+    }
+  ],
+  "inserted": 15745,
+  "updated": 788,
+  "unchanged": 0,
+  "invalid": 0,
+  "unique_completed": 16533,
+  "leagues": {
+    "SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play": 5025,
+    "SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play": 3664,
+    "SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play": 2001,
+    "SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play": 319,
+    "SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play": 466,
+    "E-FOOTBALL F24 INTERNATIONAL FRIENDLY - 16 Mins Play": 1903,
+    "E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play": 2868,
+    "E-FOOTBALL F26 ELITE CLUB FRIENDLY - 16 Mins Play": 287
+  },
+  "csv_sha256_after": "2d2ccdcb2cde282851405afcbf99754e4fa118323045ae16b86a513f93118541",
+  "failed_days": [],
+  "complete": true
+}

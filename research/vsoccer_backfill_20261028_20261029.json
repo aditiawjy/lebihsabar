@@ -1,0 +1,40 @@
+{
+  "start": "2026-10-28",
+  "end": "2026-10-29",
+  "timezone": "WIB (UTC+7)",
+  "days": [
+    {
+      "date": "2026-10-28",
+      "matches": 1080,
+      "missing_ht": 0
+    },
+    {
+      "date": "2026-10-29",
+      "matches": 347,
+      "missing_ht": 5
+    }
+  ],
+  "inserted": 767,
+  "updated": 11,
+  "unchanged": 649,
+  "invalid": 0,
+  "saved_batches": 1,
+  "unique_completed": 1427,
+  "leagues": {
+    "V-Soccer International Friendly - 12 mins [V]": 119,
+    "V-Soccer Spain La Liga - 12 mins [V]": 119,
+    "V-Soccer Argentina Liga Profesional - 12 mins [V]": 119,
+    "V-Soccer Italy Serie A - 12 mins [V]": 119,
+    "V-Soccer Women’s Nations League - 12 mins [V]": 119,
+    "V-Soccer France Ligue 1 - 12 mins [V]": 119,
+    "V-Soccer Germany Bundesliga - 12 mins [V]": 119,
+    "V-Soccer Korea K-League 1 - 12 mins [V]": 119,
+    "V-Soccer Copa Libertadores - 12 mins [V]": 119,
+    "V-Soccer China Super League - 12 mins [V]": 118,
+    "V-Soccer England Premier League - 12 mins [V]": 119,
+    "V-Soccer Champions League - 12 mins [V]": 119
+  },
+  "failed_dates": [],
+  "empty_dates": [],
+  "complete": true
+}

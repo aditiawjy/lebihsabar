@@ -1,0 +1,12 @@
+{
+  "zero": {"label":"FT 0–0","period":"FT","comparison":"under","goals":0},
+  "under15": {"label":"FT Under 1.5","period":"FT","comparison":"under","goals":1},
+  "under25": {"label":"FT Under 2.5","period":"FT","comparison":"under","goals":2},
+  "under35": {"label":"FT Under 3.5","period":"FT","comparison":"under","goals":3},
+  "over15": {"label":"FT Over 1.5","period":"FT","comparison":"over","goals":2},
+  "over25": {"label":"FT Over 2.5","period":"FT","comparison":"over","goals":3},
+  "over35": {"label":"FT Over 3.5","period":"FT","comparison":"over","goals":4},
+  "htzero": {"label":"HT 0–0","period":"HT","comparison":"under","goals":0},
+  "htunder15": {"label":"HT Under 1.5","period":"HT","comparison":"under","goals":1},
+  "htover15": {"label":"HT Over 1.5","period":"HT","comparison":"over","goals":2}
+}

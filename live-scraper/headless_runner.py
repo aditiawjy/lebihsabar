@@ -9,7 +9,7 @@ ke api_server.py (port 5000), Telegram, dan endpoint logging PHP seperti biasa.
 
 Pakai:
     python headless_runner.py
-    BPVM_URL=https://g943gp.bpvmr7u6.com/live python headless_runner.py   (override URL)
+    BPVM_URL=https://p1b3gp.bpvxncqr.com/en-US/live/997 python headless_runner.py   (override URL)
 
 Catatan:
 - Extension Manifest V3 hanya bisa di-load lewat persistent context + mode "--headless=new".
@@ -57,8 +57,8 @@ _local_browsers = BASE_DIR / ".playwright"
 if any(_local_browsers.glob("chromium-*")) and not os.environ.get("PLAYWRIGHT_BROWSERS_PATH"):
     os.environ["PLAYWRIGHT_BROWSERS_PATH"] = str(_local_browsers)
 
-TARGET_HOST = "g943gp.bpvmr7u6.com"               # selaras constants.js
-TARGET_URL = os.environ.get("BPVM_URL", f"https://{TARGET_HOST}/")
+TARGET_HOST = "p1b3gp.bpvxncqr.com"               # selaras constants.js
+TARGET_URL = os.environ.get("BPVM_URL", f"https://{TARGET_HOST}/en-US/live/997")
 
 # Reload halaman target tiap 30 menit -> selaras TARGET_TAB_RELOAD_INTERVAL_MS.
 RELOAD_INTERVAL_SEC = int(os.environ.get("BPVM_RELOAD_SEC", str(30 * 60)))

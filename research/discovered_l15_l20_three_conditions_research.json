@@ -1,0 +1,59 @@
+{
+  "split": "2026-10-01",
+  "test_end_exclusive": "2026-10-19",
+  "minimum_train": 30,
+  "minimum_test": 8,
+  "min_train_pct": 90,
+  "min_test_pct": 90,
+  "csv_sha256": "bfa4303c82cd924a9cfcaf59be810541f99c962b67fc2a2f2a61189aaaaae278",
+  "warning": "Exploratory multiple testing; shortlist uses recent test results, so not independent holdout. All history features require a 30-minute to 3-hour gap. Current HT only allowed for 2H markets. No production changes.",
+  "leagues": {
+    "15": {
+      "rows": 65167,
+      "trials": 463602,
+      "eligible_finalists": 1,
+      "shortlist": [
+        {
+          "team": "Manchester United",
+          "venue": "any",
+          "market": "FT O1.5",
+          "conditions": [
+            "away prev HT <= 1",
+            "away prev 2H >= 3",
+            "away prev HT >= 1"
+          ],
+          "train": {
+            "win": 147,
+            "fail": 14,
+            "total": 161,
+            "pct": 91.3
+          },
+          "test": {
+            "win": 9,
+            "fail": 1,
+            "total": 10,
+            "pct": 90.0
+          },
+          "overall": {
+            "win": 156,
+            "fail": 15,
+            "total": 171,
+            "pct": 91.23
+          },
+          "baseline": {
+            "win": 3186,
+            "fail": 665,
+            "total": 3851,
+            "pct": 82.73
+          }
+        }
+      ]
+    },
+    "20": {
+      "rows": 49131,
+      "trials": 959298,
+      "eligible_finalists": 0,
+      "shortlist": []
+    }
+  }
+}

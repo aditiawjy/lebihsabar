@@ -1,0 +1,218 @@
+{
+  "split": "2026-10-12",
+  "test_end_exclusive": "2026-10-19",
+  "retention_min": 0.6,
+  "baseline": {
+    "win": 3305,
+    "fail": 581,
+    "total": 3886,
+    "pct": 85.05
+  },
+  "train": {
+    "win": 3217,
+    "fail": 561,
+    "total": 3778,
+    "pct": 85.15
+  },
+  "test": {
+    "win": 84,
+    "fail": 18,
+    "total": 102,
+    "pct": 82.35
+  },
+  "note": "Filters ranked by older training data only. Earlier research reused recent data. Historical source times assumed consistent within league. No production changes.",
+  "candidates": [
+    {
+      "conditions": [
+        "Lawan previous total HT <= 3",
+        "Lawan previous total 2H >= 1"
+      ],
+      "train": {
+        "win": 2019,
+        "fail": 314,
+        "total": 2333,
+        "pct": 86.54
+      },
+      "test": {
+        "win": 56,
+        "fail": 14,
+        "total": 70,
+        "pct": 80.0
+      },
+      "overall": {
+        "win": 2076,
+        "fail": 328,
+        "total": 2404,
+        "pct": 86.36
+      }
+    },
+    {
+      "conditions": [
+        "Liverpool previous total HT >= 0",
+        "Lawan previous total 2H >= 1"
+      ],
+      "train": {
+        "win": 1974,
+        "fail": 307,
+        "total": 2281,
+        "pct": 86.54
+      },
+      "test": {
+        "win": 51,
+        "fail": 9,
+        "total": 60,
+        "pct": 85.0
+      },
+      "overall": {
+        "win": 2026,
+        "fail": 316,
+        "total": 2342,
+        "pct": 86.51
+      }
+    },
+    {
+      "conditions": [
+        "Liverpool previous total 2H <= 6",
+        "Lawan previous total 2H >= 1"
+      ],
+      "train": {
+        "win": 1973,
+        "fail": 307,
+        "total": 2280,
+        "pct": 86.54
+      },
+      "test": {
+        "win": 51,
+        "fail": 9,
+        "total": 60,
+        "pct": 85.0
+      },
+      "overall": {
+        "win": 2025,
+        "fail": 316,
+        "total": 2341,
+        "pct": 86.5
+      }
+    },
+    {
+      "conditions": [
+        "Liverpool previous gol pribadi FT <= 6",
+        "Lawan previous total 2H >= 1"
+      ],
+      "train": {
+        "win": 1973,
+        "fail": 307,
+        "total": 2280,
+        "pct": 86.54
+      },
+      "test": {
+        "win": 51,
+        "fail": 9,
+        "total": 60,
+        "pct": 85.0
+      },
+      "overall": {
+        "win": 2025,
+        "fail": 316,
+        "total": 2341,
+        "pct": 86.5
+      }
+    },
+    {
+      "conditions": [
+        "Liverpool previous total FT <= 8",
+        "Lawan previous total 2H >= 1"
+      ],
+      "train": {
+        "win": 1966,
+        "fail": 306,
+        "total": 2272,
+        "pct": 86.53
+      },
+      "test": {
+        "win": 51,
+        "fail": 9,
+        "total": 60,
+        "pct": 85.0
+      },
+      "overall": {
+        "win": 2018,
+        "fail": 315,
+        "total": 2333,
+        "pct": 86.5
+      }
+    },
+    {
+      "conditions": [
+        "Liverpool previous total HT <= 5",
+        "Lawan previous total 2H >= 1"
+      ],
+      "train": {
+        "win": 1965,
+        "fail": 306,
+        "total": 2271,
+        "pct": 86.53
+      },
+      "test": {
+        "win": 50,
+        "fail": 9,
+        "total": 59,
+        "pct": 84.75
+      },
+      "overall": {
+        "win": 2016,
+        "fail": 315,
+        "total": 2331,
+        "pct": 86.49
+      }
+    },
+    {
+      "conditions": [
+        "Liverpool previous total 2H <= 5",
+        "Lawan previous total 2H >= 1"
+      ],
+      "train": {
+        "win": 1965,
+        "fail": 306,
+        "total": 2271,
+        "pct": 86.53
+      },
+      "test": {
+        "win": 51,
+        "fail": 9,
+        "total": 60,
+        "pct": 85.0
+      },
+      "overall": {
+        "win": 2017,
+        "fail": 315,
+        "total": 2332,
+        "pct": 86.49
+      }
+    },
+    {
+      "conditions": [
+        "Liverpool previous gol pribadi FT <= 5",
+        "Lawan previous total 2H >= 1"
+      ],
+      "train": {
+        "win": 1965,
+        "fail": 306,
+        "total": 2271,
+        "pct": 86.53
+      },
+      "test": {
+        "win": 50,
+        "fail": 9,
+        "total": 59,
+        "pct": 84.75
+      },
+      "overall": {
+        "win": 2016,
+        "fail": 315,
+        "total": 2331,
+        "pct": 86.49
+      }
+    }
+  ]
+}

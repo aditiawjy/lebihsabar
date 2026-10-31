@@ -1,0 +1,39 @@
+{
+  "start": "2026-10-27",
+  "end": "2026-10-28",
+  "days": [
+    {
+      "date": "2026-10-26",
+      "api_rows": 1029,
+      "completed_in_month": 314,
+      "efootball_completed": 90,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-10-27"
+      ]
+    },
+    {
+      "date": "2026-10-27",
+      "api_rows": 1167,
+      "completed_in_month": 696,
+      "efootball_completed": 207,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-10-27",
+        "2026-10-28"
+      ]
+    },
+    {
+      "date": "2026-10-28",
+      "api_rows": 347,
+      "completed_in_month": 0,
+      "efootball_completed": 0,
+      "missing_ht_in_session": 0,
+      "returned_dates": []
+    }
+  ],
+  "inserted": 0,
+  "updated": 0,
+  "unchanged": 0,
+  "invalid": 0
+}

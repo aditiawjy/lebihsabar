@@ -48,7 +48,7 @@ def api_telegram_status():
 # --- Kelola proses headless scraper (start/stop dari dashboard) -----------
 BASE_DIR = Path(__file__).resolve().parent
 RUNNER_SCRIPT = BASE_DIR / "headless_runner.py"
-DEFAULT_URL = os.environ.get("BPVM_URL", "https://g943gp.bpvmr7u6.com/")
+DEFAULT_URL = os.environ.get("BPVM_URL", "https://p1b3gp.bpvxncqr.com/en-US/live/997")
 AUTO_START_SCRAPER = os.environ.get("AUTO_START_SCRAPER", "1") != "0"
 
 _scraper = {"proc": None, "url": DEFAULT_URL, "started_at": None}

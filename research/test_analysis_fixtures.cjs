@@ -1,0 +1,27 @@
+const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert');
+let source=fs.readFileSync(path.join(__dirname,'../patternsaba.js'),'utf8');
+source=source.slice(0,source.indexOf('  function renderPatternTable(lines)'))+
+  'globalThis.fixtureTest={load(rows){patternCsvRecords=rows},rows:patternDisplayRecords,csv:()=>patternCsvRecords,day:patternRecordDay};})();';
+const ctx={document:{createElement:()=>({}),getElementById:()=>null,head:{append(){}},body:{append(){}}},setTimeout:()=>0,clearTimeout(){}};
+vm.createContext(ctx);vm.runInContext(source,ctx);ctx.window={};
+const league='SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play';
+const history={id:'csv1',league,t:Date.parse('2026-10-17T12:00:00+08:00'),teams:['France (V)','Germany (V)'],fh:[1,0],ft:[2,0],complete:true};
+ctx.fixtureTest.load([history]);
+const live={time:'2026-10-18T12:00:00+08:00',home:'Romania',away:'Germany',status:'Belum selesai',ht:null,ft:null,live:{status:"1H 5'",score:'1 - 0',ht:null,fresh:true}};
+ctx.window.SabarajaPatternDisplay={snapshots:[{league:'16',displayMatches:[live,{time:'2026-10-18T12:15:00+08:00',home:'Norway',away:'England',status:'Belum selesai',ht:null,ft:null}]}]};
+let rows=ctx.fixtureTest.rows(league,'16');
+assert.equal(rows.length,3);assert.equal(rows.filter(r=>ctx.fixtureTest.day(r)==='2026-10-18').length,2);
+assert.equal(rows.find(r=>r.live).displayScore,'1 - 0');assert.equal(rows.find(r=>r.live).ft,null);
+assert.equal(rows.find(r=>r.live).complete,false);assert.equal(rows.find(r=>r.live).fh,null);
+assert.equal(ctx.fixtureTest.csv().length,1,'Schedules must not change statistics/history');
+assert.equal(ctx.fixtureTest.csv()[0].ft[0],2);
+const settled={id:'settled',league,t:Date.parse(live.time),teams:['Romania (V)','Germany (V)'],fh:[1,0],ft:[2,1],complete:true};
+ctx.fixtureTest.load([history,settled]);rows=ctx.fixtureTest.rows(league,'16');
+assert.equal(rows.length,3,'API and CSV kickoff/team keys deduplicate');
+assert.equal(rows.find(r=>r.id==='settled').ft.join('-'),'2-1','Completed CSV is authoritative');
+assert(!rows.find(r=>r.id==='settled').live);
+ctx.window.SabarajaPatternDisplay={snapshots:[{league:'16',displayMatches:[{...live,time:null}]}]};
+rows=ctx.fixtureTest.rows(league,'16');assert.equal(rows.length,2,'Unknown kickoff cannot be assigned to a session');
+ctx.window.SabarajaPatternDisplay={snapshots:[{league:'16',displayMatches:[{...live,time:'2026-10-19T00:45:00+08:00'}]}]};
+rows=ctx.fixtureTest.rows(league,'16');assert.equal(ctx.fixtureTest.day(rows.find(r=>r.live)),'2026-10-18','After-midnight kickoff remains in previous session');
+console.log('Analysis fixtures: current live and schedule shown with yesterday-only CSV, stable deduplication, session date, CSV authority and statistics isolation passed.');

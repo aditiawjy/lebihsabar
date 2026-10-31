@@ -1,0 +1,933 @@
+﻿candidate,market,rule,time,teams,ht,h2,split,win
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-09-27 13:45:00,belgium vs poland,2,0,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-09-27 16:45:00,belgium vs romania,1,1,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-09-27 20:45:00,belgium vs usa,3,3,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-09-27 22:30:00,belgium vs romania,3,1,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-09-27 23:30:00,belgium vs spain,2,1,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-09-28 20:30:00,belgium vs sweden,1,3,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-09-28 22:45:00,belgium vs netherlands,2,1,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-09-29 14:00:00,belgium vs mexico,3,1,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-09-29 16:45:00,belgium vs poland,1,3,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-09-29 18:45:00,belgium vs sweden,2,2,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-09-30 17:15:00,belgium vs portugal,1,3,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-09-30 19:00:00,belgium vs ukraine,3,2,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-09-30 20:45:00,belgium vs spain,1,2,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-01 00:00:00,belgium vs usa,2,4,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-01 13:00:00,belgium vs scotland,1,1,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-01 19:00:00,belgium vs romania,1,0,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-02 15:00:00,belgium vs romania,2,0,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-02 17:30:00,belgium vs usa,1,1,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-02 23:45:00,belgium vs poland,3,2,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-03 13:15:00,belgium vs portugal,1,2,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-03 15:00:00,belgium vs spain,1,2,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-04 17:15:00,belgium vs poland,2,3,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-05 13:00:00,belgium vs mexico,4,2,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-05 16:00:00,belgium vs spain,1,5,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-05 17:15:00,belgium vs poland,2,2,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-05 22:00:00,belgium vs spain,3,4,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-05 23:00:00,belgium vs netherlands,2,2,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-05 23:45:00,belgium vs sweden,1,0,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-06 14:30:00,belgium vs portugal,0,2,latih,False
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-07 16:15:00,belgium vs sweden,3,1,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-07 17:45:00,belgium vs spain,1,2,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-07 18:45:00,belgium vs netherlands,3,1,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-07 23:00:00,belgium vs romania,1,4,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-08 17:00:00,belgium vs portugal,2,1,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-08 20:15:00,belgium vs usa,1,0,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-08 23:00:00,belgium vs mexico,0,3,latih,False
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-09 16:15:00,belgium vs portugal,5,1,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-09 22:45:00,belgium vs romania,2,1,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-10 13:15:00,belgium vs usa,1,3,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-10 22:00:00,belgium vs usa,1,2,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-11 13:15:00,belgium vs portugal,1,1,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-11 17:15:00,belgium vs usa,1,1,latih,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-12 13:30:00,belgium vs usa,2,2,uji,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-12 18:45:00,belgium vs romania,1,1,uji,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-13 00:15:00,belgium vs spain,2,2,uji,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-13 13:00:00,belgium vs portugal,1,2,uji,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-13 14:00:00,belgium vs spain,1,3,uji,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-13 16:00:00,belgium vs usa,0,4,uji,False
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-13 21:15:00,belgium vs mexico,2,2,uji,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-14 18:00:00,belgium vs sweden,1,0,uji,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-14 23:30:00,belgium vs spain,0,2,uji,False
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-15 14:15:00,belgium vs argentina,4,3,uji,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-15 16:15:00,belgium vs sweden,0,0,uji,False
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-15 23:00:00,belgium vs argentina,0,2,uji,False
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-16 15:45:00,belgium vs usa,1,1,uji,True
+1,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total HT ≥1,2026-10-16 17:45:00,belgium vs mexico,2,0,uji,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-27 13:45:00,belgium vs poland,2,0,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-27 16:45:00,belgium vs romania,1,1,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-27 20:45:00,belgium vs usa,3,3,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-27 22:30:00,belgium vs romania,3,1,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-27 23:30:00,belgium vs spain,2,1,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-28 20:30:00,belgium vs sweden,1,3,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-28 21:45:00,belgium vs argentina,2,2,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-28 22:45:00,belgium vs netherlands,2,1,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-29 14:00:00,belgium vs mexico,3,1,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-29 16:45:00,belgium vs poland,1,3,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-29 18:45:00,belgium vs sweden,2,2,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-30 17:15:00,belgium vs portugal,1,3,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-30 19:00:00,belgium vs ukraine,3,2,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-30 20:45:00,belgium vs spain,1,2,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-01 00:00:00,belgium vs usa,2,4,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-01 13:00:00,belgium vs scotland,1,1,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-01 19:00:00,belgium vs romania,1,0,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-02 15:00:00,belgium vs romania,2,0,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-02 17:30:00,belgium vs usa,1,1,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-02 23:45:00,belgium vs poland,3,2,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-03 13:15:00,belgium vs portugal,1,2,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-03 15:00:00,belgium vs spain,1,2,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-04 17:15:00,belgium vs poland,2,3,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-05 13:00:00,belgium vs mexico,4,2,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-05 16:00:00,belgium vs spain,1,5,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-05 22:00:00,belgium vs spain,3,4,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-05 23:00:00,belgium vs netherlands,2,2,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-05 23:45:00,belgium vs sweden,1,0,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-06 14:30:00,belgium vs portugal,0,2,latih,False
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-07 16:15:00,belgium vs sweden,3,1,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-07 17:45:00,belgium vs spain,1,2,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-07 18:45:00,belgium vs netherlands,3,1,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-08 17:00:00,belgium vs portugal,2,1,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-08 23:00:00,belgium vs mexico,0,3,latih,False
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-09 14:45:00,belgium vs sweden,2,2,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-09 22:45:00,belgium vs romania,2,1,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-10 13:15:00,belgium vs usa,1,3,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-10 22:00:00,belgium vs usa,1,2,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-11 13:15:00,belgium vs portugal,1,1,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-11 17:15:00,belgium vs usa,1,1,latih,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-12 13:30:00,belgium vs usa,2,2,uji,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-12 18:45:00,belgium vs romania,1,1,uji,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-13 13:00:00,belgium vs portugal,1,2,uji,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-13 14:00:00,belgium vs spain,1,3,uji,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-13 16:00:00,belgium vs usa,0,4,uji,False
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-13 21:15:00,belgium vs mexico,2,2,uji,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-14 17:15:00,belgium vs argentina,1,1,uji,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-14 18:00:00,belgium vs sweden,1,0,uji,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-14 23:30:00,belgium vs spain,0,2,uji,False
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-15 14:15:00,belgium vs argentina,4,3,uji,True
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-15 16:15:00,belgium vs sweden,0,0,uji,False
+2,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-16 17:45:00,belgium vs mexico,2,0,uji,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-09-27 13:45:00,belgium vs poland,2,0,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-09-27 16:45:00,belgium vs romania,1,1,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-09-27 20:45:00,belgium vs usa,3,3,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-09-27 22:30:00,belgium vs romania,3,1,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-09-28 20:30:00,belgium vs sweden,1,3,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-09-28 21:45:00,belgium vs argentina,2,2,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-09-28 22:45:00,belgium vs netherlands,2,1,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-09-29 14:00:00,belgium vs mexico,3,1,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-09-29 16:45:00,belgium vs poland,1,3,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-09-29 18:45:00,belgium vs sweden,2,2,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-09-30 17:15:00,belgium vs portugal,1,3,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-09-30 19:00:00,belgium vs ukraine,3,2,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-09-30 20:45:00,belgium vs spain,1,2,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-01 00:00:00,belgium vs usa,2,4,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-01 13:00:00,belgium vs scotland,1,1,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-01 19:00:00,belgium vs romania,1,0,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-02 15:00:00,belgium vs romania,2,0,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-02 17:30:00,belgium vs usa,1,1,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-02 23:45:00,belgium vs poland,3,2,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-03 15:00:00,belgium vs spain,1,2,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-04 17:15:00,belgium vs poland,2,3,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-05 16:00:00,belgium vs spain,1,5,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-05 22:00:00,belgium vs spain,3,4,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-05 23:00:00,belgium vs netherlands,2,2,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-06 14:30:00,belgium vs portugal,0,2,latih,False
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-07 16:15:00,belgium vs sweden,3,1,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-07 17:45:00,belgium vs spain,1,2,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-07 18:45:00,belgium vs netherlands,3,1,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-08 17:00:00,belgium vs portugal,2,1,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-08 23:00:00,belgium vs mexico,0,3,latih,False
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-09 14:45:00,belgium vs sweden,2,2,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-09 16:15:00,belgium vs portugal,5,1,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-09 22:45:00,belgium vs romania,2,1,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-10 13:15:00,belgium vs usa,1,3,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-10 22:00:00,belgium vs usa,1,2,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-11 13:15:00,belgium vs portugal,1,1,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-11 17:15:00,belgium vs usa,1,1,latih,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-12 13:30:00,belgium vs usa,2,2,uji,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-12 18:45:00,belgium vs romania,1,1,uji,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-13 00:15:00,belgium vs spain,2,2,uji,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-13 13:00:00,belgium vs portugal,1,2,uji,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-13 14:00:00,belgium vs spain,1,3,uji,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-13 16:00:00,belgium vs usa,0,4,uji,False
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-13 21:15:00,belgium vs mexico,2,2,uji,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-14 17:15:00,belgium vs argentina,1,1,uji,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-14 18:00:00,belgium vs sweden,1,0,uji,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-14 23:30:00,belgium vs spain,0,2,uji,False
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-15 14:15:00,belgium vs argentina,4,3,uji,True
+3,HT Over 0.5,belgium kandang + slot 30 menit sebelumnya total FT ≥4,2026-10-16 17:45:00,belgium vs mexico,2,0,uji,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-09-28 14:15:00,italy vs romania,0,0,latih,False
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-09-28 16:30:00,italy vs spain,3,3,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-09-28 19:45:00,italy vs sweden,2,2,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-09-29 21:30:00,italy vs scotland,3,0,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-09-30 00:00:00,italy vs spain,2,2,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-09-30 20:15:00,italy vs mexico,3,3,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-09-30 23:30:00,italy vs romania,3,1,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-01 16:45:00,italy vs czech republic,2,2,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-01 22:00:00,italy vs belgium,0,4,latih,False
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-02 16:45:00,italy vs mexico,0,3,latih,False
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-04 16:15:00,italy vs morocco,2,3,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-05 18:45:00,italy vs netherlands,4,2,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-06 23:00:00,italy vs netherlands,2,4,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-07 15:45:00,italy vs netherlands,2,3,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-07 21:15:00,italy vs ukraine,3,2,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-08 14:30:00,italy vs netherlands,2,0,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-09 14:00:00,italy vs ukraine,1,3,latih,False
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-09 16:15:00,italy vs czech republic,3,0,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-09 19:30:00,italy vs belgium,1,2,latih,False
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-09 20:15:00,italy vs scotland,1,1,latih,False
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-10 17:45:00,italy vs belgium,2,1,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-10 21:30:00,italy vs netherlands,2,2,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-11 14:45:00,italy vs ukraine,2,2,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-11 18:30:00,italy vs spain,2,3,latih,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-12 21:30:00,italy vs belgium,3,1,uji,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-13 15:15:00,italy vs mexico,4,2,uji,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-13 23:00:00,italy vs poland,2,0,uji,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-14 18:30:00,italy vs croatia,1,2,uji,False
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-15 13:45:00,italy vs netherlands,3,2,uji,True
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-16 20:30:00,italy vs scotland,0,2,uji,False
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-16 22:15:00,italy vs spain,0,3,uji,False
+4,HT Over 1.5,italy kandang + laga italy sebelumnya HT ≤1,2026-10-16 23:45:00,italy vs sweden,3,2,uji,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-27 13:30:00,norway vs finland,2,1,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-27 18:00:00,norway vs mexico,2,3,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-27 19:30:00,norway vs finland,3,1,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-27 23:45:00,norway vs france,3,2,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-28 14:00:00,norway vs czech republic,1,2,latih,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-28 20:15:00,norway vs finland,1,2,latih,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-28 22:45:00,norway vs england,1,1,latih,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-29 15:45:00,norway vs italy,2,4,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-29 16:45:00,norway vs ghana,3,1,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-29 22:15:00,norway vs england,1,0,latih,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-09-30 00:45:00,norway vs wales,2,2,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-01 13:45:00,norway vs morocco,3,0,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-01 17:15:00,norway vs england,2,4,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-01 20:45:00,norway vs mexico,3,3,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-02 15:15:00,norway vs italy,0,1,latih,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-02 16:15:00,norway vs argentina,2,1,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-02 17:00:00,norway vs france,1,2,latih,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-02 17:45:00,norway vs england,0,3,latih,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-02 22:30:00,norway vs wales,2,2,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-03 00:15:00,norway vs france,2,2,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-03 17:00:00,norway vs argentina,3,1,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-03 22:00:00,norway vs mexico,0,2,latih,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-04 12:30:00,norway vs france,2,2,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-04 13:15:00,norway vs netherlands,2,0,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-04 17:45:00,norway vs wales,1,2,latih,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-05 16:30:00,norway vs england,2,0,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-05 21:00:00,norway vs france,4,3,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-06 20:00:00,norway vs morocco,2,1,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-06 20:45:00,norway vs germany,2,0,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-06 23:30:00,norway vs ghana,2,1,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-07 13:30:00,norway vs england,1,3,latih,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-07 18:00:00,norway vs france,0,2,latih,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-08 14:00:00,norway vs france,1,2,latih,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-08 15:00:00,norway vs morocco,2,2,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-08 17:30:00,norway vs france,0,2,latih,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-08 22:30:00,norway vs argentina,2,2,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-09 15:45:00,norway vs mexico,3,0,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-09 16:30:00,norway vs croatia,2,1,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-09 23:15:00,norway vs france,5,2,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-10 15:00:00,norway vs mexico,3,0,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-10 19:15:00,norway vs argentina,2,2,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-10 21:00:00,norway vs croatia,3,0,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-11 15:30:00,norway vs finland,1,1,latih,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-11 19:00:00,norway vs finland,2,2,latih,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-11 23:30:00,norway vs italy,0,3,latih,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-12 12:30:00,norway vs mexico,1,2,uji,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-12 14:00:00,norway vs croatia,0,0,uji,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-12 14:45:00,norway vs france,2,4,uji,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-12 16:30:00,norway vs england,3,1,uji,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-12 18:15:00,norway vs wales,1,3,uji,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-12 20:45:00,norway vs finland,3,0,uji,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-13 14:30:00,norway vs netherlands,1,2,uji,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-13 21:45:00,norway vs wales,1,0,uji,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-14 00:45:00,norway vs finland,1,1,uji,False
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-14 14:15:00,norway vs netherlands,3,2,uji,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-14 15:45:00,norway vs england,2,2,uji,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-14 20:30:00,norway vs germany,3,2,uji,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-14 23:45:00,norway vs wales,4,1,uji,True
+5,HT Over 1.5,norway kandang + slot 30 menit sebelumnya total 2H ≥2,2026-10-15 17:15:00,norway vs czech republic,1,3,uji,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-09-27 19:15:00,italy vs poland,3,2,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-09-28 14:15:00,italy vs romania,0,0,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-09-28 16:30:00,italy vs spain,3,3,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-09-28 19:45:00,italy vs sweden,2,2,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-09-28 22:00:00,usa vs italy,2,3,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-09-28 23:30:00,poland vs italy,2,3,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-09-29 17:45:00,italy vs morocco,2,2,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-09-29 20:00:00,ghana vs italy,2,2,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-09-29 20:45:00,italy vs czech republic,1,0,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-09-29 21:30:00,italy vs scotland,3,0,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-09-30 00:00:00,italy vs spain,2,2,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-09-30 00:45:00,croatia vs italy,1,1,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-09-30 15:30:00,germany vs italy,3,5,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-09-30 20:15:00,italy vs mexico,3,3,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-09-30 23:30:00,italy vs romania,3,1,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-01 16:45:00,italy vs czech republic,2,2,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-01 18:30:00,usa vs italy,3,1,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-01 22:00:00,italy vs belgium,0,4,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-01 22:45:00,croatia vs italy,1,1,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-02 13:00:00,germany vs italy,1,4,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-02 15:15:00,norway vs italy,0,1,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-02 16:45:00,italy vs mexico,0,3,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-02 22:15:00,ghana vs italy,4,1,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-03 19:15:00,italy vs mexico,0,1,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-03 21:45:00,poland vs italy,2,0,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-03 23:45:00,czech republic vs italy,2,1,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-04 16:15:00,italy vs morocco,2,3,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-04 17:45:00,croatia vs italy,3,3,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-04 22:00:00,croatia vs italy,3,1,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-05 17:45:00,czech republic vs italy,1,0,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-05 18:45:00,italy vs netherlands,4,2,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-05 22:15:00,croatia vs italy,0,2,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-06 13:30:00,germany vs italy,3,1,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-06 21:45:00,scotland vs italy,1,1,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-06 23:00:00,italy vs netherlands,2,4,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-07 00:30:00,italy vs ukraine,1,0,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-07 14:30:00,germany vs italy,1,2,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-07 15:45:00,italy vs netherlands,2,3,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-07 18:15:00,italy vs morocco,2,4,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-07 20:00:00,italy vs romania,0,2,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-07 21:15:00,italy vs ukraine,3,2,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-07 23:45:00,spain vs italy,2,0,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-08 14:30:00,italy vs netherlands,2,0,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-08 21:30:00,usa vs italy,3,2,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-09 14:00:00,italy vs ukraine,1,3,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-09 16:15:00,italy vs czech republic,3,0,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-09 19:30:00,italy vs belgium,1,2,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-09 20:15:00,italy vs scotland,1,1,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-09 21:00:00,germany vs italy,2,1,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-09 23:30:00,italy vs romania,1,0,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-10 00:45:00,poland vs italy,1,1,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-10 14:15:00,sweden vs italy,3,3,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-10 17:45:00,italy vs belgium,2,1,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-10 19:00:00,italy vs poland,0,2,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-10 21:30:00,italy vs netherlands,2,2,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-11 14:45:00,italy vs ukraine,2,2,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-11 16:45:00,italy vs scotland,0,1,latih,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-11 18:30:00,italy vs spain,2,3,latih,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-12 16:00:00,germany vs italy,3,2,uji,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-12 21:30:00,italy vs belgium,3,1,uji,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-13 00:00:00,usa vs italy,1,3,uji,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-13 15:15:00,italy vs mexico,4,2,uji,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-13 21:30:00,usa vs italy,0,0,uji,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-13 23:00:00,italy vs poland,2,0,uji,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-14 00:15:00,ghana vs italy,1,3,uji,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-14 16:30:00,spain vs italy,2,2,uji,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-14 17:30:00,italy vs ukraine,0,0,uji,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-14 18:30:00,italy vs croatia,1,2,uji,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-15 13:45:00,italy vs netherlands,3,2,uji,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-15 22:15:00,italy vs sweden,2,1,uji,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-16 00:45:00,italy vs morocco,2,2,uji,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-16 14:30:00,italy vs mexico,3,1,uji,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-16 18:30:00,usa vs italy,2,2,uji,True
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-16 19:15:00,italy vs belgium,1,3,uji,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-16 20:30:00,italy vs scotland,0,2,uji,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-16 22:15:00,italy vs spain,0,3,uji,False
+6,HT Over 1.5,italy semua + laga italy sebelumnya HT ≤2,2026-10-16 23:45:00,italy vs sweden,3,2,uji,True
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-09-27 14:00:00,spain vs argentina,4,1,latih,True
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-09-27 16:00:00,england vs argentina,0,1,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-09-27 18:30:00,portugal vs argentina,1,2,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-09-28 20:00:00,england vs argentina,1,2,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-09-29 15:00:00,spain vs argentina,3,0,latih,True
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-09-29 16:15:00,sweden vs argentina,1,0,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-09-30 16:45:00,mexico vs argentina,1,2,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-01 14:00:00,portugal vs argentina,0,0,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-01 16:45:00,denmark vs argentina,1,0,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-03 00:00:00,croatia vs argentina,1,2,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-03 17:00:00,norway vs argentina,3,1,latih,True
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-04 20:30:00,sweden vs argentina,1,1,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-04 23:00:00,england vs argentina,4,2,latih,True
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-06 22:45:00,denmark vs argentina,2,0,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-06 23:45:00,morocco vs argentina,3,3,latih,True
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-07 18:00:00,portugal vs argentina,3,1,latih,True
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-07 19:15:00,czech republic vs argentina,1,2,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-07 21:00:00,morocco vs argentina,3,2,latih,True
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-08 17:30:00,croatia vs argentina,3,1,latih,True
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-08 20:15:00,ukraine vs argentina,2,1,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-09 13:15:00,croatia vs argentina,3,1,latih,True
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-09 15:30:00,denmark vs argentina,0,0,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-09 18:45:00,czech republic vs argentina,0,3,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-09 23:00:00,sweden vs argentina,1,2,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-10 19:15:00,norway vs argentina,2,2,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-10 23:15:00,croatia vs argentina,3,1,latih,True
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-11 00:00:00,czech republic vs argentina,1,2,latih,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-11 18:30:00,morocco vs argentina,3,1,latih,True
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-11 19:30:00,denmark vs argentina,5,0,latih,True
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-12 15:00:00,morocco vs argentina,3,3,uji,True
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-12 21:00:00,germany vs argentina,1,1,uji,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-12 22:00:00,spain vs argentina,1,4,uji,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-13 22:45:00,romania vs argentina,0,0,uji,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-14 00:30:00,england vs argentina,1,3,uji,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-15 00:15:00,ghana vs argentina,2,1,uji,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-15 16:45:00,scotland vs argentina,2,1,uji,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-15 18:45:00,sweden vs argentina,1,2,uji,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-15 23:00:00,belgium vs argentina,0,2,uji,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-16 16:30:00,spain vs argentina,1,1,uji,False
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-16 17:45:00,england vs argentina,3,3,uji,True
+7,HT Over 2.5,argentina tandang + laga argentina sebelumnya 2H ≤1,2026-10-16 21:30:00,england vs argentina,2,1,uji,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-09-27 14:00:00,spain vs argentina,4,1,latih,True
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-09-27 18:30:00,portugal vs argentina,1,2,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-09-28 00:00:00,portugal vs argentina,3,2,latih,True
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-09-28 20:00:00,england vs argentina,1,2,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-09-28 21:00:00,netherlands vs argentina,0,2,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-09-28 21:45:00,belgium vs argentina,2,2,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-09-29 15:00:00,spain vs argentina,3,0,latih,True
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-09-29 16:15:00,sweden vs argentina,1,0,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-09-30 16:45:00,mexico vs argentina,1,2,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-09-30 17:45:00,england vs argentina,1,2,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-01 14:00:00,portugal vs argentina,0,0,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-01 16:45:00,denmark vs argentina,1,0,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-02 21:15:00,sweden vs argentina,1,1,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-03 00:00:00,croatia vs argentina,1,2,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-03 17:00:00,norway vs argentina,3,1,latih,True
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-04 20:30:00,sweden vs argentina,1,1,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-04 23:00:00,england vs argentina,4,2,latih,True
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-05 22:15:00,morocco vs argentina,2,2,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-06 19:45:00,czech republic vs argentina,3,2,latih,True
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-06 22:45:00,denmark vs argentina,2,0,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-06 23:45:00,morocco vs argentina,3,3,latih,True
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-07 18:00:00,portugal vs argentina,3,1,latih,True
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-07 20:15:00,netherlands vs argentina,3,0,latih,True
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-07 21:00:00,morocco vs argentina,3,2,latih,True
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-08 17:30:00,croatia vs argentina,3,1,latih,True
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-08 22:30:00,norway vs argentina,2,2,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-09 13:15:00,croatia vs argentina,3,1,latih,True
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-09 18:45:00,czech republic vs argentina,0,3,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-09 19:45:00,ghana vs argentina,1,2,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-10 00:15:00,morocco vs argentina,2,4,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-10 17:15:00,poland vs argentina,2,1,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-10 19:15:00,norway vs argentina,2,2,latih,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-12 21:00:00,germany vs argentina,1,1,uji,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-12 22:00:00,spain vs argentina,1,4,uji,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-13 22:45:00,romania vs argentina,0,0,uji,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-14 00:30:00,england vs argentina,1,3,uji,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-14 22:15:00,czech republic vs argentina,0,0,uji,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-15 00:15:00,ghana vs argentina,2,1,uji,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-15 16:45:00,scotland vs argentina,2,1,uji,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-15 18:45:00,sweden vs argentina,1,2,uji,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-15 23:00:00,belgium vs argentina,0,2,uji,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-16 00:30:00,croatia vs argentina,2,0,uji,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-16 17:45:00,england vs argentina,3,3,uji,True
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-16 21:30:00,england vs argentina,2,1,uji,False
+8,HT Over 2.5,argentina tandang + laga argentina sebelumnya FT ≤3,2026-10-17 00:15:00,portugal vs argentina,0,1,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-09-27 13:15:00,usa vs mexico,3,0,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-09-27 18:00:00,norway vs mexico,2,3,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-09-27 20:45:00,finland vs mexico,0,1,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-09-27 22:00:00,usa vs mexico,2,2,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-09-28 13:45:00,poland vs mexico,0,0,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-09-28 16:15:00,usa vs mexico,0,0,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-09-28 18:00:00,scotland vs mexico,1,1,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-09-28 19:30:00,spain vs mexico,2,3,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-09-28 22:15:00,scotland vs mexico,0,1,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-09-28 23:30:00,romania vs mexico,2,2,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-09-29 00:15:00,ghana vs mexico,2,3,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-09-29 19:30:00,norway vs mexico,5,1,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-09-29 21:45:00,netherlands vs mexico,3,3,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-09-29 23:15:00,argentina vs mexico,1,1,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-09-30 20:15:00,italy vs mexico,3,3,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-09-30 21:30:00,germany vs mexico,0,0,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-01 00:15:00,poland vs mexico,0,3,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-01 13:45:00,spain vs mexico,1,1,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-01 20:45:00,norway vs mexico,3,3,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-01 22:15:00,usa vs mexico,2,0,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-02 13:30:00,romania vs mexico,1,2,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-02 16:45:00,italy vs mexico,0,3,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-02 19:45:00,hungary vs mexico,1,2,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-03 14:45:00,argentina vs mexico,1,1,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-03 16:30:00,poland vs mexico,0,1,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-03 17:45:00,wales vs mexico,1,1,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-03 18:30:00,netherlands vs mexico,1,2,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-03 19:15:00,italy vs mexico,0,1,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-03 22:00:00,norway vs mexico,0,2,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-03 22:45:00,usa vs mexico,3,2,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-03 23:30:00,argentina vs mexico,1,4,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-04 15:15:00,czech republic vs mexico,3,0,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-04 18:15:00,usa vs mexico,1,2,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-05 00:00:00,finland vs mexico,0,2,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-05 13:45:00,argentina vs mexico,3,0,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-06 14:15:00,netherlands vs mexico,1,1,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-07 15:30:00,hungary vs mexico,3,0,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-07 22:15:00,finland vs mexico,0,3,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-08 00:30:00,norway vs mexico,1,2,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-08 14:15:00,hungary vs mexico,3,0,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-08 23:00:00,belgium vs mexico,0,3,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-09 15:45:00,norway vs mexico,3,0,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-09 22:00:00,hungary vs mexico,2,0,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-10 15:00:00,norway vs mexico,3,0,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-10 18:45:00,morocco vs mexico,3,1,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-10 23:00:00,sweden vs mexico,3,2,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-10 23:45:00,spain vs mexico,0,2,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-11 14:45:00,wales vs mexico,1,3,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-11 17:45:00,argentina vs mexico,5,1,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-11 22:15:00,wales vs mexico,2,0,latih,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-11 23:45:00,argentina vs mexico,3,3,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-12 00:30:00,ghana vs mexico,3,3,latih,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-12 13:45:00,finland vs mexico,1,0,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-12 16:45:00,poland vs mexico,2,1,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-12 18:15:00,ghana vs mexico,2,3,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-12 19:45:00,scotland vs mexico,2,1,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-12 23:00:00,ghana vs mexico,3,1,uji,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-13 13:15:00,argentina vs mexico,0,2,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-13 15:15:00,italy vs mexico,4,2,uji,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-13 21:15:00,belgium vs mexico,2,2,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-13 22:00:00,poland vs mexico,0,4,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-13 23:45:00,morocco vs mexico,1,3,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-14 16:00:00,wales vs mexico,1,1,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-14 19:00:00,usa vs mexico,1,2,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-14 19:45:00,czech republic vs mexico,2,0,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-15 00:45:00,romania vs mexico,0,1,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-15 15:00:00,czech republic vs mexico,2,2,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-15 18:30:00,finland vs mexico,1,3,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-15 19:45:00,usa vs mexico,1,4,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-16 00:15:00,czech republic vs mexico,4,0,uji,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-16 14:30:00,italy vs mexico,3,1,uji,True
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-16 17:45:00,belgium vs mexico,2,0,uji,False
+9,HT Over 2.5,mexico tandang + laga mexico sebelumnya 2H ≥1,2026-10-16 22:00:00,hungary vs mexico,0,1,uji,False
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-27 14:30:00,germany vs ukraine,1,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-27 15:15:00,romania vs ukraine,2,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-27 18:45:00,ukraine vs croatia,1,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-28 00:30:00,denmark vs ukraine,3,3,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-28 12:45:00,portugal vs ukraine,1,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-28 15:30:00,mexico vs ukraine,1,5,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-28 17:30:00,argentina vs ukraine,1,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-28 20:00:00,germany vs ukraine,1,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-28 22:30:00,romania vs ukraine,2,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-29 12:15:00,germany vs ukraine,2,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-29 13:30:00,italy vs ukraine,3,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-29 17:00:00,germany vs ukraine,1,3,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-29 17:45:00,denmark vs ukraine,3,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-29 22:00:00,germany vs ukraine,2,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-30 00:15:00,hungary vs ukraine,1,4,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-30 12:15:00,mexico vs ukraine,2,3,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-30 13:45:00,france vs ukraine,2,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-30 19:00:00,belgium vs ukraine,3,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-30 20:00:00,ukraine vs argentina,1,3,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-30 20:45:00,portugal vs ukraine,1,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-09-30 23:45:00,argentina vs ukraine,1,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-01 12:45:00,italy vs ukraine,3,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-01 15:30:00,czech republic vs ukraine,5,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-01 17:45:00,denmark vs ukraine,1,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-01 23:15:00,france vs ukraine,3,3,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-02 13:15:00,finland vs ukraine,1,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-02 15:30:00,mexico vs ukraine,1,4,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-02 17:00:00,sweden vs ukraine,3,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-03 13:15:00,mexico vs ukraine,3,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-03 14:00:00,ukraine vs italy,4,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-03 17:15:00,czech republic vs ukraine,1,0,latih,False
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-03 19:30:00,hungary vs ukraine,1,4,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-04 17:00:00,netherlands vs ukraine,2,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-04 20:00:00,portugal vs ukraine,1,3,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-05 00:30:00,ukraine vs belgium,3,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-05 14:30:00,mexico vs ukraine,1,4,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-05 19:15:00,ukraine vs morocco,3,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-05 21:30:00,mexico vs ukraine,2,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-06 19:45:00,finland vs ukraine,1,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-07 12:15:00,ukraine vs argentina,1,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-07 13:45:00,germany vs ukraine,1,4,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-07 21:15:00,italy vs ukraine,3,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-08 00:00:00,morocco vs ukraine,1,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-08 13:00:00,ukraine vs belgium,1,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-08 17:00:00,hungary vs ukraine,1,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-08 20:15:00,ukraine vs argentina,2,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-08 22:00:00,romania vs ukraine,1,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-08 23:15:00,netherlands vs ukraine,1,3,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-09 14:00:00,italy vs ukraine,1,3,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-09 20:15:00,ukraine vs hungary,2,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-09 21:45:00,denmark vs ukraine,4,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-09 23:30:00,portugal vs ukraine,1,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-10 17:15:00,portugal vs ukraine,2,2,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-10 19:15:00,czech republic vs ukraine,1,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-10 20:00:00,ukraine vs france,1,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-10 23:30:00,germany vs ukraine,1,1,latih,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-12 16:00:00,ukraine vs finland,1,1,uji,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-12 17:45:00,denmark vs ukraine,2,2,uji,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-12 21:15:00,france vs ukraine,1,0,uji,False
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-12 23:30:00,morocco vs ukraine,1,0,uji,False
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-13 12:45:00,finland vs ukraine,1,0,uji,False
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-13 13:45:00,hungary vs ukraine,2,4,uji,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-13 15:45:00,morocco vs ukraine,1,1,uji,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-13 17:45:00,france vs ukraine,3,0,uji,False
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-13 20:15:00,finland vs ukraine,1,2,uji,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-13 22:15:00,ukraine vs hungary,4,1,uji,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-14 14:00:00,france vs ukraine,1,2,uji,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-14 15:30:00,romania vs ukraine,3,2,uji,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-15 00:15:00,ukraine vs italy,1,3,uji,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-15 14:45:00,ukraine vs morocco,1,2,uji,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-15 19:45:00,hungary vs ukraine,1,0,uji,False
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-16 00:15:00,sweden vs ukraine,1,0,uji,False
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-16 13:15:00,romania vs ukraine,1,4,uji,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-16 17:15:00,czech republic vs ukraine,1,3,uji,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-16 20:00:00,ukraine vs poland,3,1,uji,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-16 21:00:00,czech republic vs ukraine,1,1,uji,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-16 21:45:00,morocco vs ukraine,1,1,uji,True
+10,2H Over 0.5,ukraine semua + slot sebelumnya total FT ≥4 + HT tidak imbang,2026-10-16 22:30:00,portugal vs ukraine,2,0,uji,False
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-27 14:30:00,germany vs ukraine,1,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-27 15:15:00,romania vs ukraine,2,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-27 18:45:00,ukraine vs croatia,1,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-28 00:30:00,denmark vs ukraine,3,3,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-28 15:30:00,mexico vs ukraine,1,5,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-28 17:30:00,argentina vs ukraine,1,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-28 20:00:00,germany vs ukraine,1,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-28 22:30:00,romania vs ukraine,2,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-29 12:15:00,germany vs ukraine,2,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-29 13:30:00,italy vs ukraine,3,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-29 17:00:00,germany vs ukraine,1,3,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-29 17:45:00,denmark vs ukraine,3,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-29 22:00:00,germany vs ukraine,2,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-30 00:15:00,hungary vs ukraine,1,4,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-30 12:15:00,mexico vs ukraine,2,3,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-30 13:45:00,france vs ukraine,2,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-30 19:00:00,belgium vs ukraine,3,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-30 20:00:00,ukraine vs argentina,1,3,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-30 20:45:00,portugal vs ukraine,1,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-09-30 23:45:00,argentina vs ukraine,1,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-01 12:45:00,italy vs ukraine,3,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-01 15:30:00,czech republic vs ukraine,5,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-01 17:45:00,denmark vs ukraine,1,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-01 23:15:00,france vs ukraine,3,3,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-02 13:15:00,finland vs ukraine,1,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-02 15:30:00,mexico vs ukraine,1,4,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-02 17:00:00,sweden vs ukraine,3,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-03 13:15:00,mexico vs ukraine,3,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-03 14:00:00,ukraine vs italy,4,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-03 15:45:00,denmark vs ukraine,1,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-03 17:15:00,czech republic vs ukraine,1,0,latih,False
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-03 19:30:00,hungary vs ukraine,1,4,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-04 17:00:00,netherlands vs ukraine,2,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-04 20:00:00,portugal vs ukraine,1,3,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-05 00:30:00,ukraine vs belgium,3,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-05 14:30:00,mexico vs ukraine,1,4,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-05 19:15:00,ukraine vs morocco,3,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-05 21:30:00,mexico vs ukraine,2,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-06 19:45:00,finland vs ukraine,1,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-07 12:15:00,ukraine vs argentina,1,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-07 13:45:00,germany vs ukraine,1,4,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-07 21:15:00,italy vs ukraine,3,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-08 00:00:00,morocco vs ukraine,1,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-08 13:00:00,ukraine vs belgium,1,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-08 22:00:00,romania vs ukraine,1,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-08 23:15:00,netherlands vs ukraine,1,3,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-09 14:00:00,italy vs ukraine,1,3,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-09 20:15:00,ukraine vs hungary,2,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-09 23:30:00,portugal vs ukraine,1,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-10 17:15:00,portugal vs ukraine,2,2,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-10 19:15:00,czech republic vs ukraine,1,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-10 20:00:00,ukraine vs france,1,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-10 23:30:00,germany vs ukraine,1,1,latih,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-12 16:00:00,ukraine vs finland,1,1,uji,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-12 17:45:00,denmark vs ukraine,2,2,uji,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-12 21:15:00,france vs ukraine,1,0,uji,False
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-12 23:30:00,morocco vs ukraine,1,0,uji,False
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-13 12:45:00,finland vs ukraine,1,0,uji,False
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-13 13:45:00,hungary vs ukraine,2,4,uji,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-13 15:45:00,morocco vs ukraine,1,1,uji,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-13 17:45:00,france vs ukraine,3,0,uji,False
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-13 22:15:00,ukraine vs hungary,4,1,uji,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-14 14:00:00,france vs ukraine,1,2,uji,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-14 15:30:00,romania vs ukraine,3,2,uji,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-15 00:15:00,ukraine vs italy,1,3,uji,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-15 14:45:00,ukraine vs morocco,1,2,uji,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-15 19:45:00,hungary vs ukraine,1,0,uji,False
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-15 22:00:00,france vs ukraine,1,2,uji,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-16 00:15:00,sweden vs ukraine,1,0,uji,False
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-16 13:15:00,romania vs ukraine,1,4,uji,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-16 17:15:00,czech republic vs ukraine,1,3,uji,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-16 21:00:00,czech republic vs ukraine,1,1,uji,True
+11,2H Over 0.5,ukraine semua + slot sebelumnya total 2H ≥2 + HT tidak imbang,2026-10-16 22:30:00,portugal vs ukraine,2,0,uji,False
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-09-27 15:00:00,norway vs france,1,3,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-09-27 18:30:00,france vs morocco,5,3,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-09-28 14:15:00,france vs ukraine,0,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-09-28 15:45:00,france vs morocco,2,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-09-28 19:45:00,france vs morocco,1,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-09-28 23:45:00,france vs scotland,1,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-09-30 13:45:00,france vs ukraine,2,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-09-30 15:00:00,france vs morocco,3,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-09-30 17:45:00,france vs netherlands,1,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-09-30 20:00:00,france vs portugal,0,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-09-30 22:00:00,morocco vs france,2,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-09-30 23:30:00,france vs portugal,2,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-01 13:00:00,france vs netherlands,1,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-01 15:45:00,sweden vs france,1,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-01 21:00:00,france vs morocco,1,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-01 23:15:00,france vs ukraine,3,3,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-02 00:30:00,portugal vs france,0,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-02 14:45:00,france vs morocco,0,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-02 16:00:00,netherlands vs france,2,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-02 17:00:00,norway vs france,1,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-02 20:00:00,sweden vs france,3,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-03 14:15:00,france vs morocco,0,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-03 15:45:00,norway vs france,1,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-03 18:00:00,portugal vs france,1,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-04 12:30:00,norway vs france,2,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-04 18:00:00,ukraine vs france,2,0,latih,False
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-04 19:45:00,norway vs france,1,3,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-04 22:00:00,france vs portugal,0,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-05 15:30:00,sweden vs france,1,5,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-05 17:30:00,france vs portugal,0,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-05 19:00:00,sweden vs france,0,3,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-05 20:15:00,france vs morocco,2,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-06 13:00:00,france vs portugal,1,3,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-06 15:00:00,france vs ukraine,0,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-06 19:00:00,france vs morocco,2,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-06 20:00:00,sweden vs france,0,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-07 13:15:00,morocco vs france,3,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-07 18:00:00,norway vs france,0,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-08 12:30:00,netherlands vs france,1,3,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-08 14:00:00,norway vs france,1,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-08 22:15:00,sweden vs france,1,4,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-09 00:00:00,france vs portugal,1,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-09 18:30:00,france vs scotland,0,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-09 21:30:00,sweden vs france,3,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-09 23:15:00,norway vs france,5,2,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-10 00:30:00,france vs scotland,1,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-10 16:45:00,sweden vs france,0,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-10 20:00:00,ukraine vs france,1,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-10 23:45:00,sweden vs france,2,5,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-11 14:15:00,france vs morocco,2,3,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-11 19:30:00,scotland vs france,1,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-12 00:30:00,morocco vs france,0,1,latih,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-12 14:45:00,norway vs france,2,4,uji,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-12 16:15:00,sweden vs france,2,3,uji,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-12 20:30:00,scotland vs france,0,0,uji,False
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-12 21:15:00,france vs ukraine,1,0,uji,False
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-13 16:15:00,france vs scotland,0,1,uji,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-13 19:45:00,netherlands vs france,1,4,uji,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-14 00:15:00,sweden vs france,3,2,uji,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-14 15:15:00,scotland vs france,1,1,uji,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-14 21:15:00,sweden vs france,0,3,uji,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-15 12:30:00,france vs portugal,1,1,uji,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-15 19:00:00,netherlands vs france,2,3,uji,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-16 17:15:00,france vs portugal,1,2,uji,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-16 18:15:00,morocco vs france,0,0,uji,False
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-16 19:30:00,france vs netherlands,0,1,uji,True
+12,2H Over 0.5,france semua + slot sebelumnya total 2H ≥3,2026-10-17 00:00:00,france vs ukraine,2,0,uji,False
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-09-27 15:15:00,romania vs ukraine,2,2,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-09-27 18:45:00,ukraine vs croatia,1,2,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-09-28 15:30:00,mexico vs ukraine,1,5,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-09-28 20:00:00,germany vs ukraine,1,1,latih,False
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-09-29 17:00:00,germany vs ukraine,1,3,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-09-30 19:00:00,belgium vs ukraine,3,2,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-09-30 20:00:00,ukraine vs argentina,1,3,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-01 15:30:00,czech republic vs ukraine,5,2,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-02 13:15:00,finland vs ukraine,1,2,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-02 15:30:00,mexico vs ukraine,1,4,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-02 17:00:00,sweden vs ukraine,3,2,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-03 13:15:00,mexico vs ukraine,3,1,latih,False
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-03 19:30:00,hungary vs ukraine,1,4,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-04 17:00:00,netherlands vs ukraine,2,2,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-04 20:00:00,portugal vs ukraine,1,3,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-05 00:30:00,ukraine vs belgium,3,2,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-05 19:15:00,ukraine vs morocco,3,1,latih,False
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-07 13:45:00,germany vs ukraine,1,4,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-08 13:00:00,ukraine vs belgium,1,2,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-08 23:15:00,netherlands vs ukraine,1,3,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-09 14:00:00,italy vs ukraine,1,3,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-09 20:15:00,ukraine vs hungary,2,2,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-10 17:15:00,portugal vs ukraine,2,2,latih,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-10 23:30:00,germany vs ukraine,1,1,latih,False
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-12 16:00:00,ukraine vs finland,1,1,uji,False
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-13 12:45:00,finland vs ukraine,1,0,uji,False
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-13 15:45:00,morocco vs ukraine,1,1,uji,False
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-13 22:15:00,ukraine vs hungary,4,1,uji,False
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-15 14:45:00,ukraine vs morocco,1,2,uji,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-16 13:15:00,romania vs ukraine,1,4,uji,True
+13,2H Over 1.5,ukraine semua + slot sebelumnya total 2H ≥4 + HT tidak imbang,2026-10-16 21:00:00,czech republic vs ukraine,1,1,uji,False
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-09-27 23:45:00,norway vs france,3,2,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-09-28 21:15:00,sweden vs france,0,3,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-09-30 22:00:00,morocco vs france,2,2,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-01 14:30:00,scotland vs france,1,1,latih,False
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-01 15:45:00,sweden vs france,1,2,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-01 19:15:00,sweden vs france,0,2,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-02 16:00:00,netherlands vs france,2,2,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-02 18:45:00,morocco vs france,0,0,latih,False
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-02 20:00:00,sweden vs france,3,2,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-03 00:15:00,norway vs france,2,2,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-03 15:45:00,norway vs france,1,1,latih,False
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-03 18:00:00,portugal vs france,1,2,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-03 21:00:00,morocco vs france,2,3,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-04 19:45:00,norway vs france,1,3,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-04 23:30:00,sweden vs france,0,0,latih,False
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-05 15:30:00,sweden vs france,1,5,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-05 19:00:00,sweden vs france,0,3,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-06 00:45:00,ukraine vs france,0,2,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-06 21:45:00,norway vs france,0,3,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-07 18:00:00,norway vs france,0,2,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-07 19:00:00,sweden vs france,1,5,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-08 15:45:00,ukraine vs france,1,0,latih,False
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-08 17:30:00,norway vs france,0,2,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-08 19:15:00,morocco vs france,1,2,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-08 22:15:00,sweden vs france,1,4,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-10 16:45:00,sweden vs france,0,1,latih,False
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-10 18:30:00,norway vs france,2,2,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-10 23:45:00,sweden vs france,2,5,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-11 22:00:00,sweden vs france,3,2,latih,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-12 20:30:00,scotland vs france,0,0,uji,False
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-13 19:45:00,netherlands vs france,1,4,uji,True
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-14 15:15:00,scotland vs france,1,1,uji,False
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-15 23:30:00,portugal vs france,3,0,uji,False
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-16 18:15:00,morocco vs france,0,0,uji,False
+14,2H Over 1.5,france tandang + laga france sebelumnya FT ≤3,2026-10-16 21:45:00,norway vs france,2,3,uji,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-09-27 15:30:00,sweden vs germany,2,0,latih,False
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-09-27 19:00:00,sweden vs england,2,4,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-09-27 20:15:00,sweden vs croatia,2,1,latih,False
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-09-28 00:15:00,finland vs sweden,2,1,latih,False
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-09-28 16:00:00,romania vs sweden,2,0,latih,False
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-09-28 17:45:00,sweden vs wales,2,3,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-09-28 19:45:00,italy vs sweden,2,2,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-09-29 18:45:00,belgium vs sweden,2,2,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-09-30 19:00:00,sweden vs england,3,2,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-09-30 22:30:00,sweden vs netherlands,3,4,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-01 13:15:00,sweden vs finland,2,2,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-01 16:30:00,sweden vs germany,3,4,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-02 12:45:00,sweden vs england,2,1,latih,False
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-02 13:45:00,sweden vs croatia,3,3,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-02 14:30:00,ghana vs sweden,2,2,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-02 17:00:00,sweden vs ukraine,3,2,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-02 20:00:00,sweden vs france,3,2,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-03 14:30:00,sweden vs ghana,2,2,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-03 18:30:00,sweden vs usa,2,2,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-04 16:15:00,sweden vs ghana,3,3,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-05 13:15:00,ghana vs sweden,2,5,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-05 21:45:00,germany vs sweden,3,3,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-06 22:00:00,netherlands vs sweden,2,2,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-07 16:15:00,belgium vs sweden,3,1,latih,False
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-07 18:15:00,hungary vs sweden,3,2,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-08 12:15:00,portugal vs sweden,2,2,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-08 17:15:00,morocco vs sweden,2,2,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-08 23:30:00,finland vs sweden,3,2,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-09 12:30:00,ghana vs sweden,2,5,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-09 13:15:00,sweden vs germany,2,3,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-09 14:45:00,belgium vs sweden,2,2,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-09 21:30:00,sweden vs france,3,1,latih,False
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-10 14:15:00,sweden vs italy,3,3,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-10 23:45:00,sweden vs france,2,5,latih,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-11 23:15:00,sweden vs germany,3,1,latih,False
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-12 16:15:00,sweden vs france,2,3,uji,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-12 23:15:00,sweden vs germany,2,1,uji,False
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-13 13:30:00,sweden vs germany,2,1,uji,False
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-13 21:30:00,sweden vs netherlands,3,2,uji,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-14 00:15:00,sweden vs france,3,2,uji,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-14 15:45:00,sweden vs italy,2,3,uji,True
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-15 15:15:00,hungary vs sweden,2,1,uji,False
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-15 22:15:00,italy vs sweden,2,1,uji,False
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-16 13:45:00,argentina vs sweden,3,1,uji,False
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-16 16:45:00,italy vs sweden,2,0,uji,False
+15,2H Over 1.5,sweden semua + slot sebelumnya total 2H ≥2 + HT 2–3,2026-10-16 19:45:00,morocco vs sweden,3,1,uji,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-27 18:00:00,norway vs mexico,2,3,latih,True
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-28 19:30:00,spain vs mexico,2,3,latih,True
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-28 23:30:00,romania vs mexico,2,2,latih,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-29 00:15:00,ghana vs mexico,2,3,latih,True
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-29 21:45:00,netherlands vs mexico,3,3,latih,True
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-30 20:15:00,italy vs mexico,3,3,latih,True
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-30 23:15:00,netherlands vs mexico,2,3,latih,True
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-01 20:45:00,norway vs mexico,3,3,latih,True
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-01 22:15:00,usa vs mexico,2,0,latih,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-02 00:30:00,spain vs mexico,2,2,latih,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-04 15:15:00,czech republic vs mexico,3,0,latih,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-05 13:45:00,argentina vs mexico,3,0,latih,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-05 19:00:00,hungary vs mexico,3,2,latih,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-07 00:00:00,czech republic vs mexico,3,3,latih,True
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-07 13:45:00,argentina vs mexico,2,4,latih,True
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-07 15:30:00,hungary vs mexico,3,0,latih,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-07 16:15:00,usa vs mexico,2,3,latih,True
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-08 14:15:00,hungary vs mexico,3,0,latih,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-09 22:00:00,hungary vs mexico,2,0,latih,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-10 18:45:00,morocco vs mexico,3,1,latih,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-11 12:30:00,italy vs mexico,3,3,latih,True
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-11 22:15:00,wales vs mexico,2,0,latih,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-11 23:45:00,argentina vs mexico,3,3,latih,True
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-12 00:30:00,ghana vs mexico,3,3,latih,True
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-12 15:45:00,wales vs mexico,2,3,uji,True
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-12 16:45:00,poland vs mexico,2,1,uji,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-12 19:45:00,scotland vs mexico,2,1,uji,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-13 18:30:00,ghana vs mexico,2,2,uji,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-14 19:45:00,czech republic vs mexico,2,0,uji,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-15 15:00:00,czech republic vs mexico,2,2,uji,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-16 14:30:00,italy vs mexico,3,1,uji,False
+16,2H Over 2.5,mexico tandang + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-16 17:45:00,belgium vs mexico,2,0,uji,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-27 16:30:00,mexico vs italy,2,2,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-27 18:00:00,norway vs mexico,2,3,latih,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-28 19:30:00,spain vs mexico,2,3,latih,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-28 23:30:00,romania vs mexico,2,2,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-29 00:15:00,ghana vs mexico,2,3,latih,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-29 15:15:00,mexico vs finland,2,4,latih,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-29 16:30:00,mexico vs croatia,2,1,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-29 21:45:00,netherlands vs mexico,3,3,latih,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-30 12:15:00,mexico vs ukraine,2,3,latih,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-30 13:45:00,mexico vs ghana,2,2,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-30 15:00:00,mexico vs scotland,2,0,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-30 18:30:00,mexico vs spain,3,3,latih,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-30 20:15:00,italy vs mexico,3,3,latih,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-09-30 23:15:00,netherlands vs mexico,2,3,latih,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-01 20:45:00,norway vs mexico,3,3,latih,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-01 22:15:00,usa vs mexico,2,0,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-02 00:30:00,spain vs mexico,2,2,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-03 13:15:00,mexico vs ukraine,3,1,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-04 15:15:00,czech republic vs mexico,3,0,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-05 13:45:00,argentina vs mexico,3,0,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-05 19:00:00,hungary vs mexico,3,2,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-05 20:00:00,mexico vs spain,2,2,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-05 21:30:00,mexico vs ukraine,2,2,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-07 00:00:00,czech republic vs mexico,3,3,latih,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-07 13:45:00,argentina vs mexico,2,4,latih,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-07 15:30:00,hungary vs mexico,3,0,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-07 16:15:00,usa vs mexico,2,3,latih,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-08 14:15:00,hungary vs mexico,3,0,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-08 22:00:00,mexico vs spain,2,2,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-09 22:00:00,hungary vs mexico,2,0,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-10 18:45:00,morocco vs mexico,3,1,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-10 20:45:00,mexico vs germany,3,1,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-11 12:30:00,italy vs mexico,3,3,latih,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-11 22:15:00,wales vs mexico,2,0,latih,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-11 23:45:00,argentina vs mexico,3,3,latih,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-12 00:30:00,ghana vs mexico,3,3,latih,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-12 15:45:00,wales vs mexico,2,3,uji,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-12 16:45:00,poland vs mexico,2,1,uji,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-12 19:45:00,scotland vs mexico,2,1,uji,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-13 18:30:00,ghana vs mexico,2,2,uji,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-14 13:15:00,mexico vs belgium,2,3,uji,True
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-14 19:45:00,czech republic vs mexico,2,0,uji,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-15 15:00:00,czech republic vs mexico,2,2,uji,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-16 14:30:00,italy vs mexico,3,1,uji,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-16 17:45:00,belgium vs mexico,2,0,uji,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-16 19:15:00,mexico vs germany,3,1,uji,False
+17,2H Over 2.5,mexico semua + slot sebelumnya total FT ≥4 + HT 2–3,2026-10-16 20:30:00,mexico vs ghana,2,1,uji,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-09-27 13:15:00,usa vs mexico,3,0,latih,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-09-27 18:00:00,norway vs mexico,2,3,latih,True
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-09-27 22:00:00,usa vs mexico,2,2,latih,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-09-28 19:30:00,spain vs mexico,2,3,latih,True
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-09-28 23:30:00,romania vs mexico,2,2,latih,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-09-29 00:15:00,ghana vs mexico,2,3,latih,True
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-09-29 14:00:00,belgium vs mexico,3,1,latih,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-09-29 21:45:00,netherlands vs mexico,3,3,latih,True
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-09-30 20:15:00,italy vs mexico,3,3,latih,True
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-09-30 23:15:00,netherlands vs mexico,2,3,latih,True
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-01 20:45:00,norway vs mexico,3,3,latih,True
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-01 22:15:00,usa vs mexico,2,0,latih,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-02 00:30:00,spain vs mexico,2,2,latih,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-04 15:15:00,czech republic vs mexico,3,0,latih,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-05 13:45:00,argentina vs mexico,3,0,latih,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-05 19:00:00,hungary vs mexico,3,2,latih,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-07 00:00:00,czech republic vs mexico,3,3,latih,True
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-07 13:45:00,argentina vs mexico,2,4,latih,True
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-07 15:30:00,hungary vs mexico,3,0,latih,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-07 16:15:00,usa vs mexico,2,3,latih,True
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-08 14:15:00,hungary vs mexico,3,0,latih,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-09 15:45:00,norway vs mexico,3,0,latih,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-09 22:00:00,hungary vs mexico,2,0,latih,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-10 18:45:00,morocco vs mexico,3,1,latih,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-11 12:30:00,italy vs mexico,3,3,latih,True
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-11 21:15:00,ghana vs mexico,2,3,latih,True
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-11 22:15:00,wales vs mexico,2,0,latih,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-12 00:30:00,ghana vs mexico,3,3,latih,True
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-12 15:45:00,wales vs mexico,2,3,uji,True
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-12 16:45:00,poland vs mexico,2,1,uji,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-12 19:45:00,scotland vs mexico,2,1,uji,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-12 23:00:00,ghana vs mexico,3,1,uji,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-13 18:30:00,ghana vs mexico,2,2,uji,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-13 21:15:00,belgium vs mexico,2,2,uji,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-14 19:45:00,czech republic vs mexico,2,0,uji,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-14 22:30:00,netherlands vs mexico,2,4,uji,True
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-15 15:00:00,czech republic vs mexico,2,2,uji,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-16 14:30:00,italy vs mexico,3,1,uji,False
+18,2H Over 2.5,mexico tandang + slot sebelumnya total HT ≥1 + HT 2–3,2026-10-16 17:45:00,belgium vs mexico,2,0,uji,False

@@ -1,0 +1,186 @@
+[
+  {
+    "id": "L16-40",
+    "n": 40,
+    "name": "UJI • norway semua + away prev own 2H ≤1 + slot sebelumnya total 2H ≥4",
+    "market": "2H Over 0.5",
+    "experimental": true,
+    "condition": "norway semua + away prev own 2H ≤1 + slot sebelumnya total 2H ≥4"
+  },
+  {
+    "id": "L16-41",
+    "n": 41,
+    "name": "UJI • morocco semua + away prev own HT ≥2",
+    "market": "2H Over 0.5",
+    "experimental": true,
+    "condition": "morocco semua + away prev own HT ≥2"
+  },
+  {
+    "id": "L16-42",
+    "n": 42,
+    "name": "UJI • scotland semua + away unggul HT + home prev HT ≤3",
+    "market": "2H Over 0.5",
+    "experimental": true,
+    "condition": "scotland semua + away unggul HT + home prev HT ≤3"
+  },
+  {
+    "id": "L16-43",
+    "n": 43,
+    "name": "UJI • portugal semua + away prev own HT ≥1 + HT 0–1",
+    "market": "2H Over 0.5",
+    "experimental": true,
+    "condition": "portugal semua + away prev own HT ≥1 + HT 0–1"
+  },
+  {
+    "id": "L16-44",
+    "n": 44,
+    "name": "UJI • hungary semua + home prev own 2H ≥1 + HT tidak imbang",
+    "market": "2H Over 0.5",
+    "experimental": true,
+    "condition": "hungary semua + home prev own 2H ≥1 + HT tidak imbang"
+  },
+  {
+    "id": "L16-45",
+    "n": 45,
+    "name": "UJI • romania kandang + home prev FT ≤3 + slot sebelumnya total 2H ≥3",
+    "market": "2H Over 0.5",
+    "experimental": true,
+    "condition": "romania kandang + home prev FT ≤3 + slot sebelumnya total 2H ≥3"
+  },
+  {
+    "id": "L16-46",
+    "n": 46,
+    "name": "UJI • scotland semua + away unggul HT + home prev HT ≤1",
+    "market": "2H Over 0.5",
+    "experimental": true,
+    "condition": "scotland semua + away unggul HT + home prev HT ≤1"
+  },
+  {
+    "id": "L16-47",
+    "n": 47,
+    "name": "UJI • portugal tandang + home prev HT ≤1 + HT 0–1",
+    "market": "2H Over 0.5",
+    "experimental": true,
+    "condition": "portugal tandang + home prev HT ≤1 + HT 0–1"
+  },
+  {
+    "id": "L16-48",
+    "n": 48,
+    "name": "UJI • norway semua + away prev 2H ≤1 + slot sebelumnya total 2H ≥3",
+    "market": "2H Over 0.5",
+    "experimental": true,
+    "condition": "norway semua + away prev 2H ≤1 + slot sebelumnya total 2H ≥3"
+  },
+  {
+    "id": "L16-49",
+    "n": 49,
+    "name": "UJI • new zealand semua + away prev own HT ≤1 + slot sebelumnya total HT ≥3",
+    "market": "2H Over 0.5",
+    "experimental": true,
+    "condition": "new zealand semua + away prev own HT ≤1 + slot sebelumnya total HT ≥3"
+  },
+  {
+    "id": "L16-50",
+    "n": 50,
+    "name": "UJI • germany semua + home same venue FT ≤2 + slot sebelumnya total HT ≥3",
+    "market": "2H Over 0.5",
+    "experimental": true,
+    "condition": "germany semua + home same venue FT ≤2 + slot sebelumnya total HT ≥3"
+  },
+  {
+    "id": "L16-51",
+    "n": 51,
+    "name": "UJI • norway semua + home prev HT ≥1",
+    "market": "HT Over 0.5",
+    "experimental": true,
+    "condition": "norway semua + home prev HT ≥1"
+  },
+  {
+    "id": "L16-52",
+    "n": 52,
+    "name": "UJI • ghana semua + away same venue 2H ≤2",
+    "market": "HT Over 0.5",
+    "experimental": true,
+    "condition": "ghana semua + away same venue 2H ≤2"
+  },
+  {
+    "id": "L16-53",
+    "n": 53,
+    "name": "UJI • ghana semua + away same venue FT ≤4",
+    "market": "HT Over 0.5",
+    "experimental": true,
+    "condition": "ghana semua + away same venue FT ≤4"
+  },
+  {
+    "id": "L16-54",
+    "n": 54,
+    "name": "UJI • morocco semua + away same venue FT ≤4 + slot 30 menit sebelumnya total HT ≥3",
+    "market": "HT Over 0.5",
+    "experimental": true,
+    "condition": "morocco semua + away same venue FT ≤4 + slot 30 menit sebelumnya total HT ≥3"
+  },
+  {
+    "id": "L16-55",
+    "n": 55,
+    "name": "UJI • argentina semua + away same venue own HT ≤0",
+    "market": "HT Over 0.5",
+    "experimental": true,
+    "condition": "argentina semua + away same venue own HT ≤0"
+  },
+  {
+    "id": "L16-56",
+    "n": 56,
+    "name": "UJI • ukraine semua + home prev FT ≥3 + slot 30 menit sebelumnya total HT ≥2",
+    "market": "HT Over 0.5",
+    "experimental": true,
+    "condition": "ukraine semua + home prev FT ≥3 + slot 30 menit sebelumnya total HT ≥2"
+  },
+  {
+    "id": "L16-57",
+    "n": 57,
+    "name": "UJI • usa kandang + away prev FT ≤3",
+    "market": "HT Over 0.5",
+    "experimental": true,
+    "condition": "usa kandang + away prev FT ≤3"
+  },
+  {
+    "id": "L16-58",
+    "n": 58,
+    "name": "UJI • argentina semua + away same venue own HT ≤0 + slot 30 menit sebelumnya total HT ≥1",
+    "market": "HT Over 0.5",
+    "experimental": true,
+    "condition": "argentina semua + away same venue own HT ≤0 + slot 30 menit sebelumnya total HT ≥1"
+  },
+  {
+    "id": "L16-59",
+    "n": 59,
+    "name": "UJI • croatia kandang + home prev 2H ≥2",
+    "market": "HT Over 0.5",
+    "experimental": true,
+    "condition": "croatia kandang + home prev 2H ≥2"
+  },
+  {
+    "id": "L16-60",
+    "n": 60,
+    "name": "UJI • spain semua + away prev own 2H ≤0",
+    "market": "HT Over 0.5",
+    "experimental": true,
+    "condition": "spain semua + away prev own 2H ≤0"
+  },
+  {
+    "id": "L16-61",
+    "n": 61,
+    "name": "UJI • morocco semua + home prev own 2H ≤0 + slot 30 menit sebelumnya total HT ≥3",
+    "market": "HT Over 0.5",
+    "experimental": true,
+    "condition": "morocco semua + home prev own 2H ≤0 + slot 30 menit sebelumnya total HT ≥3"
+  },
+  {
+    "id": "L16-62",
+    "n": 62,
+    "name": "UJI • wales semua + home prev FT ≥4 + slot 30 menit sebelumnya total 2H ≥2",
+    "market": "HT Over 0.5",
+    "experimental": true,
+    "condition": "wales semua + home prev FT ≥4 + slot 30 menit sebelumnya total 2H ≥2"
+  }
+]

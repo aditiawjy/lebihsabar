@@ -303,20 +303,25 @@ if ($selectedLeague !== '') {
     }
 }
 
-// Timpa target & deskripsi boost dengan angka hasil hitungan data aktual liga ini.
-// Angka lama yang hard-coded hanya jadi fallback saat datanya belum cukup.
+// Always replace legacy example figures with this league's actual counts.
+$boostMinimumSamples = 20;
 foreach ($boostConfigs as $bKey => $bCfg) {
     $bs = $boostStats[$bKey];
+    $boostConfigs[$bKey]['target'] = 'Belum ada data';
+    $boostConfigs[$bKey]['sample_label'] = '0 sampel';
+    $boostConfigs[$bKey]['desc'] = 'Belum ada pertandingan selesai yang cocok dengan filter lawan pada liga ini. Tidak ada persentase yang dapat dihitung.';
     if ($bs['boost_played'] > 0) {
         $basePct = $bs['base_played'] > 0 ? ($bs['base_over'] / $bs['base_played']) * 100 : 0;
         $boostPct = ($bs['boost_over'] / $bs['boost_played']) * 100;
         $oppNames = array_map(static fn($o) => trim(str_replace('(V)', '', $o)), $bCfg['opponents']);
-        $boostConfigs[$bKey]['target'] = number_format($boostPct, 1) . '%';
-        $boostConfigs[$bKey]['desc'] = 'Meningkatkan akurasi ' . htmlspecialchars($bCfg['name'])
-            . ' dari ' . number_format($basePct, 1) . '% (' . $bs['base_played'] . ' match)'
-            . ' menjadi <strong class="text-blue-700 font-bold">' . number_format($boostPct, 1) . '%</strong>'
-            . ' (' . $bs['boost_played'] . ' match) — dihitung dari data aktual liga ini,'
-            . ' dengan memfilter hanya lawan bertipe terbuka (' . htmlspecialchars(implode(', ', $oppNames)) . ').';
+        $enough = $bs['boost_played'] >= $boostMinimumSamples;
+        $boostConfigs[$bKey]['target'] = $enough ? number_format($boostPct, 1) . '%' : 'Sampel kecil';
+        $boostConfigs[$bKey]['sample_label'] = $bs['boost_over'].'/'.$bs['boost_played'].' O1.5';
+        $boostConfigs[$bKey]['desc'] = 'Statistik ' . htmlspecialchars($bCfg['name'])
+            . ': semua lawan ' . number_format($basePct, 1) . '% (' . $bs['base_over'].'/'.$bs['base_played'] . '); '
+            . 'setelah filter lawan ' . number_format($boostPct, 1) . '% (' . $bs['boost_over'].'/'.$bs['boost_played'] . '). '
+            . ($enough ? 'Selisih '.sprintf('%+.1f', $boostPct-$basePct).' poin persentase. ' : 'Sampel belum cukup: minimal '.$boostMinimumSamples.' pertandingan. ')
+            . 'Data aktual liga terpilih; filter ini bukan jaminan peningkatan. Lawan: ' . htmlspecialchars(implode(', ', $oppNames)) . '.';
     }
 }
 
@@ -390,10 +395,10 @@ $overallPct = $totalLeagueMatches > 0 ? ($totalOver15Matches / $totalLeagueMatch
                 </div>
                 <div>
                     <h4 class="text-sm font-bold text-slate-800">
-                        <?= $boostTeam !== '' && isset($boostConfigs[$boostTeam]) ? 'Rekomendasi Akurasi ' . $boostConfigs[$boostTeam]['name'] . ' Aktif' : 'Rekomendasi Akurasi Boost (Over 1.5)' ?>
+                        <?= $boostTeam !== '' && isset($boostConfigs[$boostTeam]) ? 'Filter Lawan ' . htmlspecialchars($boostConfigs[$boostTeam]['name']) . ' Aktif' : 'Statistik Filter Lawan (Over 1.5)' ?>
                     </h4>
                     <p class="text-xs text-slate-600 mt-0.5">
-                        <?= $boostTeam !== '' && isset($boostConfigs[$boostTeam]) ? $boostConfigs[$boostTeam]['desc'] : 'Saring lawan bertipe terbuka untuk meningkatkan akurasi kemenangan Over 1.5 pada tim pilihan Anda di liga ini. Pilih salah satu tombol di bawah untuk melihat rincian kondisi.' ?>
+                        <?= $boostTeam !== '' && isset($boostConfigs[$boostTeam]) ? $boostConfigs[$boostTeam]['desc'] : 'Perbandingan aktual dari liga terpilih: semua lawan vs daftar lawan pilihan. Persentase pada tombol tersedia mulai 20 sampel; angka O1.5 menunjukkan jumlah Over / total. Statistik tim berbeda dari H2H pasangan di halaman Pattern.' ?>
                     </p>
                 </div>
             </div>
@@ -402,9 +407,9 @@ $overallPct = $totalLeagueMatches > 0 ? ($totalOver15Matches / $totalLeagueMatch
                     <?php $isActive = $boostTeam === $key; ?>
                     <a href="index.php?page=league-over15&league=<?= urlencode($selectedLeague) ?>&min_matches=<?= $minMatches ?>&boost_team=<?= $isActive ? '' : urlencode($key) ?>" 
                        class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all <?= $isActive ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50' ?>"
-                       title="<?= htmlspecialchars($config['desc']) ?>">
+                       title="<?= htmlspecialchars(strip_tags($config['desc']), ENT_QUOTES, 'UTF-8') ?>">
                         <span class="w-1.5 h-1.5 rounded-full <?= $isActive ? 'bg-white animate-pulse' : 'bg-slate-400' ?>"></span>
-                        <?= htmlspecialchars($config['name']) ?> Boost (<?= $config['target'] ?>)
+                        <?= htmlspecialchars($config['name']) ?> · <?= htmlspecialchars($config['target']) ?> · <?= htmlspecialchars($config['sample_label']) ?>
                     </a>
                 <?php endforeach; ?>
             </div>

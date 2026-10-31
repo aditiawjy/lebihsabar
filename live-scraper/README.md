@@ -29,7 +29,7 @@ Syarat: **XAMPP** (untuk dashboard PHP) + **Python 3.10+** terpasang.
 ## Override URL live (opsional)
 Set environment variable sebelum menjalankan:
 ```
-set BPVM_URL=https://g943gp.bpvmr7u6.com/live
+set BPVM_URL=https://p1b3gp.bpvxncqr.com/en-US/live/997
 ```
 
 ## Cek jalan / tidak

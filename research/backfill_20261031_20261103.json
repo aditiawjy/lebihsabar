@@ -1,0 +1,78 @@
+{
+  "start": "2026-10-31",
+  "end": "2026-11-03",
+  "days": [
+    {
+      "date": "2026-10-30",
+      "api_rows": 1241,
+      "completed_in_month": 316,
+      "efootball_completed": 75,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-10-31"
+      ]
+    },
+    {
+      "date": "2026-10-31",
+      "api_rows": 1549,
+      "completed_in_month": 717,
+      "efootball_completed": 174,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-10-31",
+        "2026-11-01"
+      ]
+    },
+    {
+      "date": "2026-11-01",
+      "api_rows": 1425,
+      "completed_in_month": 747,
+      "efootball_completed": 227,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-11-01",
+        "2026-11-02"
+      ]
+    },
+    {
+      "date": "2026-11-02",
+      "api_rows": 1116,
+      "completed_in_month": 839,
+      "efootball_completed": 263,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-11-02",
+        "2026-11-03"
+      ]
+    },
+    {
+      "date": "2026-11-03",
+      "api_rows": 809,
+      "completed_in_month": 268,
+      "efootball_completed": 67,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-11-03"
+      ]
+    }
+  ],
+  "inserted": 5,
+  "updated": 0,
+  "unchanged": 2882,
+  "invalid": 0,
+  "unique_completed": 2887,
+  "leagues": {
+    "SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play": 26,
+    "SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play": 55,
+    "SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play": 702,
+    "SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play": 325,
+    "SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play": 973,
+    "E-FOOTBALL F26 INTERNATIONAL FRIENDLY - 16 Mins Play": 56,
+    "E-FOOTBALL F26 ELITE CLUB FRIENDLY - 16 Mins Play": 158,
+    "E-FOOTBALL F24 INTERNATIONAL FRIENDLY - 16 Mins Play": 188,
+    "E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play": 404
+  },
+  "csv_sha256_after": "1315c835efec09b82a056ae930e55f4efecea3b402e38f93993f0a94830a326f",
+  "failed_days": [],
+  "complete": true
+}

@@ -28,12 +28,14 @@ function patternH2hRecentBefore(array $stats, string $before, int $limit = 2): a
 function patternH2hStats() {
     $file = __DIR__.'/matches.csv';
     $cache = sys_get_temp_dir().'/sabaraja-h2h-'.md5(__DIR__).'.json';
-    $version = '7:'.filemtime($file).':'.filesize($file);
+    clearstatcache(true, $file);
+    $version = '8:'.filemtime($file).':'.filesize($file);
     $stored = is_file($cache) ? json_decode(file_get_contents($cache), true) : null;
     if (($stored['version'] ?? null) === $version) return $stored['stats'];
     $stats = []; $seen = [];
-    $handle = fopen($file,'r');
+    $handle = @fopen($file,'r');
     if (!$handle) return [];
+    if (!flock($handle, LOCK_SH)) { fclose($handle); return []; }
     $header = fgetcsv($handle); $header[0] = ltrim($header[0], "\xEF\xBB\xBF");
     while (($values = fgetcsv($handle)) !== false) {
         if (count($values) !== count($header)) continue;
@@ -83,7 +85,14 @@ function patternH2hStats() {
         if ((int)$row['ft_home']+(int)$row['ft_away'] >= 1) $stats[$key]['over05']++;
         if ((int)$row['ft_home']+(int)$row['ft_away'] >= 2) $stats[$key]['over']++;
     }
+    $complete = feof($handle);
+    flock($handle, LOCK_UN);
     fclose($handle);
-    file_put_contents($cache,json_encode(['version'=>$version,'stats'=>$stats]),LOCK_EX);
+    clearstatcache(true, $file);
+    if (!$complete || $version !== '8:'.filemtime($file).':'.filesize($file)) return [];
+    $temporary = tempnam(sys_get_temp_dir(), 'sabaraja-h2h-');
+    if ($temporary !== false) {
+        if (file_put_contents($temporary,json_encode(['version'=>$version,'stats'=>$stats]),LOCK_EX) === false || !@rename($temporary,$cache)) @unlink($temporary);
+    }
     return $stats;
 }

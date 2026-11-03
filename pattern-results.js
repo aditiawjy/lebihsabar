@@ -76,9 +76,11 @@
     const goals = scoreGoals(score);
     return goals !== null && goals[0] + goals[1] < 2;
   };
-  function under15StreakTeams(matches, league) {
-    if (String(league) === '15') return [];
-    return resultStreakTeams(matches,1);
+  function under15StreakTeams(matches, league, thresholds) {
+    const periodKey = isSessionLeague(league)
+      ? time => new Date(Date.parse(time)-4*3600000).toISOString().slice(0,10)
+      : time => new Date(Date.parse(time)+8*3600000).toISOString().slice(0,10);
+    return resultStreakTeams(matches,1,team => thresholds?.[noGoalTeamKey(team)],periodKey);
   }
   function resultStreakTeams(matches,maxGoals,threshold=3,withinDay=false) {
     const streaks = new Map();
@@ -103,7 +105,7 @@
       if (goals && goals[0]+goals[1] > maxGoals)
         for (const team of [match.home,match.away]) streaks.set(nameOf(team),0);
     }
-    return [...streaks].filter(([,count])=>count>=threshold).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+    return [...streaks].filter(([team,count])=>{ const minimum = typeof threshold === 'function' ? threshold(team) : threshold; return Number.isInteger(minimum) && minimum > 0 && count>=minimum; }).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
   }
   const noGoalTeamKey = name=>String(name || '').replace(/\s*\(V\)/gi,'').replace(/\s+/g,' ').trim().toLowerCase();
   function teamNoGoalStreak(matches,team,threshold,league='15') {
@@ -143,11 +145,15 @@
     'korea republic':'KOR','inter milan':'INT','paris saint germain':'PSG'};
   const teamCode = name => teamCodes[name.toLowerCase()] || (name.trim().split(/\s+/).length > 1
     ? name.trim().split(/\s+/).map(part=>part[0]).join('').slice(0,4) : name.slice(0,3)).toUpperCase();
-  function resultHistoryAlertsByMatch(matches, league) {
+  function resultHistoryAlertsByMatch(matches, league, under15Thresholds = {}) {
     const counts = new Map();
+    const under15Counts = new Map();
     const alerts = new Map();
     const scope = isSessionLeague(league) ? 'sesi ini' : 'hari ini';
-    const under15Threshold = ({'15':7,'16':4,'20':4})[String(league)] || 4;
+    const under15Day = match => {
+      const timestamp = Date.parse(match.time);
+      return Number.isFinite(timestamp) ? new Date(timestamp + 8 * 3600000).toISOString().slice(0,10) : null;
+    };
     const chronological = [...matches].sort((a,b)=>String(a.time).localeCompare(String(b.time)));
     for (let start = 0; start < chronological.length;) {
       const time = chronological[start].time;
@@ -163,9 +169,12 @@
           if (!name) continue;
           const previous = counts.get(name) || {zeroZero:0,under15:0};
           const zeroZeroCount = previous.zeroZero + (isFinishedZeroZero ? 1 : 0);
-          const under15Count = previous.under15 + (isFinishedUnder15 ? 1 : 0);
+          const day = under15Day(match);
+          const under15Key = day && JSON.stringify([day,noGoalTeamKey(name)]);
+          const under15Count = (under15Counts.get(under15Key) || 0) + (isFinishedUnder15 ? 1 : 0);
+          const under15Threshold = under15Thresholds[noGoalTeamKey(name)];
           if (zeroZeroCount >= zeroZeroThreshold(league)) teamAlerts.push({kind:'zerozero',highFrequency:zeroZeroCount >= 3,label:`${zeroZeroCount >= 3 ? '🔥 ' : ''}${teamCode(name)}: ${zeroZeroCount}× (0-0)`,detail:`${name}: FT 0–0 sudah ${zeroZeroCount}× (≥${zeroZeroThreshold(league)}) ${scope}`});
-          if (under15Count >= under15Threshold) teamAlerts.push({kind:'under15',label:`${teamCode(name)}: ${under15Count}× (U1.5)`,detail:`${name}: FT Under 1.5 sudah ${under15Count}× (>${under15Threshold - 1}) ${scope}`});
+          if (under15Key && Number.isInteger(under15Threshold) && under15Threshold > 0 && under15Count >= under15Threshold) teamAlerts.push({kind:'under15',label:`${teamCode(name)}: ${under15Count}× (U1.5)`,detail:`${name}: FT Under 1.5 ${under15Count}× pada ${day} UTC+8; rekor harian CSV ${under15Threshold}×.`});
         }
         if (teamAlerts.length) alerts.set(match,teamAlerts);
       }
@@ -178,7 +187,10 @@
           if (!name) continue;
           const previous = counts.get(name) || {zeroZero:0,under15:0};
           if (goals[0] + goals[1] === 0) previous.zeroZero++;
-          if (goals[0] + goals[1] < 2) previous.under15++;
+          if (goals[0] + goals[1] < 2 && under15Day(match)) {
+            const key = JSON.stringify([under15Day(match),noGoalTeamKey(name)]);
+            under15Counts.set(key,(under15Counts.get(key) || 0)+1);
+          }
           counts.set(name,previous);
         }
       }
@@ -296,7 +308,7 @@
       };
       const snapshots = (resultSnapshots.length ? resultSnapshots : ['15','16','20'].map(league => ({league,date:date.value,timezone:'UTC+8',matches:[]})))
         .map(data => ({...data, displayMatches:window.SabarajaLiveResults.merge(data,liveState,liveAnalysis)}));
-      const signature = JSON.stringify([query, selectedPhase,selectedLeague,selectedMarket,selectedRecord, [...collapsedLeagues], snapshots.map(data => [data.league, data.date, data.displayMatches, data.noGoalThresholds, data.zeroRecordSignals, data.under15RecordSignals,data.zeroNearRecordSignals,data.under15NearRecordSignals])]);
+      const signature = JSON.stringify([query, selectedPhase,selectedLeague,selectedMarket,selectedRecord, [...collapsedLeagues], snapshots.map(data => [data.league, data.date, data.displayMatches, data.noGoalThresholds, data.under15Thresholds, data.under15StreakThresholds, data.zeroStreakThresholds, data.zeroRecordSignals, data.under15RecordSignals,data.zeroNearRecordSignals,data.under15NearRecordSignals])]);
       if (signature !== rendered) {
         window.SabarajaPatternDisplay = {snapshots};
         const visibleCount = snapshots.filter(data=>selectedLeague==='all'||selectedLeague===data.league).reduce((sum,data) => sum + data.displayMatches.filter(match=>matchesSearch(match,data)).length,0);
@@ -415,11 +427,11 @@
             chip.title = `${team}: FT 0–0 ${count} kali ${isSessionLeague(data.league) ? 'dalam sesi ini' : 'pada tanggal ini'}`;
             zeroZeroCount.append(chip);
           }
-          const streakGroups = [{zeroZeroStreak:false,underStreaks:under15StreakTeams(data.displayMatches,data.league)}];
-          if (['15','16','20','vietnam15'].includes(String(data.league))) {
+          const streakGroups = [{zeroZeroStreak:false,underStreaks:under15StreakTeams(data.displayMatches,data.league,data.under15StreakThresholds)}];
+          {
             const periodKey = isSessionLeague(data.league)
-              ? time=>new Date(Date.parse(time)-4*3600000).toISOString().slice(0,10) : true;
-            streakGroups.unshift({zeroZeroStreak:true,underStreaks:resultStreakTeams(data.displayMatches,0,String(data.league)==='15'?3:2,periodKey)});
+              ? time=>new Date(Date.parse(time)-4*3600000).toISOString().slice(0,10) : time=>new Date(Date.parse(time)+8*3600000).toISOString().slice(0,10);
+            streakGroups.unshift({zeroZeroStreak:true,underStreaks:resultStreakTeams(data.displayMatches,0,team=>data.zeroStreakThresholds?.[noGoalTeamKey(team)],periodKey)});
           }
           for (const {zeroZeroStreak,underStreaks} of streakGroups) {
           if (underStreaks.length || zeroZeroStreak) {
@@ -427,15 +439,15 @@
             label.textContent = zeroZeroStreak ? 'FT 0–0 beruntun' : 'U1.5 beruntun'; zeroZeroCount.append(label);
             if (!underStreaks.length) {
               const empty = document.createElement('span'); empty.className = 'results-zerozero-empty';
-              empty.textContent = `Belum ada tim ≥${String(data.league)==='15'?3:2}× beruntun ${isSessionLeague(data.league)?'sesi ini':'hari ini'}`;
+              empty.textContent = `Belum ada tim yang mencapai rekor CSV ${isSessionLeague(data.league)?'sesi ini':'hari ini'}`;
               zeroZeroCount.append(empty);
             }
             for (const [team,count] of underStreaks) {
               const chip = document.createElement('span'); chip.className = 'results-zerozero-chip results-under-streak';
               chip.textContent = `${team} (${count}× beruntun)`;
               chip.title = zeroZeroStreak
-                ? `${team}: ${count} hasil FT 0–0 berturut-turut pada rentang kartu ini. Hilang saat pertandingan berikutnya mencetak gol.`
-                : `${team}: ${count} hasil FT Under 1.5 berturut-turut pada rentang kartu ini. Hilang saat pertandingan berikutnya mencapai total 2 gol.`;
+                ? `${team}: ${count} hasil FT 0–0 berturut-turut pada rentang kartu ini; rekor beruntun CSV ${data.zeroStreakThresholds?.[noGoalTeamKey(team)]}×. Hilang saat pertandingan berikutnya mencetak gol.`
+                : `${team}: ${count} hasil FT Under 1.5 berturut-turut pada rentang kartu ini; rekor beruntun CSV ${data.under15StreakThresholds?.[noGoalTeamKey(team)]}×. Hilang saat pertandingan berikutnya mencapai total 2 gol.`;
               zeroZeroCount.append(chip);
             }
           }
@@ -448,7 +460,7 @@
             chip.title = `Ambang pantauan ${signal.threshold}×, dihitung dari rekor terbaru matches.csv. Gol tim sendiri, kandang/tandang, hanya hasil FT selesai ${noGoalScope}. Hilang jika tim mencetak gol. Bukan jaminan gol pada laga berikutnya.`;
             zeroZeroCount.append(chip);
           }
-          const resultAlerts = resultHistoryAlertsByMatch(data.matches,data.league);
+          const resultAlerts = resultHistoryAlertsByMatch(data.matches,data.league,data.under15Thresholds);
           // Put each active record on one relevant fixture, regardless of table order.
           const selectAlertMatch = (team, day = null) => data.displayMatches
             .filter(match => match.status !== 'Selesai' && match.status !== 'Ditunda' && match.time &&
@@ -499,6 +511,41 @@
             time.append(state);
             const teams = row.insertCell();
             teams.append(document.createTextNode(match.home + ' vs ' + match.away));
+            if (match.status !== 'Selesai' && match.status !== 'Ditunda' && match.h2h) {
+              const liveStatus = String(match.live?.status || '');
+              const afterFirstHalf = /^(?:2H\b|H\.?\s*Time|HT$|Half[ -]?Time)/i.test(liveStatus);
+              const liveHt = scoreGoals(match.live?.ht || match.ht);
+              const liveScore = scoreGoals(match.live?.score);
+              const secondHalfGoal = afterFirstHalf && liveHt && liveScore && (liveScore[0] > liveHt[0] || liveScore[1] > liveHt[1]);
+              for (const [label, streak, available] of [
+                ['HT 0–0', match.h2h.htZeroStreak, !afterFirstHalf],
+                ['2H 0–0', match.h2h.secondHalfZeroStreak, !secondHalfGoal]
+              ]) {
+                if (!available || !streak?.record || streak.current < streak.record) continue;
+                const badge = document.createElement('a');
+                badge.className = 'result-h2h-badge';
+                badge.textContent = `H2H ${label} · ${streak.current}× beruntun · rekor ${streak.record}×`;
+                badge.title = `Riwayat H2H di liga yang sama sebelum kickoff dari CSV. ${label === '2H 0–0' ? '2H 0–0 berarti tidak ada gol pada babak kedua.' : 'HT 0–0 berarti tidak ada gol pada babak pertama.'} Hasil historis bukan jaminan.`;
+                badge.href = 'index.php?' + new URLSearchParams({page:'h2h',home:match.home,away:match.away,league:data.historyLeagueName || ''});
+                teams.append(badge);
+              }
+            }
+            if (match.status !== 'Selesai' && match.status !== 'Ditunda' && match.h2h?.under25StreakRecord > 0 && match.h2h.under25StreakCurrent >= match.h2h.under25StreakRecord) {
+              const badge = document.createElement('a');
+              badge.className = 'result-h2h-badge';
+              badge.textContent = `H2H UNDER 2.5 · ${match.h2h.under25StreakCurrent}× beruntun · rekor ${match.h2h.under25StreakRecord}×`;
+              badge.title = 'Hasil H2H Under 2.5 terbaru mencapai rekor beruntun pasangan ini di liga yang sama dalam CSV sebelum kickoff. Hasil historis bukan jaminan.';
+              badge.href = 'index.php?' + new URLSearchParams({page:'h2h',home:match.home,away:match.away,league:data.historyLeagueName || ''});
+              teams.append(badge);
+            }
+            if (match.status !== 'Selesai' && match.status !== 'Ditunda' && match.h2h?.drawStreakRecord > 0 && match.h2h.drawStreakCurrent >= match.h2h.drawStreakRecord) {
+              const badge = document.createElement('a');
+              badge.className = 'result-h2h-badge';
+              badge.textContent = `H2H DRAW · ${match.h2h.drawStreakCurrent}× seri beruntun · rekor ${match.h2h.drawStreakRecord}×`;
+              badge.title = 'Hasil seri H2H terbaru mencapai rekor beruntun pasangan ini di liga yang sama dalam CSV sebelum kickoff. Hasil historis bukan jaminan.';
+              badge.href = 'index.php?' + new URLSearchParams({page:'h2h',home:match.home,away:match.away,league:data.historyLeagueName || ''});
+              teams.append(badge);
+            }
             if (match.live?.fresh && match.live.kickoffMatched && /^(?:2H\b|H\.?\s*Time|HT$|Half[ -]?Time)/i.test(match.live.status || '')) {
               const htScore = scoreGoals(match.live.ht || match.ht);
               const currentScore = scoreGoals(match.live.score);
@@ -508,7 +555,7 @@
                 badge.className = 'result-h2h-badge';
                 badge.textContent = `HT ${htScore.join('–')} · gol 2H ${sample.goals}/${sample.total} (${(100*sample.goals/sample.total).toFixed(1)}%)`;
                 badge.title = 'Hasil historis CSV sebelum kickoff, untuk liga dan urutan home–away yang sama. Persentase bukan jaminan gol.';
-                badge.href = 'index.php?' + new URLSearchParams({page:'h2h',home:match.home,away:match.away});
+                badge.href = 'index.php?' + new URLSearchParams({page:'h2h',home:match.home,away:match.away,league:data.historyLeagueName || ''});
                 teams.append(badge);
               }
             }
@@ -517,7 +564,7 @@
               badge.className = 'result-h2h-badge';
               badge.textContent = match.status === 'Selesai' ? 'STREAK · 3 H2H berturut-turut FT 0–0' : 'PANTAU · 3 H2H terakhir FT 0–0';
               badge.title = match.status === 'Selesai' ? 'Pertandingan ini dan dua pertemuan sebelumnya berakhir 0–0 di liga yang sama. Klik untuk melihat riwayat.' : 'Tiga pertemuan terbaru sebelum pertandingan ini berakhir 0–0 di liga yang sama. Klik untuk melihat riwayat.';
-              badge.href = 'index.php?' + new URLSearchParams({page:'h2h', home:match.home, away:match.away});
+              badge.href = 'index.php?' + new URLSearchParams({page:'h2h', home:match.home, away:match.away, league:data.historyLeagueName || ''});
               teams.append(badge);
             }
             for (const signal of noGoalSignals.filter(signal=>noGoalTargets.get(signal) === match)) {
@@ -533,12 +580,13 @@
               if (match.status === 'Selesai' || match.status === 'Ditunda') continue;
               const isFtOver05 = period === 'FT' && side === 'O' && Number(line) === 0.5;
               const isFtOver15 = period === 'FT' && side === 'O' && Number(line) === 1.5;
+              if (!isFtOver05 && !isFtOver15 && match.h2h.total < 20) continue;
               const recentMeetings = match.h2h.recentMeetings || [];
-              const twoZero = recentMeetings.length >= 2 && recentMeetings.slice(0,2).every(meeting => meeting.totalGoals === 0);
-              const oneZero = recentMeetings.length >= 1 && recentMeetings[0].totalGoals === 0 && total > 0 && wins / total > 0.8;
-              const requiredUnder15 = total > 0 && wins / total < 0.7 ? 4 : total > 0 && wins / total < 0.8 ? 3 : 2;
-              const consecutiveUnder15 = total > 0 && wins < total && recentMeetings.length >= requiredUnder15 && recentMeetings.slice(0,requiredUnder15).every(meeting => Number.isInteger(meeting.totalGoals) && meeting.totalGoals < 2);
-              if (isFtOver05 ? !twoZero && !oneZero : isFtOver15 && wins < total ? !consecutiveUnder15 : total < 20 || wins/total < 0.95) continue;
+              const zeroRecord = match.h2h.zeroStreakRecord || 0;
+              const zeroCurrent = match.h2h.zeroStreakCurrent || 0;
+              const under15Record = match.h2h.under15StreakRecord || 0;
+              const under15Current = match.h2h.under15StreakCurrent || 0;
+              if (isFtOver05 ? !zeroRecord || zeroCurrent < zeroRecord : isFtOver15 ? !under15Record || under15Current < under15Record : total < 20 || wins/total < 0.95) continue;
               const phase = match.live?.status || '';
               const firstHalf = /^1H\b/i.test(phase);
               const secondHalf = /^(?:2H\b|H\.?\s*Time|HT$|Half[ -]?Time)/i.test(phase);
@@ -560,9 +608,9 @@
               const undated = market.undated || 0;
               badge.textContent = `H2H ${period} ${side}${line} · ${(100*wins/total).toFixed(1)}% (${wins}/${total}) · CSV ${dataPeriod}${undated ? ` · ${undated} tanpa tanggal` : ''}`;
               if (perfect) badge.textContent += ' · sampel, bukan jaminan';
-              if (isFtOver05) badge.textContent += twoZero ? ' · 2 H2H terakhir FT 0–0' : ' · H2H terakhir FT 0–0 · O0.5 >80%';
-              if (isFtOver15 && consecutiveUnder15) badge.textContent += ` · ${requiredUnder15} H2H terakhir masing-masing Under 1.5`;
-              badge.title = `H2H ${match.home} vs ${match.away}: ${wins} dari ${total} pertemuan memenuhi ${period} ${side}${line}. Tanggal dalam sampel CSV: ${dataPeriod} UTC+8${undated ? `; ${undated} pertemuan tanpa tanggal` : ''}. Per kompetisi, kandang–tandang digabung. CSV saat ini dapat memuat hasil setelah pertandingan yang ditampilkan. ${isFtOver05 ? 'Syarat: dua H2H terakhir FT 0–0, atau H2H terakhir FT 0–0 dengan O0.5 lebih dari 80%.' : isFtOver15 ? 'Syarat: O1.5 di bawah 70% membutuhkan empat H2H terakhir masing-masing kurang dari 2 gol; 70% hingga di bawah 80% membutuhkan tiga; 80% hingga di bawah 100% membutuhkan dua. Untuk 100% berlaku minimal 20 pertemuan.' : 'Minimal 20 pertemuan dan ≥95%.'} Data yang tersedia mungkin tidak lengkap. O = Over, U = Under. Hasil historis bukan jaminan dan bukan backtest sebelum kickoff.`;
+              if (isFtOver05) badge.textContent += ` · ${zeroCurrent} H2H terakhir FT 0–0 · rekor ${zeroRecord}×`;
+              if (isFtOver15) badge.textContent += ` · ${under15Current} H2H terakhir Under 1.5 · rekor ${under15Record}×`;
+              badge.title = `H2H ${match.home} vs ${match.away}: ${wins} dari ${total} pertemuan memenuhi ${period} ${side}${line}. Tanggal dalam sampel CSV: ${dataPeriod} UTC+8${undated ? `; ${undated} pertemuan tanpa tanggal` : ''}. Per kompetisi, kandang–tandang digabung. CSV saat ini dapat memuat hasil setelah pertandingan yang ditampilkan. ${isFtOver05 ? `Syarat: H2H terbaru berturut-turut FT 0–0 mencapai rekor ${zeroRecord}× di CSV sebelum kickoff.` : isFtOver15 ? `Syarat: H2H terbaru berturut-turut FT Under 1.5 mencapai rekor ${under15Record}× di CSV sebelum kickoff.` : 'Minimal 20 pertemuan dan ≥95%.'} Data yang tersedia mungkin tidak lengkap. O = Over, U = Under. Hasil historis bukan jaminan dan bukan backtest sebelum kickoff.`;
               if (isFtOver05 || isFtOver15) badge.title += ' H2H terbaru sebelum kickoff: ' + recentMeetings.map(meeting => `${meeting.time} FT ${meeting.ft}`).join('; ') + '.';
               h2hDetail.append(badge);
               const detailBody = document.createElement('div'); detailBody.className = 'result-h2h-detail-body';
@@ -570,7 +618,7 @@
               explanation.textContent = `${period} ${side}${line}: ${(100*wins/total).toFixed(1)}% · ${wins} dari ${total} hasil dalam CSV · ${dataPeriod} UTC+8${undated ? ` · ${undated} tanpa tanggal` : ''}. Sampel dapat mencakup hasil setelah kickoff pertandingan ini.`;
               detailBody.append(explanation);
               const criterion = document.createElement('p');
-              criterion.textContent = isFtOver05 ? (twoZero ? 'Sinyal: dua H2H terakhir FT 0–0.' : 'Sinyal: H2H terakhir FT 0–0 dan O0.5 lebih dari 80%.') : isFtOver15 && consecutiveUnder15 ? `Sinyal: ${requiredUnder15} H2H terakhir masing-masing kurang dari 2 gol.` : 'Sinyal: setidaknya 20 pertemuan dan 95% memenuhi market.';
+              criterion.textContent = isFtOver05 ? `Sinyal: ${zeroCurrent} H2H terakhir FT 0–0 mencapai rekor CSV ${zeroRecord}× sebelum kickoff.` : isFtOver15 ? `Sinyal: ${under15Current} H2H terakhir FT Under 1.5 mencapai rekor CSV ${under15Record}× sebelum kickoff.` : 'Sinyal: setidaknya 20 pertemuan dan 95% memenuhi market.';
               detailBody.append(criterion);
               const heading = document.createElement('strong'); heading.textContent = 'Hingga 5 pertemuan terakhir sebelum kickoff (UTC+8)'; detailBody.append(heading);
               const list = document.createElement('ul');

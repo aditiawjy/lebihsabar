@@ -1,0 +1,268 @@
+{
+  "before_rows": 139271,
+  "after_rows": 145029,
+  "added": 5758,
+  "removed_ids": 0,
+  "changed_existing": 8,
+  "daily_csv": {
+    "2026-11-01": 1753,
+    "2026-11-02": 1936,
+    "2026-11-03": 1858,
+    "2026-11-04": 1956,
+    "2026-11-05": 1996,
+    "2026-11-06": 1581
+  },
+  "coverage": {
+    "start": "2026-11-01",
+    "end": "2026-11-06",
+    "timezone": "UTC+8",
+    "csvUpdatedAt": "2026-11-06T12:03:59+00:00",
+    "leagueNames": [
+      "E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play",
+      "E-FOOTBALL F24 INTERNATIONAL FRIENDLY - 16 Mins Play",
+      "E-FOOTBALL F26 ELITE CLUB FRIENDLY - 16 Mins Play",
+      "E-FOOTBALL F26 INTERNATIONAL FRIENDLY - 16 Mins Play",
+      "SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play",
+      "SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play",
+      "SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play",
+      "SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play",
+      "SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play",
+      "V-Soccer Argentina Liga Profesional - 12 mins [V]",
+      "V-Soccer Champions League - 12 mins [V]",
+      "V-Soccer China Super League - 12 mins [V]",
+      "V-Soccer Copa Libertadores - 12 mins [V]",
+      "V-Soccer England Premier League - 12 mins [V]",
+      "V-Soccer France Ligue 1 - 12 mins [V]",
+      "V-Soccer Germany Bundesliga - 12 mins [V]",
+      "V-Soccer International Friendly - 12 mins [V]",
+      "V-Soccer Italy Serie A - 12 mins [V]",
+      "V-Soccer Korea K-League 1 - 12 mins [V]",
+      "V-Soccer Spain La Liga - 12 mins [V]",
+      "V-Soccer Women\u2019s Nations League - 12 mins [V]"
+    ],
+    "days": [
+      {
+        "date": "2026-11-01",
+        "leagues": {
+          "SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play": 6,
+          "SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play": 189,
+          "SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play": 91,
+          "SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play": 231,
+          "E-FOOTBALL F26 INTERNATIONAL FRIENDLY - 16 Mins Play": 9,
+          "E-FOOTBALL F26 ELITE CLUB FRIENDLY - 16 Mins Play": 45,
+          "E-FOOTBALL F24 INTERNATIONAL FRIENDLY - 16 Mins Play": 26,
+          "E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play": 116,
+          "SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play": 9,
+          "V-Soccer Champions League - 12 mins [V]": 87,
+          "V-Soccer International Friendly - 12 mins [V]": 86,
+          "V-Soccer Spain La Liga - 12 mins [V]": 86,
+          "V-Soccer Argentina Liga Profesional - 12 mins [V]": 86,
+          "V-Soccer Italy Serie A - 12 mins [V]": 86,
+          "V-Soccer Women\u2019s Nations League - 12 mins [V]": 86,
+          "V-Soccer France Ligue 1 - 12 mins [V]": 86,
+          "V-Soccer Germany Bundesliga - 12 mins [V]": 86,
+          "V-Soccer Korea K-League 1 - 12 mins [V]": 84,
+          "V-Soccer Copa Libertadores - 12 mins [V]": 86,
+          "V-Soccer China Super League - 12 mins [V]": 86,
+          "V-Soccer England Premier League - 12 mins [V]": 86
+        },
+        "msportsSnapshots": [
+          {
+            "session": "2026-10-31",
+            "updatedAt": "2026-11-06T12:01:58+00:00"
+          },
+          {
+            "session": "2026-11-01",
+            "updatedAt": "2026-11-06T12:02:01+00:00"
+          }
+        ],
+        "vsoccerUpdatedAt": "2026-11-06T12:02:50+00:00"
+      },
+      {
+        "date": "2026-11-02",
+        "leagues": {
+          "SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play": 6,
+          "SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play": 21,
+          "SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play": 186,
+          "SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play": 92,
+          "SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play": 273,
+          "E-FOOTBALL F26 INTERNATIONAL FRIENDLY - 16 Mins Play": 23,
+          "E-FOOTBALL F26 ELITE CLUB FRIENDLY - 16 Mins Play": 52,
+          "E-FOOTBALL F24 INTERNATIONAL FRIENDLY - 16 Mins Play": 76,
+          "E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play": 127,
+          "V-Soccer Women\u2019s Nations League - 12 mins [V]": 90,
+          "V-Soccer France Ligue 1 - 12 mins [V]": 90,
+          "V-Soccer Germany Bundesliga - 12 mins [V]": 90,
+          "V-Soccer Korea K-League 1 - 12 mins [V]": 90,
+          "V-Soccer Copa Libertadores - 12 mins [V]": 90,
+          "V-Soccer China Super League - 12 mins [V]": 90,
+          "V-Soccer England Premier League - 12 mins [V]": 90,
+          "V-Soccer Champions League - 12 mins [V]": 90,
+          "V-Soccer International Friendly - 12 mins [V]": 90,
+          "V-Soccer Spain La Liga - 12 mins [V]": 90,
+          "V-Soccer Argentina Liga Profesional - 12 mins [V]": 90,
+          "V-Soccer Italy Serie A - 12 mins [V]": 90
+        },
+        "msportsSnapshots": [
+          {
+            "session": "2026-11-01",
+            "updatedAt": "2026-11-06T12:02:01+00:00"
+          },
+          {
+            "session": "2026-11-02",
+            "updatedAt": "2026-11-06T12:02:03+00:00"
+          }
+        ],
+        "vsoccerUpdatedAt": "2026-11-06T12:03:00+00:00"
+      },
+      {
+        "date": "2026-11-03",
+        "leagues": {
+          "SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play": 92,
+          "SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play": 19,
+          "V-Soccer International Friendly - 12 mins [V]": 90,
+          "V-Soccer Spain La Liga - 12 mins [V]": 90,
+          "V-Soccer Argentina Liga Profesional - 12 mins [V]": 90,
+          "V-Soccer Italy Serie A - 12 mins [V]": 90,
+          "V-Soccer Women\u2019s Nations League - 12 mins [V]": 90,
+          "V-Soccer France Ligue 1 - 12 mins [V]": 90,
+          "V-Soccer Germany Bundesliga - 12 mins [V]": 90,
+          "V-Soccer Korea K-League 1 - 12 mins [V]": 90,
+          "V-Soccer Copa Libertadores - 12 mins [V]": 90,
+          "V-Soccer China Super League - 12 mins [V]": 90,
+          "V-Soccer England Premier League - 12 mins [V]": 90,
+          "V-Soccer Champions League - 12 mins [V]": 90,
+          "SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play": 245,
+          "SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play": 188,
+          "E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play": 108,
+          "E-FOOTBALL F24 INTERNATIONAL FRIENDLY - 16 Mins Play": 54,
+          "E-FOOTBALL F26 ELITE CLUB FRIENDLY - 16 Mins Play": 47,
+          "E-FOOTBALL F26 INTERNATIONAL FRIENDLY - 16 Mins Play": 19,
+          "SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play": 6
+        },
+        "msportsSnapshots": [
+          {
+            "session": "2026-11-02",
+            "updatedAt": "2026-11-06T12:02:03+00:00"
+          },
+          {
+            "session": "2026-11-03",
+            "updatedAt": "2026-11-06T12:02:05+00:00"
+          }
+        ],
+        "vsoccerUpdatedAt": "2026-11-06T12:03:57+00:00"
+      },
+      {
+        "date": "2026-11-04",
+        "leagues": {
+          "V-Soccer China Super League - 12 mins [V]": 90,
+          "V-Soccer England Premier League - 12 mins [V]": 90,
+          "V-Soccer Germany Bundesliga - 12 mins [V]": 90,
+          "V-Soccer Korea K-League 1 - 12 mins [V]": 90,
+          "V-Soccer Copa Libertadores - 12 mins [V]": 90,
+          "V-Soccer Women\u2019s Nations League - 12 mins [V]": 90,
+          "V-Soccer France Ligue 1 - 12 mins [V]": 90,
+          "SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play": 101,
+          "V-Soccer International Friendly - 12 mins [V]": 90,
+          "V-Soccer Spain La Liga - 12 mins [V]": 90,
+          "V-Soccer Argentina Liga Profesional - 12 mins [V]": 90,
+          "V-Soccer Italy Serie A - 12 mins [V]": 90,
+          "V-Soccer Champions League - 12 mins [V]": 90,
+          "SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play": 22,
+          "SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play": 30,
+          "SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play": 189,
+          "SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play": 262,
+          "E-FOOTBALL F26 INTERNATIONAL FRIENDLY - 16 Mins Play": 33,
+          "E-FOOTBALL F26 ELITE CLUB FRIENDLY - 16 Mins Play": 59,
+          "E-FOOTBALL F24 INTERNATIONAL FRIENDLY - 16 Mins Play": 68,
+          "E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play": 112
+        },
+        "msportsSnapshots": [
+          {
+            "session": "2026-11-03",
+            "updatedAt": "2026-11-06T12:02:05+00:00"
+          },
+          {
+            "session": "2026-11-04",
+            "updatedAt": "2026-11-06T12:02:08+00:00"
+          }
+        ],
+        "vsoccerUpdatedAt": "2026-11-06T12:03:17+00:00"
+      },
+      {
+        "date": "2026-11-05",
+        "leagues": {
+          "SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play": 24,
+          "SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play": 24,
+          "SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play": 191,
+          "SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play": 102,
+          "SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play": 268,
+          "E-FOOTBALL F26 INTERNATIONAL FRIENDLY - 16 Mins Play": 53,
+          "E-FOOTBALL F26 ELITE CLUB FRIENDLY - 16 Mins Play": 77,
+          "E-FOOTBALL F24 INTERNATIONAL FRIENDLY - 16 Mins Play": 75,
+          "E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play": 111,
+          "V-Soccer International Friendly - 12 mins [V]": 83,
+          "V-Soccer Spain La Liga - 12 mins [V]": 90,
+          "V-Soccer Argentina Liga Profesional - 12 mins [V]": 90,
+          "V-Soccer Italy Serie A - 12 mins [V]": 90,
+          "V-Soccer Women\u2019s Nations League - 12 mins [V]": 90,
+          "V-Soccer France Ligue 1 - 12 mins [V]": 90,
+          "V-Soccer Germany Bundesliga - 12 mins [V]": 88,
+          "V-Soccer Korea K-League 1 - 12 mins [V]": 90,
+          "V-Soccer Copa Libertadores - 12 mins [V]": 90,
+          "V-Soccer China Super League - 12 mins [V]": 90,
+          "V-Soccer England Premier League - 12 mins [V]": 90,
+          "V-Soccer Champions League - 12 mins [V]": 90
+        },
+        "msportsSnapshots": [
+          {
+            "session": "2026-11-04",
+            "updatedAt": "2026-11-06T12:02:08+00:00"
+          },
+          {
+            "session": "2026-11-05",
+            "updatedAt": "2026-11-06T12:02:10+00:00"
+          }
+        ],
+        "vsoccerUpdatedAt": "2026-11-06T12:03:28+00:00"
+      },
+      {
+        "date": "2026-11-06",
+        "leagues": {
+          "V-Soccer Champions League - 12 mins [V]": 74,
+          "V-Soccer International Friendly - 12 mins [V]": 74,
+          "V-Soccer Argentina Liga Profesional - 12 mins [V]": 74,
+          "V-Soccer Italy Serie A - 12 mins [V]": 69,
+          "V-Soccer Women\u2019s Nations League - 12 mins [V]": 74,
+          "V-Soccer France Ligue 1 - 12 mins [V]": 74,
+          "V-Soccer Germany Bundesliga - 12 mins [V]": 75,
+          "V-Soccer Korea K-League 1 - 12 mins [V]": 74,
+          "V-Soccer Copa Libertadores - 12 mins [V]": 75,
+          "V-Soccer China Super League - 12 mins [V]": 75,
+          "V-Soccer England Premier League - 12 mins [V]": 75,
+          "V-Soccer Spain La Liga - 12 mins [V]": 73,
+          "SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play": 28,
+          "SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play": 18,
+          "SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play": 156,
+          "SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play": 70,
+          "SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play": 199,
+          "E-FOOTBALL F26 INTERNATIONAL FRIENDLY - 16 Mins Play": 37,
+          "E-FOOTBALL F26 ELITE CLUB FRIENDLY - 16 Mins Play": 46,
+          "E-FOOTBALL F24 INTERNATIONAL FRIENDLY - 16 Mins Play": 56,
+          "E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play": 85
+        },
+        "msportsSnapshots": [
+          {
+            "session": "2026-11-05",
+            "updatedAt": "2026-11-06T12:02:10+00:00"
+          },
+          {
+            "session": "2026-11-06",
+            "updatedAt": "2026-11-06T12:02:13+00:00"
+          }
+        ],
+        "vsoccerUpdatedAt": "2026-11-06T12:03:39+00:00"
+      }
+    ]
+  }
+}

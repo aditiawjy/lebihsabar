@@ -76,36 +76,17 @@
     const goals = scoreGoals(score);
     return goals !== null && goals[0] + goals[1] < 2;
   };
-  function under15StreakTeams(matches, league, thresholds) {
-    const periodKey = isSessionLeague(league)
-      ? time => new Date(Date.parse(time)-4*3600000).toISOString().slice(0,10)
-      : time => new Date(Date.parse(time)+8*3600000).toISOString().slice(0,10);
-    return resultStreakTeams(matches,1,team => thresholds?.[noGoalTeamKey(team)],periodKey);
-  }
-  function resultStreakTeams(matches,maxGoals,threshold=3,withinDay=false) {
-    const streaks = new Map();
-    const lastDays = new Map();
-    const nameOf = team => String(team || '').replace(/\s*\(V\)/gi,'').replace(/\s+/g,' ').trim();
-    for (const match of [...matches].sort((a,b)=>String(a.time || '').localeCompare(String(b.time || '')))) {
-      if (match.status !== 'Selesai') continue;
-      const goals = scoreGoals(match.ft);
-      if (!goals) continue;
-      for (const team of [match.home,match.away]) {
-        const name = nameOf(team);
-        const day = typeof withinDay === 'function' ? withinDay(match.time) : String(match.time || '').slice(0,10);
-        if (withinDay && lastDays.get(name)!==day) streaks.set(name,0);
-        lastDays.set(name,day);
-        if (name) streaks.set(name,goals[0]+goals[1] <= maxGoals ? (streaks.get(name)||0)+1 : 0);
-      }
-    }
-    // Live scores can break a streak, but cannot add an unfinished result.
-    for (const match of matches) {
+  function csvStreakTeams(data, market, maxGoals) {
+    const stats = data.csvStreakStats?.[market] || {};
+    const broken = new Set();
+    for (const match of data.displayMatches) {
       if (!match.live?.fresh) continue;
       const goals = scoreGoals(match.live.score);
-      if (goals && goals[0]+goals[1] > maxGoals)
-        for (const team of [match.home,match.away]) streaks.set(nameOf(team),0);
+      if (goals && goals[0] + goals[1] > maxGoals)
+        for (const team of [match.home, match.away]) broken.add(noGoalTeamKey(team));
     }
-    return [...streaks].filter(([team,count])=>{ const minimum = typeof threshold === 'function' ? threshold(team) : threshold; return Number.isInteger(minimum) && minimum > 0 && count>=minimum; }).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+    return Object.entries(stats).filter(([key, entry]) => entry.current > 0 && entry.current >= entry.record && !broken.has(key))
+      .map(([, entry]) => [entry.name, entry.current]).sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]));
   }
   const noGoalTeamKey = name=>String(name || '').replace(/\s*\(V\)/gi,'').replace(/\s+/g,' ').trim().toLowerCase();
   function teamNoGoalStreak(matches,team,threshold,league='15') {
@@ -217,6 +198,7 @@
     if (update) showApiHealth('loading', 'Menghubungi API. Data tersimpan tetap ditampilkan selama pembaruan.');
     setApiState(update ? 'Mengambil hasil terbaru dari API…' : 'Memuat hasil tersimpan…');
     try {
+      await window.SabarajaSignalHistory.load(requestedDate);
       const snapshots = [];
       let updateError = null;
       // All leagues share the same UTC+8 snapshot: refresh it only once.
@@ -232,6 +214,15 @@
         }
         if (!response.ok) throw new Error(data.error || 'Gagal memuat hasil API League ' + league + '.');
         snapshots.push(data);
+        // Restore each league immediately; do not hide every match until all eight requests finish.
+        if (date.value === requestedDate) {
+          if (snapshotDate !== requestedDate) resultSnapshots = [];
+          const existing = resultSnapshots.findIndex(snapshot => String(snapshot.league) === String(data.league));
+          if (existing < 0) resultSnapshots.push(data); else resultSnapshots[existing] = data;
+          snapshotDate = requestedDate;
+          rendered = ''; renderResults();
+        }
+
       }
       saveMatches = snapshots.flatMap(data => data.saveMatches || []);
       const liveSnapshot = snapshots.find(data => data.league === '16');
@@ -308,7 +299,7 @@
       };
       const snapshots = (resultSnapshots.length ? resultSnapshots : ['15','16','20'].map(league => ({league,date:date.value,timezone:'UTC+8',matches:[]})))
         .map(data => ({...data, displayMatches:window.SabarajaLiveResults.merge(data,liveState,liveAnalysis)}));
-      const signature = JSON.stringify([query, selectedPhase,selectedLeague,selectedMarket,selectedRecord, [...collapsedLeagues], snapshots.map(data => [data.league, data.date, data.displayMatches, data.noGoalThresholds, data.under15Thresholds, data.under15StreakThresholds, data.zeroStreakThresholds, data.zeroRecordSignals, data.under15RecordSignals,data.zeroNearRecordSignals,data.under15NearRecordSignals])]);
+      const signature = JSON.stringify([query, selectedPhase,selectedLeague,selectedMarket,selectedRecord, [...collapsedLeagues], snapshots.map(data => [data.league, data.date, data.displayMatches, data.noGoalThresholds, data.under15Thresholds, data.under15StreakThresholds, data.zeroStreakThresholds, data.csvStreakStats, data.zeroRecordSignals, data.under15RecordSignals,data.zeroNearRecordSignals,data.under15NearRecordSignals])]);
       if (signature !== rendered) {
         window.SabarajaPatternDisplay = {snapshots};
         const visibleCount = snapshots.filter(data=>selectedLeague==='all'||selectedLeague===data.league).reduce((sum,data) => sum + data.displayMatches.filter(match=>matchesSearch(match,data)).length,0);
@@ -427,27 +418,25 @@
             chip.title = `${team}: FT 0–0 ${count} kali ${isSessionLeague(data.league) ? 'dalam sesi ini' : 'pada tanggal ini'}`;
             zeroZeroCount.append(chip);
           }
-          const streakGroups = [{zeroZeroStreak:false,underStreaks:under15StreakTeams(data.displayMatches,data.league,data.under15StreakThresholds)}];
-          {
-            const periodKey = isSessionLeague(data.league)
-              ? time=>new Date(Date.parse(time)-4*3600000).toISOString().slice(0,10) : time=>new Date(Date.parse(time)+8*3600000).toISOString().slice(0,10);
-            streakGroups.unshift({zeroZeroStreak:true,underStreaks:resultStreakTeams(data.displayMatches,0,team=>data.zeroStreakThresholds?.[noGoalTeamKey(team)],periodKey)});
-          }
+          const streakGroups = [
+            {zeroZeroStreak:true, underStreaks:csvStreakTeams(data,'zero',0)},
+            {zeroZeroStreak:false, underStreaks:csvStreakTeams(data,'under15',1)}
+          ];
           for (const {zeroZeroStreak,underStreaks} of streakGroups) {
           if (underStreaks.length || zeroZeroStreak) {
             const label = document.createElement('span'); label.className = 'results-zerozero-label';
             label.textContent = zeroZeroStreak ? 'FT 0–0 beruntun' : 'U1.5 beruntun'; zeroZeroCount.append(label);
             if (!underStreaks.length) {
               const empty = document.createElement('span'); empty.className = 'results-zerozero-empty';
-              empty.textContent = `Belum ada tim yang mencapai rekor CSV ${isSessionLeague(data.league)?'sesi ini':'hari ini'}`;
+              empty.textContent = 'Belum ada tim yang mencapai rekor beruntun CSV lintas hari/sesi';
               zeroZeroCount.append(empty);
             }
             for (const [team,count] of underStreaks) {
               const chip = document.createElement('span'); chip.className = 'results-zerozero-chip results-under-streak';
               chip.textContent = `${team} (${count}× beruntun)`;
               chip.title = zeroZeroStreak
-                ? `${team}: ${count} hasil FT 0–0 berturut-turut pada rentang kartu ini; rekor beruntun CSV ${data.zeroStreakThresholds?.[noGoalTeamKey(team)]}×. Hilang saat pertandingan berikutnya mencetak gol.`
-                : `${team}: ${count} hasil FT Under 1.5 berturut-turut pada rentang kartu ini; rekor beruntun CSV ${data.under15StreakThresholds?.[noGoalTeamKey(team)]}×. Hilang saat pertandingan berikutnya mencapai total 2 gol.`;
+                ? `${team}: ${count} hasil FT 0–0 berturut-turut dari CSV lintas hari/sesi; rekor beruntun CSV ${data.zeroStreakThresholds?.[noGoalTeamKey(team)]}×. Hilang saat pertandingan berikutnya mencetak gol.`
+                : `${team}: ${count} hasil FT Under 1.5 berturut-turut dari CSV lintas hari/sesi; rekor beruntun CSV ${data.under15StreakThresholds?.[noGoalTeamKey(team)]}×. Hilang saat pertandingan berikutnya mencapai total 2 gol.`;
               zeroZeroCount.append(chip);
             }
           }
@@ -511,6 +500,7 @@
             time.append(state);
             const teams = row.insertCell();
             teams.append(document.createTextNode(match.home + ' vs ' + match.away));
+            window.SabarajaRecentMeetings.append(teams, match.h2h?.recentMeetings || [], /^1H\b/i.test(match.live?.status || '') ? null : match.live?.ht || match.ht, null, match.h2h?.recentByHt || {}, match.home, match.h2h?.htRun);
             if (match.status !== 'Selesai' && match.status !== 'Ditunda' && match.h2h) {
               const liveStatus = String(match.live?.status || '');
               const afterFirstHalf = /^(?:2H\b|H\.?\s*Time|HT$|Half[ -]?Time)/i.test(liveStatus);
@@ -646,6 +636,8 @@
               }
               teams.append(badges);
             }
+            window.SabarajaSignalEvaluation.append(teams, match, data.league);
+            window.SabarajaSignalHistory.capture(teams, data.league, match);
             if (match.live && !match.live.kickoffMatched) {
               const hint = document.createElement('small'); hint.className = 'result-live-hint';
               hint.textContent = 'Kickoff belum cocok dengan API'; teams.append(hint);
@@ -747,6 +739,24 @@
         if (data.history_saved === false) setSaveState('CSV tersimpan · riwayat gagal', 'CSV tersimpan, tetapi riwayat tidak dapat dicatat.', 'error');
       }
       try {
+        if ((data.inserted || data.updated) && date.value === selectedDate && resultSnapshots.length) {
+          const streakResponse = await fetch('pattern-streak-data.php', {
+            method:'POST', headers:{'Content-Type':'application/json'}, cache:'no-store',
+            body:JSON.stringify({date:selectedDate,leagues:resultSnapshots.map(snapshot=>({league:snapshot.league,name:snapshot.historyLeagueName}))}),
+            signal:AbortSignal.timeout(90000)
+          });
+          const refreshed = await streakResponse.json();
+          if (!streakResponse.ok) throw new Error(refreshed.error || 'Gagal memperbarui streak CSV.');
+          if (date.value === selectedDate) {
+            for (const snapshot of resultSnapshots) {
+              const stats = refreshed.leagues?.[snapshot.league]; if (!stats) continue;
+              snapshot.csvStreakStats = stats;
+              snapshot.under15StreakThresholds = Object.fromEntries(Object.entries(stats.under15).map(([key,value])=>[key,value.record]));
+              snapshot.zeroStreakThresholds = Object.fromEntries(Object.entries(stats.zero).map(([key,value])=>[key,value.record]));
+            }
+            rendered = ''; renderResults();
+          }
+        }
         await window.SabarajaPatternEngine?.refreshHistory(true);
         window.SabarajaPatternLive?.refreshView();
       }

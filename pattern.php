@@ -49,6 +49,7 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
       <p><strong>HT</strong>: skor babak pertama. <strong>FT</strong>: skor akhir. <strong>U1.5</strong>: Under 1.5, total 0 atau 1 gol. <strong>O0.5</strong>: Over 0.5, minimal 1 gol. <strong>H2H</strong>: riwayat pertemuan kedua tim. <strong>API saja</strong>: data dari API; tidak tersedia pembaruan live.</p>
     </details>
   </div>
+  <p id="pattern-signal-history-status" class="results-search-status" role="status">Sinyal yang pernah tampil disimpan per pertandingan untuk evaluasi.</p>
   <p id="pattern-results-note" role="status" class="results-error-note" hidden>Memuat hasil API…</p>
   <p id="pattern-results-save-summary" role="status" aria-live="polite" class="results-save-summary" hidden></p>
   <p id="pattern-all-summary" role="status" aria-live="polite" class="results-save-summary" hidden></p>
@@ -245,6 +246,14 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
 #pattern-results-host .results-zerozero-chip.is-high-frequency{background:#b91c1c;border-color:#b91c1c;color:#fff;font-weight:600}
 #pattern-results-host .results-zerozero-chip.results-under-streak{background:#ede9fe;border-color:#c4b5fd;color:#5b21b6;font-weight:600}
 #pattern-results-host .result-h2h-badge{display:block;width:fit-content;margin-top:4px;padding:3px 6px;border-radius:5px;background:#ecfdf5;color:#166534;border:1px solid #bbf7d0;font-size:10px;font-weight:600;line-height:1.5}
+#pattern-results-host .signal-outcome{display:inline-block;margin-left:5px;padding:0 4px;border-radius:3px;font-size:9px;font-weight:700;background:#e2e8f0;color:#334155}
+#pattern-results-host .signal-outcome.is-hit{background:#dcfce7;color:#166534}
+#pattern-results-host .signal-outcome.is-miss{background:#fee2e2;color:#991b1b}
+#pattern-results-host .signal-outcome.is-pending{background:#fef3c7;color:#92400e}
+#pattern-results-host .result-analysis{margin-top:5px;font-size:10px;text-align:left;white-space:normal}
+#pattern-results-host .result-analysis>summary{color:#475569;cursor:pointer}
+#pattern-results-host .result-analysis-note{color:#64748b}
+#pattern-results-host .result-historical-signal{background:#eff6ff;color:#1e40af;border-color:#bfdbfe}
 #pattern-results-host .result-h2h-badge.is-perfect-history{background:#065f46;color:#fff;border-color:#047857;font-weight:700}
 #pattern-results-host .result-h2h-badge{cursor:pointer;list-style:none}
 #pattern-results-host .result-h2h-badge::before{content:'▸ ';}
@@ -256,6 +265,9 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
 #pattern-results-host .pattern-results-grid{align-items:start}
 @media(max-width:1200px){#pattern-results-host .pattern-results-grid{grid-template-columns:minmax(0,1fr)}}
 </style>
+<script src="pattern-signal-evaluation.js?v=<?= (int) filemtime(__DIR__.'/pattern-signal-evaluation.js') ?>" defer></script>
+<script src="pattern-signal-history.js?v=<?= (int) filemtime(__DIR__.'/pattern-signal-history.js') ?>" defer></script>
+<script src="pattern-recent-meetings.js?v=<?= (int) filemtime(__DIR__.'/pattern-recent-meetings.js') ?>" defer></script>
 <script src="pattern-live-results.js?v=<?= (int) filemtime(__DIR__.'/pattern-live-results.js') ?>" defer></script>
 <script src="vsoccer-results.js?v=<?= (int) filemtime(__DIR__.'/vsoccer-results.js') ?>" defer></script>
 <script src="pattern-all-results.js?v=<?= (int) filemtime(__DIR__.'/pattern-all-results.js') ?>" defer></script>
@@ -363,6 +375,17 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
 #pattern-table-host tbody tr:hover { background:#f8fafc; }
 #pattern-table-host .pattern-code { white-space:nowrap; color:#2563eb; font-weight:600; }
 #pattern-table-host .pattern-note { color:#64748b; font-size:13px; margin:0 0 16px; }
+#pattern-results-host .result-recent-meetings{margin:7px 0 0;padding:6px 0 0;border-top:1px solid #dbe5f1;text-align:left;white-space:normal;font-size:10px;line-height:1.5;color:#475569}
+#pattern-results-host tr.result-repeat-ht>td{background:#fff7d6!important}
+#pattern-results-host .result-recent-same-ht{border-top-color:#e9c65b}
+#pattern-results-host .result-recent-same-ht strong{color:#854d0e}
+#pattern-results-host .result-ht-run{margin-top:5px;font-size:10px;line-height:1.5;font-weight:600;color:#1e40af}
+#pattern-results-host .result-recent-meetings strong{display:block;font-size:10px;font-weight:600;color:#334155}
+#pattern-results-host .result-recent-meetings ol{list-style:none;margin:3px 0 0;padding:0}
+#pattern-results-host .result-recent-meetings li+li{margin-top:5px}
+#pattern-results-host .result-recent-meetings li{display:flex;flex-wrap:wrap;column-gap:6px;align-items:baseline}
+#pattern-results-host .result-recent-meetings time{display:inline;color:#64748b}
+#pattern-results-host .result-recent-meetings .recent-score{display:inline;font-weight:600;color:#334155;font-variant-numeric:tabular-nums}
 </style>
 <script>
 (() => {

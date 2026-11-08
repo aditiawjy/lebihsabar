@@ -90,6 +90,9 @@ $rows = [];
 $saveMatches = [];
 require_once __DIR__.'/pattern-h2h.php';
 $h2hStats = patternH2hStats();
+require_once __DIR__.'/pattern-signal-analysis.php';
+$analysisTeamIndex = [];
+usort($merged, static fn($a,$b)=>strcmp($a['match_date'] ?? '',$b['match_date'] ?? ''));
 foreach ($merged as $match) {
     if ((string)($match['events'] ?? '') !== $leagues[$league]) continue;
     try {
@@ -111,6 +114,8 @@ foreach ($merged as $match) {
             'ft_home'=>(int)$score[3], 'ft_away'=>(int)$score[4]
         ];
     }
+    $analysisLeague = $match['event_name'] ?? '';
+    if (!isset($analysisTeamIndex[$analysisLeague])) $analysisTeamIndex += patternAnalysisTeamIndex($h2hStats, $analysisLeague);
     $h2h = $h2hStats[($match['event_name'] ?? '').'|'.patternH2hKey($match['home_name'] ?? '',$match['away_name'] ?? '')] ?? null;
     $secondHalfByHt = [];
     if ($h2h) {
@@ -189,9 +194,12 @@ foreach ($merged as $match) {
         }
         $h2h['lastMeeting'] = patternH2hLatestBefore($h2h,$time->format('c'));
         $h2h['recentMeetings'] = patternH2hRecentBefore($h2h,$time->format('c'),5);
+        $h2h['recentByHt'] = patternH2hRecentByHt($allPreviousMeetings, trim(preg_replace('/\s*\(V\)/i', '', $match['home_name'] ?? '')), trim(preg_replace('/\s*\(V\)/i', '', $match['away_name'] ?? '')));
+        $h2h['htRun'] = patternH2hHtRun($allPreviousMeetings, $match['home_name'] ?? '', $match['away_name'] ?? '');
         unset($h2h['meetings']);
     }
     $rows[] = [
+        'signalAnalysis'=>patternAdvancedAnalysis($h2h ? $allPreviousMeetings : [], $analysisTeamIndex, $match['event_name'] ?? '', $match['home_name'] ?? '', $match['away_name'] ?? '', $time->format('c')),
         'secondHalfByHt'=>$secondHalfByHt,
         'h2h'=>$h2h ?: null,
         'h2hZeroStreak'=>count($h2h['recentMeetings'] ?? []) >= 3 && array_reduce(array_slice($h2h['recentMeetings'], 0, 3), static fn($all, $meeting) => $all && ($meeting['totalGoals'] ?? null) === 0, true),
@@ -233,8 +241,9 @@ require_once __DIR__.'/pattern-no-goal.php';
 require_once __DIR__.'/pattern-under15-streak.php';
 $streakLeagueNames = ['15'=>'SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play', '16'=>'SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play', '20'=>'SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play'];
 $streakLeagueName = $extraNames[$league] ?? $streakLeagueNames[$league] ?? '';
-$under15StreakThresholds = $streakLeagueName === '' ? [] : patternUnder15StreakThresholds(__DIR__.'/matches.csv', $streakLeagueName, in_array($league, ['16','vietnam15'], true));
-$zeroStreakThresholds = $streakLeagueName === '' ? [] : patternUnder15StreakThresholds(__DIR__.'/matches.csv', $streakLeagueName, in_array($league, ['16','vietnam15'], true), 0);
+$csvStreakStats = $streakLeagueName === '' ? ['under15'=>[], 'zero'=>[]] : patternCsvStreakStats(__DIR__.'/matches.csv', $streakLeagueName, $period['periodEnd']);
+$under15StreakThresholds = array_map(static fn($entry) => $entry['record'], $csvStreakStats['under15']);
+$zeroStreakThresholds = array_map(static fn($entry) => $entry['record'], $csvStreakStats['zero']);
 $csvUnderHistory = teamZeroHistoryCached(__DIR__.'/matches.csv', [], 'under15');
 $under15Thresholds = [];
 foreach ($csvUnderHistory['records'] as $record) {
@@ -248,6 +257,7 @@ echo json_encode(array_merge($period, ['date'=>$date, 'league'=>$league, 'update
     'zeroNearRecordSignals'=>$nearRecordSignals['zero'], 'under15NearRecordSignals'=>$nearRecordSignals['under15'],
     'noGoalThresholds'=>in_array($league,['15','16','20'],true)?patternNoGoalThresholds(null,$league):null,
     'under15Thresholds'=>$under15Thresholds,
+    'csvStreakStats'=>$csvStreakStats,
     'under15StreakThresholds'=>$under15StreakThresholds,
     'historyLeagueName'=>$streakLeagueName,
     'zeroStreakThresholds'=>$zeroStreakThresholds,

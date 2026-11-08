@@ -33,6 +33,10 @@
       for (const value of [match.time.slice(11,16), clean(match.league), clean(match.home)+' vs '+clean(match.away), match.ht || '—', match.ft]) {
         const cell = document.createElement('td'); cell.textContent = value; row.append(cell);
       }
+      window.SabarajaRecentMeetings.append(row.cells[2], match.recentMeetings || [], match.ht, null, match.recentByHt || {}, match.home, match.htRun);
+      const evaluated={...match,status:'Selesai',time:match.time.replace(' ','T')+':00+07:00'};
+      window.SabarajaSignalEvaluation.append(row.cells[2], evaluated, 'vsoccer:'+match.league);
+      window.SabarajaSignalHistory.capture(row.cells[2], 'vsoccer:'+match.league, evaluated);
       fragment.append(row);
     }
     if (!matches.length) {

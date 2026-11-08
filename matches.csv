@@ -148882,8 +148882,8 @@ id,match_time,home_team,away_team,league,fh_home,fh_away,ft_home,ft_away,created
 158292,"2026-11-08 21:15:00","e-Real Madrid","e-Manchester United","E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play",2,1,2,2,"2026-11-08 14:52:03","2026-11-08 14:52:03",+08:00
 158293,"2026-11-08 21:15:00",e-Spain,e-Finland,"E-FOOTBALL F24 INTERNATIONAL FRIENDLY - 16 Mins Play",0,1,2,3,"2026-11-08 14:52:03","2026-11-08 14:52:03",+08:00
 158294,"2026-11-08 21:34:00","Bayer 04 [V]","Inter Milan [V]","V-Soccer Champions League - 12 mins [V]",0,2,1,4,"2026-11-08 14:52:24","2026-11-08 14:52:24",+08:00
-158295,"2026-11-08 21:29:00","Netherlands [V]","Germany [V]","V-Soccer International Friendly - 12 mins [V]",1,2,1,4,"2026-11-08 14:52:24","2026-11-08 14:52:24",+08:00
-158296,"2026-11-08 21:28:00","Atletico Madrid [V]","Villarreal CF [V]","V-Soccer Spain La Liga - 12 mins [V]",2,1,4,2,"2026-11-08 14:52:24","2026-11-08 14:52:24",+08:00
+158295,"2026-11-08 21:29:00","Netherlands [V]","Germany [V]","V-Soccer International Friendly - 12 mins [V]",1,2,1,4,"2026-11-08 14:52:24","2026-11-08 15:49:12",+08:00
+158296,"2026-11-08 21:28:00","Atletico Madrid [V]","Villarreal CF [V]","V-Soccer Spain La Liga - 12 mins [V]",2,1,4,2,"2026-11-08 14:52:24","2026-11-08 15:48:45",+08:00
 158297,"2026-11-08 21:37:00","Shanghai Shenhua [V]","Shanghai Port [V]","V-Soccer China Super League - 12 mins [V]",1,2,2,2,"2026-11-08 14:53:38","2026-11-08 14:53:38",+08:00
 158298,"2026-11-08 21:36:00","Chelsea [V]","Manchester City [V]","V-Soccer England Premier League - 12 mins [V]",1,2,3,3,"2026-11-08 14:53:38","2026-11-08 14:53:38",+08:00
 158299,"2026-11-08 21:42:00","Bologna FC 1909 [V]","Napoli [V]","V-Soccer Italy Serie A - 12 mins [V]",1,0,1,1,"2026-11-08 14:58:16","2026-11-08 14:58:16",+08:00
@@ -148917,9 +148917,9 @@ id,match_time,home_team,away_team,league,fh_home,fh_away,ft_home,ft_away,created
 158327,"2026-11-08 21:45:00","e-RB Leipzig","e-Borussia Dortmund","E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play",2,1,2,1,"2026-11-08 15:23:38","2026-11-08 15:23:38",+08:00
 158328,"2026-11-08 22:06:00","Borussia Dortmund [V]","Juventus [V]","V-Soccer Champions League - 12 mins [V]",2,1,5,3,"2026-11-08 15:24:01","2026-11-08 15:24:01",+08:00
 158329,"2026-11-08 22:01:00","Belgium [V]","Spain [V]","V-Soccer International Friendly - 12 mins [V]",1,2,1,2,"2026-11-08 15:24:01","2026-11-08 15:30:15",+08:00
-158330,"2026-11-08 22:00:00","Lanus [V]","Racing Club [V]","V-Soccer Argentina Liga Profesional - 12 mins [V]",1,2,3,3,"2026-11-08 15:24:01","2026-11-08 15:36:05",+08:00
-158331,"2026-11-08 22:00:00","Real Sociedad [V]","Real Madrid [V]","V-Soccer Spain La Liga - 12 mins [V]",1,2,4,5,"2026-11-08 15:24:01","2026-11-08 15:36:05",+08:00
-158332,"2026-11-08 21:58:00","Atalanta BC [V]","SS Lazio [V]","V-Soccer Italy Serie A - 12 mins [V]",1,2,4,5,"2026-11-08 15:24:01","2026-11-08 15:36:05",+08:00
+158330,"2026-11-08 22:00:00","Lanus [V]","Racing Club [V]","V-Soccer Argentina Liga Profesional - 12 mins [V]",3,2,3,3,"2026-11-08 15:24:01","2026-11-08 15:41:37",+08:00
+158331,"2026-11-08 22:00:00","Real Sociedad [V]","Real Madrid [V]","V-Soccer Spain La Liga - 12 mins [V]",3,2,4,5,"2026-11-08 15:24:01","2026-11-08 15:41:37",+08:00
+158332,"2026-11-08 21:58:00","Atalanta BC [V]","SS Lazio [V]","V-Soccer Italy Serie A - 12 mins [V]",3,2,4,5,"2026-11-08 15:24:01","2026-11-08 15:41:37",+08:00
 158333,"2026-11-08 21:57:00","England W [V]","Germany W [V]","V-Soccer Women’s Nations League - 12 mins [V]",3,2,5,4,"2026-11-08 15:24:01","2026-11-08 15:24:01",+08:00
 158334,"2026-11-08 21:56:00","PSG [V]","Stade Brestois 29 [V]","V-Soccer France Ligue 1 - 12 mins [V]",3,2,5,2,"2026-11-08 15:24:01","2026-11-08 15:24:01",+08:00
 158335,"2026-11-08 21:55:00","Vfb Stuttgart [V]","SV Werder Bremen [V]","V-Soccer Germany Bundesliga - 12 mins [V]",1,1,3,3,"2026-11-08 15:24:01","2026-11-08 15:24:01",+08:00
@@ -148941,3 +148941,31 @@ id,match_time,home_team,away_team,league,fh_home,fh_away,ft_home,ft_away,created
 158351,"2026-11-08 22:14:00","Napoli [V]","Torino FC [V]","V-Soccer Italy Serie A - 12 mins [V]",2,3,5,3,"2026-11-08 15:33:50","2026-11-08 15:33:50",+08:00
 158352,"2026-11-08 22:00:00","Italy (V)","Switzerland (V)","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play",1,0,1,0,"2026-11-08 15:36:05","2026-11-08 15:36:05",+08:00
 158353,"2026-11-08 22:00:00","Kuwait (V)","Pakistan (V)","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play",1,0,3,0,"2026-11-08 15:36:05","2026-11-08 15:36:05",+08:00
+158354,"2026-11-08 22:25:00","Beijing Guoan [V]","Rongcheng FC [V]","V-Soccer China Super League - 12 mins [V]",2,3,4,3,"2026-11-08 15:42:01","2026-11-08 15:42:01",+08:00
+158355,"2026-11-08 22:24:00","West Ham [V]","Liverpool [V]","V-Soccer England Premier League - 12 mins [V]",1,2,2,4,"2026-11-08 15:42:01","2026-11-08 15:42:01",+08:00
+158356,"2026-11-08 22:22:00","Atletico Madrid [V]","Aston Villa [V]","V-Soccer Champions League - 12 mins [V]",3,1,8,1,"2026-11-08 15:42:01","2026-11-08 15:42:01",+08:00
+158357,"2026-11-08 22:27:00","TSG Hoffenheim [V]","RB Leipzig [V]","V-Soccer Germany Bundesliga - 12 mins [V]",2,1,4,5,"2026-11-08 15:44:30","2026-11-08 15:44:30",+08:00
+158358,"2026-11-08 22:26:00","Colo-Colo [V]","Penarol [V]","V-Soccer Copa Libertadores - 12 mins [V]",2,1,3,4,"2026-11-08 15:44:30","2026-11-08 15:44:30",+08:00
+158359,"2026-11-08 22:15:00","e-Tottenham Hotspur","e-AS Monaco","E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play",2,0,4,1,"2026-11-08 15:48:45","2026-11-08 15:48:45",+08:00
+158360,"2026-11-08 22:15:00","e-Atletico Madrid",e-Ajax,"E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play",1,1,1,1,"2026-11-08 15:48:45","2026-11-08 15:48:45",+08:00
+158361,"2026-11-08 22:15:00",e-Germany,e-Finland,"E-FOOTBALL F26 INTERNATIONAL FRIENDLY - 16 Mins Play",1,0,1,1,"2026-11-08 15:48:45","2026-11-08 15:48:45",+08:00
+158362,"2026-11-08 22:32:00","Atletico Madrid [V]","D. Alaves [V]","V-Soccer Spain La Liga - 12 mins [V]",2,1,2,1,"2026-11-08 15:49:12","2026-11-08 16:01:22",+08:00
+158363,"2026-11-08 22:31:00","Independiente [V]","Newell's [V]","V-Soccer Argentina Liga Profesional - 12 mins [V]",1,1,1,2,"2026-11-08 15:49:12","2026-11-08 15:49:12",+08:00
+158364,"2026-11-08 22:30:00","Napoli [V]","Juventus [V]","V-Soccer Italy Serie A - 12 mins [V]",2,1,4,5,"2026-11-08 15:49:12","2026-11-08 16:01:22",+08:00
+158365,"2026-11-08 22:29:00","England W [V]","Spain W [V]","V-Soccer Women’s Nations League - 12 mins [V]",2,1,3,2,"2026-11-08 15:49:12","2026-11-08 16:01:22",+08:00
+158366,"2026-11-08 22:28:00","PSG [V]","Olympique de Marseille [V]","V-Soccer France Ligue 1 - 12 mins [V]",2,1,5,4,"2026-11-08 15:49:12","2026-11-08 16:01:22",+08:00
+158367,"2026-11-08 22:27:00","Suwon Samsung [V]","Pohang Steelers [V]","V-Soccer Korea K-League 1 - 12 mins [V]",2,1,3,4,"2026-11-08 15:49:12","2026-11-08 15:49:12",+08:00
+158368,"2026-11-08 22:15:00","Tottenham Hotspur (V)","Napoli (V)","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play",2,0,2,1,"2026-11-08 15:54:56","2026-11-08 15:54:56",+08:00
+158369,"2026-11-08 22:15:00","Poland (V)","Italy (V)","SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play",0,0,2,0,"2026-11-08 15:54:56","2026-11-08 15:54:56",+08:00
+158370,"2026-11-08 22:15:00","Slovenia (V)","Mexico (V)","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play",0,2,0,2,"2026-11-08 15:54:56","2026-11-08 15:54:56",+08:00
+158371,"2026-11-08 22:38:00","Real Madrid [V]","AC Milan [V]","V-Soccer Champions League - 12 mins [V]",1,1,4,1,"2026-11-08 15:55:22","2026-11-08 15:55:22",+08:00
+158372,"2026-11-08 22:33:00","England [V]","Italy [V]","V-Soccer International Friendly - 12 mins [V]",2,1,4,1,"2026-11-08 15:55:22","2026-11-08 16:01:22",+08:00
+158373,"2026-11-08 22:30:00","AS Monaco (V)","Valencia CF (V)","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play",3,1,3,1,"2026-11-08 16:00:56","2026-11-08 16:00:56",+08:00
+158374,"2026-11-08 22:30:00","Lazio (V)","Real Sociedad (V)","SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play",0,0,0,0,"2026-11-08 16:00:56","2026-11-08 16:00:56",+08:00
+158375,"2026-11-08 22:15:00","Colombia (V)","Algeria (V)","SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play",3,0,3,2,"2026-11-08 16:00:56","2026-11-08 16:00:56",+08:00
+158376,"2026-11-08 22:44:00","Monaco [V]","Stade Reims [V]","V-Soccer France Ligue 1 - 12 mins [V]",2,1,4,2,"2026-11-08 16:01:22","2026-11-08 16:01:22",+08:00
+158377,"2026-11-08 22:43:00","Borussia Dortmund [V]","Vfb Stuttgart [V]","V-Soccer Germany Bundesliga - 12 mins [V]",3,0,4,0,"2026-11-08 16:01:22","2026-11-08 16:01:22",+08:00
+158378,"2026-11-08 22:43:00","Seongnam FC [V]","Gangwon FC [V]","V-Soccer Korea K-League 1 - 12 mins [V]",1,0,1,0,"2026-11-08 16:01:22","2026-11-08 16:01:22",+08:00
+158379,"2026-11-08 22:42:00","Penarol [V]","Atletico Mineiro [V]","V-Soccer Copa Libertadores - 12 mins [V]",1,2,1,6,"2026-11-08 16:01:22","2026-11-08 16:01:22",+08:00
+158380,"2026-11-08 22:41:00","Zhejiang Pro [V]","Wuhan Three Towns [V]","V-Soccer China Super League - 12 mins [V]",1,0,2,4,"2026-11-08 16:01:22","2026-11-08 16:01:22",+08:00
+158381,"2026-11-08 22:40:00","Aston Villa [V]","Arsenal [V]","V-Soccer England Premier League - 12 mins [V]",2,0,3,3,"2026-11-08 16:01:22","2026-11-08 16:01:22",+08:00

@@ -16,9 +16,9 @@
   const note = document.getElementById('pattern-results-note');
   const body = document.getElementById('pattern-results-body');
   const extraBody = document.getElementById('pattern-results-extra-body');
-  const resultLeagues = ['15','16','20','vietnam15','f24-club','f24-international','f26-club','f26-international'];
+  const resultLeagues = ['16','vietnam15','f24-club','f24-international','f26-club','f26-international'];
   const isSessionLeague = league => ['16','vietnam15'].includes(String(league));
-  let busy = false, timer = null, stopped = false, rendered = '';
+  let busy = false, stopped = false, rendered = '';
   let saving = false, saveMatches = [], vsoccerSaveMatches = [], vsoccerSaveDate = null, pendingAutoSave = false;
   let savedFingerprint = '';
   let resultSnapshots = [], liveState = null, liveAnalysis = null;
@@ -184,14 +184,8 @@
     save.disabled = busy || saving || !count;
     save.textContent = saving ? 'Menyinkronkan…' : 'Sinkronkan ' + count + ' hasil ke matches.csv';
   }
-  const interval = 300000;
-  function schedule() {
-    clearTimeout(timer);
-    if (!stopped && !document.hidden) timer = setTimeout(() => load(true), interval);
-  }
   async function load(update = false) {
     if (busy || !date.value || stopped || (update && document.hidden)) return;
-    clearTimeout(timer);
     const requestedDate = date.value;
     busy = true; refresh.disabled = true; date.disabled = true;
     updateSaveButton();
@@ -204,10 +198,10 @@
       // All leagues share the same UTC+8 snapshot: refresh it only once.
       for (const league of resultLeagues) {
         let response = await fetch('pattern-results-data.php?date=' + encodeURIComponent(requestedDate) + '&league=' + league, {
-          method: update && league === '15' ? 'POST' : 'GET', cache:'no-store', signal:AbortSignal.timeout(90000)
+          method: update && league === resultLeagues[0] ? 'POST' : 'GET', cache:'no-store', signal:AbortSignal.timeout(90000)
         });
         let data = await response.json();
-        if (!response.ok && update && league === '15') {
+        if (!response.ok && update && league === resultLeagues[0]) {
           updateError = data.error || 'Pembaruan API gagal.';
           response = await fetch('pattern-results-data.php?date=' + encodeURIComponent(requestedDate) + '&league=' + league, {cache:'no-store', signal:AbortSignal.timeout(90000)});
           data = await response.json();
@@ -248,12 +242,12 @@
         await window.SabarajaSyncHistory?.failure('MSports',requestedDate,'fetch',updateError);
         const expired = /401|403|menolak sesi|perbarui sesi login/i.test(updateError);
         reportTelegramHealth('api', expired ? 'denied' : 'error');
-        showApiHealth('error', (expired ? 'Sesi ditolak (HTTP 401/403); kemungkinan kedaluwarsa. Perbarui sesi login dengan curl terbaru. ' : updateError + ' ') + (apiTimestamp ? 'Berkas tersimpan terlama: ' + apiTimestamp + '.' : 'Belum ada data tersimpan untuk tanggal ini.') + ' Akan dicoba kembali dalam 5 menit.');
+        showApiHealth('error', (expired ? 'Sesi ditolak (HTTP 401/403); kemungkinan kedaluwarsa. Perbarui sesi login dengan curl terbaru. ' : updateError + ' ') + (apiTimestamp ? 'Berkas tersimpan terlama: ' + apiTimestamp + '.' : 'Belum ada data tersimpan untuk tanggal ini.') + ' Tekan Perbarui dari API untuk mencoba lagi.');
         setApiState(apiHealthMessage, 'error');
       } else {
         if (update) reportTelegramHealth('api',!times.length || Date.now()-Math.min(...times)>180000?'stale':'ok');
         showApiHealth(update ? 'ok' : 'unknown', (update ? 'Pembaruan berhasil. ' : 'Menampilkan data tersimpan; koneksi API belum diperiksa. ') + (apiTimestamp ? 'Berkas tersimpan terlama: ' + apiTimestamp + '.' : 'Belum ada data tersimpan untuk tanggal ini.') + (incomplete ? ' Sebagian berkas sesi belum tersedia; data bisa belum lengkap.' : ''));
-        setApiState(`L15/L20: ${requestedDate}, 00:00–23:59 UTC+8 · L16: ${liveSnapshot?.periodLabel || 'sesi 12:00–00:45 hari berikutnya'} · Otomatis setiap 5 menit · ${saveMatches.length} hasil selesai siap disimpan` +
+        setApiState(`L16: ${liveSnapshot?.periodLabel || 'sesi 12:00–00:45 hari berikutnya'} · Pembaruan hasil manual · ${saveMatches.length} hasil selesai siap disimpan` +
         ' · Vietnam V League 1: sesi 12:00–00:45 hari berikutnya UTC+8 · E-Football F24/F26: tanggal kalender UTC+8 · Vietnam dan E-Football: API saja' +
         (times.length ? ' · Pembaruan terlama ' + new Date(Math.min(...times)).toLocaleString('id-ID') : ''), update ? 'ok' : 'cached');
       }
@@ -267,15 +261,14 @@
       if (update) await window.SabarajaSyncHistory?.failure('MSports',requestedDate,'fetch',error);
       reportTelegramHealth('api',/401|403|menolak sesi|perbarui sesi login/i.test(error.message || '')?'denied':'error');
       if (snapshotDate !== requestedDate) { resultSnapshots = []; saveMatches = []; }
-      showApiHealth('error', (error.message || 'Tidak dapat memuat hasil API.') + (apiTimestamp && snapshotDate === requestedDate ? ' Data tersimpan terakhir: ' + apiTimestamp + '.' : ' Data untuk tanggal ini belum dapat dimuat.') + ' Akan dicoba kembali dalam 5 menit.');
+      showApiHealth('error', (error.message || 'Tidak dapat memuat hasil API.') + (apiTimestamp && snapshotDate === requestedDate ? ' Data tersimpan terakhir: ' + apiTimestamp + '.' : ' Data untuk tanggal ini belum dapat dimuat.') + ' Tekan Perbarui dari API untuk mencoba lagi.');
       rendered = ''; renderResults();
-      setApiState((error.message || 'Tidak dapat memuat hasil API.') + ' Mencoba kembali dalam 5 menit.', 'error');
+      setApiState((error.message || 'Tidak dapat memuat hasil API.') + ' Tekan Perbarui dari API untuk mencoba lagi.', 'error');
     }
     finally {
-      document.dispatchEvent(new CustomEvent('pattern-results-cycle', {detail:{date:requestedDate,update}}));
+      document.dispatchEvent(new CustomEvent('pattern-results-cycle', {detail:{date:requestedDate,update:false}}));
       busy = false; refresh.disabled = false; date.disabled = false;
       updateSaveButton();
-      schedule();
     }
   }
   function renderResults() {
@@ -297,7 +290,7 @@
         }
         return true;
       };
-      const snapshots = (resultSnapshots.length ? resultSnapshots : ['15','16','20'].map(league => ({league,date:date.value,timezone:'UTC+8',matches:[]})))
+      const snapshots = (resultSnapshots.length ? resultSnapshots : ['16'].map(league => ({league,date:date.value,timezone:'UTC+8',matches:[]})))
         .map(data => ({...data, displayMatches:window.SabarajaLiveResults.merge(data,liveState,liveAnalysis)}));
       const signature = JSON.stringify([query, selectedPhase,selectedLeague,selectedMarket,selectedRecord, [...collapsedLeagues], snapshots.map(data => [data.league, data.date, data.displayMatches, data.noGoalThresholds, data.under15Thresholds, data.under15StreakThresholds, data.zeroStreakThresholds, data.csvStreakStats, data.zeroRecordSignals, data.under15RecordSignals,data.zeroNearRecordSignals,data.under15NearRecordSignals])]);
       if (signature !== rendered) {
@@ -695,7 +688,7 @@
     updateInfo();
     renderResults();
   });
-  refresh.addEventListener('click', () => load(true));
+  refresh.addEventListener('click', () => { if (!document.getElementById('pattern-all-refresh').disabled) load(true); });
   document.getElementById('pattern-live-retry').addEventListener('click', async event => {
     const button = event.currentTarget; button.disabled = true;
     try { await window.SabarajaPatternLive?.retry(); } finally { button.disabled = false; }
@@ -782,12 +775,9 @@
   teamSearch.addEventListener('input', renderResults);
   phaseFilter.addEventListener('change', renderResults);
   for (const filter of [leagueFilter,marketFilter,recordFilter]) filter.addEventListener('change', renderResults);
-  date.addEventListener('change', () => { resultSnapshots = []; rendered = ''; renderResults(); saveMatches = []; vsoccerSaveMatches = []; vsoccerSaveDate = null; setSaveState(''); updateSaveButton(); load(true); });
-  document.addEventListener('visibilitychange', () => {
-    clearTimeout(timer);
-    if (!document.hidden) load(true);
-  });
-  window.addEventListener('pagehide', () => { stopped = true; clearTimeout(timer); });
-  window.addEventListener('pageshow', event => { if (event.persisted) { stopped = false; load(true); } });
-  load().then(() => load(true));
+  date.addEventListener('change', () => { resultSnapshots = []; rendered = ''; renderResults(); saveMatches = []; vsoccerSaveMatches = []; vsoccerSaveDate = null; setSaveState(''); updateSaveButton(); load(false); });
+  window.addEventListener('pagehide', () => { stopped = true; });
+  window.addEventListener('pageshow', event => { if (event.persisted) { stopped = false; load(false); } });
+  document.addEventListener('pattern-results-cache-refresh', () => load(false));
+  load(false);
 })();

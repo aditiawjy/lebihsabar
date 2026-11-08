@@ -23,6 +23,9 @@ $extraNames = [
 ];
 $extraLabels = ['vietnam15'=>'Vietnam V League 1 · 15 menit', 'f24-club'=>'E-Football F24 · Elite Club', 'f24-international'=>'E-Football F24 · International',
     'f26-club'=>'E-Football F26 · Elite Club', 'f26-international'=>'E-Football F26 · International'];
+if (in_array((string)$league, ['15', '20'], true)) {
+    http_response_code(410); echo json_encode(['error'=>'League 15 dan 20 dinonaktifkan.']); exit;
+}
 if (!isset($leagues[$league])) {
     http_response_code(400); echo json_encode(['error'=>'League tidak valid.']); exit;
 }

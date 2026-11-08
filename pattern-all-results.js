@@ -32,6 +32,7 @@
   }
   const display = (name, stats) => `${name}: ${stats.inserted} baru, ${stats.updated} diperbarui, ${stats.skipped_duplicate} sudah ada${stats.skipped_invalid ? `, ${stats.skipped_invalid} tidak valid` : ''}${stats.historyFailed ? ' (riwayat gagal dicatat)' : ''}`;
   button.addEventListener('click', async () => {
+    if (button.disabled || document.getElementById('pattern-results-refresh').disabled || document.getElementById('pattern-vsoccer-refresh').disabled) return;
     button.disabled = true; summary.hidden = false; summary.classList.remove('is-error');
     const end = today(), start = previous(end), lines = [], failures = [];
     summary.textContent = `Memperbarui semua data ${start}–${end}…`;
@@ -59,6 +60,6 @@
       summary.textContent = `${failures.length ? 'Pembaruan belum lengkap' : 'Pembaruan selesai'} (${start}–${end}) · ${lines.join(' · ')}${failures.length ? ' · Gagal: '+failures.join('; ') : ''}. Tanggal MSports UTC+8; V-Soccer WIB.`;
       window.SabarajaSyncHistory?.refresh();
       try { await window.SabarajaPatternEngine?.refreshHistory(true); window.SabarajaPatternLive?.refreshView(); } catch (_) {}
-    } finally { button.disabled = false; }
+    } finally { button.disabled = false; document.dispatchEvent(new CustomEvent('pattern-results-cache-refresh')); }
   });
 })();

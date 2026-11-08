@@ -10,8 +10,8 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
     <div class="results-title-group">
     <h2 id="pattern-results-title" style="font-size:16px;font-weight:600;margin:0">Hasil API · Semua League</h2>
       <span class="results-info">
-        <button type="button" class="results-info-button" aria-label="Informasi rentang sesi dan pembaruan otomatis" aria-describedby="pattern-results-details">ⓘ</button>
-        <span id="pattern-results-details" role="tooltip">L15/L20: tanggal kalender UTC+8. L16/Vietnam: sesi 12:00–00:45 hari berikutnya. Hasil API diperbarui setiap 5 menit; menit dan skor live setiap 5 detik.</span>
+        <button type="button" class="results-info-button" aria-label="Informasi rentang sesi dan pembaruan manual" aria-describedby="pattern-results-details">ⓘ</button>
+        <span id="pattern-results-details" role="tooltip">E-Football: tanggal kalender UTC+8. L16/Vietnam: sesi 12:00–00:45 hari berikutnya. Hasil API diperbarui manual lewat tombol; menit dan skor live setiap 5 detik.</span>
       </span>
     </div>
   </div>
@@ -21,7 +21,7 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
   </div>
   <div class="results-brief">
     <p><strong>Sesi</strong> Kalender: L15, L20, E-Football · Sesi: L16, Vietnam 12.00–00.45 UTC+8</p>
-    <p><strong>Pembaruan terakhir</strong> <span id="pattern-results-last-updated">API belum tersedia</span> · otomatis setiap 5 menit</p>
+    <p><strong>Pembaruan terakhir</strong> <span id="pattern-results-last-updated">API belum tersedia</span> · Pembaruan hasil manual</p>
     <p><strong>Status sumber</strong> <span id="pattern-results-live-state" class="results-pill live-pill" role="status">Live…</span> <span id="pattern-results-api-state" class="results-pill" role="status">API memuat…</span> <span id="pattern-results-save-status" role="status" class="results-pill">▤ CSV menunggu</span></p>
   </div>
   <div id="pattern-api-health" class="results-api-health" role="status" aria-live="polite">
@@ -32,7 +32,7 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
     <label style="font-size:12px">Tanggal <input id="pattern-results-date" type="date" value="<?= htmlspecialchars(date('Y-m-d'), ENT_QUOTES, 'UTF-8') ?>" style="padding:7px;border:1px solid #cbd5e1;border-radius:6px"></label>
     <label class="results-team-search">Cari tim <input id="pattern-results-team-search" type="search" placeholder="Nama tim atau negara" autocomplete="off" aria-describedby="pattern-results-search-status"></label>
     <label class="results-team-search">Fase <select id="pattern-results-phase"><option value="all">Semua fase</option><option value="scheduled">Jadwal</option><option value="halftime">HT</option><option value="live">Live</option><option value="finished">Selesai</option><option value="postponed">Ditunda</option></select></label>
-    <label class="results-team-search">Liga <select id="pattern-results-league-filter"><option value="all">Semua liga</option><option value="15">League 15</option><option value="16">League 16</option><option value="20">League 20</option><option value="vietnam15">Vietnam</option><option value="f24-club">F24 · Club</option><option value="f24-international">F24 · International</option><option value="f26-club">F26 · Club</option><option value="f26-international">F26 · International</option><option value="vsoccer">V-Soccer</option></select></label>
+    <label class="results-team-search">Liga <select id="pattern-results-league-filter"><option value="all">Semua liga</option><option value="16">League 16</option><option value="vietnam15">Vietnam</option><option value="f24-club">F24 · Club</option><option value="f24-international">F24 · International</option><option value="f26-club">F26 · Club</option><option value="f26-international">F26 · International</option><option value="vsoccer">V-Soccer</option></select></label>
     <label class="results-team-search">Market hasil FT <select id="pattern-results-market-filter"><option value="all">Semua hasil</option><option value="zero">FT 0–0</option><option value="under15">FT Under 1.5</option><option value="over15">FT Over 1.5</option><option value="under25">FT Under 2.5</option><option value="over25">FT Over 2.5</option></select></label>
     <label class="results-team-search">Capaian rekor <select id="pattern-results-record-filter"><option value="all">Semua tim</option><option value="near">Mendekati (≥80%, belum tercapai)</option><option value="reached">Sudah mencapai rekor</option></select></label>
     <button id="pattern-results-refresh" type="button" style="padding:8px 12px;background:#2563eb;color:white;border:0;border-radius:6px;cursor:pointer">Perbarui dari API</button>
@@ -44,8 +44,8 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
   <div class="results-context">
     <p class="results-timezone"><strong>Waktu pertandingan MSports: UTC+8</strong> · 1 jam lebih cepat dari WIB. V-Soccer menggunakan WIB (UTC+7).</p>
     <details class="results-legend"><summary>Informasi liga, sinkronisasi, dan istilah</summary>
-      <p>Filter tanggal memakai hari kalender untuk League 15, League 20, dan E-Football. League 16 dan Vietnam memakai sesi 12.00–00.45 hari berikutnya; sebelum 12.00 UTC+8, tanggal hari ini menampilkan sesi sebelumnya. Rentang setiap liga tercantum di bawah namanya.</p>
-      <p id="pattern-results-save-help">Sinkronisasi menambahkan hasil selesai yang baru, memperbarui skor yang berubah, dan melewati hasil yang sudah sama. Sinkronisasi juga berjalan otomatis setelah pembaruan API.</p>
+      <p>League 15 dan 20 dinonaktifkan. Filter tanggal memakai hari kalender untuk E-Football. League 16 dan Vietnam memakai sesi 12.00–00.45 hari berikutnya; sebelum 12.00 UTC+8, tanggal hari ini menampilkan sesi sebelumnya. Rentang setiap liga tercantum di bawah namanya.</p>
+      <p id="pattern-results-save-help">Sinkronisasi menambahkan hasil selesai yang baru, memperbarui skor yang berubah, dan melewati hasil yang sudah sama. Hasil API diperbarui manual lewat tombol. Sinkronisasi CSV tetap berjalan setelah pembaruan berhasil; skor dan odds live tetap otomatis.</p>
       <p><strong>HT</strong>: skor babak pertama. <strong>FT</strong>: skor akhir. <strong>U1.5</strong>: Under 1.5, total 0 atau 1 gol. <strong>O0.5</strong>: Over 0.5, minimal 1 gol. <strong>H2H</strong>: riwayat pertemuan kedua tim. <strong>API saja</strong>: data dari API; tidak tersedia pembaruan live.</p>
     </details>
   </div>
@@ -73,7 +73,7 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
   </details>
   <p id="pattern-results-live-note" hidden>Menghubungkan menit live…</p>
   <nav class="results-league-nav" aria-label="Navigasi liga">
-    <button type="button" data-results-league="15">League 15</button><button type="button" data-results-league="16">League 16</button><button type="button" data-results-league="20">League 20</button><button type="button" data-results-league="vietnam15">Vietnam</button><button type="button" data-results-league="extra">E-Football</button><button type="button" data-results-league="vsoccer">V-Soccer</button>
+    <button type="button" data-results-league="16">League 16</button><button type="button" data-results-league="vietnam15">Vietnam</button><button type="button" data-results-league="extra">E-Football</button><button type="button" data-results-league="vsoccer">V-Soccer</button>
   </nav>
   <div id="pattern-results-body" class="pattern-results-grid"></div>
   <details class="results-api-only-section" aria-labelledby="pattern-results-extra-title" open>

@@ -114,6 +114,21 @@ def fetch_results(payload, environ=None, opener=urlopen, config=None):
     return result
 
 
+# Only these leagues are enabled for Results ingestion. League 15/20 stay in historical CSV.
+ENABLED_RESULT_LEAGUES = (10031403, 10031619, 10031501, 10031502, 10034432, 10034496)
+
+
+def fetch_enabled_results(payload, config=None, fetcher=fetch_results):
+    combined = None
+    rows = []
+    for league_id in ENABLED_RESULT_LEAGUES:
+        result = fetcher({**payload, 'league_id': league_id}, config=config)
+        if combined is None:
+            combined = {**result, 'data': rows}
+        rows.extend(row for row in result['data'] if str(row.get('events')) == str(league_id))
+    return combined
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--date', type=date.fromisoformat,
@@ -130,7 +145,7 @@ def main():
         if args.import_curl:
             import_curl(args.import_curl, args.session_file)
             print('Konfigurasi sesi disimpan terenkripsi untuk akun Windows ini.')
-        data = fetch_results(result_payload(args.date, args.language, args.sport, args.utc_offset), config=load_config(args.session_file))
+        data = fetch_enabled_results(result_payload(args.date, args.language, args.sport, args.utc_offset), config=load_config(args.session_file))
         output = args.output or default_dir / f'msports-{args.date}.json'
         output.parent.mkdir(parents=True, exist_ok=True)
         temporary = output.with_suffix(output.suffix + '.tmp')

@@ -576,7 +576,7 @@
               const zeroCurrent = match.h2h.zeroStreakCurrent || 0;
               const under15Record = match.h2h.under15StreakRecord || 0;
               const under15Current = match.h2h.under15StreakCurrent || 0;
-              if (isFtOver05 ? !zeroRecord || zeroCurrent < zeroRecord : isFtOver15 ? !under15Record || under15Current < under15Record : total < 20 || wins/total < 0.95) continue;
+              if (isFtOver05 ? zeroRecord < 2 || zeroCurrent < zeroRecord : isFtOver15 ? !under15Record || under15Current < under15Record : total < 20 || wins/total < 0.95) continue;
               const phase = match.live?.status || '';
               const firstHalf = /^1H\b/i.test(phase);
               const secondHalf = /^(?:2H\b|H\.?\s*Time|HT$|Half[ -]?Time)/i.test(phase);

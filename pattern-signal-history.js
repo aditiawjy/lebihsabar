@@ -54,7 +54,7 @@
     if(match.status !== 'Selesai' || !match.h2h)return [];
     const h=match.h2h, result=[];
     const add=(prefix,current,record,label)=>{
-      if(record>0 && current>=record)result.push({prefix,label:label(current,record)});
+      if(record >= (prefix === 'H2H FT O0.5' ? 2 : 1) && current>=record)result.push({prefix,label:label(current,record)});
     };
     add('H2H HT 0–0',h.htZeroStreak?.current,h.htZeroStreak?.record,(c,r)=>`H2H HT 0–0 · ${c}× beruntun · rekor ${r}×`);
     add('H2H 2H 0–0',h.secondHalfZeroStreak?.current,h.secondHalfZeroStreak?.record,(c,r)=>`H2H 2H 0–0 · ${c}× beruntun · rekor ${r}×`);
@@ -96,6 +96,7 @@
     if(changed){records.set(key,entry);dirty.set(key,entry);clearTimeout(localTimer);localTimer=setTimeout(localSave,50);clearTimeout(timer);timer=setTimeout(flush,350);}
     for(const signal of Object.values(entry.signals)) {
       if(visible.has(signal.label))continue;
+      if(signal.label.startsWith('H2H FT O0.5') && Number(signal.label.match(/rekor (\d+)/)?.[1] || 0) < 2)continue;
       const wrapper=document.createElement('details');wrapper.className='result-saved-signal';
       const badge=document.createElement('summary');badge.className='result-h2h-badge';badge.textContent=signal.label+' · tersimpan';
       badge.title='Sinyal pernah tampil; disimpan untuk evaluasi, bukan sinyal aktif baru.';

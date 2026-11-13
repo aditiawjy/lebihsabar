@@ -11,11 +11,21 @@ $directory = getenv('SABARAJA_RESULTS_DIR') ?: ($localAppData ? $localAppData . 
 $sessionFile = getenv('SABARAJA_SESSION_FILE') ?: ($localAppData ? $localAppData . '/Sabaraja/msports-session.bin' : '');
 $date = $_GET['date'] ?? date('Y-m-d');
 $league = $_GET['league'] ?? '16';
-$leagues = ['vietnam15'=>'10031619', '15'=>'10026214', '16'=>'10031403', '20'=>'10026211'];
+$leagues = ['vietnam15'=>'10031619', '15'=>'10026214', '16'=>'10031403', '20'=>'10026211',
+    'f24-club'=>'10031501', 'f24-international'=>'10031502',
+    'f26-club'=>'10034432', 'f26-international'=>'10034496'];
 $extraNames = [
     'vietnam15'=>'SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play',
+    'f24-club'=>'E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play',
+    'f24-international'=>'E-FOOTBALL F24 INTERNATIONAL FRIENDLY - 16 Mins Play',
+    'f26-club'=>'E-FOOTBALL F26 ELITE CLUB FRIENDLY - 16 Mins Play',
+    'f26-international'=>'E-FOOTBALL F26 INTERNATIONAL FRIENDLY - 16 Mins Play',
 ];
-$extraLabels = ['vietnam15'=>'Vietnam V League 1 · 15 menit'];
+$extraLabels = ['vietnam15'=>'Vietnam V League 1 · 15 menit', 'f24-club'=>'E-Football F24 · Elite Club', 'f24-international'=>'E-Football F24 · International',
+    'f26-club'=>'E-Football F26 · Elite Club', 'f26-international'=>'E-Football F26 · International'];
+if (in_array((string)$league, ['15', '20'], true)) {
+    http_response_code(410); echo json_encode(['error'=>'League 15 dan 20 dinonaktifkan.']); exit;
+}
 if (!isset($leagues[$league])) {
     http_response_code(400); echo json_encode(['error'=>'League tidak valid.']); exit;
 }
@@ -83,6 +93,9 @@ $rows = [];
 $saveMatches = [];
 require_once __DIR__.'/pattern-h2h.php';
 $h2hStats = patternH2hStats();
+require_once __DIR__.'/pattern-signal-analysis.php';
+$analysisTeamIndex = [];
+usort($merged, static fn($a,$b)=>strcmp($a['match_date'] ?? '',$b['match_date'] ?? ''));
 foreach ($merged as $match) {
     if ((string)($match['events'] ?? '') !== $leagues[$league]) continue;
     try {
@@ -104,67 +117,12 @@ foreach ($merged as $match) {
             'ft_home'=>(int)$score[3], 'ft_away'=>(int)$score[4]
         ];
     }
+    $analysisLeague = $match['event_name'] ?? '';
+    if (!isset($analysisTeamIndex[$analysisLeague])) $analysisTeamIndex += patternAnalysisTeamIndex($h2hStats, $analysisLeague);
     $h2h = $h2hStats[($match['event_name'] ?? '').'|'.patternH2hKey($match['home_name'] ?? '',$match['away_name'] ?? '')] ?? null;
     $secondHalfByHt = [];
     if ($h2h) {
-        // Use only results presumed complete before both kickoff and the current time.
-        if (in_array($league, ['15', '16', '20'], true)) {
-            $now = new DateTimeImmutable('now', new DateTimeZone('Asia/Singapore'));
-            $cutoff = ($time < $now ? $time : $now)->modify('-30 minutes');
-            $byTime = [];
-            foreach ($h2h['meetings'] ?? [] as $meeting) {
-                $at = $meeting['time'] ?? '';
-                if ($at === '' || $at > $cutoff->format('c')) continue;
-                if (isset($byTime[$at]) && ($byTime[$at]['ft'] ?? null) !== ($meeting['ft'] ?? null)) {
-                    $byTime[$at]['ft'] = null;
-                } elseif (!array_key_exists($at, $byTime)) $byTime[$at] = $meeting;
-            }
-            krsort($byTime, SORT_STRING);
-            $sample = array_slice(array_values($byTime), 0, 20);
-            $wins = 0; $over15 = 0; $noScoreTeamMatches = 0; $valid = count($sample) === 20;
-            foreach ($sample as $meeting) {
-                if (!isset($meeting['totalGoals']) || !preg_match('/^(\d+)–(\d+)$/uD', $meeting['ft'] ?? '', $ft)) { $valid = false; break; }
-                if ((int)$ft[1] > 0 && (int)$ft[2] > 0 && (int)$ft[1] + (int)$ft[2] >= 3) $wins++;
-                if ((int)$ft[1] + (int)$ft[2] >= 2) $over15++;
-                if ((int)$ft[1] === 0 || (int)$ft[2] === 0) $noScoreTeamMatches++;
-            }
-            if ($valid) {
-                $sampleDates = ['total'=>20, 'firstDate'=>substr($sample[19]['time'],0,10), 'lastDate'=>substr($sample[0]['time'],0,10)];
-                if ($league === '15') {
-                    $lastFiveOver15 = count(array_filter(array_slice($sample, 0, 5), static fn($meeting) => (int)$meeting['totalGoals'] >= 2));
-                    $h2h['over15Last20'] = ['wins'=>$over15, 'lastFiveOver15'=>$lastFiveOver15] + $sampleDates;
-                }
-                else $h2h['bttsOver25Last20'] = ['wins'=>$wins, 'noScoreTeamMatches'=>$noScoreTeamMatches] + $sampleDates;
-            }
-        }
         $allPreviousMeetings = patternH2hRecentBefore($h2h, $time->format('c'), PHP_INT_MAX);
-        if ($finished) {
-            // Reconstruct the market sample using only dated results before kickoff.
-            $marketsBefore = [];
-            foreach ($allPreviousMeetings as $previous) {
-                if (!isset($previous['totalGoals']) || !is_int($previous['totalGoals'])) continue;
-                $values = ['FT' => $previous['totalGoals']];
-                if (is_int($previous['htHome'] ?? null) && is_int($previous['htAway'] ?? null)) {
-                    $values['HT'] = $previous['htHome'] + $previous['htAway'];
-                    $values['2H'] = $previous['totalGoals'] - $values['HT'];
-                }
-                foreach ($values as $periodName => $goals) foreach ($periodName === 'FT' ? [0.5, 1.5, 3.5, 4.5, 5.5] : [0.5] as $line) {
-                    foreach ($periodName === 'FT' && $line >= 3.5 ? ['O', 'U'] : ['O'] as $side) {
-                        $key = $periodName.' '.$side.$line;
-                        if (!isset($marketsBefore[$key])) $marketsBefore[$key] = ['period'=>$periodName,'side'=>$side,'line'=>$line,'wins'=>0,'total'=>0];
-                        $market =& $marketsBefore[$key];
-                        $market['total']++;
-                        if ($side === 'O' ? $goals > $line : $goals < $line) $market['wins']++;
-                        $day = substr($previous['time'], 0, 10);
-                        $market['firstDate'] = min($market['firstDate'] ?? $day, $day);
-                        $market['lastDate'] = max($market['lastDate'] ?? $day, $day);
-                        unset($market);
-                    }
-                }
-            }
-            $h2h['markets'] = $marketsBefore;
-            $h2h['total'] = count(array_filter($allPreviousMeetings, static fn($meeting) => is_int($meeting['totalGoals'] ?? null)));
-        }
         $currentZeroStreak = 0; $maxZeroStreak = 0; $runZeroStreak = 0;
         $currentUnder15Streak = 0; $maxUnder15Streak = 0; $runUnder15Streak = 0;
         $currentUnder25Streak = 0; $maxUnder25Streak = 0; $runUnder25Streak = 0;
@@ -236,19 +194,15 @@ foreach ($merged as $match) {
             if (!isset($secondHalfByHt[$htKey])) $secondHalfByHt[$htKey] = ['total'=>0,'goals'=>0];
             $secondHalfByHt[$htKey]['total']++;
             if ($meeting['totalGoals'] > $meeting['htHome'] + $meeting['htAway']) $secondHalfByHt[$htKey]['goals']++;
-            $noSecondHalfGoal = $meeting['totalGoals'] === $meeting['htHome'] + $meeting['htAway'];
-            if (!isset($secondHalfByHt[$htKey]['lastTime']) || $meeting['time'] > $secondHalfByHt[$htKey]['lastTime']) {
-                $secondHalfByHt[$htKey]['lastTime'] = $meeting['time'];
-                $secondHalfByHt[$htKey]['lastNoSecondHalfGoal'] = $noSecondHalfGoal;
-            } elseif ($meeting['time'] === $secondHalfByHt[$htKey]['lastTime'] && $secondHalfByHt[$htKey]['lastNoSecondHalfGoal'] !== $noSecondHalfGoal) {
-                $secondHalfByHt[$htKey]['lastNoSecondHalfGoal'] = null;
-            }
         }
         $h2h['lastMeeting'] = patternH2hLatestBefore($h2h,$time->format('c'));
         $h2h['recentMeetings'] = patternH2hRecentBefore($h2h,$time->format('c'),5);
+        $h2h['recentByHt'] = patternH2hRecentByHt($allPreviousMeetings, trim(preg_replace('/\s*\(V\)/i', '', $match['home_name'] ?? '')), trim(preg_replace('/\s*\(V\)/i', '', $match['away_name'] ?? '')));
+        $h2h['htRun'] = patternH2hHtRun($allPreviousMeetings, $match['home_name'] ?? '', $match['away_name'] ?? '');
         unset($h2h['meetings']);
     }
     $rows[] = [
+        'signalAnalysis'=>patternAdvancedAnalysis($h2h ? $allPreviousMeetings : [], $analysisTeamIndex, $match['event_name'] ?? '', $match['home_name'] ?? '', $match['away_name'] ?? '', $time->format('c')),
         'secondHalfByHt'=>$secondHalfByHt,
         'h2h'=>$h2h ?: null,
         'h2hZeroStreak'=>count($h2h['recentMeetings'] ?? []) >= 3 && array_reduce(array_slice($h2h['recentMeetings'], 0, 3), static fn($all, $meeting) => $all && ($meeting['totalGoals'] ?? null) === 0, true),
@@ -290,8 +244,9 @@ require_once __DIR__.'/pattern-no-goal.php';
 require_once __DIR__.'/pattern-under15-streak.php';
 $streakLeagueNames = ['15'=>'SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play', '16'=>'SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play', '20'=>'SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play'];
 $streakLeagueName = $extraNames[$league] ?? $streakLeagueNames[$league] ?? '';
-$under15StreakThresholds = $streakLeagueName === '' ? [] : patternUnder15StreakThresholds(__DIR__.'/matches.csv', $streakLeagueName, in_array($league, ['16','vietnam15'], true));
-$zeroStreakThresholds = $streakLeagueName === '' ? [] : patternUnder15StreakThresholds(__DIR__.'/matches.csv', $streakLeagueName, in_array($league, ['16','vietnam15'], true), 0);
+$csvStreakStats = $streakLeagueName === '' ? ['under15'=>[], 'zero'=>[]] : patternCsvStreakStats(__DIR__.'/matches.csv', $streakLeagueName, $period['periodEnd']);
+$under15StreakThresholds = array_map(static fn($entry) => $entry['record'], $csvStreakStats['under15']);
+$zeroStreakThresholds = array_map(static fn($entry) => $entry['record'], $csvStreakStats['zero']);
 $csvUnderHistory = teamZeroHistoryCached(__DIR__.'/matches.csv', [], 'under15');
 $under15Thresholds = [];
 foreach ($csvUnderHistory['records'] as $record) {
@@ -305,6 +260,7 @@ echo json_encode(array_merge($period, ['date'=>$date, 'league'=>$league, 'update
     'zeroNearRecordSignals'=>$nearRecordSignals['zero'], 'under15NearRecordSignals'=>$nearRecordSignals['under15'],
     'noGoalThresholds'=>in_array($league,['15','16','20'],true)?patternNoGoalThresholds(null,$league):null,
     'under15Thresholds'=>$under15Thresholds,
+    'csvStreakStats'=>$csvStreakStats,
     'under15StreakThresholds'=>$under15StreakThresholds,
     'historyLeagueName'=>$streakLeagueName,
     'zeroStreakThresholds'=>$zeroStreakThresholds,

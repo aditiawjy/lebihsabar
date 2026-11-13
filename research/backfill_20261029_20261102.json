@@ -1,0 +1,89 @@
+{
+  "start": "2026-10-29",
+  "end": "2026-11-02",
+  "days": [
+    {
+      "date": "2026-10-28",
+      "api_rows": 1256,
+      "completed_in_month": 314,
+      "efootball_completed": 93,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-10-29"
+      ]
+    },
+    {
+      "date": "2026-10-29",
+      "api_rows": 1121,
+      "completed_in_month": 843,
+      "efootball_completed": 300,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-10-29",
+        "2026-10-30"
+      ]
+    },
+    {
+      "date": "2026-10-30",
+      "api_rows": 1241,
+      "completed_in_month": 860,
+      "efootball_completed": 239,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-10-30",
+        "2026-10-31"
+      ]
+    },
+    {
+      "date": "2026-10-31",
+      "api_rows": 1549,
+      "completed_in_month": 717,
+      "efootball_completed": 174,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-10-31",
+        "2026-11-01"
+      ]
+    },
+    {
+      "date": "2026-11-01",
+      "api_rows": 1425,
+      "completed_in_month": 747,
+      "efootball_completed": 227,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-11-01",
+        "2026-11-02"
+      ]
+    },
+    {
+      "date": "2026-11-02",
+      "api_rows": 974,
+      "completed_in_month": 355,
+      "efootball_completed": 117,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-11-02"
+      ]
+    }
+  ],
+  "inserted": 1479,
+  "updated": 0,
+  "unchanged": 2357,
+  "invalid": 0,
+  "unique_completed": 3836,
+  "leagues": {
+    "SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play": 58,
+    "SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play": 83,
+    "SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play": 893,
+    "SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play": 426,
+    "SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play": 1226,
+    "E-FOOTBALL F26 INTERNATIONAL FRIENDLY - 16 Mins Play": 83,
+    "E-FOOTBALL F26 ELITE CLUB FRIENDLY - 16 Mins Play": 245,
+    "E-FOOTBALL F24 INTERNATIONAL FRIENDLY - 16 Mins Play": 289,
+    "E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play": 533
+  },
+  "csv_sha256_after": "519e7262e4f1537c4b56b69aaa1d6bfa9ccf369aad73fe982db05d25f210e186",
+  "failed_days": [],
+  "complete": true
+}

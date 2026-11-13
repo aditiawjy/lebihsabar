@@ -21,8 +21,9 @@ foreach ([$start->modify('-1 day'), $start, $today] as $sessionDay) {
     $payload = json_decode(file_get_contents($output), true);
     if (!isset($payload['data']) || !is_array($payload['data'])) { http_response_code(502); echo json_encode(['error'=>'Data API tidak valid untuk '.$day.'.']); exit; }
     foreach ($payload['data'] as $row) {
+        if (in_array((string)($row['events'] ?? ''), ['10026214','10026211'], true)) continue;
         $league = trim((string)($row['event_name'] ?? ''));
-        if (!preg_match('/^SABA /i', $league) || ($row['st_fs'] ?? '') !== 'Y' || ($row['st_postponed'] ?? '') !== 'N') continue;
+        if (!preg_match('/^(SABA |E-FOOTBALL )/i', $league) || ($row['st_fs'] ?? '') !== 'Y' || ($row['st_postponed'] ?? '') !== 'N') continue;
         if (($row['st_hs'] ?? '') !== 'Y') { $missingHt++; continue; }
         if (!preg_match('/^(\d+):(\d+)_(\d+):(\d+)$/D', $row['fs_home'] ?? '', $score) || (int)$score[3] < (int)$score[1] || (int)$score[4] < (int)$score[2]) continue;
         try { $time = new DateTimeImmutable($row['match_date']); $time = $time->setTimezone($zone); } catch (Throwable $e) { continue; }

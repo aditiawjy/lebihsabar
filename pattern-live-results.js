@@ -39,15 +39,8 @@
           kickoffMatched:candidates.length === 1};
       }
     }
-    // Sort newest kickoff first, including sessions crossing midnight.
-    // Unmatched live fixtures have no reliable kickoff and remain at the end.
-    return rows.sort((a,b) => {
-      const aTime = a.time ? Date.parse(a.time) : NaN;
-      const bTime = b.time ? Date.parse(b.time) : NaN;
-      if (!Number.isFinite(aTime)) return Number.isFinite(bTime) ? 1 : 0;
-      if (!Number.isFinite(bTime)) return -1;
-      return bTime - aTime;
-    });
+    const rank = row => row.live ? 0 : row.status === 'Belum selesai' ? 1 : 2;
+    return rows.sort((a,b) => rank(a)-rank(b) || (rank(a) === 1 ? Date.parse(a.time)-Date.parse(b.time) : Date.parse(b.time || 0)-Date.parse(a.time || 0)));
   }
   function appendMarkets(container, live) {
     if (!live) return;

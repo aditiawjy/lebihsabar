@@ -1,0 +1,2257 @@
+[
+  {
+    "team": "Lille OSC",
+    "length": 10,
+    "from": "2025-10-20 09:30:00",
+    "to": "2025-10-21 00:30:00",
+    "matches": [
+      {
+        "time": "2025-10-20 09:30:00",
+        "home": "Lille OSC",
+        "away": "Olympique Lyonnais",
+        "ft": "0-1",
+        "under": true,
+        "id": "22460"
+      },
+      {
+        "time": "2025-10-20 11:45:00",
+        "home": "Olympique de Marseille",
+        "away": "Lille OSC",
+        "ft": "0-1",
+        "under": true,
+        "id": "22494"
+      },
+      {
+        "time": "2025-10-20 14:30:00",
+        "home": "Lille OSC",
+        "away": "Atletico de Madrid",
+        "ft": "0-1",
+        "under": true,
+        "id": "22557"
+      },
+      {
+        "time": "2025-10-20 15:30:00",
+        "home": "Lille OSC",
+        "away": "Lazio",
+        "ft": "1-0",
+        "under": true,
+        "id": "22583"
+      },
+      {
+        "time": "2025-10-20 16:30:00",
+        "home": "Arsenal",
+        "away": "Lille OSC",
+        "ft": "0-1",
+        "under": true,
+        "id": "22607"
+      },
+      {
+        "time": "2025-10-20 17:30:00",
+        "home": "Sevilla",
+        "away": "Lille OSC",
+        "ft": "1-0",
+        "under": true,
+        "id": "22627"
+      },
+      {
+        "time": "2025-10-20 18:30:00",
+        "home": "Lille OSC",
+        "away": "Olympique Lyonnais",
+        "ft": "0-0",
+        "under": true,
+        "id": "22645"
+      },
+      {
+        "time": "2025-10-20 20:30:00",
+        "home": "Paris Saint Germain",
+        "away": "Lille OSC",
+        "ft": "1-0",
+        "under": true,
+        "id": "22669"
+      },
+      {
+        "time": "2025-10-20 23:15:00",
+        "home": "Everton",
+        "away": "Lille OSC",
+        "ft": "1-0",
+        "under": true,
+        "id": "22719"
+      },
+      {
+        "time": "2025-10-21 00:30:00",
+        "home": "Lille OSC",
+        "away": "Lazio",
+        "ft": "1-0",
+        "under": true,
+        "id": "22748"
+      }
+    ],
+    "current": 1
+  },
+  {
+    "team": "Udinese",
+    "length": 10,
+    "from": "2025-12-11 17:00:00",
+    "to": "2025-12-12 06:15:00",
+    "matches": [
+      {
+        "time": "2025-12-11 17:00:00",
+        "home": "Udinese",
+        "away": "Napoli",
+        "ft": "0-1",
+        "under": true,
+        "id": "60207"
+      },
+      {
+        "time": "2025-12-11 19:00:00",
+        "home": "Udinese",
+        "away": "Getafe CF",
+        "ft": "0-0",
+        "under": true,
+        "id": "60223"
+      },
+      {
+        "time": "2025-12-11 20:30:00",
+        "home": "AS Roma",
+        "away": "Udinese",
+        "ft": "0-0",
+        "under": true,
+        "id": "60235"
+      },
+      {
+        "time": "2025-12-11 22:00:00",
+        "home": "Torino",
+        "away": "Udinese",
+        "ft": "0-1",
+        "under": true,
+        "id": "60252"
+      },
+      {
+        "time": "2025-12-11 23:45:00",
+        "home": "Udinese",
+        "away": "Napoli",
+        "ft": "0-0",
+        "under": true,
+        "id": "60283"
+      },
+      {
+        "time": "2025-12-12 00:30:00",
+        "home": "Olympique de Marseille",
+        "away": "Udinese",
+        "ft": "0-1",
+        "under": true,
+        "id": "60294"
+      },
+      {
+        "time": "2025-12-12 01:15:00",
+        "home": "Real Sociedad",
+        "away": "Udinese",
+        "ft": "0-0",
+        "under": true,
+        "id": "60309"
+      },
+      {
+        "time": "2025-12-12 02:30:00",
+        "home": "Udinese",
+        "away": "CA Osasuna",
+        "ft": "1-0",
+        "under": true,
+        "id": "60322"
+      },
+      {
+        "time": "2025-12-12 03:15:00",
+        "home": "AS Monaco",
+        "away": "Udinese",
+        "ft": "0-0",
+        "under": true,
+        "id": "60330"
+      },
+      {
+        "time": "2025-12-12 06:15:00",
+        "home": "Everton",
+        "away": "Udinese",
+        "ft": "1-0",
+        "under": true,
+        "id": "60354"
+      }
+    ],
+    "current": 1
+  },
+  {
+    "team": "AS Roma",
+    "length": 9,
+    "from": "2025-11-29 10:30:00",
+    "to": "2025-11-29 23:45:00",
+    "matches": [
+      {
+        "time": "2025-11-29 10:30:00",
+        "home": "AS Roma",
+        "away": "Juventus",
+        "ft": "1-0",
+        "under": true,
+        "id": "54854"
+      },
+      {
+        "time": "2025-11-29 12:15:00",
+        "home": "AS Roma",
+        "away": "CA Osasuna",
+        "ft": "0-1",
+        "under": true,
+        "id": "55099"
+      },
+      {
+        "time": "2025-11-29 15:30:00",
+        "home": "AS Roma",
+        "away": "Getafe CF",
+        "ft": "0-0",
+        "under": true,
+        "id": "55128"
+      },
+      {
+        "time": "2025-11-29 16:45:00",
+        "home": "Valencia CF",
+        "away": "AS Roma",
+        "ft": "0-0",
+        "under": true,
+        "id": "55142"
+      },
+      {
+        "time": "2025-11-29 18:00:00",
+        "home": "Leicester City",
+        "away": "AS Roma",
+        "ft": "0-0",
+        "under": true,
+        "id": "55161"
+      },
+      {
+        "time": "2025-11-29 19:00:00",
+        "home": "AS Roma",
+        "away": "Juventus",
+        "ft": "0-1",
+        "under": true,
+        "id": "55174"
+      },
+      {
+        "time": "2025-11-29 20:00:00",
+        "home": "AS Roma",
+        "away": "Torino",
+        "ft": "0-0",
+        "under": true,
+        "id": "55187"
+      },
+      {
+        "time": "2025-11-29 21:00:00",
+        "home": "AS Monaco",
+        "away": "AS Roma",
+        "ft": "0-1",
+        "under": true,
+        "id": "55203"
+      },
+      {
+        "time": "2025-11-29 23:45:00",
+        "home": "FSV Mainz 05",
+        "away": "AS Roma",
+        "ft": "0-0",
+        "under": true,
+        "id": "55229"
+      }
+    ],
+    "current": 2
+  },
+  {
+    "team": "Everton",
+    "length": 9,
+    "from": "2025-06-26 08:00:00",
+    "to": "2025-06-26 18:00:00",
+    "matches": [
+      {
+        "time": "2025-06-26 08:00:00",
+        "home": "Real Sociedad",
+        "away": "Everton",
+        "ft": "0-1",
+        "under": true,
+        "id": "35100"
+      },
+      {
+        "time": "2025-06-26 10:45:00",
+        "home": "Everton",
+        "away": "Udinese",
+        "ft": "1-0",
+        "under": true,
+        "id": "35123"
+      },
+      {
+        "time": "2025-06-26 12:00:00",
+        "home": "CA Osasuna",
+        "away": "Everton",
+        "ft": "0-0",
+        "under": true,
+        "id": "35329"
+      },
+      {
+        "time": "2025-06-26 13:00:00",
+        "home": "Everton",
+        "away": "Chelsea",
+        "ft": "0-0",
+        "under": true,
+        "id": "35342"
+      },
+      {
+        "time": "2025-06-26 14:00:00",
+        "home": "Everton",
+        "away": "Olympique de Marseille",
+        "ft": "0-1",
+        "under": true,
+        "id": "35360"
+      },
+      {
+        "time": "2025-06-26 15:00:00",
+        "home": "Lazio",
+        "away": "Everton",
+        "ft": "0-1",
+        "under": true,
+        "id": "35373"
+      },
+      {
+        "time": "2025-06-26 16:00:00",
+        "home": "Everton",
+        "away": "Lille OSC",
+        "ft": "0-0",
+        "under": true,
+        "id": "35392"
+      },
+      {
+        "time": "2025-06-26 17:00:00",
+        "home": "Everton",
+        "away": "Udinese",
+        "ft": "0-1",
+        "under": true,
+        "id": "35408"
+      },
+      {
+        "time": "2025-06-26 18:00:00",
+        "home": "Valencia CF",
+        "away": "Everton",
+        "ft": "0-0",
+        "under": true,
+        "id": "35416"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "AC Milan",
+    "length": 8,
+    "from": "2025-11-29 03:30:00",
+    "to": "2025-11-29 18:00:00",
+    "matches": [
+      {
+        "time": "2025-11-29 03:30:00",
+        "home": "Torino",
+        "away": "AC Milan",
+        "ft": "1-0",
+        "under": true,
+        "id": "54797"
+      },
+      {
+        "time": "2025-11-29 05:45:00",
+        "home": "Bayern Munchen",
+        "away": "AC Milan",
+        "ft": "0-1",
+        "under": true,
+        "id": "54815"
+      },
+      {
+        "time": "2025-11-29 08:30:00",
+        "home": "Napoli",
+        "away": "AC Milan",
+        "ft": "0-1",
+        "under": true,
+        "id": "54837"
+      },
+      {
+        "time": "2025-11-29 10:45:00",
+        "home": "Valencia CF",
+        "away": "AC Milan",
+        "ft": "1-0",
+        "under": true,
+        "id": "54855"
+      },
+      {
+        "time": "2025-11-29 13:30:00",
+        "home": "Arminia Bielefeld",
+        "away": "AC Milan",
+        "ft": "0-1",
+        "under": true,
+        "id": "55109"
+      },
+      {
+        "time": "2025-11-29 15:15:00",
+        "home": "Inter Milan",
+        "away": "AC Milan",
+        "ft": "0-0",
+        "under": true,
+        "id": "55123"
+      },
+      {
+        "time": "2025-11-29 17:00:00",
+        "home": "Real Madrid",
+        "away": "AC Milan",
+        "ft": "1-0",
+        "under": true,
+        "id": "55148"
+      },
+      {
+        "time": "2025-11-29 18:00:00",
+        "home": "Arminia Bielefeld",
+        "away": "AC Milan",
+        "ft": "0-0",
+        "under": true,
+        "id": "55159"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "CA Osasuna",
+    "length": 8,
+    "from": "2025-09-11 23:30:00",
+    "to": "2025-09-12 07:45:00",
+    "matches": [
+      {
+        "time": "2025-09-11 23:30:00",
+        "home": "CA Osasuna",
+        "away": "Sevilla",
+        "ft": "0-0",
+        "under": true,
+        "id": "15627"
+      },
+      {
+        "time": "2025-09-12 00:30:00",
+        "home": "AS Roma",
+        "away": "CA Osasuna",
+        "ft": "0-0",
+        "under": true,
+        "id": "15648"
+      },
+      {
+        "time": "2025-09-12 02:15:00",
+        "home": "Atletico de Madrid",
+        "away": "CA Osasuna",
+        "ft": "1-0",
+        "under": true,
+        "id": "15673"
+      },
+      {
+        "time": "2025-09-12 03:15:00",
+        "home": "CA Osasuna",
+        "away": "Liverpool",
+        "ft": "1-0",
+        "under": true,
+        "id": "15689"
+      },
+      {
+        "time": "2025-09-12 04:15:00",
+        "home": "CA Osasuna",
+        "away": "Bayern Munchen",
+        "ft": "0-1",
+        "under": true,
+        "id": "15707"
+      },
+      {
+        "time": "2025-09-12 05:15:00",
+        "home": "CA Osasuna",
+        "away": "Arsenal",
+        "ft": "0-0",
+        "under": true,
+        "id": "15719"
+      },
+      {
+        "time": "2025-09-12 06:00:00",
+        "home": "CA Osasuna",
+        "away": "Lazio",
+        "ft": "0-0",
+        "under": true,
+        "id": "15730"
+      },
+      {
+        "time": "2025-09-12 07:45:00",
+        "home": "Arminia Bielefeld",
+        "away": "CA Osasuna",
+        "ft": "0-1",
+        "under": true,
+        "id": "15743"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "FC Koln",
+    "length": 8,
+    "from": "2025-10-17 12:30:00",
+    "to": "2025-10-17 21:00:00",
+    "matches": [
+      {
+        "time": "2025-10-17 12:30:00",
+        "home": "Getafe CF",
+        "away": "FC Koln",
+        "ft": "0-0",
+        "under": true,
+        "id": "21298"
+      },
+      {
+        "time": "2025-10-17 14:30:00",
+        "home": "Real Sociedad",
+        "away": "FC Koln",
+        "ft": "0-0",
+        "under": true,
+        "id": "21347"
+      },
+      {
+        "time": "2025-10-17 15:30:00",
+        "home": "Bayern Munchen",
+        "away": "FC Koln",
+        "ft": "0-1",
+        "under": true,
+        "id": "21372"
+      },
+      {
+        "time": "2025-10-17 16:45:00",
+        "home": "Barcelona",
+        "away": "FC Koln",
+        "ft": "0-1",
+        "under": true,
+        "id": "21391"
+      },
+      {
+        "time": "2025-10-17 18:00:00",
+        "home": "Inter Milan",
+        "away": "FC Koln",
+        "ft": "0-0",
+        "under": true,
+        "id": "21411"
+      },
+      {
+        "time": "2025-10-17 18:45:00",
+        "home": "Chelsea",
+        "away": "FC Koln",
+        "ft": "0-0",
+        "under": true,
+        "id": "21427"
+      },
+      {
+        "time": "2025-10-17 20:00:00",
+        "home": "Juventus",
+        "away": "FC Koln",
+        "ft": "0-1",
+        "under": true,
+        "id": "21436"
+      },
+      {
+        "time": "2025-10-17 21:00:00",
+        "home": "FC Koln",
+        "away": "Leicester City",
+        "ft": "1-0",
+        "under": true,
+        "id": "21448"
+      }
+    ],
+    "current": 2
+  },
+  {
+    "team": "Arminia Bielefeld",
+    "length": 7,
+    "from": "2025-10-21 22:15:00",
+    "to": "2025-10-22 03:00:00",
+    "matches": [
+      {
+        "time": "2025-10-21 22:15:00",
+        "home": "Arminia Bielefeld",
+        "away": "CA Osasuna",
+        "ft": "0-1",
+        "under": true,
+        "id": "23134"
+      },
+      {
+        "time": "2025-10-21 23:15:00",
+        "home": "Paris Saint Germain",
+        "away": "Arminia Bielefeld",
+        "ft": "1-0",
+        "under": true,
+        "id": "23155"
+      },
+      {
+        "time": "2025-10-22 00:00:00",
+        "home": "Lazio",
+        "away": "Arminia Bielefeld",
+        "ft": "1-0",
+        "under": true,
+        "id": "23178"
+      },
+      {
+        "time": "2025-10-22 00:45:00",
+        "home": "Arminia Bielefeld",
+        "away": "Udinese",
+        "ft": "1-0",
+        "under": true,
+        "id": "23198"
+      },
+      {
+        "time": "2025-10-22 01:30:00",
+        "home": "Arminia Bielefeld",
+        "away": "Juventus",
+        "ft": "0-1",
+        "under": true,
+        "id": "23224"
+      },
+      {
+        "time": "2025-10-22 02:15:00",
+        "home": "Arminia Bielefeld",
+        "away": "Liverpool",
+        "ft": "0-1",
+        "under": true,
+        "id": "23236"
+      },
+      {
+        "time": "2025-10-22 03:00:00",
+        "home": "Borussia Dortmund",
+        "away": "Arminia Bielefeld",
+        "ft": "1-0",
+        "under": true,
+        "id": "23253"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Inter Milan",
+    "length": 7,
+    "from": "2026-04-23 17:45:00",
+    "to": "2026-04-24 05:15:00",
+    "matches": [
+      {
+        "time": "2026-04-23 17:45:00",
+        "home": "Napoli",
+        "away": "Inter Milan",
+        "ft": "0-0",
+        "under": true,
+        "id": "121242"
+      },
+      {
+        "time": "2026-04-23 19:15:00",
+        "home": "Inter Milan",
+        "away": "Bayer 04 Leverkusen",
+        "ft": "1-0",
+        "under": true,
+        "id": "121255"
+      },
+      {
+        "time": "2026-04-23 20:00:00",
+        "home": "Inter Milan",
+        "away": "Barcelona",
+        "ft": "1-0",
+        "under": true,
+        "id": "121260"
+      },
+      {
+        "time": "2026-04-23 21:00:00",
+        "home": "Inter Milan",
+        "away": "Manchester United",
+        "ft": "0-1",
+        "under": true,
+        "id": "121268"
+      },
+      {
+        "time": "2026-04-23 22:00:00",
+        "home": "Inter Milan",
+        "away": "Napoli",
+        "ft": "1-0",
+        "under": true,
+        "id": "121277"
+      },
+      {
+        "time": "2026-04-23 23:30:00",
+        "home": "Atletico de Madrid",
+        "away": "Inter Milan",
+        "ft": "1-0",
+        "under": true,
+        "id": "121288"
+      },
+      {
+        "time": "2026-04-24 05:15:00",
+        "home": "Everton",
+        "away": "Inter Milan",
+        "ft": "0-1",
+        "under": true,
+        "id": "121337"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Leicester City",
+    "length": 7,
+    "from": "2025-12-14 05:15:00",
+    "to": "2025-12-14 14:30:00",
+    "matches": [
+      {
+        "time": "2025-12-14 05:15:00",
+        "home": "Arsenal",
+        "away": "Leicester City",
+        "ft": "0-0",
+        "under": true,
+        "id": "61313"
+      },
+      {
+        "time": "2025-12-14 06:15:00",
+        "home": "Borussia Dortmund",
+        "away": "Leicester City",
+        "ft": "0-1",
+        "under": true,
+        "id": "61321"
+      },
+      {
+        "time": "2025-12-14 07:45:00",
+        "home": "Leicester City",
+        "away": "AS Roma",
+        "ft": "1-0",
+        "under": true,
+        "id": "61333"
+      },
+      {
+        "time": "2025-12-14 11:15:00",
+        "home": "Leicester City",
+        "away": "Getafe CF",
+        "ft": "0-1",
+        "under": true,
+        "id": "61361"
+      },
+      {
+        "time": "2025-12-14 12:30:00",
+        "home": "Arsenal",
+        "away": "Leicester City",
+        "ft": "0-1",
+        "under": true,
+        "id": "61598"
+      },
+      {
+        "time": "2025-12-14 13:30:00",
+        "home": "Leicester City",
+        "away": "Bayer 04 Leverkusen",
+        "ft": "0-0",
+        "under": true,
+        "id": "61614"
+      },
+      {
+        "time": "2025-12-14 14:30:00",
+        "home": "Barcelona",
+        "away": "Leicester City",
+        "ft": "0-1",
+        "under": true,
+        "id": "61631"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Olympique de Marseille",
+    "length": 7,
+    "from": "2026-01-05 18:15:00",
+    "to": "2026-01-06 01:15:00",
+    "matches": [
+      {
+        "time": "2026-01-05 18:15:00",
+        "home": "Olympique de Marseille",
+        "away": "Udinese",
+        "ft": "1-0",
+        "under": true,
+        "id": "52996"
+      },
+      {
+        "time": "2026-01-05 19:30:00",
+        "home": "FSV Mainz 05",
+        "away": "Olympique de Marseille",
+        "ft": "0-0",
+        "under": true,
+        "id": "53009"
+      },
+      {
+        "time": "2026-01-05 21:30:00",
+        "home": "Olympique de Marseille",
+        "away": "Liverpool",
+        "ft": "0-1",
+        "under": true,
+        "id": "53037"
+      },
+      {
+        "time": "2026-01-05 22:45:00",
+        "home": "Olympique de Marseille",
+        "away": "Tottenham Hotspur",
+        "ft": "1-0",
+        "under": true,
+        "id": "53055"
+      },
+      {
+        "time": "2026-01-05 23:30:00",
+        "home": "Paris Saint Germain",
+        "away": "Olympique de Marseille",
+        "ft": "0-1",
+        "under": true,
+        "id": "53072"
+      },
+      {
+        "time": "2026-01-06 00:30:00",
+        "home": "Olympique de Marseille",
+        "away": "Lazio",
+        "ft": "1-0",
+        "under": true,
+        "id": "53087"
+      },
+      {
+        "time": "2026-01-06 01:15:00",
+        "home": "FSV Mainz 05",
+        "away": "Olympique de Marseille",
+        "ft": "1-0",
+        "under": true,
+        "id": "53102"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Paris Saint Germain",
+    "length": 7,
+    "from": "2025-06-18 12:00:00",
+    "to": "2025-06-18 20:00:00",
+    "matches": [
+      {
+        "time": "2025-06-18 12:00:00",
+        "home": "Paris Saint Germain",
+        "away": "Olympique Lyonnais",
+        "ft": "0-1",
+        "under": true,
+        "id": "24419"
+      },
+      {
+        "time": "2025-06-18 13:45:00",
+        "home": "Girondins de Bordeaux",
+        "away": "Paris Saint Germain",
+        "ft": "1-0",
+        "under": true,
+        "id": "24442"
+      },
+      {
+        "time": "2025-06-18 14:30:00",
+        "home": "Paris Saint Germain",
+        "away": "Liverpool",
+        "ft": "0-1",
+        "under": true,
+        "id": "24454"
+      },
+      {
+        "time": "2025-06-18 16:00:00",
+        "home": "Olympique Lyonnais",
+        "away": "Paris Saint Germain",
+        "ft": "1-0",
+        "under": true,
+        "id": "24475"
+      },
+      {
+        "time": "2025-06-18 17:00:00",
+        "home": "Borussia Dortmund",
+        "away": "Paris Saint Germain",
+        "ft": "0-0",
+        "under": true,
+        "id": "24490"
+      },
+      {
+        "time": "2025-06-18 19:00:00",
+        "home": "Paris Saint Germain",
+        "away": "Girondins de Bordeaux",
+        "ft": "0-1",
+        "under": true,
+        "id": "24508"
+      },
+      {
+        "time": "2025-06-18 20:00:00",
+        "home": "Paris Saint Germain",
+        "away": "Valencia CF",
+        "ft": "0-1",
+        "under": true,
+        "id": "24517"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Sevilla",
+    "length": 7,
+    "from": "2025-12-21 09:45:00",
+    "to": "2025-12-21 17:15:00",
+    "matches": [
+      {
+        "time": "2025-12-21 09:45:00",
+        "home": "Bayer 04 Leverkusen",
+        "away": "Sevilla",
+        "ft": "0-1",
+        "under": true,
+        "id": "64921"
+      },
+      {
+        "time": "2025-12-21 11:15:00",
+        "home": "Sevilla",
+        "away": "Lille OSC",
+        "ft": "1-0",
+        "under": true,
+        "id": "64932"
+      },
+      {
+        "time": "2025-12-21 12:00:00",
+        "home": "Sevilla",
+        "away": "Tottenham Hotspur",
+        "ft": "1-0",
+        "under": true,
+        "id": "65194"
+      },
+      {
+        "time": "2025-12-21 13:00:00",
+        "home": "Sevilla",
+        "away": "Valencia CF",
+        "ft": "0-1",
+        "under": true,
+        "id": "65208"
+      },
+      {
+        "time": "2025-12-21 14:00:00",
+        "home": "Bayer 04 Leverkusen",
+        "away": "Sevilla",
+        "ft": "1-0",
+        "under": true,
+        "id": "65226"
+      },
+      {
+        "time": "2025-12-21 15:00:00",
+        "home": "Arsenal",
+        "away": "Sevilla",
+        "ft": "0-0",
+        "under": true,
+        "id": "65241"
+      },
+      {
+        "time": "2025-12-21 17:15:00",
+        "home": "Sevilla",
+        "away": "Valencia CF",
+        "ft": "1-0",
+        "under": true,
+        "id": "65262"
+      }
+    ],
+    "current": 1
+  },
+  {
+    "team": "Atalanta",
+    "length": 6,
+    "from": "2025-12-17 05:00:00",
+    "to": "2025-12-17 16:00:00",
+    "matches": [
+      {
+        "time": "2025-12-17 05:00:00",
+        "home": "FSV Mainz 05",
+        "away": "Atalanta",
+        "ft": "1-0",
+        "under": true,
+        "id": "62836"
+      },
+      {
+        "time": "2025-12-17 07:15:00",
+        "home": "Atalanta",
+        "away": "AS Monaco",
+        "ft": "0-0",
+        "under": true,
+        "id": "62854"
+      },
+      {
+        "time": "2025-12-17 11:00:00",
+        "home": "Getafe CF",
+        "away": "Atalanta",
+        "ft": "0-0",
+        "under": true,
+        "id": "62884"
+      },
+      {
+        "time": "2025-12-17 12:00:00",
+        "home": "Paris Saint Germain",
+        "away": "Atalanta",
+        "ft": "0-1",
+        "under": true,
+        "id": "63130"
+      },
+      {
+        "time": "2025-12-17 15:00:00",
+        "home": "Getafe CF",
+        "away": "Atalanta",
+        "ft": "0-1",
+        "under": true,
+        "id": "63173"
+      },
+      {
+        "time": "2025-12-17 16:00:00",
+        "home": "Atalanta",
+        "away": "Manchester City",
+        "ft": "1-0",
+        "under": true,
+        "id": "63189"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Atletico de Madrid",
+    "length": 6,
+    "from": "2025-07-14 13:00:00",
+    "to": "2025-07-14 21:45:00",
+    "matches": [
+      {
+        "time": "2025-07-14 13:00:00",
+        "home": "Atletico de Madrid",
+        "away": "CA Osasuna",
+        "ft": "1-0",
+        "under": true,
+        "id": "45335"
+      },
+      {
+        "time": "2025-07-14 14:00:00",
+        "home": "Atletico de Madrid",
+        "away": "AC Milan",
+        "ft": "0-1",
+        "under": true,
+        "id": "45355"
+      },
+      {
+        "time": "2025-07-14 15:00:00",
+        "home": "Atletico de Madrid",
+        "away": "Liverpool",
+        "ft": "0-1",
+        "under": true,
+        "id": "45369"
+      },
+      {
+        "time": "2025-07-14 16:15:00",
+        "home": "Getafe CF",
+        "away": "Atletico de Madrid",
+        "ft": "0-1",
+        "under": true,
+        "id": "45388"
+      },
+      {
+        "time": "2025-07-14 17:00:00",
+        "home": "Atletico de Madrid",
+        "away": "Olympique de Marseille",
+        "ft": "1-0",
+        "under": true,
+        "id": "45398"
+      },
+      {
+        "time": "2025-07-14 21:45:00",
+        "home": "Atletico de Madrid",
+        "away": "Olympique de Marseille",
+        "ft": "1-0",
+        "under": true,
+        "id": "45444"
+      }
+    ],
+    "current": 1
+  },
+  {
+    "team": "Bayer 04 Leverkusen",
+    "length": 6,
+    "from": "2025-09-10 17:00:00",
+    "to": "2025-09-10 21:30:00",
+    "matches": [
+      {
+        "time": "2025-09-10 17:00:00",
+        "home": "Bayer 04 Leverkusen",
+        "away": "Real Madrid",
+        "ft": "0-1",
+        "under": true,
+        "id": "16048"
+      },
+      {
+        "time": "2025-09-10 18:00:00",
+        "home": "Real Sociedad",
+        "away": "Bayer 04 Leverkusen",
+        "ft": "0-0",
+        "under": true,
+        "id": "16066"
+      },
+      {
+        "time": "2025-09-10 19:00:00",
+        "home": "Bayer 04 Leverkusen",
+        "away": "CA Osasuna",
+        "ft": "0-0",
+        "under": true,
+        "id": "16080"
+      },
+      {
+        "time": "2025-09-10 20:00:00",
+        "home": "Borussia Dortmund",
+        "away": "Bayer 04 Leverkusen",
+        "ft": "0-1",
+        "under": true,
+        "id": "16098"
+      },
+      {
+        "time": "2025-09-10 20:45:00",
+        "home": "Bayer 04 Leverkusen",
+        "away": "Lille OSC",
+        "ft": "1-0",
+        "under": true,
+        "id": "16111"
+      },
+      {
+        "time": "2025-09-10 21:30:00",
+        "home": "Inter Milan",
+        "away": "Bayer 04 Leverkusen",
+        "ft": "1-0",
+        "under": true,
+        "id": "16123"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "FSV Mainz 05",
+    "length": 6,
+    "from": "2025-09-25 12:30:00",
+    "to": "2025-09-25 21:30:00",
+    "matches": [
+      {
+        "time": "2025-09-25 12:30:00",
+        "home": "CA Osasuna",
+        "away": "FSV Mainz 05",
+        "ft": "1-0",
+        "under": true,
+        "id": "8995"
+      },
+      {
+        "time": "2025-09-25 13:30:00",
+        "home": "FC Koln",
+        "away": "FSV Mainz 05",
+        "ft": "0-1",
+        "under": true,
+        "id": "9002"
+      },
+      {
+        "time": "2025-09-25 14:15:00",
+        "home": "FSV Mainz 05",
+        "away": "AS Roma",
+        "ft": "1-0",
+        "under": true,
+        "id": "9012"
+      },
+      {
+        "time": "2025-09-25 15:00:00",
+        "home": "FSV Mainz 05",
+        "away": "Arsenal",
+        "ft": "1-0",
+        "under": true,
+        "id": "9022"
+      },
+      {
+        "time": "2025-09-25 20:45:00",
+        "home": "FC Koln",
+        "away": "FSV Mainz 05",
+        "ft": "1-0",
+        "under": true,
+        "id": "9074"
+      },
+      {
+        "time": "2025-09-25 21:30:00",
+        "home": "FSV Mainz 05",
+        "away": "AS Roma",
+        "ft": "0-1",
+        "under": true,
+        "id": "9085"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Getafe CF",
+    "length": 6,
+    "from": "2025-10-05 17:00:00",
+    "to": "2025-10-06 00:45:00",
+    "matches": [
+      {
+        "time": "2025-10-05 17:00:00",
+        "home": "Getafe CF",
+        "away": "Valencia CF",
+        "ft": "0-0",
+        "under": true,
+        "id": "4536"
+      },
+      {
+        "time": "2025-10-05 18:00:00",
+        "home": "Getafe CF",
+        "away": "Sevilla",
+        "ft": "1-0",
+        "under": true,
+        "id": "4545"
+      },
+      {
+        "time": "2025-10-05 21:45:00",
+        "home": "Getafe CF",
+        "away": "Olympique de Marseille",
+        "ft": "0-0",
+        "under": true,
+        "id": "4579"
+      },
+      {
+        "time": "2025-10-05 22:30:00",
+        "home": "Getafe CF",
+        "away": "Inter Milan",
+        "ft": "0-1",
+        "under": true,
+        "id": "4585"
+      },
+      {
+        "time": "2025-10-05 23:15:00",
+        "home": "AS Roma",
+        "away": "Getafe CF",
+        "ft": "0-1",
+        "under": true,
+        "id": "4591"
+      },
+      {
+        "time": "2025-10-06 00:45:00",
+        "home": "Leicester City",
+        "away": "Getafe CF",
+        "ft": "0-0",
+        "under": true,
+        "id": "4606"
+      }
+    ],
+    "current": 2
+  },
+  {
+    "team": "Lazio",
+    "length": 6,
+    "from": "2025-07-15 16:15:00",
+    "to": "2025-07-15 22:45:00",
+    "matches": [
+      {
+        "time": "2025-07-15 16:15:00",
+        "home": "Lille OSC",
+        "away": "Lazio",
+        "ft": "0-0",
+        "under": true,
+        "id": "45737"
+      },
+      {
+        "time": "2025-07-15 17:15:00",
+        "home": "Lazio",
+        "away": "Arminia Bielefeld",
+        "ft": "1-0",
+        "under": true,
+        "id": "45748"
+      },
+      {
+        "time": "2025-07-15 18:45:00",
+        "home": "Olympique de Marseille",
+        "away": "Lazio",
+        "ft": "1-0",
+        "under": true,
+        "id": "45767"
+      },
+      {
+        "time": "2025-07-15 19:30:00",
+        "home": "Atletico de Madrid",
+        "away": "Lazio",
+        "ft": "0-1",
+        "under": true,
+        "id": "45781"
+      },
+      {
+        "time": "2025-07-15 20:30:00",
+        "home": "Lazio",
+        "away": "Napoli",
+        "ft": "1-0",
+        "under": true,
+        "id": "45792"
+      },
+      {
+        "time": "2025-07-15 22:45:00",
+        "home": "CA Osasuna",
+        "away": "Lazio",
+        "ft": "0-1",
+        "under": true,
+        "id": "45826"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Napoli",
+    "length": 6,
+    "from": "2026-03-25 01:30:00",
+    "to": "2026-03-25 10:45:00",
+    "matches": [
+      {
+        "time": "2026-03-25 01:30:00",
+        "home": "Napoli",
+        "away": "Real Madrid",
+        "ft": "0-1",
+        "under": true,
+        "id": "99522"
+      },
+      {
+        "time": "2026-03-25 02:45:00",
+        "home": "Udinese",
+        "away": "Napoli",
+        "ft": "0-0",
+        "under": true,
+        "id": "99539"
+      },
+      {
+        "time": "2026-03-25 03:45:00",
+        "home": "Liverpool",
+        "away": "Napoli",
+        "ft": "1-0",
+        "under": true,
+        "id": "99552"
+      },
+      {
+        "time": "2026-03-25 04:30:00",
+        "home": "Tottenham Hotspur",
+        "away": "Napoli",
+        "ft": "1-0",
+        "under": true,
+        "id": "99557"
+      },
+      {
+        "time": "2026-03-25 07:00:00",
+        "home": "Manchester City",
+        "away": "Napoli",
+        "ft": "0-0",
+        "under": true,
+        "id": "99578"
+      },
+      {
+        "time": "2026-03-25 10:45:00",
+        "home": "Paris Saint Germain",
+        "away": "Napoli",
+        "ft": "0-0",
+        "under": true,
+        "id": "99790"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Real Madrid",
+    "length": 6,
+    "from": "2025-12-15 20:30:00",
+    "to": "2025-12-16 02:45:00",
+    "matches": [
+      {
+        "time": "2025-12-15 20:30:00",
+        "home": "AC Milan",
+        "away": "Real Madrid",
+        "ft": "1-0",
+        "under": true,
+        "id": "62213"
+      },
+      {
+        "time": "2025-12-15 21:30:00",
+        "home": "Real Madrid",
+        "away": "Chelsea",
+        "ft": "0-1",
+        "under": true,
+        "id": "62221"
+      },
+      {
+        "time": "2025-12-16 00:00:00",
+        "home": "Bayern Munchen",
+        "away": "Real Madrid",
+        "ft": "0-1",
+        "under": true,
+        "id": "62245"
+      },
+      {
+        "time": "2025-12-16 00:45:00",
+        "home": "Real Madrid",
+        "away": "AS Roma",
+        "ft": "0-1",
+        "under": true,
+        "id": "62257"
+      },
+      {
+        "time": "2025-12-16 01:30:00",
+        "home": "Bayer 04 Leverkusen",
+        "away": "Real Madrid",
+        "ft": "1-0",
+        "under": true,
+        "id": "62270"
+      },
+      {
+        "time": "2025-12-16 02:45:00",
+        "home": "Real Madrid",
+        "away": "AS Monaco",
+        "ft": "1-0",
+        "under": true,
+        "id": "62291"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Torino",
+    "length": 6,
+    "from": "2026-02-08 10:45:00",
+    "to": "2026-02-08 20:00:00",
+    "matches": [
+      {
+        "time": "2026-02-08 10:45:00",
+        "home": "Barcelona",
+        "away": "Torino",
+        "ft": "0-1",
+        "under": true,
+        "id": "84467"
+      },
+      {
+        "time": "2026-02-08 12:45:00",
+        "home": "Real Madrid",
+        "away": "Torino",
+        "ft": "1-0",
+        "under": true,
+        "id": "84675"
+      },
+      {
+        "time": "2026-02-08 16:00:00",
+        "home": "Torino",
+        "away": "AC Milan",
+        "ft": "1-0",
+        "under": true,
+        "id": "84706"
+      },
+      {
+        "time": "2026-02-08 16:45:00",
+        "home": "AS Roma",
+        "away": "Torino",
+        "ft": "0-0",
+        "under": true,
+        "id": "84721"
+      },
+      {
+        "time": "2026-02-08 18:30:00",
+        "home": "Torino",
+        "away": "Udinese",
+        "ft": "1-0",
+        "under": true,
+        "id": "84746"
+      },
+      {
+        "time": "2026-02-08 20:00:00",
+        "home": "Napoli",
+        "away": "Torino",
+        "ft": "0-0",
+        "under": true,
+        "id": "84769"
+      }
+    ],
+    "current": 1
+  },
+  {
+    "team": "Valencia CF",
+    "length": 6,
+    "from": "2026-03-21 06:30:00",
+    "to": "2026-03-22 01:45:00",
+    "matches": [
+      {
+        "time": "2026-03-21 06:30:00",
+        "home": "Barcelona",
+        "away": "Valencia CF",
+        "ft": "1-0",
+        "under": true,
+        "id": "102209"
+      },
+      {
+        "time": "2026-03-21 10:45:00",
+        "home": "Sevilla",
+        "away": "Valencia CF",
+        "ft": "0-0",
+        "under": true,
+        "id": "102242"
+      },
+      {
+        "time": "2026-03-21 14:30:00",
+        "home": "Paris Saint Germain",
+        "away": "Valencia CF",
+        "ft": "1-0",
+        "under": true,
+        "id": "102463"
+      },
+      {
+        "time": "2026-03-21 16:30:00",
+        "home": "Valencia CF",
+        "away": "Everton",
+        "ft": "0-0",
+        "under": true,
+        "id": "102483"
+      },
+      {
+        "time": "2026-03-21 21:00:00",
+        "home": "Valencia CF",
+        "away": "Real Sociedad",
+        "ft": "1-0",
+        "under": true,
+        "id": "102528"
+      },
+      {
+        "time": "2026-03-22 01:45:00",
+        "home": "Sevilla",
+        "away": "Valencia CF",
+        "ft": "1-0",
+        "under": true,
+        "id": "102567"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "AS Monaco",
+    "length": 5,
+    "from": "2026-02-13 19:45:00",
+    "to": "2026-02-14 01:45:00",
+    "matches": [
+      {
+        "time": "2026-02-13 19:45:00",
+        "home": "AS Monaco",
+        "away": "Valencia CF",
+        "ft": "1-0",
+        "under": true,
+        "id": "87277"
+      },
+      {
+        "time": "2026-02-13 20:30:00",
+        "home": "AS Monaco",
+        "away": "Lazio",
+        "ft": "1-0",
+        "under": true,
+        "id": "87284"
+      },
+      {
+        "time": "2026-02-13 21:45:00",
+        "home": "Atalanta",
+        "away": "AS Monaco",
+        "ft": "1-0",
+        "under": true,
+        "id": "87294"
+      },
+      {
+        "time": "2026-02-13 23:45:00",
+        "home": "AS Monaco",
+        "away": "Valencia CF",
+        "ft": "0-0",
+        "under": true,
+        "id": "87324"
+      },
+      {
+        "time": "2026-02-14 01:45:00",
+        "home": "Atalanta",
+        "away": "AS Monaco",
+        "ft": "0-0",
+        "under": true,
+        "id": "87360"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Barcelona",
+    "length": 5,
+    "from": "2025-07-07 05:15:00",
+    "to": "2025-07-07 11:15:00",
+    "matches": [
+      {
+        "time": "2025-07-07 05:15:00",
+        "home": "Juventus",
+        "away": "Barcelona",
+        "ft": "1-0",
+        "under": true,
+        "id": "40918"
+      },
+      {
+        "time": "2025-07-07 07:15:00",
+        "home": "Torino",
+        "away": "Barcelona",
+        "ft": "1-0",
+        "under": true,
+        "id": "40937"
+      },
+      {
+        "time": "2025-07-07 08:45:00",
+        "home": "AS Roma",
+        "away": "Barcelona",
+        "ft": "0-1",
+        "under": true,
+        "id": "40949"
+      },
+      {
+        "time": "2025-07-07 10:30:00",
+        "home": "Barcelona",
+        "away": "Valencia CF",
+        "ft": "0-0",
+        "under": true,
+        "id": "40969"
+      },
+      {
+        "time": "2025-07-07 11:15:00",
+        "home": "Barcelona",
+        "away": "Chelsea",
+        "ft": "0-1",
+        "under": true,
+        "id": "40981"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Bayern Munchen",
+    "length": 5,
+    "from": "2025-06-28 06:30:00",
+    "to": "2025-06-28 13:30:00",
+    "matches": [
+      {
+        "time": "2025-06-28 06:30:00",
+        "home": "Bayern Munchen",
+        "away": "Arsenal",
+        "ft": "1-0",
+        "under": true,
+        "id": "36035"
+      },
+      {
+        "time": "2025-06-28 07:30:00",
+        "home": "FC Koln",
+        "away": "Bayern Munchen",
+        "ft": "0-1",
+        "under": true,
+        "id": "36044"
+      },
+      {
+        "time": "2025-06-28 09:30:00",
+        "home": "Napoli",
+        "away": "Bayern Munchen",
+        "ft": "1-0",
+        "under": true,
+        "id": "36059"
+      },
+      {
+        "time": "2025-06-28 11:30:00",
+        "home": "FC Koln",
+        "away": "Bayern Munchen",
+        "ft": "0-1",
+        "under": true,
+        "id": "36076"
+      },
+      {
+        "time": "2025-06-28 13:30:00",
+        "home": "Bayern Munchen",
+        "away": "Inter Milan",
+        "ft": "0-1",
+        "under": true,
+        "id": "36296"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Borussia Dortmund",
+    "length": 5,
+    "from": "2025-07-16 04:30:00",
+    "to": "2025-07-16 15:30:00",
+    "matches": [
+      {
+        "time": "2025-07-16 04:30:00",
+        "home": "Borussia Dortmund",
+        "away": "Leicester City",
+        "ft": "1-0",
+        "under": true,
+        "id": "45906"
+      },
+      {
+        "time": "2025-07-16 12:30:00",
+        "home": "Getafe CF",
+        "away": "Borussia Dortmund",
+        "ft": "0-0",
+        "under": true,
+        "id": "32440"
+      },
+      {
+        "time": "2025-07-16 13:30:00",
+        "home": "Borussia Dortmund",
+        "away": "Inter Milan",
+        "ft": "0-0",
+        "under": true,
+        "id": "32452"
+      },
+      {
+        "time": "2025-07-16 14:30:00",
+        "home": "Borussia Dortmund",
+        "away": "Paris Saint Germain",
+        "ft": "0-1",
+        "under": true,
+        "id": "32471"
+      },
+      {
+        "time": "2025-07-16 15:30:00",
+        "home": "Borussia Dortmund",
+        "away": "Arminia Bielefeld",
+        "ft": "1-0",
+        "under": true,
+        "id": "32484"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Chelsea",
+    "length": 5,
+    "from": "2025-09-28 02:15:00",
+    "to": "2025-09-28 08:15:00",
+    "matches": [
+      {
+        "time": "2025-09-28 02:15:00",
+        "home": "FC Koln",
+        "away": "Chelsea",
+        "ft": "0-1",
+        "under": true,
+        "id": "8273"
+      },
+      {
+        "time": "2025-09-28 03:00:00",
+        "home": "Chelsea",
+        "away": "Sevilla",
+        "ft": "0-0",
+        "under": true,
+        "id": "8278"
+      },
+      {
+        "time": "2025-09-28 04:30:00",
+        "home": "Arsenal",
+        "away": "Chelsea",
+        "ft": "0-0",
+        "under": true,
+        "id": "8299"
+      },
+      {
+        "time": "2025-09-28 06:30:00",
+        "home": "AS Monaco",
+        "away": "Chelsea",
+        "ft": "0-1",
+        "under": true,
+        "id": "8322"
+      },
+      {
+        "time": "2025-09-28 08:15:00",
+        "home": "Manchester City",
+        "away": "Chelsea",
+        "ft": "0-1",
+        "under": true,
+        "id": "8335"
+      }
+    ],
+    "current": 1
+  },
+  {
+    "team": "Girondins de Bordeaux",
+    "length": 5,
+    "from": "2025-06-27 03:30:00",
+    "to": "2025-06-27 12:00:00",
+    "matches": [
+      {
+        "time": "2025-06-27 03:30:00",
+        "home": "Girondins de Bordeaux",
+        "away": "Olympique Lyonnais",
+        "ft": "1-0",
+        "under": true,
+        "id": "35520"
+      },
+      {
+        "time": "2025-06-27 05:00:00",
+        "home": "Girondins de Bordeaux",
+        "away": "Lille OSC",
+        "ft": "0-0",
+        "under": true,
+        "id": "35532"
+      },
+      {
+        "time": "2025-06-27 07:10:00",
+        "home": "Girondins de Bordeaux",
+        "away": "Olympique Lyonnais",
+        "ft": "0-0",
+        "under": true,
+        "id": "35559"
+      },
+      {
+        "time": "2025-06-27 08:10:00",
+        "home": "Girondins de Bordeaux",
+        "away": "Lille OSC",
+        "ft": "0-1",
+        "under": true,
+        "id": "35571"
+      },
+      {
+        "time": "2025-06-27 12:00:00",
+        "home": "Girondins de Bordeaux",
+        "away": "Olympique Lyonnais",
+        "ft": "0-1",
+        "under": true,
+        "id": "35805"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Juventus",
+    "length": 5,
+    "from": "2025-07-02 07:00:00",
+    "to": "2025-07-02 15:00:00",
+    "matches": [
+      {
+        "time": "2025-07-02 07:00:00",
+        "home": "Inter Milan",
+        "away": "Juventus",
+        "ft": "0-1",
+        "under": true,
+        "id": "38000"
+      },
+      {
+        "time": "2025-07-02 10:30:00",
+        "home": "CA Osasuna",
+        "away": "Juventus",
+        "ft": "1-0",
+        "under": true,
+        "id": "38027"
+      },
+      {
+        "time": "2025-07-02 12:15:00",
+        "home": "Juventus",
+        "away": "Atalanta",
+        "ft": "0-0",
+        "under": true,
+        "id": "38246"
+      },
+      {
+        "time": "2025-07-02 14:15:00",
+        "home": "Juventus",
+        "away": "Sevilla",
+        "ft": "0-0",
+        "under": true,
+        "id": "38277"
+      },
+      {
+        "time": "2025-07-02 15:00:00",
+        "home": "Juventus",
+        "away": "Manchester United",
+        "ft": "0-1",
+        "under": true,
+        "id": "38290"
+      }
+    ],
+    "current": 1
+  },
+  {
+    "team": "Manchester City",
+    "length": 5,
+    "from": "2025-07-13 23:30:00",
+    "to": "2025-07-14 08:45:00",
+    "matches": [
+      {
+        "time": "2025-07-13 23:30:00",
+        "home": "Leicester City",
+        "away": "Manchester City",
+        "ft": "0-1",
+        "under": true,
+        "id": "44973"
+      },
+      {
+        "time": "2025-07-14 01:30:00",
+        "home": "Manchester City",
+        "away": "Sevilla",
+        "ft": "0-1",
+        "under": true,
+        "id": "45004"
+      },
+      {
+        "time": "2025-07-14 02:30:00",
+        "home": "Bayer 04 Leverkusen",
+        "away": "Manchester City",
+        "ft": "0-0",
+        "under": true,
+        "id": "45023"
+      },
+      {
+        "time": "2025-07-14 03:45:00",
+        "home": "Manchester City",
+        "away": "Napoli",
+        "ft": "0-1",
+        "under": true,
+        "id": "45040"
+      },
+      {
+        "time": "2025-07-14 08:45:00",
+        "home": "Atalanta",
+        "away": "Manchester City",
+        "ft": "1-0",
+        "under": true,
+        "id": "45093"
+      }
+    ],
+    "current": 1
+  },
+  {
+    "team": "Olympique Lyonnais",
+    "length": 5,
+    "from": "2026-01-10 05:00:00",
+    "to": "2026-01-10 21:30:00",
+    "matches": [
+      {
+        "time": "2026-01-10 05:00:00",
+        "home": "Girondins de Bordeaux",
+        "away": "Olympique Lyonnais",
+        "ft": "0-1",
+        "under": true,
+        "id": "51028"
+      },
+      {
+        "time": "2026-01-10 16:30:00",
+        "home": "Girondins de Bordeaux",
+        "away": "Olympique Lyonnais",
+        "ft": "0-1",
+        "under": true,
+        "id": "50143"
+      },
+      {
+        "time": "2026-01-10 18:30:00",
+        "home": "Olympique Lyonnais",
+        "away": "AS Monaco",
+        "ft": "1-0",
+        "under": true,
+        "id": "50168"
+      },
+      {
+        "time": "2026-01-10 20:45:00",
+        "home": "Olympique de Marseille",
+        "away": "Olympique Lyonnais",
+        "ft": "1-0",
+        "under": true,
+        "id": "50205"
+      },
+      {
+        "time": "2026-01-10 21:30:00",
+        "home": "Lille OSC",
+        "away": "Olympique Lyonnais",
+        "ft": "1-0",
+        "under": true,
+        "id": "50214"
+      }
+    ],
+    "current": 3
+  },
+  {
+    "team": "Real Sociedad",
+    "length": 5,
+    "from": "2025-06-22 21:00:00",
+    "to": "2025-06-23 01:30:00",
+    "matches": [
+      {
+        "time": "2025-06-22 21:00:00",
+        "home": "Real Sociedad",
+        "away": "Bayern Munchen",
+        "ft": "0-1",
+        "under": true,
+        "id": "33499"
+      },
+      {
+        "time": "2025-06-22 21:45:00",
+        "home": "Real Sociedad",
+        "away": "Inter Milan",
+        "ft": "0-1",
+        "under": true,
+        "id": "33513"
+      },
+      {
+        "time": "2025-06-22 22:30:00",
+        "home": "Valencia CF",
+        "away": "Real Sociedad",
+        "ft": "1-0",
+        "under": true,
+        "id": "33524"
+      },
+      {
+        "time": "2025-06-23 00:30:00",
+        "home": "AS Monaco",
+        "away": "Real Sociedad",
+        "ft": "0-0",
+        "under": true,
+        "id": "33542"
+      },
+      {
+        "time": "2025-06-23 01:30:00",
+        "home": "Real Sociedad",
+        "away": "CA Osasuna",
+        "ft": "1-0",
+        "under": true,
+        "id": "33557"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Arsenal",
+    "length": 4,
+    "from": "2025-07-27 01:00:00",
+    "to": "2025-07-27 04:00:00",
+    "matches": [
+      {
+        "time": "2025-07-27 01:00:00",
+        "home": "FSV Mainz 05",
+        "away": "Arsenal",
+        "ft": "1-0",
+        "under": true,
+        "id": "27923"
+      },
+      {
+        "time": "2025-07-27 02:00:00",
+        "home": "Arsenal",
+        "away": "Bayern Munchen",
+        "ft": "0-1",
+        "under": true,
+        "id": "27936"
+      },
+      {
+        "time": "2025-07-27 03:15:00",
+        "home": "Arsenal",
+        "away": "Sevilla",
+        "ft": "1-0",
+        "under": true,
+        "id": "27956"
+      },
+      {
+        "time": "2025-07-27 04:00:00",
+        "home": "CA Osasuna",
+        "away": "Arsenal",
+        "ft": "1-0",
+        "under": true,
+        "id": "27968"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Liverpool",
+    "length": 4,
+    "from": "2025-10-10 07:45:00",
+    "to": "2025-10-10 12:00:00",
+    "matches": [
+      {
+        "time": "2025-10-10 07:45:00",
+        "home": "Liverpool",
+        "away": "Napoli",
+        "ft": "1-0",
+        "under": true,
+        "id": "2979"
+      },
+      {
+        "time": "2025-10-10 09:30:00",
+        "home": "Liverpool",
+        "away": "Atalanta",
+        "ft": "0-1",
+        "under": true,
+        "id": "2992"
+      },
+      {
+        "time": "2025-10-10 10:45:00",
+        "home": "Udinese",
+        "away": "Liverpool",
+        "ft": "1-0",
+        "under": true,
+        "id": "3003"
+      },
+      {
+        "time": "2025-10-10 12:00:00",
+        "home": "Liverpool",
+        "away": "Torino",
+        "ft": "1-0",
+        "under": true,
+        "id": "2361"
+      }
+    ],
+    "current": 1
+  },
+  {
+    "team": "Manchester United",
+    "length": 4,
+    "from": "2025-08-03 17:30:00",
+    "to": "2025-08-03 22:30:00",
+    "matches": [
+      {
+        "time": "2025-08-03 17:30:00",
+        "home": "Bayer 04 Leverkusen",
+        "away": "Manchester United",
+        "ft": "1-0",
+        "under": true,
+        "id": "43502"
+      },
+      {
+        "time": "2025-08-03 18:15:00",
+        "home": "AS Roma",
+        "away": "Manchester United",
+        "ft": "0-0",
+        "under": true,
+        "id": "43511"
+      },
+      {
+        "time": "2025-08-03 20:45:00",
+        "home": "Atletico de Madrid",
+        "away": "Manchester United",
+        "ft": "0-1",
+        "under": true,
+        "id": "43536"
+      },
+      {
+        "time": "2025-08-03 22:30:00",
+        "home": "Chelsea",
+        "away": "Manchester United",
+        "ft": "0-1",
+        "under": true,
+        "id": "43554"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "RB Leipzig",
+    "length": 4,
+    "from": "2025-06-26 13:10:00",
+    "to": "2025-06-26 16:10:00",
+    "matches": [
+      {
+        "time": "2025-06-26 13:10:00",
+        "home": "Valencia CF",
+        "away": "RB Leipzig",
+        "ft": "0-0",
+        "under": true,
+        "id": "35347"
+      },
+      {
+        "time": "2025-06-26 14:10:00",
+        "home": "RB Leipzig",
+        "away": "Udinese",
+        "ft": "0-0",
+        "under": true,
+        "id": "35363"
+      },
+      {
+        "time": "2025-06-26 15:10:00",
+        "home": "AS Roma",
+        "away": "RB Leipzig",
+        "ft": "0-1",
+        "under": true,
+        "id": "35378"
+      },
+      {
+        "time": "2025-06-26 16:10:00",
+        "home": "Valencia CF",
+        "away": "RB Leipzig",
+        "ft": "1-0",
+        "under": true,
+        "id": "35395"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Schalke 04",
+    "length": 4,
+    "from": "2025-06-24 10:10:00",
+    "to": "2025-06-24 15:10:00",
+    "matches": [
+      {
+        "time": "2025-06-24 10:10:00",
+        "home": "Schalke 04",
+        "away": "FSV Mainz 05",
+        "ft": "0-1",
+        "under": true,
+        "id": "34165"
+      },
+      {
+        "time": "2025-06-24 12:10:00",
+        "home": "RB Leipzig",
+        "away": "Schalke 04",
+        "ft": "0-1",
+        "under": true,
+        "id": "34390"
+      },
+      {
+        "time": "2025-06-24 14:10:00",
+        "home": "Barcelona",
+        "away": "Schalke 04",
+        "ft": "0-0",
+        "under": true,
+        "id": "34421"
+      },
+      {
+        "time": "2025-06-24 15:10:00",
+        "home": "RB Leipzig",
+        "away": "Schalke 04",
+        "ft": "1-0",
+        "under": true,
+        "id": "34436"
+      }
+    ],
+    "current": 0
+  },
+  {
+    "team": "Tottenham Hotspur",
+    "length": 4,
+    "from": "2025-06-17 11:30:00",
+    "to": "2025-06-17 15:00:00",
+    "matches": [
+      {
+        "time": "2025-06-17 11:30:00",
+        "home": "Arminia Bielefeld",
+        "away": "Tottenham Hotspur",
+        "ft": "0-1",
+        "under": true,
+        "id": "23888"
+      },
+      {
+        "time": "2025-06-17 12:30:00",
+        "home": "Tottenham Hotspur",
+        "away": "Everton",
+        "ft": "0-0",
+        "under": true,
+        "id": "23913"
+      },
+      {
+        "time": "2025-06-17 14:00:00",
+        "home": "Olympique de Marseille",
+        "away": "Tottenham Hotspur",
+        "ft": "1-0",
+        "under": true,
+        "id": "23938"
+      },
+      {
+        "time": "2025-06-17 15:00:00",
+        "home": "Napoli",
+        "away": "Tottenham Hotspur",
+        "ft": "0-1",
+        "under": true,
+        "id": "23950"
+      }
+    ],
+    "current": 0
+  }
+]

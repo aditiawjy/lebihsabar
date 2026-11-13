@@ -10,8 +10,8 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
     <div class="results-title-group">
     <h2 id="pattern-results-title" style="font-size:16px;font-weight:600;margin:0">Hasil API · Semua League</h2>
       <span class="results-info">
-        <button type="button" class="results-info-button" aria-label="Informasi rentang sesi dan pembaruan" aria-describedby="pattern-results-details">ⓘ</button>
-        <span id="pattern-results-details" role="tooltip">L15/L20: tanggal kalender UTC+8. L16/Vietnam: sesi 12:00–00:45 hari berikutnya. Hasil API diperbarui secara manual; menit dan skor live setiap 5 detik.</span>
+        <button type="button" class="results-info-button" aria-label="Informasi rentang sesi dan pembaruan manual" aria-describedby="pattern-results-details">ⓘ</button>
+        <span id="pattern-results-details" role="tooltip">E-Football: tanggal kalender UTC+8. L16/Vietnam: sesi 12:00–00:45 hari berikutnya. Hasil API diperbarui manual lewat tombol; menit dan skor live setiap 5 detik.</span>
       </span>
     </div>
   </div>
@@ -20,8 +20,8 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
     <button id="pattern-live-retry" type="button">Coba sambungkan kembali</button>
   </div>
   <div class="results-brief">
-    <p><strong>Sesi</strong> Kalender: L15, L20 · Sesi: L16, Vietnam 12.00–00.45 UTC+8</p>
-    <p><strong>Pembaruan terakhir</strong> <span id="pattern-results-last-updated">API belum tersedia</span> · pembaruan manual</p>
+    <p><strong>Sesi</strong> Kalender: L15, L20, E-Football · Sesi: L16, Vietnam 12.00–00.45 UTC+8</p>
+    <p><strong>Pembaruan terakhir</strong> <span id="pattern-results-last-updated">API belum tersedia</span> · Pembaruan hasil manual</p>
     <p><strong>Status sumber</strong> <span id="pattern-results-live-state" class="results-pill live-pill" role="status">Live…</span> <span id="pattern-results-api-state" class="results-pill" role="status">API memuat…</span> <span id="pattern-results-save-status" role="status" class="results-pill">▤ CSV menunggu</span></p>
   </div>
   <div id="pattern-api-health" class="results-api-health" role="status" aria-live="polite">
@@ -32,7 +32,7 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
     <label style="font-size:12px">Tanggal <input id="pattern-results-date" type="date" value="<?= htmlspecialchars(date('Y-m-d'), ENT_QUOTES, 'UTF-8') ?>" style="padding:7px;border:1px solid #cbd5e1;border-radius:6px"></label>
     <label class="results-team-search">Cari tim <input id="pattern-results-team-search" type="search" placeholder="Nama tim atau negara" autocomplete="off" aria-describedby="pattern-results-search-status"></label>
     <label class="results-team-search">Fase <select id="pattern-results-phase"><option value="all">Semua fase</option><option value="scheduled">Jadwal</option><option value="halftime">HT</option><option value="live">Live</option><option value="finished">Selesai</option><option value="postponed">Ditunda</option></select></label>
-    <label class="results-team-search">Liga <select id="pattern-results-league-filter"><option value="all">Semua liga</option><option value="15">League 15</option><option value="16">League 16</option><option value="20">League 20</option><option value="vietnam15">Vietnam</option></select></label>
+    <label class="results-team-search">Liga <select id="pattern-results-league-filter"><option value="all">Semua liga</option><option value="16">League 16</option><option value="vietnam15">Vietnam</option><option value="f24-club">F24 · Club</option><option value="f24-international">F24 · International</option><option value="f26-club">F26 · Club</option><option value="f26-international">F26 · International</option><option value="vsoccer">V-Soccer</option></select></label>
     <label class="results-team-search">Market hasil FT <select id="pattern-results-market-filter"><option value="all">Semua hasil</option><option value="zero">FT 0–0</option><option value="under15">FT Under 1.5</option><option value="over15">FT Over 1.5</option><option value="under25">FT Under 2.5</option><option value="over25">FT Over 2.5</option></select></label>
     <label class="results-team-search">Capaian rekor <select id="pattern-results-record-filter"><option value="all">Semua tim</option><option value="near">Mendekati (≥80%, belum tercapai)</option><option value="reached">Sudah mencapai rekor</option></select></label>
     <button id="pattern-results-refresh" type="button" style="padding:8px 12px;background:#2563eb;color:white;border:0;border-radius:6px;cursor:pointer">Perbarui dari API</button>
@@ -42,13 +42,14 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
   <p id="pattern-results-search-status" class="results-search-status" role="status" aria-live="polite" hidden></p>
   <p class="results-search-status">Market menyaring skor FT pertandingan selesai. Rekor dihitung per hari UTC+8 untuk FT 0–0 dan Under 1.5; filter rekor tersedia untuk liga MSports.</p>
   <div class="results-context">
-    <p class="results-timezone"><strong>Waktu pertandingan MSports: UTC+8</strong> · 1 jam lebih cepat dari WIB.</p>
+    <p class="results-timezone"><strong>Waktu pertandingan MSports: UTC+8</strong> · 1 jam lebih cepat dari WIB. V-Soccer menggunakan WIB (UTC+7).</p>
     <details class="results-legend"><summary>Informasi liga, sinkronisasi, dan istilah</summary>
-      <p>Filter tanggal memakai hari kalender untuk League 15 dan League 20. League 16 dan Vietnam memakai sesi 12.00–00.45 hari berikutnya; sebelum 12.00 UTC+8, tanggal hari ini menampilkan sesi sebelumnya. Rentang setiap liga tercantum di bawah namanya.</p>
-      <p id="pattern-results-save-help">Sinkronisasi menambahkan hasil selesai yang baru, memperbarui skor yang berubah, dan melewati hasil yang sudah sama. Tekan tombol sinkronisasi atau Perbarui semua data untuk menyimpan ke CSV.</p>
+      <p>League 15 dan 20 dinonaktifkan. Filter tanggal memakai hari kalender untuk E-Football. League 16 dan Vietnam memakai sesi 12.00–00.45 hari berikutnya; sebelum 12.00 UTC+8, tanggal hari ini menampilkan sesi sebelumnya. Rentang setiap liga tercantum di bawah namanya.</p>
+      <p id="pattern-results-save-help">Sinkronisasi menambahkan hasil selesai yang baru, memperbarui skor yang berubah, dan melewati hasil yang sudah sama. Hasil API diperbarui manual lewat tombol. Sinkronisasi CSV tetap berjalan setelah pembaruan berhasil; skor dan odds live tetap otomatis.</p>
       <p><strong>HT</strong>: skor babak pertama. <strong>FT</strong>: skor akhir. <strong>U1.5</strong>: Under 1.5, total 0 atau 1 gol. <strong>O0.5</strong>: Over 0.5, minimal 1 gol. <strong>H2H</strong>: riwayat pertemuan kedua tim. <strong>API saja</strong>: data dari API; tidak tersedia pembaruan live.</p>
     </details>
   </div>
+  <p id="pattern-signal-history-status" class="results-search-status" role="status">Sinyal yang pernah tampil disimpan per pertandingan untuk evaluasi.</p>
   <p id="pattern-results-note" role="status" class="results-error-note" hidden>Memuat hasil API…</p>
   <p id="pattern-results-save-summary" role="status" aria-live="polite" class="results-save-summary" hidden></p>
   <p id="pattern-all-summary" role="status" aria-live="polite" class="results-save-summary" hidden></p>
@@ -72,9 +73,22 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
   </details>
   <p id="pattern-results-live-note" hidden>Menghubungkan menit live…</p>
   <nav class="results-league-nav" aria-label="Navigasi liga">
-    <button type="button" data-results-league="15">League 15</button><button type="button" data-results-league="16">League 16</button><button type="button" data-results-league="20">League 20</button><button type="button" data-results-league="vietnam15">Vietnam</button>
+    <button type="button" data-results-league="16">League 16</button><button type="button" data-results-league="vietnam15">Vietnam</button><button type="button" data-results-league="extra">E-Football</button><button type="button" data-results-league="vsoccer">V-Soccer</button>
   </nav>
   <div id="pattern-results-body" class="pattern-results-grid"></div>
+  <details class="results-api-only-section" aria-labelledby="pattern-results-extra-title" open>
+    <summary class="results-api-only-heading">
+      <span id="pattern-results-extra-title">E-Football · API saja (4 liga)</span>
+      <span>Data dari API; tidak tersedia pembaruan live</span>
+    </summary>
+    <div id="pattern-results-extra-body" class="pattern-results-grid results-extra-grid"></div>
+  </details>
+  <details id="pattern-vsoccer-section" class="results-api-only-section" open>
+    <summary class="results-api-only-heading"><span id="pattern-vsoccer-title">V-Soccer · Hasil pertandingan</span><span>WIB (UTC+7) · data Results</span></summary>
+    <div class="vsoccer-controls"><label>Liga <select id="pattern-vsoccer-league"><option value="">Semua liga</option></select></label><button id="pattern-vsoccer-refresh" type="button">Perbarui V-Soccer</button><span id="pattern-vsoccer-status" role="status">Memuat…</span></div>
+    <p class="vsoccer-note">Skor HT dan FT dari Results V-Soccer. Hasil selesai ikut disinkronkan ke matches.csv; skor HT yang tidak tersedia disimpan kosong. Waktu di CSV dikonversi ke UTC+8.</p>
+    <div class="results-scroll vsoccer-scroll"><table class="vsoccer-table"><thead><tr><th>Jam WIB</th><th>Liga</th><th>Pertandingan</th><th>HT</th><th>FT</th></tr></thead><tbody id="pattern-vsoccer-rows"><tr><td colspan="5">Memuat hasil…</td></tr></tbody></table></div>
+  </details>
 </section>
 <style>
 #pattern-results-host .results-under15-record{background:#f5f3ff!important;color:#6d28d9!important;border:1px solid #c4b5fd;border-radius:5px;padding:4px 7px;white-space:normal;line-height:1.6}
@@ -196,7 +210,6 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
 #pattern-results-host table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:11px}
 #pattern-results-host .result-time-cell{font-size:10px}
 #pattern-results-host .result-match-day{display:block;color:#64748b;font-size:9px}
-#pattern-results-host .result-f24-league{display:block;margin-top:3px;color:#64748b;font-size:9px}
 #pattern-results-host .results-card .results-session-range{padding:7px 10px 0;color:#1e40af;font-size:10px}
 #pattern-results-host .results-session-range .results-source-note{display:block;margin-top:4px;color:#64748b;font-size:10px;line-height:1.5}
 #pattern-results-host .result-state{display:block;width:max-content;max-width:100%;margin-top:4px;padding:2px 5px;border:1px solid transparent;border-radius:5px;font-size:9px;font-weight:700;line-height:1.35;white-space:normal}
@@ -208,8 +221,6 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
 #pattern-results-host .result-state-stale{background:#fef3c7;color:#92400e}
 #pattern-results-host .result-live-row td{background:#f0fdf4}
 #pattern-results-host .result-stale-row td{background:#fffbeb}
-#pattern-results-host .result-no-second-half-goal td{background:#fff1f2}
-#pattern-results-host .result-no-second-half-label{display:block;width:max-content;max-width:100%;margin-top:4px;padding:2px 5px;border-radius:4px;background:#ffe4e6;color:#9f1239;font-size:9px;font-weight:700}
 #pattern-results-host .result-live-hint{display:block;margin-top:4px;color:#64748b;font-size:9px}
 #pattern-results-host .result-live-signal{display:block;margin-top:4px;padding:3px 4px;border-radius:4px;background:#dbeafe;color:#1e40af;font-size:9px;line-height:1.4}
 #pattern-results-host .result-live-signal.is-active{background:#dcfce7;color:#166534;border:1px solid #86efac;font-size:10px;font-weight:600;animation:pattern-signal-glow 2s ease-in-out infinite}
@@ -235,6 +246,14 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
 #pattern-results-host .results-zerozero-chip.is-high-frequency{background:#b91c1c;border-color:#b91c1c;color:#fff;font-weight:600}
 #pattern-results-host .results-zerozero-chip.results-under-streak{background:#ede9fe;border-color:#c4b5fd;color:#5b21b6;font-weight:600}
 #pattern-results-host .result-h2h-badge{display:block;width:fit-content;margin-top:4px;padding:3px 6px;border-radius:5px;background:#ecfdf5;color:#166534;border:1px solid #bbf7d0;font-size:10px;font-weight:600;line-height:1.5}
+#pattern-results-host .signal-outcome{display:inline-block;margin-left:5px;padding:0 4px;border-radius:3px;font-size:9px;font-weight:700;background:#e2e8f0;color:#334155}
+#pattern-results-host .signal-outcome.is-hit{background:#dcfce7;color:#166534}
+#pattern-results-host .signal-outcome.is-miss{background:#fee2e2;color:#991b1b}
+#pattern-results-host .signal-outcome.is-pending{background:#fef3c7;color:#92400e}
+#pattern-results-host .result-analysis{margin-top:5px;font-size:10px;text-align:left;white-space:normal}
+#pattern-results-host .result-analysis>summary{color:#475569;cursor:pointer}
+#pattern-results-host .result-analysis-note{color:#64748b}
+#pattern-results-host .result-historical-signal{background:#eff6ff;color:#1e40af;border-color:#bfdbfe}
 #pattern-results-host .result-h2h-badge.is-perfect-history{background:#065f46;color:#fff;border-color:#047857;font-weight:700}
 #pattern-results-host .result-h2h-badge{cursor:pointer;list-style:none}
 #pattern-results-host .result-h2h-badge::before{content:'▸ ';}
@@ -242,13 +261,15 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
 #pattern-results-host .result-h2h-detail-body{margin-top:4px;padding:7px;border:1px solid #cbd5e1;border-radius:6px;background:#f8fafc;color:#334155;font-size:10px;line-height:1.5;overflow-wrap:anywhere}
 #pattern-results-host .result-h2h-detail-body p{padding:0;margin:0 0 6px;color:inherit;font-size:10px}
 #pattern-results-host .result-h2h-detail-body ul{margin:4px 0 0;padding-left:16px}
+#pattern-results-host .results-vietnam-card{margin-top:24px}
 #pattern-results-host .pattern-results-grid{align-items:start}
-@media(min-width:768px) and (max-width:1200px){#pattern-results-host #pattern-results-body{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(min-width:768px){#pattern-results-body:has(.results-vietnam-card) .results-vietnam-card{grid-column:1} #pattern-results-body:has(.results-vietnam-card) #results-league-f24-combined{grid-column:2}}
-@media(min-width:1201px){#pattern-results-body:has(.results-vietnam-card) #results-league-f26-combined{grid-column:3}}
-@media(max-width:767px){#pattern-results-host .pattern-results-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:1200px){#pattern-results-host .pattern-results-grid{grid-template-columns:minmax(0,1fr)}}
 </style>
+<script src="pattern-signal-evaluation.js?v=<?= (int) filemtime(__DIR__.'/pattern-signal-evaluation.js') ?>" defer></script>
+<script src="pattern-signal-history.js?v=<?= (int) filemtime(__DIR__.'/pattern-signal-history.js') ?>" defer></script>
+<script src="pattern-recent-meetings.js?v=<?= (int) filemtime(__DIR__.'/pattern-recent-meetings.js') ?>" defer></script>
 <script src="pattern-live-results.js?v=<?= (int) filemtime(__DIR__.'/pattern-live-results.js') ?>" defer></script>
+<script src="vsoccer-results.js?v=<?= (int) filemtime(__DIR__.'/vsoccer-results.js') ?>" defer></script>
 <script src="pattern-all-results.js?v=<?= (int) filemtime(__DIR__.'/pattern-all-results.js') ?>" defer></script>
 <script src="pattern-data-coverage.js?v=<?= (int) filemtime(__DIR__.'/pattern-data-coverage.js') ?>" defer></script>
 <script src="pattern-sync-history.js?v=<?= (int) filemtime(__DIR__.'/pattern-sync-history.js') ?>" defer></script>
@@ -354,6 +375,17 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
 #pattern-table-host tbody tr:hover { background:#f8fafc; }
 #pattern-table-host .pattern-code { white-space:nowrap; color:#2563eb; font-weight:600; }
 #pattern-table-host .pattern-note { color:#64748b; font-size:13px; margin:0 0 16px; }
+#pattern-results-host .result-recent-meetings{margin:7px 0 0;padding:6px 0 0;border-top:1px solid #dbe5f1;text-align:left;white-space:normal;font-size:10px;line-height:1.5;color:#475569}
+#pattern-results-host tr.result-repeat-ht>td{background:#fff7d6!important}
+#pattern-results-host .result-recent-same-ht{border-top-color:#e9c65b}
+#pattern-results-host .result-recent-same-ht strong{color:#854d0e}
+#pattern-results-host .result-ht-run{margin-top:5px;font-size:10px;line-height:1.5;font-weight:600;color:#1e40af}
+#pattern-results-host .result-recent-meetings strong{display:block;font-size:10px;font-weight:600;color:#334155}
+#pattern-results-host .result-recent-meetings ol{list-style:none;margin:3px 0 0;padding:0}
+#pattern-results-host .result-recent-meetings li+li{margin-top:5px}
+#pattern-results-host .result-recent-meetings li{display:flex;flex-wrap:wrap;column-gap:6px;align-items:baseline}
+#pattern-results-host .result-recent-meetings time{display:inline;color:#64748b}
+#pattern-results-host .result-recent-meetings .recent-score{display:inline;font-weight:600;color:#334155;font-variant-numeric:tabular-nums}
 </style>
 <script>
 (() => {

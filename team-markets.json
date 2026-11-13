@@ -3,7 +3,6 @@
   "under15": {"label":"FT Under 1.5","period":"FT","comparison":"under","goals":1},
   "under25": {"label":"FT Under 2.5","period":"FT","comparison":"under","goals":2},
   "under35": {"label":"FT Under 3.5","period":"FT","comparison":"under","goals":3},
-  "under45": {"label":"FT Under 4.5","period":"FT","comparison":"under","goals":4},
   "over15": {"label":"FT Over 1.5","period":"FT","comparison":"over","goals":2},
   "over25": {"label":"FT Over 2.5","period":"FT","comparison":"over","goals":3},
   "over35": {"label":"FT Over 3.5","period":"FT","comparison":"over","goals":4},

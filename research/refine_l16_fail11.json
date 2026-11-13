@@ -1,0 +1,1178 @@
+{
+  "end": "2026-10-18",
+  "split": "2026-10-12",
+  "rows": 4824,
+  "note": "One/two-filter candidates (top five by training only; test not used in ranking) selected on older data only. Recent data has been used in earlier research; not untouched prospective validation. Prior fixtures require 30-minute gap. No production rules changed.",
+  "results": [
+    {
+      "code": "L16-08",
+      "baseline": {
+        "win": 58,
+        "fail": 11,
+        "total": 69,
+        "pct": 84.06
+      },
+      "train": {
+        "win": 48,
+        "fail": 8,
+        "total": 56,
+        "pct": 85.71
+      },
+      "test": {
+        "win": 10,
+        "fail": 3,
+        "total": 13,
+        "pct": 76.92
+      },
+      "trials": 1540,
+      "candidate": {
+        "conditions": [
+          "Away previous 2H ≤2",
+          "HT tidak imbang"
+        ],
+        "train": {
+          "win": 25,
+          "fail": 1,
+          "total": 26,
+          "pct": 96.15
+        },
+        "test": {
+          "win": 5,
+          "fail": 1,
+          "total": 6,
+          "pct": 83.33
+        },
+        "overall": {
+          "win": 30,
+          "fail": 2,
+          "total": 32,
+          "pct": 93.75
+        }
+      },
+      "finalists": [
+        {
+          "conditions": [
+            "Away previous 2H ≤2",
+            "HT tidak imbang"
+          ],
+          "train": {
+            "win": 25,
+            "fail": 1,
+            "total": 26,
+            "pct": 96.15
+          },
+          "test": {
+            "win": 5,
+            "fail": 1,
+            "total": 6,
+            "pct": 83.33
+          },
+          "overall": {
+            "win": 30,
+            "fail": 2,
+            "total": 32,
+            "pct": 93.75
+          }
+        },
+        {
+          "conditions": [
+            "HT tidak imbang",
+            "Total HT ≤2"
+          ],
+          "train": {
+            "win": 24,
+            "fail": 1,
+            "total": 25,
+            "pct": 96
+          },
+          "test": {
+            "win": 3,
+            "fail": 1,
+            "total": 4,
+            "pct": 75
+          },
+          "overall": {
+            "win": 27,
+            "fail": 2,
+            "total": 29,
+            "pct": 93.1
+          }
+        },
+        {
+          "conditions": [
+            "Away previous FT ≥4",
+            "HT tidak imbang"
+          ],
+          "train": {
+            "win": 23,
+            "fail": 1,
+            "total": 24,
+            "pct": 95.83
+          },
+          "test": {
+            "win": 4,
+            "fail": 0,
+            "total": 4,
+            "pct": 100
+          },
+          "overall": {
+            "win": 27,
+            "fail": 1,
+            "total": 28,
+            "pct": 96.43
+          }
+        },
+        {
+          "conditions": [
+            "Away previous 2H ≤4",
+            "Home previous HT ≥1"
+          ],
+          "train": {
+            "win": 22,
+            "fail": 1,
+            "total": 23,
+            "pct": 95.65
+          },
+          "test": {
+            "win": 9,
+            "fail": 3,
+            "total": 12,
+            "pct": 75
+          },
+          "overall": {
+            "win": 31,
+            "fail": 4,
+            "total": 35,
+            "pct": 88.57
+          }
+        },
+        {
+          "conditions": [
+            "Away previous 2H ≤4",
+            "HT tidak imbang"
+          ],
+          "train": {
+            "win": 34,
+            "fail": 2,
+            "total": 36,
+            "pct": 94.44
+          },
+          "test": {
+            "win": 5,
+            "fail": 1,
+            "total": 6,
+            "pct": 83.33
+          },
+          "overall": {
+            "win": 39,
+            "fail": 3,
+            "total": 42,
+            "pct": 92.86
+          }
+        }
+      ]
+    },
+    {
+      "code": "L16-16",
+      "baseline": {
+        "win": 71,
+        "fail": 11,
+        "total": 82,
+        "pct": 86.59
+      },
+      "train": {
+        "win": 63,
+        "fail": 10,
+        "total": 73,
+        "pct": 86.3
+      },
+      "test": {
+        "win": 8,
+        "fail": 1,
+        "total": 9,
+        "pct": 88.89
+      },
+      "trials": 1540,
+      "candidate": {
+        "conditions": [
+          "Home previous 2H ≤3"
+        ],
+        "train": {
+          "win": 32,
+          "fail": 2,
+          "total": 34,
+          "pct": 94.12
+        },
+        "test": {
+          "win": 6,
+          "fail": 1,
+          "total": 7,
+          "pct": 85.71
+        },
+        "overall": {
+          "win": 38,
+          "fail": 3,
+          "total": 41,
+          "pct": 92.68
+        }
+      },
+      "finalists": [
+        {
+          "conditions": [
+            "Home previous 2H ≤3"
+          ],
+          "train": {
+            "win": 32,
+            "fail": 2,
+            "total": 34,
+            "pct": 94.12
+          },
+          "test": {
+            "win": 6,
+            "fail": 1,
+            "total": 7,
+            "pct": 85.71
+          },
+          "overall": {
+            "win": 38,
+            "fail": 3,
+            "total": 41,
+            "pct": 92.68
+          }
+        },
+        {
+          "conditions": [
+            "Total HT ≤3",
+            "Home previous 2H ≤3"
+          ],
+          "train": {
+            "win": 30,
+            "fail": 2,
+            "total": 32,
+            "pct": 93.75
+          },
+          "test": {
+            "win": 6,
+            "fail": 1,
+            "total": 7,
+            "pct": 85.71
+          },
+          "overall": {
+            "win": 36,
+            "fail": 3,
+            "total": 39,
+            "pct": 92.31
+          }
+        },
+        {
+          "conditions": [
+            "Home previous HT ≤2",
+            "Home previous 2H ≤3"
+          ],
+          "train": {
+            "win": 29,
+            "fail": 2,
+            "total": 31,
+            "pct": 93.55
+          },
+          "test": {
+            "win": 4,
+            "fail": 1,
+            "total": 5,
+            "pct": 80
+          },
+          "overall": {
+            "win": 33,
+            "fail": 3,
+            "total": 36,
+            "pct": 91.67
+          }
+        },
+        {
+          "conditions": [
+            "Home previous FT ≥1",
+            "Home previous 2H ≤3"
+          ],
+          "train": {
+            "win": 29,
+            "fail": 2,
+            "total": 31,
+            "pct": 93.55
+          },
+          "test": {
+            "win": 5,
+            "fail": 1,
+            "total": 6,
+            "pct": 83.33
+          },
+          "overall": {
+            "win": 34,
+            "fail": 3,
+            "total": 37,
+            "pct": 91.89
+          }
+        },
+        {
+          "conditions": [
+            "Away previous HT ≤4",
+            "HT tidak imbang"
+          ],
+          "train": {
+            "win": 28,
+            "fail": 2,
+            "total": 30,
+            "pct": 93.33
+          },
+          "test": {
+            "win": 4,
+            "fail": 1,
+            "total": 5,
+            "pct": 80
+          },
+          "overall": {
+            "win": 32,
+            "fail": 3,
+            "total": 35,
+            "pct": 91.43
+          }
+        }
+      ]
+    },
+    {
+      "code": "L16-27",
+      "baseline": {
+        "win": 61,
+        "fail": 11,
+        "total": 72,
+        "pct": 84.72
+      },
+      "train": {
+        "win": 44,
+        "fail": 8,
+        "total": 52,
+        "pct": 84.62
+      },
+      "test": {
+        "win": 17,
+        "fail": 3,
+        "total": 20,
+        "pct": 85
+      },
+      "trials": 1540,
+      "candidate": {
+        "conditions": [
+          "Home previous 2H ≤1"
+        ],
+        "train": {
+          "win": 23,
+          "fail": 0,
+          "total": 23,
+          "pct": 100
+        },
+        "test": {
+          "win": 7,
+          "fail": 2,
+          "total": 9,
+          "pct": 77.78
+        },
+        "overall": {
+          "win": 30,
+          "fail": 2,
+          "total": 32,
+          "pct": 93.75
+        }
+      },
+      "finalists": [
+        {
+          "conditions": [
+            "Home previous 2H ≤1"
+          ],
+          "train": {
+            "win": 23,
+            "fail": 0,
+            "total": 23,
+            "pct": 100
+          },
+          "test": {
+            "win": 7,
+            "fail": 2,
+            "total": 9,
+            "pct": 77.78
+          },
+          "overall": {
+            "win": 30,
+            "fail": 2,
+            "total": 32,
+            "pct": 93.75
+          }
+        },
+        {
+          "conditions": [
+            "Home previous HT ≤3",
+            "Home previous 2H ≤1"
+          ],
+          "train": {
+            "win": 22,
+            "fail": 0,
+            "total": 22,
+            "pct": 100
+          },
+          "test": {
+            "win": 6,
+            "fail": 2,
+            "total": 8,
+            "pct": 75
+          },
+          "overall": {
+            "win": 28,
+            "fail": 2,
+            "total": 30,
+            "pct": 93.33
+          }
+        },
+        {
+          "conditions": [
+            "Home previous FT ≥1",
+            "Home previous 2H ≤1"
+          ],
+          "train": {
+            "win": 22,
+            "fail": 0,
+            "total": 22,
+            "pct": 100
+          },
+          "test": {
+            "win": 6,
+            "fail": 2,
+            "total": 8,
+            "pct": 75
+          },
+          "overall": {
+            "win": 28,
+            "fail": 2,
+            "total": 30,
+            "pct": 93.33
+          }
+        },
+        {
+          "conditions": [
+            "Home previous 2H ≤1",
+            "Away previous 2H ≤4"
+          ],
+          "train": {
+            "win": 22,
+            "fail": 0,
+            "total": 22,
+            "pct": 100
+          },
+          "test": {
+            "win": 6,
+            "fail": 2,
+            "total": 8,
+            "pct": 75
+          },
+          "overall": {
+            "win": 28,
+            "fail": 2,
+            "total": 30,
+            "pct": 93.33
+          }
+        },
+        {
+          "conditions": [
+            "Home previous FT ≤3",
+            "Home previous 2H ≤1"
+          ],
+          "train": {
+            "win": 21,
+            "fail": 0,
+            "total": 21,
+            "pct": 100
+          },
+          "test": {
+            "win": 5,
+            "fail": 2,
+            "total": 7,
+            "pct": 71.43
+          },
+          "overall": {
+            "win": 26,
+            "fail": 2,
+            "total": 28,
+            "pct": 92.86
+          }
+        }
+      ]
+    },
+    {
+      "code": "L16-32",
+      "baseline": {
+        "win": 62,
+        "fail": 11,
+        "total": 73,
+        "pct": 84.93
+      },
+      "train": {
+        "win": 50,
+        "fail": 7,
+        "total": 57,
+        "pct": 87.72
+      },
+      "test": {
+        "win": 12,
+        "fail": 4,
+        "total": 16,
+        "pct": 75
+      },
+      "trials": 1540,
+      "candidate": {
+        "conditions": [
+          "Home previous HT ≤1",
+          "Away previous 2H ≤2"
+        ],
+        "train": {
+          "win": 23,
+          "fail": 0,
+          "total": 23,
+          "pct": 100
+        },
+        "test": {
+          "win": 5,
+          "fail": 2,
+          "total": 7,
+          "pct": 71.43
+        },
+        "overall": {
+          "win": 28,
+          "fail": 2,
+          "total": 30,
+          "pct": 93.33
+        }
+      },
+      "finalists": [
+        {
+          "conditions": [
+            "Home previous HT ≤1",
+            "Away previous 2H ≤2"
+          ],
+          "train": {
+            "win": 23,
+            "fail": 0,
+            "total": 23,
+            "pct": 100
+          },
+          "test": {
+            "win": 5,
+            "fail": 2,
+            "total": 7,
+            "pct": 71.43
+          },
+          "overall": {
+            "win": 28,
+            "fail": 2,
+            "total": 30,
+            "pct": 93.33
+          }
+        },
+        {
+          "conditions": [
+            "Home previous HT ≤1",
+            "HT tidak imbang"
+          ],
+          "train": {
+            "win": 31,
+            "fail": 1,
+            "total": 32,
+            "pct": 96.88
+          },
+          "test": {
+            "win": 5,
+            "fail": 2,
+            "total": 7,
+            "pct": 71.43
+          },
+          "overall": {
+            "win": 36,
+            "fail": 3,
+            "total": 39,
+            "pct": 92.31
+          }
+        },
+        {
+          "conditions": [
+            "Home previous HT ≤1",
+            "Home previous FT ≤2"
+          ],
+          "train": {
+            "win": 28,
+            "fail": 1,
+            "total": 29,
+            "pct": 96.55
+          },
+          "test": {
+            "win": 4,
+            "fail": 1,
+            "total": 5,
+            "pct": 80
+          },
+          "overall": {
+            "win": 32,
+            "fail": 2,
+            "total": 34,
+            "pct": 94.12
+          }
+        },
+        {
+          "conditions": [
+            "Home previous HT ≤1",
+            "Home previous 2H ≤1"
+          ],
+          "train": {
+            "win": 27,
+            "fail": 1,
+            "total": 28,
+            "pct": 96.43
+          },
+          "test": {
+            "win": 4,
+            "fail": 1,
+            "total": 5,
+            "pct": 80
+          },
+          "overall": {
+            "win": 31,
+            "fail": 2,
+            "total": 33,
+            "pct": 93.94
+          }
+        },
+        {
+          "conditions": [
+            "Home previous HT ≤1",
+            "Away previous FT ≥1"
+          ],
+          "train": {
+            "win": 27,
+            "fail": 1,
+            "total": 28,
+            "pct": 96.43
+          },
+          "test": {
+            "win": 5,
+            "fail": 1,
+            "total": 6,
+            "pct": 83.33
+          },
+          "overall": {
+            "win": 32,
+            "fail": 2,
+            "total": 34,
+            "pct": 94.12
+          }
+        }
+      ]
+    },
+    {
+      "code": "L16-34",
+      "baseline": {
+        "win": 72,
+        "fail": 11,
+        "total": 83,
+        "pct": 86.75
+      },
+      "train": {
+        "win": 61,
+        "fail": 8,
+        "total": 69,
+        "pct": 88.41
+      },
+      "test": {
+        "win": 11,
+        "fail": 3,
+        "total": 14,
+        "pct": 78.57
+      },
+      "trials": 1540,
+      "candidate": {
+        "conditions": [
+          "Total HT ≤2",
+          "Home previous FT ≤4"
+        ],
+        "train": {
+          "win": 29,
+          "fail": 0,
+          "total": 29,
+          "pct": 100
+        },
+        "test": {
+          "win": 4,
+          "fail": 1,
+          "total": 5,
+          "pct": 80
+        },
+        "overall": {
+          "win": 33,
+          "fail": 1,
+          "total": 34,
+          "pct": 97.06
+        }
+      },
+      "finalists": [
+        {
+          "conditions": [
+            "Total HT ≤2",
+            "Home previous FT ≤4"
+          ],
+          "train": {
+            "win": 29,
+            "fail": 0,
+            "total": 29,
+            "pct": 100
+          },
+          "test": {
+            "win": 4,
+            "fail": 1,
+            "total": 5,
+            "pct": 80
+          },
+          "overall": {
+            "win": 33,
+            "fail": 1,
+            "total": 34,
+            "pct": 97.06
+          }
+        },
+        {
+          "conditions": [
+            "Away previous HT ≤2",
+            "Home previous FT ≤4"
+          ],
+          "train": {
+            "win": 33,
+            "fail": 1,
+            "total": 34,
+            "pct": 97.06
+          },
+          "test": {
+            "win": 4,
+            "fail": 2,
+            "total": 6,
+            "pct": 66.67
+          },
+          "overall": {
+            "win": 37,
+            "fail": 3,
+            "total": 40,
+            "pct": 92.5
+          }
+        },
+        {
+          "conditions": [
+            "Away previous HT ≤2",
+            "Home previous 2H ≤2"
+          ],
+          "train": {
+            "win": 32,
+            "fail": 1,
+            "total": 33,
+            "pct": 96.97
+          },
+          "test": {
+            "win": 5,
+            "fail": 1,
+            "total": 6,
+            "pct": 83.33
+          },
+          "overall": {
+            "win": 37,
+            "fail": 2,
+            "total": 39,
+            "pct": 94.87
+          }
+        },
+        {
+          "conditions": [
+            "Total HT ≤2",
+            "Home previous 2H ≤3"
+          ],
+          "train": {
+            "win": 31,
+            "fail": 1,
+            "total": 32,
+            "pct": 96.88
+          },
+          "test": {
+            "win": 6,
+            "fail": 2,
+            "total": 8,
+            "pct": 75
+          },
+          "overall": {
+            "win": 37,
+            "fail": 3,
+            "total": 40,
+            "pct": 92.5
+          }
+        },
+        {
+          "conditions": [
+            "Away previous FT ≤3",
+            "Home previous FT ≤4"
+          ],
+          "train": {
+            "win": 28,
+            "fail": 1,
+            "total": 29,
+            "pct": 96.55
+          },
+          "test": {
+            "win": 4,
+            "fail": 2,
+            "total": 6,
+            "pct": 66.67
+          },
+          "overall": {
+            "win": 32,
+            "fail": 3,
+            "total": 35,
+            "pct": 91.43
+          }
+        }
+      ]
+    },
+    {
+      "code": "L16-39",
+      "baseline": {
+        "win": 91,
+        "fail": 11,
+        "total": 102,
+        "pct": 89.22
+      },
+      "train": {
+        "win": 72,
+        "fail": 5,
+        "total": 77,
+        "pct": 93.51
+      },
+      "test": {
+        "win": 19,
+        "fail": 6,
+        "total": 25,
+        "pct": 76
+      },
+      "trials": 1540,
+      "candidate": {
+        "conditions": [
+          "Home previous 2H ≥2",
+          "Away previous 2H ≤3"
+        ],
+        "train": {
+          "win": 31,
+          "fail": 0,
+          "total": 31,
+          "pct": 100
+        },
+        "test": {
+          "win": 2,
+          "fail": 2,
+          "total": 4,
+          "pct": 50
+        },
+        "overall": {
+          "win": 33,
+          "fail": 2,
+          "total": 35,
+          "pct": 94.29
+        }
+      },
+      "finalists": [
+        {
+          "conditions": [
+            "Home previous 2H ≥2",
+            "Away previous 2H ≤3"
+          ],
+          "train": {
+            "win": 31,
+            "fail": 0,
+            "total": 31,
+            "pct": 100
+          },
+          "test": {
+            "win": 2,
+            "fail": 2,
+            "total": 4,
+            "pct": 50
+          },
+          "overall": {
+            "win": 33,
+            "fail": 2,
+            "total": 35,
+            "pct": 94.29
+          }
+        },
+        {
+          "conditions": [
+            "Away previous HT ≥1",
+            "Away previous 2H ≤2"
+          ],
+          "train": {
+            "win": 39,
+            "fail": 1,
+            "total": 40,
+            "pct": 97.5
+          },
+          "test": {
+            "win": 6,
+            "fail": 4,
+            "total": 10,
+            "pct": 60
+          },
+          "overall": {
+            "win": 45,
+            "fail": 5,
+            "total": 50,
+            "pct": 90
+          }
+        },
+        {
+          "conditions": [
+            "Home previous FT ≥3",
+            "Away previous 2H ≤3"
+          ],
+          "train": {
+            "win": 36,
+            "fail": 1,
+            "total": 37,
+            "pct": 97.3
+          },
+          "test": {
+            "win": 2,
+            "fail": 3,
+            "total": 5,
+            "pct": 40
+          },
+          "overall": {
+            "win": 38,
+            "fail": 4,
+            "total": 42,
+            "pct": 90.48
+          }
+        },
+        {
+          "conditions": [
+            "Away previous 2H ≤3",
+            "HT tidak imbang"
+          ],
+          "train": {
+            "win": 36,
+            "fail": 1,
+            "total": 37,
+            "pct": 97.3
+          },
+          "test": {
+            "win": 3,
+            "fail": 3,
+            "total": 6,
+            "pct": 50
+          },
+          "overall": {
+            "win": 39,
+            "fail": 4,
+            "total": 43,
+            "pct": 90.7
+          }
+        },
+        {
+          "conditions": [
+            "Away previous 2H ≤1"
+          ],
+          "train": {
+            "win": 35,
+            "fail": 1,
+            "total": 36,
+            "pct": 97.22
+          },
+          "test": {
+            "win": 7,
+            "fail": 3,
+            "total": 10,
+            "pct": 70
+          },
+          "overall": {
+            "win": 42,
+            "fail": 4,
+            "total": 46,
+            "pct": 91.3
+          }
+        }
+      ]
+    },
+    {
+      "code": "L16-57",
+      "baseline": {
+        "win": 58,
+        "fail": 11,
+        "total": 69,
+        "pct": 84.06
+      },
+      "train": {
+        "win": 50,
+        "fail": 8,
+        "total": 58,
+        "pct": 86.21
+      },
+      "test": {
+        "win": 8,
+        "fail": 3,
+        "total": 11,
+        "pct": 72.73
+      },
+      "trials": 1176,
+      "candidate": {
+        "conditions": [
+          "Away previous HT ≤1",
+          "Away previous 2H ≥1"
+        ],
+        "train": {
+          "win": 33,
+          "fail": 4,
+          "total": 37,
+          "pct": 89.19
+        },
+        "test": {
+          "win": 4,
+          "fail": 3,
+          "total": 7,
+          "pct": 57.14
+        },
+        "overall": {
+          "win": 37,
+          "fail": 7,
+          "total": 44,
+          "pct": 84.09
+        }
+      },
+      "finalists": [
+        {
+          "conditions": [
+            "Away previous HT ≤1",
+            "Away previous 2H ≥1"
+          ],
+          "train": {
+            "win": 33,
+            "fail": 4,
+            "total": 37,
+            "pct": 89.19
+          },
+          "test": {
+            "win": 4,
+            "fail": 3,
+            "total": 7,
+            "pct": 57.14
+          },
+          "overall": {
+            "win": 37,
+            "fail": 7,
+            "total": 44,
+            "pct": 84.09
+          }
+        },
+        {
+          "conditions": [
+            "Away previous FT ≥1",
+            "Home previous FT ≥2"
+          ],
+          "train": {
+            "win": 24,
+            "fail": 3,
+            "total": 27,
+            "pct": 88.89
+          },
+          "test": {
+            "win": 5,
+            "fail": 1,
+            "total": 6,
+            "pct": 83.33
+          },
+          "overall": {
+            "win": 29,
+            "fail": 4,
+            "total": 33,
+            "pct": 87.88
+          }
+        },
+        {
+          "conditions": [
+            "Away previous FT ≤2",
+            "Away previous 2H ≥1"
+          ],
+          "train": {
+            "win": 24,
+            "fail": 3,
+            "total": 27,
+            "pct": 88.89
+          },
+          "test": {
+            "win": 3,
+            "fail": 2,
+            "total": 5,
+            "pct": 60
+          },
+          "overall": {
+            "win": 27,
+            "fail": 5,
+            "total": 32,
+            "pct": 84.38
+          }
+        },
+        {
+          "conditions": [
+            "Home previous HT ≤1"
+          ],
+          "train": {
+            "win": 23,
+            "fail": 3,
+            "total": 26,
+            "pct": 88.46
+          },
+          "test": {
+            "win": 3,
+            "fail": 2,
+            "total": 5,
+            "pct": 60
+          },
+          "overall": {
+            "win": 26,
+            "fail": 5,
+            "total": 31,
+            "pct": 83.87
+          }
+        },
+        {
+          "conditions": [
+            "Away previous FT ≥1",
+            "Away previous FT ≤2"
+          ],
+          "train": {
+            "win": 30,
+            "fail": 4,
+            "total": 34,
+            "pct": 88.24
+          },
+          "test": {
+            "win": 5,
+            "fail": 2,
+            "total": 7,
+            "pct": 71.43
+          },
+          "overall": {
+            "win": 35,
+            "fail": 6,
+            "total": 41,
+            "pct": 85.37
+          }
+        }
+      ]
+    }
+  ]
+}

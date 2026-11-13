@@ -1,7 +1,6 @@
 <?php
 if (!defined('SABARAJA_APP')) { exit('No direct script access allowed'); }
 $teamMarkets = json_decode(file_get_contents(__DIR__.'/team-markets.json'),true,512,JSON_THROW_ON_ERROR);
-$teamMarkets = array_filter($teamMarkets, static fn($market) => $market['comparison'] !== 'over');
 $zeroDate = (new DateTimeImmutable('now', new DateTimeZone('Asia/Singapore')))->format('Y-m-d');
 ?>
 <section id="team-zero" class="zero-page">
@@ -9,7 +8,7 @@ $zeroDate = (new DateTimeImmutable('now', new DateTimeZone('Asia/Singapore')))->
   <form id="zero-filters" class="zero-filters">
     <label>Statistik<select id="zero-metric"><?php foreach ($teamMarkets as $key=>$market): ?><option value="<?= htmlspecialchars($key,ENT_QUOTES,'UTF-8') ?>"><?= htmlspecialchars($market['label'],ENT_QUOTES,'UTF-8') ?></option><?php endforeach; ?></select></label>
     <label>Tanggal<input id="zero-date" type="date" required value="<?= htmlspecialchars($zeroDate, ENT_QUOTES, 'UTF-8') ?>"></label>
-    <label>Liga<select id="zero-league"><option value="all">Semua liga</option><option value="15">League 15</option><option value="16">League 16</option><option value="20">League 20</option><option value="vietnam15">Vietnam V League 1 · 15 menit</option></select></label>
+    <label>Liga<select id="zero-league"><option value="all">Semua liga</option><option value="15">League 15</option><option value="16">League 16</option><option value="20">League 20</option><option value="vietnam15">Vietnam V League 1 · 15 menit</option><option value="f24-club">F24 · Elite Club</option><option value="f24-international">F24 · International</option><option value="f26-club">F26 · Elite Club</option><option value="f26-international">F26 · International</option><option value="vsoccer">V-Soccer · Semua liga</option><optgroup id="zero-vsoccer-leagues" label="Liga V-Soccer"></optgroup></select></label>
     <label class="zero-search">Cari tim<input id="zero-search" type="search" placeholder="Nama tim…"></label>
     <button id="zero-refresh" type="button">Perbarui dari API</button>
   </form>

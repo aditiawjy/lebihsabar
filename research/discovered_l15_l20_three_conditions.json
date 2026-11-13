@@ -1,0 +1,24 @@
+{
+  "split": "2026-10-01",
+  "test_end_exclusive": "2026-10-19",
+  "minimum_train": 40,
+  "minimum_test": 8,
+  "min_train_pct": 90,
+  "min_test_pct": 90,
+  "csv_sha256": "bfa4303c82cd924a9cfcaf59be810541f99c962b67fc2a2f2a61189aaaaae278",
+  "warning": "Exploratory multiple testing; shortlist uses recent test results, so not independent holdout. All history features require a 30-minute to 3-hour gap. Current HT only allowed for 2H markets. No production changes.",
+  "leagues": {
+    "15": {
+      "rows": 65167,
+      "trials": 419914,
+      "eligible_finalists": 0,
+      "shortlist": []
+    },
+    "20": {
+      "rows": 49131,
+      "trials": 734419,
+      "eligible_finalists": 0,
+      "shortlist": []
+    }
+  }
+}

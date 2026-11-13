@@ -1,0 +1,259 @@
+{
+  "league": "16",
+  "start": "2026-09-26",
+  "end": "2026-10-16",
+  "results": [
+    {
+      "code": "L16-02",
+      "name": "Norway Recovery Kandang — pertandingan Norway sebelumnya di kandang, tanpa gol 2H",
+      "win": 7,
+      "fail": 0,
+      "total": 7,
+      "accuracy": 100,
+      "pending": 0
+    },
+    {
+      "code": "L16-04",
+      "name": "Ukraine Previous FT ≥4 & HT 1",
+      "win": 9,
+      "fail": 0,
+      "total": 9,
+      "accuracy": 100,
+      "pending": 0
+    },
+    {
+      "code": "L16-31",
+      "name": "Previous Session Both HT 0–0 — minimal satu gol 2H dalam dua laga berikutnya",
+      "win": 48,
+      "fail": 1,
+      "total": 49,
+      "accuracy": 97.95918367346938,
+      "pending": 0
+    },
+    {
+      "code": "L16-08",
+      "name": "Italy Tandang Previous FT ≥3 Gol",
+      "win": 23,
+      "fail": 1,
+      "total": 24,
+      "accuracy": 95.83333333333334,
+      "pending": 0
+    },
+    {
+      "code": "L16-13",
+      "name": "Hungary Tandang Previous Tanpa Gol Pribadi 2H",
+      "win": 15,
+      "fail": 1,
+      "total": 16,
+      "accuracy": 93.75,
+      "pending": 0
+    },
+    {
+      "code": "L16-14",
+      "name": "Hungary HT 2 + Sebelumnya Kandang",
+      "win": 13,
+      "fail": 1,
+      "total": 14,
+      "accuracy": 92.85714285714286,
+      "pending": 0
+    },
+    {
+      "code": "L16-01",
+      "name": "Norway Kandang FT Over 1.5",
+      "win": 63,
+      "fail": 5,
+      "total": 68,
+      "accuracy": 92.64705882352942,
+      "pending": 0
+    },
+    {
+      "code": "L16-07",
+      "name": "Spain Previous Signal WIN — HT 2–3, sebelumnya ada gol 2H",
+      "win": 12,
+      "fail": 1,
+      "total": 13,
+      "accuracy": 92.3076923076923,
+      "pending": 0
+    },
+    {
+      "code": "L16-16",
+      "name": "Belgium Kandang HT ≥2 Gol",
+      "win": 18,
+      "fail": 2,
+      "total": 20,
+      "accuracy": 90,
+      "pending": 0
+    },
+    {
+      "code": "L16-05",
+      "name": "Mexico Previous FT ≤1 + HT 1–2",
+      "win": 7,
+      "fail": 1,
+      "total": 8,
+      "accuracy": 87.5,
+      "pending": 0
+    },
+    {
+      "code": "L16-15",
+      "name": "Norway Home Previous HT ≥3",
+      "win": 7,
+      "fail": 1,
+      "total": 8,
+      "accuracy": 87.5,
+      "pending": 0
+    },
+    {
+      "code": "L16-38",
+      "name": "Argentina HT ≥1 + Home Previous HT ≥2",
+      "win": 42,
+      "fail": 6,
+      "total": 48,
+      "accuracy": 87.5,
+      "pending": 0
+    },
+    {
+      "code": "L16-35",
+      "name": "France Previous Session FT ≥5 Gol",
+      "win": 52,
+      "fail": 8,
+      "total": 60,
+      "accuracy": 86.66666666666667,
+      "pending": 0
+    },
+    {
+      "code": "L16-12",
+      "name": "Norway Kandang HT 2 Gol",
+      "win": 19,
+      "fail": 3,
+      "total": 22,
+      "accuracy": 86.36363636363636,
+      "pending": 0
+    },
+    {
+      "code": "L16-34",
+      "name": "Norway Kandang + Lawan Previous HT ≥1",
+      "win": 31,
+      "fail": 5,
+      "total": 36,
+      "accuracy": 86.11111111111111,
+      "pending": 0
+    },
+    {
+      "code": "L16-30",
+      "name": "Previous Session 2H ≥3 + Current HT ≥3",
+      "win": 124,
+      "fail": 21,
+      "total": 145,
+      "accuracy": 85.51724137931035,
+      "pending": 0
+    },
+    {
+      "code": "L16-03",
+      "name": "Hungary Previous FT ≥4 & HT ≤1",
+      "win": 17,
+      "fail": 3,
+      "total": 20,
+      "accuracy": 85,
+      "pending": 0
+    },
+    {
+      "code": "L16-39",
+      "name": "France Previous Session HT ≥2 Gol",
+      "win": 51,
+      "fail": 9,
+      "total": 60,
+      "accuracy": 85,
+      "pending": 0
+    },
+    {
+      "code": "L16-10",
+      "name": "Italy Tertinggal HT",
+      "win": 39,
+      "fail": 7,
+      "total": 46,
+      "accuracy": 84.78260869565217,
+      "pending": 0
+    },
+    {
+      "code": "L16-27",
+      "name": "Previous Session FT ≥5 + Current HT ≥3, Slot :30",
+      "win": 38,
+      "fail": 7,
+      "total": 45,
+      "accuracy": 84.44444444444444,
+      "pending": 0
+    },
+    {
+      "code": "L16-32",
+      "name": "USA HT ≥1 + Home Sebelumnya Tandang",
+      "win": 32,
+      "fail": 6,
+      "total": 38,
+      "accuracy": 84.21052631578947,
+      "pending": 0
+    },
+    {
+      "code": "L16-33",
+      "name": "Ukraine HT Ganjil + Previous Session 2H ≥2",
+      "win": 37,
+      "fail": 7,
+      "total": 44,
+      "accuracy": 84.0909090909091,
+      "pending": 0
+    },
+    {
+      "code": "L16-20",
+      "name": "Croatia Kandang Tertinggal HT",
+      "win": 20,
+      "fail": 4,
+      "total": 24,
+      "accuracy": 83.33333333333334,
+      "pending": 0
+    },
+    {
+      "code": "L16-37",
+      "name": "Netherlands HT ≥1 + Home Previous 2H ≥2",
+      "win": 39,
+      "fail": 8,
+      "total": 47,
+      "accuracy": 82.97872340425532,
+      "pending": 0
+    },
+    {
+      "code": "L16-36",
+      "name": "France + Tim Tandang Previous Gol 2H ≥1",
+      "win": 57,
+      "fail": 12,
+      "total": 69,
+      "accuracy": 82.6086956521739,
+      "pending": 0
+    },
+    {
+      "code": "L16-06",
+      "name": "Spain Tandang Previous 2H ≥2",
+      "win": 27,
+      "fail": 6,
+      "total": 33,
+      "accuracy": 81.81818181818183,
+      "pending": 0
+    },
+    {
+      "code": "L16-11",
+      "name": "Mexico Sebelumnya Kandang",
+      "win": 31,
+      "fail": 7,
+      "total": 38,
+      "accuracy": 81.57894736842105,
+      "pending": 0
+    },
+    {
+      "code": "L16-22",
+      "name": "Ghana Previous Kandang + Gol Pribadi 2H",
+      "win": 23,
+      "fail": 6,
+      "total": 29,
+      "accuracy": 79.3103448275862,
+      "pending": 0
+    }
+  ]
+}

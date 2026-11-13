@@ -1,0 +1,60 @@
+{
+  "baseline": {
+    "w": 3305,
+    "l": 581,
+    "n": 3886,
+    "pct": 85.05
+  },
+  "split": "2026-10-12",
+  "trials": 9730,
+  "results": [
+    {
+      "conditions": [
+        "Lawan previous total FT ≥4",
+        "Slot -30m total 2H ≤4"
+      ],
+      "train": {
+        "w": 479,
+        "l": 51,
+        "n": 530,
+        "pct": 90.38
+      },
+      "test": {
+        "w": 15,
+        "l": 2,
+        "n": 17,
+        "pct": 88.24
+      },
+      "overall": {
+        "w": 495,
+        "l": 53,
+        "n": 548,
+        "pct": 90.33
+      }
+    },
+    {
+      "conditions": [
+        "Lawan previous total FT ≥4",
+        "Liverpool previous total 2H ≤1"
+      ],
+      "train": {
+        "w": 382,
+        "l": 41,
+        "n": 423,
+        "pct": 90.31
+      },
+      "test": {
+        "w": 8,
+        "l": 2,
+        "n": 10,
+        "pct": 80.0
+      },
+      "overall": {
+        "w": 391,
+        "l": 43,
+        "n": 434,
+        "pct": 90.09
+      }
+    }
+  ]
+}

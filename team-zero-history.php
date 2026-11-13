@@ -14,8 +14,13 @@ function teamZeroHistory(string $csvFile, array $snapshotFiles, string $metric =
         '15'=>'SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play',
         '16'=>'SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play',
         '20'=>'SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play',
+        'f24-club'=>'E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play',
+        'f24-international'=>'E-FOOTBALL F24 INTERNATIONAL FRIENDLY - 16 Mins Play',
+        'f26-club'=>'E-FOOTBALL F26 ELITE CLUB FRIENDLY - 16 Mins Play',
+        'f26-international'=>'E-FOOTBALL F26 INTERNATIONAL FRIENDLY - 16 Mins Play',
     ];
-    $ids = ['10031619'=>'vietnam15','10026214'=>'15','10031403'=>'16','10026211'=>'20'];
+    $ids = ['10031619'=>'vietnam15','10026214'=>'15','10031403'=>'16','10026211'=>'20','10031501'=>'f24-club',
+        '10031502'=>'f24-international','10034432'=>'f26-club','10034496'=>'f26-international'];
     $nameIds = array_flip($names);
     $zone = new DateTimeZone('Asia/Singapore');
     $clean = static fn($value) => trim(preg_replace('/\s+/', ' ', preg_replace('/\s*(?:\(V\)|\[V\])/i', '', $value)));

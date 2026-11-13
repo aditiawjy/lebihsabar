@@ -33,6 +33,10 @@
       for (const value of [match.time.slice(11,16), clean(match.league), clean(match.home)+' vs '+clean(match.away), match.ht || '—', match.ft]) {
         const cell = document.createElement('td'); cell.textContent = value; row.append(cell);
       }
+      window.SabarajaRecentMeetings.append(row.cells[2], match.recentMeetings || [], match.ht, null, match.recentByHt || {}, match.home, match.htRun);
+      const evaluated={...match,status:'Selesai',time:match.time.replace(' ','T')+':00+07:00'};
+      window.SabarajaSignalEvaluation.append(row.cells[2], evaluated, 'vsoccer:'+match.league);
+      window.SabarajaSignalHistory.capture(row.cells[2], 'vsoccer:'+match.league, evaluated);
       fragment.append(row);
     }
     if (!matches.length) {
@@ -42,10 +46,10 @@
     }
     body.replaceChildren(fragment);
     const timestamp = data?.updatedAt ? new Date(data.updatedAt).toLocaleString('id-ID',{timeZone:'Asia/Jakarta',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' WIB' : 'belum tersedia';
-    status.textContent = `${error ? error + ' · ' : ''}${matches.length} ditampilkan · pembaruan ${timestamp}`;
+    status.textContent = `${error ? error + ' · ' : ''}${matches.length} ditampilkan · Pembaruan hasil manual · terakhir ${timestamp}`;
   }
   async function load(requestedDate, update) {
-    if (!requestedDate) return;
+    if (!requestedDate || (update && active)) return;
     active?.abort(); const controller = new AbortController(); active = controller;
     refresh.disabled = true; status.textContent = update ? 'Memperbarui V-Soccer…' : 'Memuat V-Soccer…';
     if (data?.date !== requestedDate) { data = null; error = ''; }
@@ -65,10 +69,10 @@
       if (controller.signal.aborted) return;
       error = exception.message || 'Gagal memuat V-Soccer';
       if (update) await window.SabarajaSyncHistory?.failure('V-Soccer',requestedDate,'fetch',exception);
-    } finally { if (!controller.signal.aborted) { refresh.disabled = false; render(); } }
+    } finally { if (!controller.signal.aborted) { active = null; refresh.disabled = false; render(); } }
   }
-  document.addEventListener('pattern-results-cycle', event => load(event.detail.date,event.detail.update));
-  refresh.addEventListener('click', () => load(date.value,true));
+  refresh.addEventListener('click', () => { if (!document.getElementById('pattern-all-refresh').disabled) load(date.value,true); });
+  document.addEventListener('pattern-results-cache-refresh', () => load(date.value,false));
   date.addEventListener('change', () => load(date.value,false));
   league.addEventListener('change',render);
   search.addEventListener('input',render);

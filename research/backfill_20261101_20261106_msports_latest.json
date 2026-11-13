@@ -1,0 +1,100 @@
+{
+  "start": "2026-11-01",
+  "end": "2026-11-06",
+  "days": [
+    {
+      "date": "2026-10-31",
+      "api_rows": 1547,
+      "completed_in_month": 312,
+      "efootball_completed": 89,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-11-01"
+      ]
+    },
+    {
+      "date": "2026-11-01",
+      "api_rows": 1425,
+      "completed_in_month": 747,
+      "efootball_completed": 227,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-11-01",
+        "2026-11-02"
+      ]
+    },
+    {
+      "date": "2026-11-02",
+      "api_rows": 1116,
+      "completed_in_month": 839,
+      "efootball_completed": 263,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-11-02",
+        "2026-11-03"
+      ]
+    },
+    {
+      "date": "2026-11-03",
+      "api_rows": 1186,
+      "completed_in_month": 812,
+      "efootball_completed": 237,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-11-03",
+        "2026-11-04"
+      ]
+    },
+    {
+      "date": "2026-11-04",
+      "api_rows": 1231,
+      "completed_in_month": 899,
+      "efootball_completed": 302,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-11-04",
+        "2026-11-05"
+      ]
+    },
+    {
+      "date": "2026-11-05",
+      "api_rows": 1229,
+      "completed_in_month": 912,
+      "efootball_completed": 309,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-11-05",
+        "2026-11-06"
+      ]
+    },
+    {
+      "date": "2026-11-06",
+      "api_rows": 976,
+      "completed_in_month": 336,
+      "efootball_completed": 88,
+      "missing_ht_in_session": 0,
+      "returned_dates": [
+        "2026-11-06"
+      ]
+    }
+  ],
+  "inserted": 4,
+  "updated": 0,
+  "unchanged": 4853,
+  "invalid": 0,
+  "unique_completed": 4857,
+  "leagues": {
+    "SABA ELITE FRIENDLY Virtual PES 21 - 5 Mins Play": 100,
+    "SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play": 1100,
+    "SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play": 549,
+    "SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play": 1480,
+    "E-FOOTBALL F26 INTERNATIONAL FRIENDLY - 16 Mins Play": 175,
+    "E-FOOTBALL F26 ELITE CLUB FRIENDLY - 16 Mins Play": 326,
+    "E-FOOTBALL F24 INTERNATIONAL FRIENDLY - 16 Mins Play": 355,
+    "E-FOOTBALL F24 ELITE CLUB FRIENDLY - 16 Mins Play": 659,
+    "SABA VIETNAM V LEAGUE 1 Virtual PES 24 - 15 Mins Play": 113
+  },
+  "csv_sha256_after": "f60f97696ef3ccc0f5acabfa0e5b0c19d72a5920137c396d1b7547a5bc51b35e",
+  "failed_days": [],
+  "complete": true
+}

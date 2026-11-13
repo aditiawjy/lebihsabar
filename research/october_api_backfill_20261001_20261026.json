@@ -1,0 +1,280 @@
+{
+  "start": "2026-10-01",
+  "end": "2026-10-26",
+  "days": [
+    {
+      "date": "2026-09-30",
+      "api_rows": 1210,
+      "completed_in_month": 393,
+      "efootball_completed": 163,
+      "returned_dates": [
+        "2026-10-01"
+      ]
+    },
+    {
+      "date": "2026-10-01",
+      "api_rows": 1118,
+      "completed_in_month": 861,
+      "efootball_completed": 331,
+      "returned_dates": [
+        "2026-10-01",
+        "2026-10-02"
+      ]
+    },
+    {
+      "date": "2026-10-02",
+      "api_rows": 1199,
+      "completed_in_month": 832,
+      "efootball_completed": 272,
+      "returned_dates": [
+        "2026-10-02",
+        "2026-10-03"
+      ]
+    },
+    {
+      "date": "2026-10-03",
+      "api_rows": 1384,
+      "completed_in_month": 770,
+      "efootball_completed": 221,
+      "returned_dates": [
+        "2026-10-03",
+        "2026-10-04"
+      ]
+    },
+    {
+      "date": "2026-10-04",
+      "api_rows": 1407,
+      "completed_in_month": 861,
+      "efootball_completed": 248,
+      "returned_dates": [
+        "2026-10-04",
+        "2026-10-05"
+      ]
+    },
+    {
+      "date": "2026-10-05",
+      "api_rows": 1044,
+      "completed_in_month": 847,
+      "efootball_completed": 268,
+      "returned_dates": [
+        "2026-10-05",
+        "2026-10-06"
+      ]
+    },
+    {
+      "date": "2026-10-06",
+      "api_rows": 1156,
+      "completed_in_month": 870,
+      "efootball_completed": 309,
+      "returned_dates": [
+        "2026-10-06",
+        "2026-10-07"
+      ]
+    },
+    {
+      "date": "2026-10-07",
+      "api_rows": 1154,
+      "completed_in_month": 862,
+      "efootball_completed": 285,
+      "returned_dates": [
+        "2026-10-07",
+        "2026-10-08"
+      ]
+    },
+    {
+      "date": "2026-10-08",
+      "api_rows": 1175,
+      "completed_in_month": 886,
+      "efootball_completed": 324,
+      "returned_dates": [
+        "2026-10-08",
+        "2026-10-09"
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "api_rows": 1332,
+      "completed_in_month": 798,
+      "efootball_completed": 247,
+      "returned_dates": [
+        "2026-10-09",
+        "2026-10-10"
+      ]
+    },
+    {
+      "date": "2026-10-10",
+      "api_rows": 1611,
+      "completed_in_month": 714,
+      "efootball_completed": 185,
+      "returned_dates": [
+        "2026-10-10",
+        "2026-10-11"
+      ]
+    },
+    {
+      "date": "2026-10-11",
+      "api_rows": 1442,
+      "completed_in_month": 654,
+      "efootball_completed": 198,
+      "returned_dates": [
+        "2026-10-11",
+        "2026-10-12"
+      ]
+    },
+    {
+      "date": "2026-10-12",
+      "api_rows": 1176,
+      "completed_in_month": 808,
+      "efootball_completed": 247,
+      "returned_dates": [
+        "2026-10-12",
+        "2026-10-13"
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "api_rows": 1254,
+      "completed_in_month": 821,
+      "efootball_completed": 269,
+      "returned_dates": [
+        "2026-10-13",
+        "2026-10-14"
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "api_rows": 1355,
+      "completed_in_month": 871,
+      "efootball_completed": 298,
+      "returned_dates": [
+        "2026-10-14",
+        "2026-10-15"
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "api_rows": 1294,
+      "completed_in_month": 850,
+      "efootball_completed": 278,
+      "returned_dates": [
+        "2026-10-15",
+        "2026-10-16"
+      ]
+    },
+    {
+      "date": "2026-10-16",
+      "api_rows": 1385,
+      "completed_in_month": 859,
+      "efootball_completed": 298,
+      "returned_dates": [
+        "2026-10-16",
+        "2026-10-17"
+      ]
+    },
+    {
+      "date": "2026-10-17",
+      "api_rows": 1545,
+      "completed_in_month": 709,
+      "efootball_completed": 183,
+      "returned_dates": [
+        "2026-10-17",
+        "2026-10-18"
+      ]
+    },
+    {
+      "date": "2026-10-18",
+      "api_rows": 1415,
+      "completed_in_month": 685,
+      "efootball_completed": 181,
+      "returned_dates": [
+        "2026-10-18",
+        "2026-10-19"
+      ]
+    },
+    {
+      "date": "2026-10-19",
+      "api_rows": 1118,
+      "completed_in_month": 788,
+      "efootball_completed": 207,
+      "returned_dates": [
+        "2026-10-19",
+        "2026-10-20"
+      ]
+    },
+    {
+      "date": "2026-10-20",
+      "api_rows": 1050,
+      "completed_in_month": 749,
+      "efootball_completed": 219,
+      "returned_dates": [
+        "2026-10-20",
+        "2026-10-21"
+      ]
+    },
+    {
+      "date": "2026-10-21",
+      "api_rows": 1211,
+      "completed_in_month": 803,
+      "efootball_completed": 263,
+      "returned_dates": [
+        "2026-10-21",
+        "2026-10-22"
+      ]
+    },
+    {
+      "date": "2026-10-22",
+      "api_rows": 1226,
+      "completed_in_month": 897,
+      "efootball_completed": 317,
+      "returned_dates": [
+        "2026-10-22",
+        "2026-10-23"
+      ]
+    },
+    {
+      "date": "2026-10-23",
+      "api_rows": 1275,
+      "completed_in_month": 824,
+      "efootball_completed": 262,
+      "returned_dates": [
+        "2026-10-23",
+        "2026-10-24"
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "api_rows": 1553,
+      "completed_in_month": 702,
+      "efootball_completed": 188,
+      "returned_dates": [
+        "2026-10-24",
+        "2026-10-25"
+      ]
+    },
+    {
+      "date": "2026-10-25",
+      "api_rows": 1364,
+      "completed_in_month": 572,
+      "efootball_completed": 135,
+      "returned_dates": [
+        "2026-10-25",
+        "2026-10-26"
+      ]
+    },
+    {
+      "date": "2026-10-26",
+      "api_rows": 115,
+      "completed_in_month": 0,
+      "efootball_completed": 0,
+      "returned_dates": []
+    }
+  ],
+  "inserted": 1622,
+  "updated": 0,
+  "unchanged": 18661,
+  "invalid": 0,
+  "unique_completed": 20283,
+  "csv_sha256_after": "ae4cfdb4a30a9f60f9636be1d35130a877597c7f84755815ce5cecf51979de35",
+  "failed_days": [],
+  "complete": true
+}

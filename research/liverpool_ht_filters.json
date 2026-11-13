@@ -1,0 +1,218 @@
+{
+  "split": "2026-10-12",
+  "test_end_exclusive": "2026-10-19",
+  "retention_min": 0.15,
+  "baseline": {
+    "win": 3305,
+    "fail": 581,
+    "total": 3886,
+    "pct": 85.05
+  },
+  "train": {
+    "win": 3217,
+    "fail": 561,
+    "total": 3778,
+    "pct": 85.15
+  },
+  "test": {
+    "win": 84,
+    "fail": 18,
+    "total": 102,
+    "pct": 82.35
+  },
+  "note": "Filters ranked by older training data only. Earlier research reused recent data. Historical source times assumed consistent within league. No production changes.",
+  "candidates": [
+    {
+      "conditions": [
+        "Lawan previous total HT >= 1",
+        "HT sekarang tepat 1 gol"
+      ],
+      "train": {
+        "win": 625,
+        "fail": 139,
+        "total": 764,
+        "pct": 81.81
+      },
+      "test": {
+        "win": 11,
+        "fail": 5,
+        "total": 16,
+        "pct": 68.75
+      },
+      "overall": {
+        "win": 637,
+        "fail": 144,
+        "total": 781,
+        "pct": 81.56
+      }
+    },
+    {
+      "conditions": [
+        "Liverpool previous gol pribadi FT >= 2",
+        "HT sekarang tepat 1 gol"
+      ],
+      "train": {
+        "win": 508,
+        "fail": 114,
+        "total": 622,
+        "pct": 81.67
+      },
+      "test": {
+        "win": 9,
+        "fail": 2,
+        "total": 11,
+        "pct": 81.82
+      },
+      "overall": {
+        "win": 517,
+        "fail": 116,
+        "total": 633,
+        "pct": 81.67
+      }
+    },
+    {
+      "conditions": [
+        "Liverpool previous total 2H >= 1",
+        "HT sekarang tepat 1 gol"
+      ],
+      "train": {
+        "win": 710,
+        "fail": 160,
+        "total": 870,
+        "pct": 81.61
+      },
+      "test": {
+        "win": 11,
+        "fail": 3,
+        "total": 14,
+        "pct": 78.57
+      },
+      "overall": {
+        "win": 722,
+        "fail": 163,
+        "total": 885,
+        "pct": 81.58
+      }
+    },
+    {
+      "conditions": [
+        "Liverpool previous total FT <= 6",
+        "HT sekarang tepat 1 gol"
+      ],
+      "train": {
+        "win": 839,
+        "fail": 193,
+        "total": 1032,
+        "pct": 81.3
+      },
+      "test": {
+        "win": 16,
+        "fail": 4,
+        "total": 20,
+        "pct": 80.0
+      },
+      "overall": {
+        "win": 856,
+        "fail": 197,
+        "total": 1053,
+        "pct": 81.29
+      }
+    },
+    {
+      "conditions": [
+        "Liverpool previous gol pribadi FT >= 1",
+        "HT sekarang tepat 1 gol"
+      ],
+      "train": {
+        "win": 737,
+        "fail": 170,
+        "total": 907,
+        "pct": 81.26
+      },
+      "test": {
+        "win": 15,
+        "fail": 2,
+        "total": 17,
+        "pct": 88.24
+      },
+      "overall": {
+        "win": 753,
+        "fail": 172,
+        "total": 925,
+        "pct": 81.41
+      }
+    },
+    {
+      "conditions": [
+        "Liverpool previous gol pribadi FT <= 4",
+        "HT sekarang tepat 1 gol"
+      ],
+      "train": {
+        "win": 838,
+        "fail": 195,
+        "total": 1033,
+        "pct": 81.12
+      },
+      "test": {
+        "win": 16,
+        "fail": 3,
+        "total": 19,
+        "pct": 84.21
+      },
+      "overall": {
+        "win": 855,
+        "fail": 198,
+        "total": 1053,
+        "pct": 81.2
+      }
+    },
+    {
+      "conditions": [
+        "Liverpool previous gol pribadi FT <= 3",
+        "HT sekarang tepat 1 gol"
+      ],
+      "train": {
+        "win": 786,
+        "fail": 183,
+        "total": 969,
+        "pct": 81.11
+      },
+      "test": {
+        "win": 16,
+        "fail": 3,
+        "total": 19,
+        "pct": 84.21
+      },
+      "overall": {
+        "win": 803,
+        "fail": 186,
+        "total": 989,
+        "pct": 81.19
+      }
+    },
+    {
+      "conditions": [
+        "Liverpool previous gol pribadi FT <= 5",
+        "HT sekarang tepat 1 gol"
+      ],
+      "train": {
+        "win": 861,
+        "fail": 201,
+        "total": 1062,
+        "pct": 81.07
+      },
+      "test": {
+        "win": 16,
+        "fail": 4,
+        "total": 20,
+        "pct": 80.0
+      },
+      "overall": {
+        "win": 878,
+        "fail": 205,
+        "total": 1083,
+        "pct": 81.07
+      }
+    }
+  ]
+}

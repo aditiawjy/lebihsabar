@@ -1,0 +1,1335 @@
+{
+  "generatedAt": "2026-10-17T04:21:29.205Z",
+  "start": "2026-09-27",
+  "split": "2026-10-13",
+  "end": "2026-10-17",
+  "matches": 1994,
+  "sessions": 20,
+  "rules": 49,
+  "csvSha256": "6b9bc0501dbce9d0c15d0f307b89394e6d77783fe38993a4de02a02a1839492f",
+  "results": [
+    {
+      "code": "L16-40",
+      "name": "UJI • norway semua + away prev own 2H ≤1 + slot sebelumnya total 2H ≥4",
+      "market": "2H Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 33,
+        "fail": 0,
+        "total": 33,
+        "pending": 0,
+        "accuracy": 100
+      },
+      "train": {
+        "win": 26,
+        "fail": 0,
+        "total": 26,
+        "pending": 0,
+        "accuracy": 100
+      },
+      "test": {
+        "win": 7,
+        "fail": 0,
+        "total": 7,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-47",
+      "name": "UJI • portugal tandang + home prev HT ≤1 + HT 0–1",
+      "market": "2H Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 30,
+        "fail": 0,
+        "total": 30,
+        "pending": 0,
+        "accuracy": 100
+      },
+      "train": {
+        "win": 24,
+        "fail": 0,
+        "total": 24,
+        "pending": 0,
+        "accuracy": 100
+      },
+      "test": {
+        "win": 6,
+        "fail": 0,
+        "total": 6,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-48",
+      "name": "UJI • norway semua + away prev 2H ≤1 + slot sebelumnya total 2H ≥3",
+      "market": "2H Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 30,
+        "fail": 0,
+        "total": 30,
+        "pending": 0,
+        "accuracy": 100
+      },
+      "train": {
+        "win": 24,
+        "fail": 0,
+        "total": 24,
+        "pending": 0,
+        "accuracy": 100
+      },
+      "test": {
+        "win": 6,
+        "fail": 0,
+        "total": 6,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-04",
+      "name": "Ukraine Previous FT ≥4 & HT 1",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 15,
+        "fail": 0,
+        "total": 15,
+        "pending": 0,
+        "accuracy": 100
+      },
+      "train": {
+        "win": 12,
+        "fail": 0,
+        "total": 12,
+        "pending": 0,
+        "accuracy": 100
+      },
+      "test": {
+        "win": 3,
+        "fail": 0,
+        "total": 3,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-02",
+      "name": "Norway Recovery Kandang — pertandingan Norway sebelumnya di kandang, tanpa gol 2H",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 7,
+        "fail": 0,
+        "total": 7,
+        "pending": 0,
+        "accuracy": 100
+      },
+      "train": {
+        "win": 6,
+        "fail": 0,
+        "total": 6,
+        "pending": 0,
+        "accuracy": 100
+      },
+      "test": {
+        "win": 1,
+        "fail": 0,
+        "total": 1,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-41",
+      "name": "UJI • morocco semua + away prev own HT ≥2",
+      "market": "2H Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 33,
+        "fail": 1,
+        "total": 34,
+        "pending": 0,
+        "accuracy": 97.05882352941177
+      },
+      "train": {
+        "win": 26,
+        "fail": 1,
+        "total": 27,
+        "pending": 0,
+        "accuracy": 96.29629629629629
+      },
+      "test": {
+        "win": 7,
+        "fail": 0,
+        "total": 7,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-31",
+      "name": "Previous Session Both HT 0–0 — minimal satu gol 2H dalam dua laga berikutnya",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 58,
+        "fail": 2,
+        "total": 60,
+        "pending": 0,
+        "accuracy": 96.66666666666667
+      },
+      "train": {
+        "win": 41,
+        "fail": 2,
+        "total": 43,
+        "pending": 0,
+        "accuracy": 95.34883720930233
+      },
+      "test": {
+        "win": 17,
+        "fail": 0,
+        "total": 17,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-52",
+      "name": "UJI • ghana semua + away same venue 2H ≤2",
+      "market": "HT Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 52,
+        "fail": 2,
+        "total": 54,
+        "pending": 0,
+        "accuracy": 96.29629629629629
+      },
+      "train": {
+        "win": 38,
+        "fail": 1,
+        "total": 39,
+        "pending": 0,
+        "accuracy": 97.43589743589743
+      },
+      "test": {
+        "win": 14,
+        "fail": 1,
+        "total": 15,
+        "pending": 0,
+        "accuracy": 93.33333333333333
+      }
+    },
+    {
+      "code": "L16-53",
+      "name": "UJI • ghana semua + away same venue FT ≤4",
+      "market": "HT Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 51,
+        "fail": 2,
+        "total": 53,
+        "pending": 0,
+        "accuracy": 96.22641509433963
+      },
+      "train": {
+        "win": 38,
+        "fail": 1,
+        "total": 39,
+        "pending": 0,
+        "accuracy": 97.43589743589743
+      },
+      "test": {
+        "win": 13,
+        "fail": 1,
+        "total": 14,
+        "pending": 0,
+        "accuracy": 92.85714285714286
+      }
+    },
+    {
+      "code": "L16-55",
+      "name": "UJI • argentina semua + away same venue own HT ≤0",
+      "market": "HT Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 38,
+        "fail": 2,
+        "total": 40,
+        "pending": 0,
+        "accuracy": 95
+      },
+      "train": {
+        "win": 29,
+        "fail": 0,
+        "total": 29,
+        "pending": 0,
+        "accuracy": 100
+      },
+      "test": {
+        "win": 9,
+        "fail": 2,
+        "total": 11,
+        "pending": 0,
+        "accuracy": 81.81818181818183
+      }
+    },
+    {
+      "code": "L16-43",
+      "name": "UJI • portugal semua + away prev own HT ≥1 + HT 0–1",
+      "market": "2H Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 33,
+        "fail": 2,
+        "total": 35,
+        "pending": 0,
+        "accuracy": 94.28571428571428
+      },
+      "train": {
+        "win": 29,
+        "fail": 0,
+        "total": 29,
+        "pending": 0,
+        "accuracy": 100
+      },
+      "test": {
+        "win": 4,
+        "fail": 2,
+        "total": 6,
+        "pending": 0,
+        "accuracy": 66.66666666666666
+      }
+    },
+    {
+      "code": "L16-45",
+      "name": "UJI • romania kandang + home prev FT ≤3 + slot sebelumnya total 2H ≥3",
+      "market": "2H Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 33,
+        "fail": 2,
+        "total": 35,
+        "pending": 0,
+        "accuracy": 94.28571428571428
+      },
+      "train": {
+        "win": 25,
+        "fail": 2,
+        "total": 27,
+        "pending": 0,
+        "accuracy": 92.5925925925926
+      },
+      "test": {
+        "win": 8,
+        "fail": 0,
+        "total": 8,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-57",
+      "name": "UJI • usa kandang + away prev FT ≤3",
+      "market": "HT Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 33,
+        "fail": 2,
+        "total": 35,
+        "pending": 0,
+        "accuracy": 94.28571428571428
+      },
+      "train": {
+        "win": 27,
+        "fail": 0,
+        "total": 27,
+        "pending": 0,
+        "accuracy": 100
+      },
+      "test": {
+        "win": 6,
+        "fail": 2,
+        "total": 8,
+        "pending": 0,
+        "accuracy": 75
+      }
+    },
+    {
+      "code": "L16-58",
+      "name": "UJI • argentina semua + away same venue own HT ≤0 + slot 30 menit sebelumnya total HT ≥1",
+      "market": "HT Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 32,
+        "fail": 2,
+        "total": 34,
+        "pending": 0,
+        "accuracy": 94.11764705882352
+      },
+      "train": {
+        "win": 26,
+        "fail": 0,
+        "total": 26,
+        "pending": 0,
+        "accuracy": 100
+      },
+      "test": {
+        "win": 6,
+        "fail": 2,
+        "total": 8,
+        "pending": 0,
+        "accuracy": 75
+      }
+    },
+    {
+      "code": "L16-08",
+      "name": "Italy Tandang Previous FT ≥3 Gol",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 30,
+        "fail": 2,
+        "total": 32,
+        "pending": 0,
+        "accuracy": 93.75
+      },
+      "train": {
+        "win": 26,
+        "fail": 2,
+        "total": 28,
+        "pending": 0,
+        "accuracy": 92.85714285714286
+      },
+      "test": {
+        "win": 4,
+        "fail": 0,
+        "total": 4,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-59",
+      "name": "UJI • croatia kandang + home prev 2H ≥2",
+      "market": "HT Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 30,
+        "fail": 2,
+        "total": 32,
+        "pending": 0,
+        "accuracy": 93.75
+      },
+      "train": {
+        "win": 26,
+        "fail": 2,
+        "total": 28,
+        "pending": 0,
+        "accuracy": 92.85714285714286
+      },
+      "test": {
+        "win": 4,
+        "fail": 0,
+        "total": 4,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-49",
+      "name": "UJI • new zealand semua + away prev own HT ≤1 + slot sebelumnya total HT ≥3",
+      "market": "2H Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 29,
+        "fail": 2,
+        "total": 31,
+        "pending": 0,
+        "accuracy": 93.54838709677419
+      },
+      "train": {
+        "win": 22,
+        "fail": 1,
+        "total": 23,
+        "pending": 0,
+        "accuracy": 95.65217391304348
+      },
+      "test": {
+        "win": 7,
+        "fail": 1,
+        "total": 8,
+        "pending": 0,
+        "accuracy": 87.5
+      }
+    },
+    {
+      "code": "L16-61",
+      "name": "UJI • morocco semua + home prev own 2H ≤0 + slot 30 menit sebelumnya total HT ≥3",
+      "market": "HT Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 29,
+        "fail": 2,
+        "total": 31,
+        "pending": 0,
+        "accuracy": 93.54838709677419
+      },
+      "train": {
+        "win": 25,
+        "fail": 1,
+        "total": 26,
+        "pending": 0,
+        "accuracy": 96.15384615384616
+      },
+      "test": {
+        "win": 4,
+        "fail": 1,
+        "total": 5,
+        "pending": 0,
+        "accuracy": 80
+      }
+    },
+    {
+      "code": "L16-14",
+      "name": "Hungary HT 2 + Sebelumnya Kandang",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 14,
+        "fail": 1,
+        "total": 15,
+        "pending": 0,
+        "accuracy": 93.33333333333333
+      },
+      "train": {
+        "win": 10,
+        "fail": 1,
+        "total": 11,
+        "pending": 0,
+        "accuracy": 90.9090909090909
+      },
+      "test": {
+        "win": 4,
+        "fail": 0,
+        "total": 4,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-54",
+      "name": "UJI • morocco semua + away same venue FT ≤4 + slot 30 menit sebelumnya total HT ≥3",
+      "market": "HT Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 40,
+        "fail": 3,
+        "total": 43,
+        "pending": 0,
+        "accuracy": 93.02325581395348
+      },
+      "train": {
+        "win": 30,
+        "fail": 2,
+        "total": 32,
+        "pending": 0,
+        "accuracy": 93.75
+      },
+      "test": {
+        "win": 10,
+        "fail": 1,
+        "total": 11,
+        "pending": 0,
+        "accuracy": 90.9090909090909
+      }
+    },
+    {
+      "code": "L16-46",
+      "name": "UJI • scotland semua + away unggul HT + home prev HT ≤1",
+      "market": "2H Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 26,
+        "fail": 2,
+        "total": 28,
+        "pending": 0,
+        "accuracy": 92.85714285714286
+      },
+      "train": {
+        "win": 21,
+        "fail": 1,
+        "total": 22,
+        "pending": 0,
+        "accuracy": 95.45454545454545
+      },
+      "test": {
+        "win": 5,
+        "fail": 1,
+        "total": 6,
+        "pending": 0,
+        "accuracy": 83.33333333333334
+      }
+    },
+    {
+      "code": "L16-50",
+      "name": "UJI • germany semua + home same venue FT ≤2 + slot sebelumnya total HT ≥3",
+      "market": "2H Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 26,
+        "fail": 2,
+        "total": 28,
+        "pending": 0,
+        "accuracy": 92.85714285714286
+      },
+      "train": {
+        "win": 20,
+        "fail": 2,
+        "total": 22,
+        "pending": 0,
+        "accuracy": 90.9090909090909
+      },
+      "test": {
+        "win": 6,
+        "fail": 0,
+        "total": 6,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-05",
+      "name": "Mexico Previous FT ≤1 + HT 1–2",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 13,
+        "fail": 1,
+        "total": 14,
+        "pending": 0,
+        "accuracy": 92.85714285714286
+      },
+      "train": {
+        "win": 10,
+        "fail": 1,
+        "total": 11,
+        "pending": 0,
+        "accuracy": 90.9090909090909
+      },
+      "test": {
+        "win": 3,
+        "fail": 0,
+        "total": 3,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-01",
+      "name": "Norway Kandang FT Over 1.5",
+      "market": "FT Over 1.5",
+      "experimental": false,
+      "overall": {
+        "win": 77,
+        "fail": 6,
+        "total": 83,
+        "pending": 0,
+        "accuracy": 92.7710843373494
+      },
+      "train": {
+        "win": 63,
+        "fail": 5,
+        "total": 68,
+        "pending": 0,
+        "accuracy": 92.64705882352942
+      },
+      "test": {
+        "win": 14,
+        "fail": 1,
+        "total": 15,
+        "pending": 0,
+        "accuracy": 93.33333333333333
+      }
+    },
+    {
+      "code": "L16-56",
+      "name": "UJI • ukraine semua + home prev FT ≥3 + slot 30 menit sebelumnya total HT ≥2",
+      "market": "HT Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 37,
+        "fail": 3,
+        "total": 40,
+        "pending": 0,
+        "accuracy": 92.5
+      },
+      "train": {
+        "win": 30,
+        "fail": 1,
+        "total": 31,
+        "pending": 0,
+        "accuracy": 96.7741935483871
+      },
+      "test": {
+        "win": 7,
+        "fail": 2,
+        "total": 9,
+        "pending": 0,
+        "accuracy": 77.77777777777779
+      }
+    },
+    {
+      "code": "L16-35",
+      "name": "France Previous Session FT ≥5 Gol + HT ≤1",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 46,
+        "fail": 4,
+        "total": 50,
+        "pending": 0,
+        "accuracy": 92
+      },
+      "train": {
+        "win": 38,
+        "fail": 2,
+        "total": 40,
+        "pending": 0,
+        "accuracy": 95
+      },
+      "test": {
+        "win": 8,
+        "fail": 2,
+        "total": 10,
+        "pending": 0,
+        "accuracy": 80
+      }
+    },
+    {
+      "code": "L16-42",
+      "name": "UJI • scotland semua + away unggul HT + home prev HT ≤3",
+      "market": "2H Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 32,
+        "fail": 3,
+        "total": 35,
+        "pending": 0,
+        "accuracy": 91.42857142857143
+      },
+      "train": {
+        "win": 26,
+        "fail": 2,
+        "total": 28,
+        "pending": 0,
+        "accuracy": 92.85714285714286
+      },
+      "test": {
+        "win": 6,
+        "fail": 1,
+        "total": 7,
+        "pending": 0,
+        "accuracy": 85.71428571428571
+      }
+    },
+    {
+      "code": "L16-51",
+      "name": "UJI • norway semua + home prev HT ≥1",
+      "market": "HT Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 88,
+        "fail": 9,
+        "total": 97,
+        "pending": 0,
+        "accuracy": 90.72164948453609
+      },
+      "train": {
+        "win": 74,
+        "fail": 8,
+        "total": 82,
+        "pending": 0,
+        "accuracy": 90.2439024390244
+      },
+      "test": {
+        "win": 14,
+        "fail": 1,
+        "total": 15,
+        "pending": 0,
+        "accuracy": 93.33333333333333
+      }
+    },
+    {
+      "code": "L16-10",
+      "name": "Italy Tertinggal HT + Total HT ≤1",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 19,
+        "fail": 2,
+        "total": 21,
+        "pending": 0,
+        "accuracy": 90.47619047619048
+      },
+      "train": {
+        "win": 16,
+        "fail": 2,
+        "total": 18,
+        "pending": 0,
+        "accuracy": 88.88888888888889
+      },
+      "test": {
+        "win": 3,
+        "fail": 0,
+        "total": 3,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-13",
+      "name": "Hungary Tandang Previous Tanpa Gol Pribadi 2H",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 19,
+        "fail": 2,
+        "total": 21,
+        "pending": 0,
+        "accuracy": 90.47619047619048
+      },
+      "train": {
+        "win": 13,
+        "fail": 2,
+        "total": 15,
+        "pending": 0,
+        "accuracy": 86.66666666666667
+      },
+      "test": {
+        "win": 6,
+        "fail": 0,
+        "total": 6,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-07",
+      "name": "Spain Previous Signal WIN — HT 2–3, sebelumnya ada gol 2H",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 18,
+        "fail": 2,
+        "total": 20,
+        "pending": 0,
+        "accuracy": 90
+      },
+      "train": {
+        "win": 18,
+        "fail": 2,
+        "total": 20,
+        "pending": 0,
+        "accuracy": 90
+      },
+      "test": {
+        "win": 0,
+        "fail": 0,
+        "total": 0,
+        "pending": 0,
+        "accuracy": null
+      }
+    },
+    {
+      "code": "L16-34",
+      "name": "Norway Kandang + Lawan Previous HT ≥1",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 40,
+        "fail": 5,
+        "total": 45,
+        "pending": 0,
+        "accuracy": 88.88888888888889
+      },
+      "train": {
+        "win": 32,
+        "fail": 5,
+        "total": 37,
+        "pending": 0,
+        "accuracy": 86.48648648648648
+      },
+      "test": {
+        "win": 8,
+        "fail": 0,
+        "total": 8,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-30",
+      "name": "Previous Session 2H ≥3 + Current HT Tepat 3",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 110,
+        "fail": 14,
+        "total": 124,
+        "pending": 0,
+        "accuracy": 88.70967741935483
+      },
+      "train": {
+        "win": 86,
+        "fail": 12,
+        "total": 98,
+        "pending": 0,
+        "accuracy": 87.75510204081633
+      },
+      "test": {
+        "win": 24,
+        "fail": 2,
+        "total": 26,
+        "pending": 0,
+        "accuracy": 92.3076923076923
+      }
+    },
+    {
+      "code": "L16-12",
+      "name": "Norway Kandang HT 2 Gol",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 23,
+        "fail": 3,
+        "total": 26,
+        "pending": 0,
+        "accuracy": 88.46153846153845
+      },
+      "train": {
+        "win": 19,
+        "fail": 3,
+        "total": 22,
+        "pending": 0,
+        "accuracy": 86.36363636363636
+      },
+      "test": {
+        "win": 4,
+        "fail": 0,
+        "total": 4,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-60",
+      "name": "UJI • spain semua + away prev own 2H ≤0",
+      "market": "HT Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 44,
+        "fail": 6,
+        "total": 50,
+        "pending": 0,
+        "accuracy": 88
+      },
+      "train": {
+        "win": 38,
+        "fail": 5,
+        "total": 43,
+        "pending": 0,
+        "accuracy": 88.37209302325581
+      },
+      "test": {
+        "win": 6,
+        "fail": 1,
+        "total": 7,
+        "pending": 0,
+        "accuracy": 85.71428571428571
+      }
+    },
+    {
+      "code": "L16-33",
+      "name": "Ukraine HT Ganjil + Previous Session 2H ≥2",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 51,
+        "fail": 7,
+        "total": 58,
+        "pending": 0,
+        "accuracy": 87.93103448275862
+      },
+      "train": {
+        "win": 42,
+        "fail": 3,
+        "total": 45,
+        "pending": 0,
+        "accuracy": 93.33333333333333
+      },
+      "test": {
+        "win": 9,
+        "fail": 4,
+        "total": 13,
+        "pending": 0,
+        "accuracy": 69.23076923076923
+      }
+    },
+    {
+      "code": "L16-39",
+      "name": "France Previous Session HT ≥2 Gol",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 72,
+        "fail": 10,
+        "total": 82,
+        "pending": 0,
+        "accuracy": 87.8048780487805
+      },
+      "train": {
+        "win": 63,
+        "fail": 5,
+        "total": 68,
+        "pending": 0,
+        "accuracy": 92.64705882352942
+      },
+      "test": {
+        "win": 9,
+        "fail": 5,
+        "total": 14,
+        "pending": 0,
+        "accuracy": 64.28571428571429
+      }
+    },
+    {
+      "code": "L16-36",
+      "name": "France + Tim Tandang Previous Gol 2H ≥1 + HT Imbang",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 36,
+        "fail": 5,
+        "total": 41,
+        "pending": 0,
+        "accuracy": 87.8048780487805
+      },
+      "train": {
+        "win": 32,
+        "fail": 3,
+        "total": 35,
+        "pending": 0,
+        "accuracy": 91.42857142857143
+      },
+      "test": {
+        "win": 4,
+        "fail": 2,
+        "total": 6,
+        "pending": 0,
+        "accuracy": 66.66666666666666
+      }
+    },
+    {
+      "code": "L16-44",
+      "name": "UJI • hungary semua + home prev own 2H ≥1 + HT tidak imbang",
+      "market": "2H Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 36,
+        "fail": 5,
+        "total": 41,
+        "pending": 0,
+        "accuracy": 87.8048780487805
+      },
+      "train": {
+        "win": 31,
+        "fail": 3,
+        "total": 34,
+        "pending": 0,
+        "accuracy": 91.17647058823529
+      },
+      "test": {
+        "win": 5,
+        "fail": 2,
+        "total": 7,
+        "pending": 0,
+        "accuracy": 71.42857142857143
+      }
+    },
+    {
+      "code": "L16-11",
+      "name": "Mexico Sebelumnya Kandang + HT Tidak Imbang",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 28,
+        "fail": 4,
+        "total": 32,
+        "pending": 0,
+        "accuracy": 87.5
+      },
+      "train": {
+        "win": 21,
+        "fail": 3,
+        "total": 24,
+        "pending": 0,
+        "accuracy": 87.5
+      },
+      "test": {
+        "win": 7,
+        "fail": 1,
+        "total": 8,
+        "pending": 0,
+        "accuracy": 87.5
+      }
+    },
+    {
+      "code": "L16-16",
+      "name": "Belgium Kandang HT ≥2 Gol",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 28,
+        "fail": 4,
+        "total": 32,
+        "pending": 0,
+        "accuracy": 87.5
+      },
+      "train": {
+        "win": 26,
+        "fail": 3,
+        "total": 29,
+        "pending": 0,
+        "accuracy": 89.65517241379311
+      },
+      "test": {
+        "win": 2,
+        "fail": 1,
+        "total": 3,
+        "pending": 0,
+        "accuracy": 66.66666666666666
+      }
+    },
+    {
+      "code": "L16-38",
+      "name": "Argentina HT ≥1 + Home Previous HT ≥2",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 48,
+        "fail": 7,
+        "total": 55,
+        "pending": 0,
+        "accuracy": 87.27272727272727
+      },
+      "train": {
+        "win": 37,
+        "fail": 7,
+        "total": 44,
+        "pending": 0,
+        "accuracy": 84.0909090909091
+      },
+      "test": {
+        "win": 11,
+        "fail": 0,
+        "total": 11,
+        "pending": 0,
+        "accuracy": 100
+      }
+    },
+    {
+      "code": "L16-27",
+      "name": "Previous Session FT ≥5 + Current HT ≥3, Slot :30",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 51,
+        "fail": 8,
+        "total": 59,
+        "pending": 0,
+        "accuracy": 86.4406779661017
+      },
+      "train": {
+        "win": 39,
+        "fail": 7,
+        "total": 46,
+        "pending": 0,
+        "accuracy": 84.78260869565217
+      },
+      "test": {
+        "win": 12,
+        "fail": 1,
+        "total": 13,
+        "pending": 0,
+        "accuracy": 92.3076923076923
+      }
+    },
+    {
+      "code": "L16-32",
+      "name": "USA HT ≥1 + Home Sebelumnya Tandang",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 43,
+        "fail": 7,
+        "total": 50,
+        "pending": 0,
+        "accuracy": 86
+      },
+      "train": {
+        "win": 35,
+        "fail": 4,
+        "total": 39,
+        "pending": 0,
+        "accuracy": 89.74358974358975
+      },
+      "test": {
+        "win": 8,
+        "fail": 3,
+        "total": 11,
+        "pending": 0,
+        "accuracy": 72.72727272727273
+      }
+    },
+    {
+      "code": "L16-62",
+      "name": "UJI • wales semua + home prev FT ≥4 + slot 30 menit sebelumnya total 2H ≥2",
+      "market": "HT Over 0.5",
+      "experimental": true,
+      "overall": {
+        "win": 24,
+        "fail": 4,
+        "total": 28,
+        "pending": 0,
+        "accuracy": 85.71428571428571
+      },
+      "train": {
+        "win": 20,
+        "fail": 3,
+        "total": 23,
+        "pending": 0,
+        "accuracy": 86.95652173913044
+      },
+      "test": {
+        "win": 4,
+        "fail": 1,
+        "total": 5,
+        "pending": 0,
+        "accuracy": 80
+      }
+    },
+    {
+      "code": "L16-20",
+      "name": "Croatia Kandang Tertinggal HT",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 23,
+        "fail": 4,
+        "total": 27,
+        "pending": 0,
+        "accuracy": 85.18518518518519
+      },
+      "train": {
+        "win": 21,
+        "fail": 3,
+        "total": 24,
+        "pending": 0,
+        "accuracy": 87.5
+      },
+      "test": {
+        "win": 2,
+        "fail": 1,
+        "total": 3,
+        "pending": 0,
+        "accuracy": 66.66666666666666
+      }
+    },
+    {
+      "code": "L16-37",
+      "name": "Netherlands HT ≥1 + Home Previous 2H ≥2",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 45,
+        "fail": 9,
+        "total": 54,
+        "pending": 0,
+        "accuracy": 83.33333333333334
+      },
+      "train": {
+        "win": 32,
+        "fail": 6,
+        "total": 38,
+        "pending": 0,
+        "accuracy": 84.21052631578947
+      },
+      "test": {
+        "win": 13,
+        "fail": 3,
+        "total": 16,
+        "pending": 0,
+        "accuracy": 81.25
+      }
+    },
+    {
+      "code": "L16-03",
+      "name": "Hungary Previous FT ≥4 & HT ≤1",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 20,
+        "fail": 4,
+        "total": 24,
+        "pending": 0,
+        "accuracy": 83.33333333333334
+      },
+      "train": {
+        "win": 17,
+        "fail": 2,
+        "total": 19,
+        "pending": 0,
+        "accuracy": 89.47368421052632
+      },
+      "test": {
+        "win": 3,
+        "fail": 2,
+        "total": 5,
+        "pending": 0,
+        "accuracy": 60
+      }
+    },
+    {
+      "code": "L16-06",
+      "name": "Spain Tandang Previous 2H ≥2",
+      "market": "2H Over 0.5",
+      "experimental": false,
+      "overall": {
+        "win": 34,
+        "fail": 8,
+        "total": 42,
+        "pending": 0,
+        "accuracy": 80.95238095238095
+      },
+      "train": {
+        "win": 24,
+        "fail": 8,
+        "total": 32,
+        "pending": 0,
+        "accuracy": 75
+      },
+      "test": {
+        "win": 10,
+        "fail": 0,
+        "total": 10,
+        "pending": 0,
+        "accuracy": 100
+      }
+    }
+  ]
+}

@@ -32,6 +32,7 @@
   }
   const display = (name, stats) => `${name}: ${stats.inserted} baru, ${stats.updated} diperbarui, ${stats.skipped_duplicate} sudah ada${stats.skipped_invalid ? `, ${stats.skipped_invalid} tidak valid` : ''}${stats.historyFailed ? ' (riwayat gagal dicatat)' : ''}`;
   button.addEventListener('click', async () => {
+    if (button.disabled || document.getElementById('pattern-results-refresh').disabled || document.getElementById('pattern-vsoccer-refresh').disabled) return;
     button.disabled = true; summary.hidden = false; summary.classList.remove('is-error');
     const end = today(), start = previous(end), lines = [], failures = [];
     summary.textContent = `Memperbarui semua data ${start}–${end}…`;
@@ -42,13 +43,23 @@
         if (data.start !== start || data.end !== end || !Array.isArray(data.matches)) throw new Error('Tanggal atau format hasil MSports tidak sesuai.');
         msportsFetched = true;
         const stats = await save(data.matches);
-        lines.push(display('SABA',stats) + (data.missingHt ? `; ${data.missingHt} hasil tanpa HT dilewati (termasuk kemungkinan duplikat antar sesi)` : ''));
-      } catch (error) { failures.push('SABA: '+error.message); if (!msportsFetched) await window.SabarajaSyncHistory?.failure('MSports',end,'fetch',error); }
+        lines.push(display('SABA dan E-Football',stats) + (data.missingHt ? `; ${data.missingHt} hasil tanpa HT dilewati (termasuk kemungkinan duplikat antar sesi)` : ''));
+      } catch (error) { failures.push('SABA dan E-Football: '+error.message); if (!msportsFetched) await window.SabarajaSyncHistory?.failure('MSports',end,'fetch',error); }
+      const vsoccer = [];
+      for (const day of [start,end]) {
+        summary.textContent = `Mengambil V-Soccer ${day}…`;
+        try {
+          const data = await request('vsoccer-results-data.php?date='+encodeURIComponent(day), {method:'POST'});
+          if (data.date !== day || !Array.isArray(data.saveMatches)) throw new Error('Tanggal atau format hasil tidak sesuai.');
+          vsoccer.push(...data.saveMatches);
+        } catch (error) { failures.push(`V-Soccer ${day}: ${error.message}`); await window.SabarajaSyncHistory?.failure('V-Soccer',day,'fetch',error); }
+      }
+      try { lines.push(display('V-Soccer', await save(vsoccer))); }
+      catch (error) { failures.push('Penyimpanan V-Soccer: '+error.message); }
       summary.classList.toggle('is-error', failures.length > 0);
-      summary.textContent = `${failures.length ? 'Pembaruan belum lengkap' : 'Pembaruan selesai'} (${start}–${end}) · ${lines.join(' · ')}${failures.length ? ' · Gagal: '+failures.join('; ') : ''}. Tanggal MSports UTC+8.`;
+      summary.textContent = `${failures.length ? 'Pembaruan belum lengkap' : 'Pembaruan selesai'} (${start}–${end}) · ${lines.join(' · ')}${failures.length ? ' · Gagal: '+failures.join('; ') : ''}. Tanggal MSports UTC+8; V-Soccer WIB.`;
       window.SabarajaSyncHistory?.refresh();
       try { await window.SabarajaPatternEngine?.refreshHistory(true); window.SabarajaPatternLive?.refreshView(); } catch (_) {}
-      document.dispatchEvent(new CustomEvent('pattern-all-data-updated'));
-    } finally { button.disabled = false; }
+    } finally { button.disabled = false; document.dispatchEvent(new CustomEvent('pattern-results-cache-refresh')); }
   });
 })();

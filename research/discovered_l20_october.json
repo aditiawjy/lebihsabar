@@ -1,0 +1,52 @@
+{
+  "split": "2026-10-01",
+  "test_end_exclusive": "2026-10-19",
+  "minimum_train": 40,
+  "minimum_test": 8,
+  "min_train_pct": 85,
+  "min_test_pct": 80,
+  "csv_sha256": "61544529ac2f15d49314a684e9bf87ede5155ce66ed01a910e6463a315998433",
+  "warning": "Exploratory multiple testing; shortlist uses recent test results, so not independent holdout. All history features require a 30-minute to 3-hour gap. Current HT only allowed for 2H markets. No production changes.",
+  "leagues": {
+    "20": {
+      "rows": 49129,
+      "trials": 659778,
+      "eligible_finalists": 1,
+      "shortlist": [
+        {
+          "team": "Qatar",
+          "venue": "any",
+          "market": "2H O0.5",
+          "conditions": [
+            "home prev own HT <= 2",
+            "home prev 2H >= 3"
+          ],
+          "train": {
+            "win": 106,
+            "fail": 12,
+            "total": 118,
+            "pct": 89.83
+          },
+          "test": {
+            "win": 7,
+            "fail": 1,
+            "total": 8,
+            "pct": 87.5
+          },
+          "overall": {
+            "win": 114,
+            "fail": 13,
+            "total": 127,
+            "pct": 89.76
+          },
+          "baseline": {
+            "win": 1312,
+            "fail": 339,
+            "total": 1651,
+            "pct": 79.47
+          }
+        }
+      ]
+    }
+  }
+}

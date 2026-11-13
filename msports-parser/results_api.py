@@ -111,10 +111,22 @@ def fetch_results(payload, environ=None, opener=urlopen, config=None):
         raise ValueError('API belum mengembalikan hasil sukses (status bukan 1).')
     if not isinstance(result.get('data'), list):
         raise ValueError('Struktur data Results berubah; respons tidak disimpan.')
-    result['data'] = [row for row in result['data'] if not (
-        isinstance(row, dict) and (str(row.get('events', '')) in {'10031501', '10031502', '10034432', '10034496'}
-        or str(row.get('event_name', '')).strip().upper().startswith(('E-FOOTBALL', 'E FOOTBALL'))))]
     return result
+
+
+# Only these leagues are enabled for Results ingestion. League 15/20 stay in historical CSV.
+ENABLED_RESULT_LEAGUES = (10031403, 10031619, 10031501, 10031502, 10034432, 10034496)
+
+
+def fetch_enabled_results(payload, config=None, fetcher=fetch_results):
+    combined = None
+    rows = []
+    for league_id in ENABLED_RESULT_LEAGUES:
+        result = fetcher({**payload, 'league_id': league_id}, config=config)
+        if combined is None:
+            combined = {**result, 'data': rows}
+        rows.extend(row for row in result['data'] if str(row.get('events')) == str(league_id))
+    return combined
 
 
 def main():
@@ -133,7 +145,7 @@ def main():
         if args.import_curl:
             import_curl(args.import_curl, args.session_file)
             print('Konfigurasi sesi disimpan terenkripsi untuk akun Windows ini.')
-        data = fetch_results(result_payload(args.date, args.language, args.sport, args.utc_offset), config=load_config(args.session_file))
+        data = fetch_enabled_results(result_payload(args.date, args.language, args.sport, args.utc_offset), config=load_config(args.session_file))
         output = args.output or default_dir / f'msports-{args.date}.json'
         output.parent.mkdir(parents=True, exist_ok=True)
         temporary = output.with_suffix(output.suffix + '.tmp')

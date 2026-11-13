@@ -37,7 +37,7 @@
   const root = document.getElementById('team-zero');
   if (!root) return;
   const el = id => document.getElementById('zero-' + id);
-  const leagues = ['15', '16', '20', 'vietnam15'];
+  const leagues = ['15', '16', '20', 'vietnam15', 'f24-club', 'f24-international', 'f26-club', 'f26-international'];
   let snapshots = [], history = new Map(), controller, loadedDate = null, loadedMetric = null, progressSort = null;
   const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const formatTime = value => new Intl.DateTimeFormat('id-ID', {hour:'2-digit', minute:'2-digit', hour12:false, timeZone:'Asia/Singapore'}).format(new Date(value));
@@ -63,8 +63,8 @@
     el('daily-header').textContent = `${label} tanggal dipilih`;
     el('record-header').textContent = `Rekor ${label} / hari`;
     el('matches-header').textContent = `Pertandingan ${label}`;
-    el('explanation').textContent = `Satu hari dihitung pukul 00:00–23:59 UTC+8 untuk semua liga, termasuk League 16. Setiap hasil ${label} menambah 1 hitungan untuk masing-masing tim. Tim yang sama di liga berbeda dihitung terpisah. Rekor menggunakan matches.csv dan arsip API tersimpan. Riwayat yang tersedia bisa belum lengkap.`;
-    const stats = aggregate(snapshots.filter(snapshot => selected === 'all' || snapshot.league === selected), metric);
+    el('explanation').textContent = `Satu hari dihitung pukul 00:00–23:59 UTC+8 untuk semua liga, termasuk League 16 dan V-Soccer. Setiap hasil ${label} menambah 1 hitungan untuk masing-masing tim. Tim yang sama di liga berbeda dihitung terpisah. Data harian V-Soccer berasal dari matches.csv; sinkronkan hasil terbaru di Pola Pertandingan. Rekor menggunakan matches.csv dan arsip API tersimpan. Riwayat yang tersedia bisa belum lengkap.`;
+    const stats = aggregate(snapshots.filter(snapshot => selected === 'all' || snapshot.league === selected || (selected === 'vsoccer' && snapshot.league.startsWith('vsoccer:'))), metric);
     const search = el('search').value.trim().toLocaleLowerCase();
     const rows = stats.rows.filter(row => row.name.toLocaleLowerCase().includes(search));
     if (progressSort) rows.sort((a, b) => {
@@ -98,16 +98,26 @@
     let refreshError = null;
     try {
       if (refresh) { try { await request(date, '16', signal, true); } catch (error) { if (signal.aborted) throw error; refreshError = error; } }
-      const [results, historyResponse] = await Promise.all([
+      const [results, historyResponse, vsoccerResponse] = await Promise.all([
         Promise.all(leagues.map(league => request(date, league, signal))),
         fetch('team-zero-history.php?metric=' + encodeURIComponent(metric), {signal, cache:'no-store'}).then(async response => {
           if (!response.ok) throw new Error('Rekor historis belum berhasil dimuat. Coba lagi.');
           const data = await response.json();
           if (!Array.isArray(data.records)) throw new Error('Data rekor historis tidak valid.');
           return data;
+        }),
+        fetch('team-vsoccer-day.php?date=' + encodeURIComponent(date), {signal, cache:'no-store'}).then(async response => {
+          if (!response.ok) throw new Error('Data harian V-Soccer belum berhasil dimuat.');
+          const data = await response.json();
+          if (!Array.isArray(data.snapshots) || !Array.isArray(data.leagues)) throw new Error('Data V-Soccer tidak valid.');
+          return data;
         })
       ]);
       if (signal.aborted) return;
+      const chosenLeague = el('league').value;
+      el('vsoccer-leagues').replaceChildren(...vsoccerResponse.leagues.map(item => new Option(item.name,item.id)));
+      if ([...el('league').options].some(option => option.value === chosenLeague)) el('league').value = chosenLeague;
+      results.push(...vsoccerResponse.snapshots);
       history = new Map(historyResponse.records.map(record => [teamKey(record.league, record.name), record]));
       // Include the displayed day if a live refresh has just raised the record.
       for (const row of aggregate(results, metric).rows) {

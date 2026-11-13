@@ -1,0 +1,306 @@
+{
+  "periods": {
+    "3 minggu": {
+      "original": {
+        "win": 124,
+        "fail": 21,
+        "total": 145,
+        "accuracy": 85.52
+      },
+      "filtered": {
+        "win": 88,
+        "fail": 12,
+        "total": 100,
+        "accuracy": 88.0
+      },
+      "excluded": {
+        "win": 36,
+        "fail": 9,
+        "total": 45,
+        "accuracy": 80.0
+      }
+    },
+    "Pemilihan filter": {
+      "original": {
+        "win": 82,
+        "fail": 17,
+        "total": 99,
+        "accuracy": 82.83
+      },
+      "filtered": {
+        "win": 59,
+        "fail": 10,
+        "total": 69,
+        "accuracy": 85.51
+      },
+      "excluded": {
+        "win": 23,
+        "fail": 7,
+        "total": 30,
+        "accuracy": 76.67
+      }
+    },
+    "Data uji": {
+      "original": {
+        "win": 42,
+        "fail": 4,
+        "total": 46,
+        "accuracy": 91.3
+      },
+      "filtered": {
+        "win": 29,
+        "fail": 2,
+        "total": 31,
+        "accuracy": 93.55
+      },
+      "excluded": {
+        "win": 13,
+        "fail": 2,
+        "total": 15,
+        "accuracy": 86.67
+      }
+    }
+  },
+  "daily": [
+    {
+      "session": "2026-10-01",
+      "original": {
+        "win": 10,
+        "fail": 1,
+        "total": 11,
+        "accuracy": 90.91
+      },
+      "filtered": {
+        "win": 7,
+        "fail": 1,
+        "total": 8,
+        "accuracy": 87.5
+      }
+    },
+    {
+      "session": "2026-10-02",
+      "original": {
+        "win": 11,
+        "fail": 1,
+        "total": 12,
+        "accuracy": 91.67
+      },
+      "filtered": {
+        "win": 8,
+        "fail": 0,
+        "total": 8,
+        "accuracy": 100.0
+      }
+    },
+    {
+      "session": "2026-10-03",
+      "original": {
+        "win": 4,
+        "fail": 0,
+        "total": 4,
+        "accuracy": 100.0
+      },
+      "filtered": {
+        "win": 2,
+        "fail": 0,
+        "total": 2,
+        "accuracy": 100.0
+      }
+    },
+    {
+      "session": "2026-10-04",
+      "original": {
+        "win": 6,
+        "fail": 4,
+        "total": 10,
+        "accuracy": 60.0
+      },
+      "filtered": {
+        "win": 4,
+        "fail": 3,
+        "total": 7,
+        "accuracy": 57.14
+      }
+    },
+    {
+      "session": "2026-10-05",
+      "original": {
+        "win": 7,
+        "fail": 1,
+        "total": 8,
+        "accuracy": 87.5
+      },
+      "filtered": {
+        "win": 6,
+        "fail": 1,
+        "total": 7,
+        "accuracy": 85.71
+      }
+    },
+    {
+      "session": "2026-10-06",
+      "original": {
+        "win": 6,
+        "fail": 0,
+        "total": 6,
+        "accuracy": 100.0
+      },
+      "filtered": {
+        "win": 5,
+        "fail": 0,
+        "total": 5,
+        "accuracy": 100.0
+      }
+    },
+    {
+      "session": "2026-10-07",
+      "original": {
+        "win": 12,
+        "fail": 2,
+        "total": 14,
+        "accuracy": 85.71
+      },
+      "filtered": {
+        "win": 9,
+        "fail": 2,
+        "total": 11,
+        "accuracy": 81.82
+      }
+    },
+    {
+      "session": "2026-10-08",
+      "original": {
+        "win": 5,
+        "fail": 1,
+        "total": 6,
+        "accuracy": 83.33
+      },
+      "filtered": {
+        "win": 4,
+        "fail": 0,
+        "total": 4,
+        "accuracy": 100.0
+      }
+    },
+    {
+      "session": "2026-10-09",
+      "original": {
+        "win": 4,
+        "fail": 3,
+        "total": 7,
+        "accuracy": 57.14
+      },
+      "filtered": {
+        "win": 2,
+        "fail": 0,
+        "total": 2,
+        "accuracy": 100.0
+      }
+    },
+    {
+      "session": "2026-10-10",
+      "original": {
+        "win": 8,
+        "fail": 2,
+        "total": 10,
+        "accuracy": 80.0
+      },
+      "filtered": {
+        "win": 6,
+        "fail": 2,
+        "total": 8,
+        "accuracy": 75.0
+      }
+    },
+    {
+      "session": "2026-10-11",
+      "original": {
+        "win": 9,
+        "fail": 2,
+        "total": 11,
+        "accuracy": 81.82
+      },
+      "filtered": {
+        "win": 6,
+        "fail": 1,
+        "total": 7,
+        "accuracy": 85.71
+      }
+    },
+    {
+      "session": "2026-10-12",
+      "original": {
+        "win": 8,
+        "fail": 0,
+        "total": 8,
+        "accuracy": 100.0
+      },
+      "filtered": {
+        "win": 5,
+        "fail": 0,
+        "total": 5,
+        "accuracy": 100.0
+      }
+    },
+    {
+      "session": "2026-10-13",
+      "original": {
+        "win": 10,
+        "fail": 1,
+        "total": 11,
+        "accuracy": 90.91
+      },
+      "filtered": {
+        "win": 6,
+        "fail": 1,
+        "total": 7,
+        "accuracy": 85.71
+      }
+    },
+    {
+      "session": "2026-10-14",
+      "original": {
+        "win": 9,
+        "fail": 0,
+        "total": 9,
+        "accuracy": 100.0
+      },
+      "filtered": {
+        "win": 8,
+        "fail": 0,
+        "total": 8,
+        "accuracy": 100.0
+      }
+    },
+    {
+      "session": "2026-10-15",
+      "original": {
+        "win": 5,
+        "fail": 2,
+        "total": 7,
+        "accuracy": 71.43
+      },
+      "filtered": {
+        "win": 3,
+        "fail": 1,
+        "total": 4,
+        "accuracy": 75.0
+      }
+    },
+    {
+      "session": "2026-10-16",
+      "original": {
+        "win": 10,
+        "fail": 1,
+        "total": 11,
+        "accuracy": 90.91
+      },
+      "filtered": {
+        "win": 7,
+        "fail": 0,
+        "total": 7,
+        "accuracy": 100.0
+      }
+    }
+  ]
+}

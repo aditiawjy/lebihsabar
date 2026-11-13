@@ -1,0 +1,146 @@
+﻿session,time,teams,ht,prev2h,win,filtered
+2026-10-01,2026-10-01 12:45:00,Italy (V) vs Ukraine (V),3,3,True,True
+2026-10-01,2026-10-01 12:45:00,Portugal (V) vs Croatia (V),3,3,True,True
+2026-10-01,2026-10-01 13:45:00,Norway (V) vs Morocco (V),3,5,False,True
+2026-10-01,2026-10-01 15:30:00,Czech Republic (V) vs Ukraine (V),5,7,True,False
+2026-10-01,2026-10-01 15:30:00,England (V) vs Portugal (V),4,7,True,False
+2026-10-01,2026-10-01 18:15:00,Ghana (V) vs Netherlands (V),3,4,True,True
+2026-10-01,2026-10-01 18:30:00,USA (V) vs Italy (V),3,4,True,True
+2026-10-01,2026-10-01 20:45:00,Norway (V) vs Mexico (V),3,3,True,True
+2026-10-01,2026-10-01 21:30:00,Spain (V) vs Norway (V),5,5,True,False
+2026-10-01,2026-10-01 23:15:00,France (V) vs Ukraine (V),3,3,True,True
+2026-10-01,2026-10-02 00:45:00,Hungary (V) vs Morocco (V),3,3,True,True
+2026-10-02,2026-10-02 12:30:00,USA (V) vs Ghana (V),4,5,False,False
+2026-10-02,2026-10-02 13:45:00,Sweden (V) vs Croatia (V),3,5,True,True
+2026-10-02,2026-10-02 14:00:00,Germany (V) vs Portugal (V),3,3,True,True
+2026-10-02,2026-10-02 14:30:00,Spain (V) vs Czech Republic (V),3,3,True,True
+2026-10-02,2026-10-02 16:30:00,Germany (V) vs Spain (V),4,3,True,False
+2026-10-02,2026-10-02 16:45:00,Morocco (V) vs Ghana (V),3,5,True,True
+2026-10-02,2026-10-02 17:00:00,Sweden (V) vs Ukraine (V),3,5,True,True
+2026-10-02,2026-10-02 20:00:00,Sweden (V) vs France (V),3,5,True,True
+2026-10-02,2026-10-02 22:15:00,Ghana (V) vs Italy (V),4,3,True,False
+2026-10-02,2026-10-02 23:30:00,Qatar (V) vs Wales (V),4,3,True,False
+2026-10-02,2026-10-02 23:45:00,Belgium (V) vs Poland (V),3,5,True,True
+2026-10-02,2026-10-02 23:45:00,Spain (V) vs Italy (V),3,5,True,True
+2026-10-03,2026-10-03 12:30:00,England (V) vs Argentina (V),4,7,True,False
+2026-10-03,2026-10-03 13:15:00,Mexico (V) vs Ukraine (V),3,5,True,True
+2026-10-03,2026-10-03 14:00:00,Ukraine (V) vs Italy (V),4,3,True,False
+2026-10-03,2026-10-03 17:15:00,England (V) vs Denmark (V),3,3,True,True
+2026-10-04,2026-10-04 12:45:00,Mexico (V) vs Argentina (V),8,3,True,False
+2026-10-04,2026-10-04 13:00:00,Italy (V) vs Spain (V),5,5,False,False
+2026-10-04,2026-10-04 15:15:00,Czech Republic (V) vs Mexico (V),3,5,False,True
+2026-10-04,2026-10-04 15:45:00,Poland (V) vs USA (V),3,3,True,True
+2026-10-04,2026-10-04 17:45:00,Croatia (V) vs Italy (V),3,5,True,True
+2026-10-04,2026-10-04 18:00:00,Argentina (V) vs Portugal (V),3,5,False,True
+2026-10-04,2026-10-04 22:00:00,Croatia (V) vs Italy (V),3,4,True,True
+2026-10-04,2026-10-04 23:00:00,England (V) vs Argentina (V),4,4,True,False
+2026-10-04,2026-10-04 23:15:00,Netherlands (V) vs Spain (V),3,5,False,True
+2026-10-04,2026-10-05 00:30:00,Ukraine (V) vs Belgium (V),3,4,True,True
+2026-10-05,2026-10-05 13:00:00,Belgium (V) vs Mexico (V),4,7,True,False
+2026-10-05,2026-10-05 13:30:00,Poland (V) vs Italy (V),3,5,True,True
+2026-10-05,2026-10-05 13:45:00,Argentina (V) vs Mexico (V),3,4,False,True
+2026-10-05,2026-10-05 14:45:00,USA (V) vs Norway (V),3,7,True,True
+2026-10-05,2026-10-05 18:30:00,Germany (V) vs Spain (V),3,5,True,True
+2026-10-05,2026-10-05 19:00:00,Hungary (V) vs Mexico (V),3,4,True,True
+2026-10-05,2026-10-05 19:15:00,Ukraine (V) vs Morocco (V),3,5,True,True
+2026-10-05,2026-10-05 22:00:00,Belgium (V) vs Spain (V),3,4,True,True
+2026-10-06,2026-10-06 12:45:00,Morocco (V) vs USA (V),4,4,True,False
+2026-10-06,2026-10-06 13:30:00,Germany (V) vs Italy (V),3,5,True,True
+2026-10-06,2026-10-06 15:45:00,Croatia (V) vs Argentina (V),3,3,True,True
+2026-10-06,2026-10-06 16:00:00,Italy (V) vs Romania (V),3,4,True,True
+2026-10-06,2026-10-06 20:30:00,Ghana (V) vs Belgium (V),3,5,True,True
+2026-10-06,2026-10-07 00:00:00,Czech Republic (V) vs Mexico (V),3,7,True,True
+2026-10-07,2026-10-07 12:15:00,Germany (V) vs Scotland (V),4,3,True,False
+2026-10-07,2026-10-07 13:15:00,Morocco (V) vs France (V),3,4,True,True
+2026-10-07,2026-10-07 14:15:00,Netherlands (V) vs Morocco (V),3,5,True,True
+2026-10-07,2026-10-07 15:30:00,Hungary (V) vs Mexico (V),3,3,False,True
+2026-10-07,2026-10-07 16:15:00,Belgium (V) vs Sweden (V),3,3,True,True
+2026-10-07,2026-10-07 16:30:00,Romania (V) vs Ghana (V),4,4,True,False
+2026-10-07,2026-10-07 18:00:00,Portugal (V) vs Argentina (V),3,4,True,True
+2026-10-07,2026-10-07 18:15:00,Hungary (V) vs Sweden (V),3,3,True,True
+2026-10-07,2026-10-07 18:45:00,Belgium (V) vs Netherlands (V),3,3,True,True
+2026-10-07,2026-10-07 18:45:00,England (V) vs Denmark (V),3,3,False,True
+2026-10-07,2026-10-07 19:30:00,Hungary (V) vs New Zealand (V),3,3,True,True
+2026-10-07,2026-10-07 21:15:00,Italy (V) vs Ukraine (V),3,3,True,True
+2026-10-07,2026-10-07 23:15:00,Hungary (V) vs Croatia (V),5,4,True,False
+2026-10-07,2026-10-07 23:30:00,Denmark (V) vs USA (V),3,5,True,True
+2026-10-08,2026-10-08 13:00:00,Italy (V) vs Romania (V),3,4,True,True
+2026-10-08,2026-10-08 15:15:00,Portugal (V) vs England (V),5,5,False,False
+2026-10-08,2026-10-08 17:45:00,Qatar (V) vs Czech Republic (V),4,3,True,False
+2026-10-08,2026-10-08 19:30:00,Hungary (V) vs New Zealand (V),3,5,True,True
+2026-10-08,2026-10-08 21:30:00,USA (V) vs Italy (V),3,4,True,True
+2026-10-08,2026-10-08 23:30:00,Finland (V) vs Sweden (V),3,3,True,True
+2026-10-09,2026-10-09 12:45:00,Morocco (V) vs Mexico (V),4,5,False,False
+2026-10-09,2026-10-09 13:15:00,Croatia (V) vs Argentina (V),3,3,True,True
+2026-10-09,2026-10-09 14:00:00,Hungary (V) vs New Zealand (V),4,4,False,False
+2026-10-09,2026-10-09 14:30:00,Croatia (V) vs Portugal (V),4,4,True,False
+2026-10-09,2026-10-09 21:30:00,Argentina (V) vs Spain (V),4,5,False,False
+2026-10-09,2026-10-09 21:30:00,Sweden (V) vs France (V),3,5,True,True
+2026-10-09,2026-10-09 23:15:00,Norway (V) vs France (V),5,4,True,False
+2026-10-10,2026-10-10 14:15:00,Sweden (V) vs Italy (V),3,4,True,True
+2026-10-10,2026-10-10 14:30:00,Morocco (V) vs England (V),3,4,False,True
+2026-10-10,2026-10-10 14:30:00,Wales (V) vs New Zealand (V),4,4,True,False
+2026-10-10,2026-10-10 16:30:00,England (V) vs Belgium (V),3,4,True,True
+2026-10-10,2026-10-10 17:30:00,Netherlands (V) vs Ghana (V),3,3,False,True
+2026-10-10,2026-10-10 18:45:00,Morocco (V) vs Mexico (V),3,5,True,True
+2026-10-10,2026-10-10 20:00:00,Croatia (V) vs Morocco (V),3,3,True,True
+2026-10-10,2026-10-10 20:45:00,Argentina (V) vs Netherlands (V),4,3,True,False
+2026-10-10,2026-10-10 20:45:00,Mexico (V) vs Germany (V),3,3,True,True
+2026-10-10,2026-10-10 23:15:00,Croatia (V) vs Argentina (V),3,5,True,True
+2026-10-11,2026-10-11 12:30:00,Italy (V) vs Mexico (V),3,3,True,True
+2026-10-11,2026-10-11 12:30:00,Sweden (V) vs Argentina (V),4,3,True,False
+2026-10-11,2026-10-11 12:45:00,Czech Republic (V) vs Norway (V),4,5,True,False
+2026-10-11,2026-10-11 14:30:00,Czech Republic (V) vs New Zealand (V),3,6,False,True
+2026-10-11,2026-10-11 17:30:00,Morocco (V) vs Hungary (V),4,4,True,False
+2026-10-11,2026-10-11 18:30:00,Morocco (V) vs Argentina (V),3,3,True,True
+2026-10-11,2026-10-11 19:15:00,Croatia (V) vs Morocco (V),3,3,True,True
+2026-10-11,2026-10-11 19:30:00,Denmark (V) vs Argentina (V),5,4,False,False
+2026-10-11,2026-10-11 23:15:00,Sweden (V) vs Germany (V),3,4,True,True
+2026-10-11,2026-10-11 23:45:00,Argentina (V) vs Mexico (V),3,4,True,True
+2026-10-11,2026-10-12 00:30:00,Ghana (V) vs Mexico (V),3,4,True,True
+2026-10-12,2026-10-12 13:00:00,Italy (V) vs Spain (V),6,4,True,False
+2026-10-12,2026-10-12 15:00:00,Morocco (V) vs Argentina (V),3,5,True,True
+2026-10-12,2026-10-12 15:45:00,USA (V) vs Denmark (V),4,5,True,False
+2026-10-12,2026-10-12 16:00:00,Germany (V) vs Italy (V),3,5,True,True
+2026-10-12,2026-10-12 16:15:00,Croatia (V) vs Portugal (V),3,3,True,True
+2026-10-12,2026-10-12 16:30:00,Norway (V) vs England (V),3,5,True,True
+2026-10-12,2026-10-12 21:45:00,Mexico (V) vs Hungary (V),4,3,True,False
+2026-10-12,2026-10-13 00:30:00,Germany (V) vs Norway (V),3,5,True,True
+2026-10-13,2026-10-13 14:45:00,Morocco (V) vs Spain (V),3,4,True,True
+2026-10-13,2026-10-13 15:00:00,Denmark (V) vs Wales (V),3,5,True,True
+2026-10-13,2026-10-13 15:15:00,Italy (V) vs Mexico (V),4,4,True,False
+2026-10-13,2026-10-13 15:30:00,Argentina (V) vs Norway (V),3,3,True,True
+2026-10-13,2026-10-13 17:30:00,Portugal (V) vs Belgium (V),5,3,True,False
+2026-10-13,2026-10-13 19:30:00,Norway (V) vs Morocco (V),3,5,True,True
+2026-10-13,2026-10-13 20:00:00,England (V) vs Denmark (V),3,5,False,True
+2026-10-13,2026-10-13 20:45:00,Sweden (V) vs Hungary (V),5,3,True,False
+2026-10-13,2026-10-13 21:30:00,Sweden (V) vs Netherlands (V),3,3,True,True
+2026-10-13,2026-10-13 22:15:00,Ukraine (V) vs Hungary (V),4,5,True,False
+2026-10-13,2026-10-14 00:15:00,Sweden (V) vs France (V),3,6,True,True
+2026-10-14,2026-10-14 13:00:00,Czech Republic (V) vs Italy (V),4,3,True,False
+2026-10-14,2026-10-14 13:30:00,Argentina (V) vs Portugal (V),3,4,True,True
+2026-10-14,2026-10-14 13:30:00,Finland (V) vs Germany (V),3,4,True,True
+2026-10-14,2026-10-14 14:15:00,England (V) vs Argentina (V),3,3,True,True
+2026-10-14,2026-10-14 14:15:00,Norway (V) vs Netherlands (V),3,3,True,True
+2026-10-14,2026-10-14 14:30:00,Czech Republic (V) vs Spain (V),3,5,True,True
+2026-10-14,2026-10-14 14:45:00,Poland (V) vs Belgium (V),3,5,True,True
+2026-10-14,2026-10-14 15:15:00,Qatar (V) vs Czech Republic (V),3,4,True,True
+2026-10-14,2026-10-14 17:00:00,Denmark (V) vs Romania (V),3,4,True,True
+2026-10-15,2026-10-15 12:30:00,Poland (V) vs Morocco (V),3,4,True,True
+2026-10-15,2026-10-15 13:45:00,Italy (V) vs Netherlands (V),3,7,True,True
+2026-10-15,2026-10-15 14:15:00,Belgium (V) vs Argentina (V),4,3,True,False
+2026-10-15,2026-10-15 15:00:00,Italy (V) vs Spain (V),4,3,True,False
+2026-10-15,2026-10-15 19:30:00,Portugal (V) vs England (V),3,5,True,True
+2026-10-15,2026-10-15 20:00:00,Argentina (V) vs Ghana (V),3,4,False,True
+2026-10-15,2026-10-16 00:15:00,Czech Republic (V) vs Mexico (V),4,3,False,False
+2026-10-16,2026-10-16 13:15:00,Germany (V) vs Poland (V),5,4,False,False
+2026-10-16,2026-10-16 13:45:00,Argentina (V) vs Sweden (V),3,5,True,True
+2026-10-16,2026-10-16 14:15:00,England (V) vs Belgium (V),3,4,True,True
+2026-10-16,2026-10-16 14:30:00,Italy (V) vs Mexico (V),3,5,True,True
+2026-10-16,2026-10-16 16:00:00,Czech Republic (V) vs Italy (V),3,3,True,True
+2026-10-16,2026-10-16 16:45:00,Poland (V) vs Netherlands (V),3,3,True,True
+2026-10-16,2026-10-16 17:45:00,England (V) vs Argentina (V),3,3,True,True
+2026-10-16,2026-10-16 18:00:00,Qatar (V) vs Romania (V),3,3,True,True
+2026-10-16,2026-10-16 23:00:00,Norway (V) vs Netherlands (V),4,5,True,False
+2026-10-16,2026-10-17 00:30:00,Spain (V) vs Ghana (V),4,3,True,False
+2026-10-16,2026-10-17 00:45:00,Czech Republic (V) vs Belgium (V),5,4,True,False

@@ -22,7 +22,7 @@ $leagues=[]; $seen=[];
 while (($values=fgetcsv($fh)) !== false) {
     if (count($values)!==count($header)) continue;
     $row=array_combine($header,$values); $league=trim($row['league'] ?? '');
-    if (!preg_match('/^(?:SABA |V-Soccer )/i',$league)) continue;
+    if (!preg_match('/^(?:SABA |E-FOOTBALL |V-Soccer )/i',$league)) continue;
     $leagues[$league]=true;
     if (!ctype_digit($row['ft_home'] ?? '') || !ctype_digit($row['ft_away'] ?? '')) continue;
     $raw=$row['match_time'] ?? '';

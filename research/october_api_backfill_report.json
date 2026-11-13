@@ -1,0 +1,210 @@
+{
+  "start": "2026-10-01",
+  "end": "2026-10-19",
+  "days": [
+    {
+      "date": "2026-09-30",
+      "api_rows": 1210,
+      "completed_in_month": 393,
+      "efootball_completed": 163,
+      "returned_dates": [
+        "2026-10-01"
+      ]
+    },
+    {
+      "date": "2026-10-01",
+      "api_rows": 1118,
+      "completed_in_month": 861,
+      "efootball_completed": 331,
+      "returned_dates": [
+        "2026-10-01",
+        "2026-10-02"
+      ]
+    },
+    {
+      "date": "2026-10-02",
+      "api_rows": 1199,
+      "completed_in_month": 832,
+      "efootball_completed": 272,
+      "returned_dates": [
+        "2026-10-02",
+        "2026-10-03"
+      ]
+    },
+    {
+      "date": "2026-10-03",
+      "api_rows": 1502,
+      "completed_in_month": 829,
+      "efootball_completed": 272,
+      "returned_dates": [
+        "2026-10-03",
+        "2026-10-04"
+      ]
+    },
+    {
+      "date": "2026-10-04",
+      "api_rows": 1526,
+      "completed_in_month": 887,
+      "efootball_completed": 269,
+      "returned_dates": [
+        "2026-10-04",
+        "2026-10-05"
+      ]
+    },
+    {
+      "date": "2026-10-05",
+      "api_rows": 1163,
+      "completed_in_month": 874,
+      "efootball_completed": 293,
+      "returned_dates": [
+        "2026-10-05",
+        "2026-10-06"
+      ]
+    },
+    {
+      "date": "2026-10-06",
+      "api_rows": 1255,
+      "completed_in_month": 894,
+      "efootball_completed": 327,
+      "returned_dates": [
+        "2026-10-06",
+        "2026-10-07"
+      ]
+    },
+    {
+      "date": "2026-10-07",
+      "api_rows": 1362,
+      "completed_in_month": 894,
+      "efootball_completed": 316,
+      "returned_dates": [
+        "2026-10-07",
+        "2026-10-08"
+      ]
+    },
+    {
+      "date": "2026-10-08",
+      "api_rows": 1311,
+      "completed_in_month": 918,
+      "efootball_completed": 356,
+      "returned_dates": [
+        "2026-10-08",
+        "2026-10-09"
+      ]
+    },
+    {
+      "date": "2026-10-09",
+      "api_rows": 1332,
+      "completed_in_month": 798,
+      "efootball_completed": 247,
+      "returned_dates": [
+        "2026-10-09",
+        "2026-10-10"
+      ]
+    },
+    {
+      "date": "2026-10-10",
+      "api_rows": 1611,
+      "completed_in_month": 714,
+      "efootball_completed": 185,
+      "returned_dates": [
+        "2026-10-10",
+        "2026-10-11"
+      ]
+    },
+    {
+      "date": "2026-10-11",
+      "api_rows": 1442,
+      "completed_in_month": 654,
+      "efootball_completed": 198,
+      "returned_dates": [
+        "2026-10-11",
+        "2026-10-12"
+      ]
+    },
+    {
+      "date": "2026-10-12",
+      "api_rows": 1176,
+      "completed_in_month": 808,
+      "efootball_completed": 247,
+      "returned_dates": [
+        "2026-10-12",
+        "2026-10-13"
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "api_rows": 1254,
+      "completed_in_month": 821,
+      "efootball_completed": 269,
+      "returned_dates": [
+        "2026-10-13",
+        "2026-10-14"
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "api_rows": 1355,
+      "completed_in_month": 871,
+      "efootball_completed": 298,
+      "returned_dates": [
+        "2026-10-14",
+        "2026-10-15"
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "api_rows": 1294,
+      "completed_in_month": 850,
+      "efootball_completed": 278,
+      "returned_dates": [
+        "2026-10-15",
+        "2026-10-16"
+      ]
+    },
+    {
+      "date": "2026-10-16",
+      "api_rows": 1385,
+      "completed_in_month": 859,
+      "efootball_completed": 298,
+      "returned_dates": [
+        "2026-10-16",
+        "2026-10-17"
+      ]
+    },
+    {
+      "date": "2026-10-17",
+      "api_rows": 1545,
+      "completed_in_month": 709,
+      "efootball_completed": 183,
+      "returned_dates": [
+        "2026-10-17",
+        "2026-10-18"
+      ]
+    },
+    {
+      "date": "2026-10-18",
+      "api_rows": 1415,
+      "completed_in_month": 685,
+      "efootball_completed": 181,
+      "returned_dates": [
+        "2026-10-18",
+        "2026-10-19"
+      ]
+    },
+    {
+      "date": "2026-10-19",
+      "api_rows": 935,
+      "completed_in_month": 401,
+      "efootball_completed": 100,
+      "returned_dates": [
+        "2026-10-19"
+      ]
+    }
+  ],
+  "inserted": 3782,
+  "updated": 505,
+  "unchanged": 11262,
+  "invalid": 0,
+  "unique_completed": 15549,
+  "csv_sha256_after": "38ba80736b24dc6ab72bb34c1cf8163f0a3a7abd27ff05d82eed43ba56d8c624"
+}

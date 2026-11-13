@@ -1,0 +1,124 @@
+{
+  "split": "2026-10-12",
+  "test_end_exclusive": "2026-10-19",
+  "minimum_train": 40,
+  "minimum_test": 8,
+  "min_train_pct": 85,
+  "min_test_pct": 80,
+  "csv_sha256": "61544529ac2f15d49314a684e9bf87ede5155ce66ed01a910e6463a315998433",
+  "warning": "Exploratory multiple testing; shortlist uses recent test results, so not independent holdout. All history features require a 30-minute to 3-hour gap. Current HT only allowed for 2H markets. No production changes.",
+  "leagues": {
+    "15": {
+      "rows": 65165,
+      "trials": 413888,
+      "eligible_finalists": 3,
+      "shortlist": [
+        {
+          "team": "Paris Saint Germain",
+          "venue": "any",
+          "market": "2H O0.5",
+          "conditions": [
+            "HT draw",
+            "away prev own HT >= 2"
+          ],
+          "train": {
+            "win": 195,
+            "fail": 28,
+            "total": 223,
+            "pct": 87.44
+          },
+          "test": {
+            "win": 9,
+            "fail": 1,
+            "total": 10,
+            "pct": 90.0
+          },
+          "overall": {
+            "win": 204,
+            "fail": 29,
+            "total": 233,
+            "pct": 87.55
+          },
+          "baseline": {
+            "win": 3049,
+            "fail": 838,
+            "total": 3887,
+            "pct": 78.44
+          }
+        },
+        {
+          "team": "Chelsea",
+          "venue": "away",
+          "market": "2H O0.5",
+          "conditions": [
+            "HT draw",
+            "away prev HT <= 1"
+          ],
+          "train": {
+            "win": 284,
+            "fail": 42,
+            "total": 326,
+            "pct": 87.12
+          },
+          "test": {
+            "win": 8,
+            "fail": 1,
+            "total": 9,
+            "pct": 88.89
+          },
+          "overall": {
+            "win": 294,
+            "fail": 43,
+            "total": 337,
+            "pct": 87.24
+          },
+          "baseline": {
+            "win": 1474,
+            "fail": 378,
+            "total": 1852,
+            "pct": 79.59
+          }
+        },
+        {
+          "team": "Real Madrid",
+          "venue": "away",
+          "market": "2H O0.5",
+          "conditions": [
+            "HT draw",
+            "away prev FT <= 2"
+          ],
+          "train": {
+            "win": 223,
+            "fail": 39,
+            "total": 262,
+            "pct": 85.11
+          },
+          "test": {
+            "win": 9,
+            "fail": 2,
+            "total": 11,
+            "pct": 81.82
+          },
+          "overall": {
+            "win": 232,
+            "fail": 42,
+            "total": 274,
+            "pct": 84.67
+          },
+          "baseline": {
+            "win": 1109,
+            "fail": 450,
+            "total": 1559,
+            "pct": 71.14
+          }
+        }
+      ]
+    },
+    "20": {
+      "rows": 49129,
+      "trials": 660069,
+      "eligible_finalists": 0,
+      "shortlist": []
+    }
+  }
+}

@@ -18,7 +18,7 @@ REM pemeriksaan "if exist" polos lolos lalu gagal saat browser diluncurkan.
 if exist "%SCRIPT_DIR%.playwright\chromium-*" set "PLAYWRIGHT_BROWSERS_PATH=%SCRIPT_DIR%.playwright"
 
 REM URL live yang di-scrape (SABA Football). Ganti di sini atau dari dashboard.
-set "BPVM_URL=https://g943gp.bpvmr7u6.com/en-US/live/997"
+set "BPVM_URL=https://p1b3gp.bpvxncqr.com/en-US/live/997"
 
 echo Menjalankan API server + scraper (port 5000)...
 echo API server akan auto-start headless scraper. Kontrol Start/Stop juga tersedia

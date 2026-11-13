@@ -92,9 +92,8 @@ function shouldResetFixtureState(key, minute, scoreStr, nowMs) {
         return true;
     }
 
-    if (has2HGoalByMatchKey.get(key) && (isHalftime || (curStatus.half === '2H' && curStatus.min <= 2))) {
-        return true;
-    }
+    // A goal at 2H 0'–2' belongs to this fixture. Resetting here erased the
+    // locked HT and caused the updated running score to be saved as HT.
 
     return false;
 }
@@ -517,8 +516,18 @@ async function trackGoalEvents(matches) {
         }
 
         const isHalftime = /^H\.?Time$/i.test(minute);
-        if ((isHalftime || isSecondHalfStart(minute)) && !shScoreByMatchKey.has(key)) {
+        if (isHalftime && !shScoreByMatchKey.has(key)) {
             shScoreByMatchKey.set(key, scoreStr);
+        }
+        if (parsedMinute.half === '2H' && !shScoreByMatchKey.has(key)) {
+            const priorStatus = String(lastStatusByMatchKey.get(key) || '').trim();
+            const priorScore = lastScoreByMatchKey.get(key);
+            if (/^H\.?Time$/i.test(priorStatus) && priorScore !== undefined) {
+                shScoreByMatchKey.set(key, priorScore);
+            } else if (parsedMinute.min === 0 && priorScore === scoreStr) {
+                shScoreByMatchKey.set(key, scoreStr);
+            }
+            // Joining at 2H 1' or later cannot establish HT from the running score.
         }
         if (isKickoffMinute(minute) && shScoreByMatchKey.has(key)) {
             shScoreByMatchKey.delete(key);

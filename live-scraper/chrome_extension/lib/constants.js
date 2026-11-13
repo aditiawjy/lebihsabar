@@ -5,7 +5,7 @@ const LIVE_INTERVAL_MS = 5000;
 const REFRESH_SETTLE_MS = 1500;
 const AUTO_SEND_RETRY_COUNT = 2;
 const AUTO_SEND_RETRY_DELAY_MS = 1200;
-const TARGET_HOST = 'g943gp.bpvmr7u6.com';
+const TARGET_HOST = 'p1b3gp.bpvxncqr.com';
 const LIVE_ALARM_NAME = 'bpvm-live-cycle';
 
 // --- Notifikasi H2H Over 0.5 (match hari ini) -------------------------------

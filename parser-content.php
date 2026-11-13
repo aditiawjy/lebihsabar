@@ -1026,11 +1026,18 @@ function saveToDatabase() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ matches: state.matches })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Gagal menghubungi server');
+    .then(async response => {
+        const text = await response.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (_) {
+            throw new Error('Respons server tidak valid (HTTP ' + response.status + ').');
         }
-        return response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Server gagal menyimpan (HTTP ' + response.status + ').');
+        }
+        return data;
     })
     .then(data => {
         if (data.success) {

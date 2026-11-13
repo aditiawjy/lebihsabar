@@ -14,15 +14,33 @@ $pages = [
         'include' => 'parser-content.php',
         'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
     ],
+    'pattern' => [
+        'title' => 'Hasil & Pola Pertandingan',
+        'nav' => 'Pola Pertandingan',
+        'include' => 'pattern.php',
+        'icon' => 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z',
+    ],
+    'h2h' => [
+        'title' => 'Riwayat Head to Head',
+        'nav' => 'Head to Head',
+        'include' => 'h2h-page.php',
+        'icon' => 'M17 20h5v-2a4 4 0 00-5-3.87M7 20H2v-2a4 4 0 015-3.87M12 12a4 4 0 100-8 4 4 0 000 8zM8 20v-1a4 4 0 018 0v1H8z',
+    ],
+    'team-zero' => [
+        'title' => 'Rekor Tim Harian',
+        'nav' => 'Rekor Tim Harian',
+        'include' => 'team-zero.php',
+        'icon' => 'M8 21h8m-4-4v4M7 4h10v6a5 5 0 01-10 0V4zM7 6H4v3a4 4 0 004 4m9-7h3v3a4 4 0 01-4 4',
+    ],
     'league-over15' => [
-        'title' => 'Statistik League Over 1.5',
-        'nav' => 'League Over 1.5',
+        'title' => 'Statistik Liga Over 1.5',
+        'nav' => 'Statistik Liga',
         'include' => 'league-over15.php',
         'icon' => 'M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z',
     ],
     'streak' => [
-        'title' => 'Streak Under 1.5',
-        'nav' => 'Streak U1.5',
+        'title' => 'Rangkaian Under 1.5',
+        'nav' => 'Rangkaian U1.5',
         'include' => 'streak-analysis.php',
         'icon' => 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',
     ],
@@ -55,6 +73,7 @@ $navIconIdleClass = 'text-slate-500 group-hover:text-blue-400';
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Poppins', sans-serif; }
+        #sidebar { width: 248px; flex-shrink: 0; }
 
         /* Custom Scrollbar */
         .scrollbar-thin::-webkit-scrollbar {
@@ -235,7 +254,7 @@ $navIconIdleClass = 'text-slate-500 group-hover:text-blue-400';
                         <span class="text-sm font-medium text-slate-600">Memuat...</span>
                     </div>
                 </div>
-                <div class="max-w-7xl mx-auto">
+                <div class="<?php echo $page === 'pattern' ? 'w-full' : 'max-w-7xl mx-auto'; ?>">
                     <div class="page-transition">
                         <?php
                         $includePath = __DIR__ . DIRECTORY_SEPARATOR . $pages[$page]['include'];

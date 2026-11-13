@@ -47,6 +47,26 @@ async function syncData(data) {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'syncLeague16Results') {
+        if (!sender.url || new URL(sender.url).hostname !== 'msports.m88m8idtop.com') {
+            sendResponse({success:false,error:'Unexpected Results source'});
+            return false;
+        }
+        const league = 'SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play';
+        const matches = Array.isArray(request.matches) ? request.matches.filter(m => m.league === league) : [];
+        if (!matches.length) { sendResponse({success:false,error:'No completed League 16 results'}); return false; }
+        (async () => {
+            try {
+                const response = await fetch('http://127.0.0.1/lebihsabar/save_matches_csv.php', {
+                    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({matches})
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.message || 'CSV sync failed');
+                sendResponse({success:true,result});
+            } catch (error) { sendResponse({success:false,error:error.message}); }
+        })();
+        return true;
+    }
     if (request.action === 'syncToDatabase') {
         console.log('📤 Background: Received sync request with', request.data?.length || 0, 'leagues');
 

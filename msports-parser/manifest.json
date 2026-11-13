@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Sabar Msports Parser",
-  "version": "2.2",
-  "description": "Alat parsing data msports.ms0198.com untuk project Sabar - Auto Sync",
+  "version": "2.3",
+  "description": "Msports Results League 16 - Auto Sync CSV lebihsabar",
   "permissions": ["activeTab", "scripting"],
   "host_permissions": ["https://msports.ms0198.com/*", "http://localhost/*", "http://127.0.0.1/*", "<all_urls>"],
   "background": {
@@ -10,8 +10,8 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://msports.ms0198.com/*"],
-      "js": ["content.js"],
+      "matches": ["https://msports.ms0198.com/*", "https://msports.m88m8idtop.com/*"],
+      "js": ["content.js", "league16-results.js"],
       "css": ["styles.css"],
       "all_frames": true
     }

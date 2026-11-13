@@ -2,6 +2,11 @@ Header always set Access-Control-Allow-Origin "*"
 Header always set Access-Control-Allow-Methods "POST, GET, OPTIONS"
 Header always set Access-Control-Allow-Headers "Content-Type"
 
+# Local Python runtime and Results cache used by the Pattern endpoints.
+SetEnv SABARAJA_PYTHON "C:/Users/adit/AppData/Local/Programs/Python/Python310/python.exe"
+SetEnv SABARAJA_RESULTS_DIR "C:/Users/adit/AppData/Local/Sabaraja/results"
+SetEnv SABARAJA_SESSION_FILE "C:/Users/adit/AppData/Local/Sabaraja/msports-session.bin"
+
 RewriteEngine On
 RewriteCond %{REQUEST_METHOD} OPTIONS
 RewriteRule ^ - [R=204,L]

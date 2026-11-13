@@ -16,7 +16,7 @@
   const note = document.getElementById('pattern-results-note');
   const body = document.getElementById('pattern-results-body');
   const extraBody = document.getElementById('pattern-results-extra-body');
-  const resultLeagues = ['16','vietnam15','f24-club','f24-international','f26-club','f26-international'];
+  const resultLeagues = ['15','16','20','vietnam15','f24-club','f24-international','f26-club','f26-international'];
   const isSessionLeague = league => ['16','vietnam15'].includes(String(league));
   let busy = false, stopped = false, rendered = '';
   let saving = false, saveMatches = [], vsoccerSaveMatches = [], vsoccerSaveDate = null, pendingAutoSave = false;
@@ -247,7 +247,7 @@
       } else {
         if (update) reportTelegramHealth('api',!times.length || Date.now()-Math.min(...times)>180000?'stale':'ok');
         showApiHealth(update ? 'ok' : 'unknown', (update ? 'Pembaruan berhasil. ' : 'Menampilkan data tersimpan; koneksi API belum diperiksa. ') + (apiTimestamp ? 'Berkas tersimpan terlama: ' + apiTimestamp + '.' : 'Belum ada data tersimpan untuk tanggal ini.') + (incomplete ? ' Sebagian berkas sesi belum tersedia; data bisa belum lengkap.' : ''));
-        setApiState(`L16: ${liveSnapshot?.periodLabel || 'sesi 12:00–00:45 hari berikutnya'} · Pembaruan hasil manual · ${saveMatches.length} hasil selesai siap disimpan` +
+        setApiState(`L15/L20: ${requestedDate}, 00:00–23:59 UTC+8 · L16: ${liveSnapshot?.periodLabel || 'sesi 12:00–00:45 hari berikutnya'} · Pembaruan hasil manual · ${saveMatches.length} hasil selesai siap disimpan` +
         ' · Vietnam V League 1: sesi 12:00–00:45 hari berikutnya UTC+8 · E-Football F24/F26: tanggal kalender UTC+8 · Vietnam dan E-Football: API saja' +
         (times.length ? ' · Pembaruan terlama ' + new Date(Math.min(...times)).toLocaleString('id-ID') : ''), update ? 'ok' : 'cached');
       }

@@ -114,8 +114,8 @@ def fetch_results(payload, environ=None, opener=urlopen, config=None):
     return result
 
 
-# Only these leagues are enabled for Results ingestion. League 15/20 stay in historical CSV.
-ENABLED_RESULT_LEAGUES = (10031403, 10031619, 10031501, 10031502, 10034432, 10034496)
+# Enabled leagues for Results ingestion (includes League 15, 16, 20, Vietnam, and E-Football).
+ENABLED_RESULT_LEAGUES = (10026214, 10031403, 10026211, 10031619, 10031501, 10031502, 10034432, 10034496)
 
 
 def fetch_enabled_results(payload, config=None, fetcher=fetch_results):

@@ -956,7 +956,7 @@ async function checkPageStatus() {
     }
 
     await refreshCurrentTab();
-    const isTarget = currentTab && currentTab.url && currentTab.url.includes('p1b3gp.bpvxncqr.com');
+    const isTarget = currentTab && currentTab.url && currentTab.url.includes('p1b3gp.bpyuxsq3.com');
 
     if (!isTarget) {
         document.getElementById('pageStatus').textContent = 'X Not on target page';

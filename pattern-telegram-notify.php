@@ -11,6 +11,7 @@ if ($origin && !in_array($origin,['localhost','127.0.0.1','::1','[::1]'],true)) 
 $python = getenv('SABARAJA_PYTHON') ?: 'C:/Users/adit/AppData/Local/Programs/Python/Python310/python.exe';
 $input = json_decode(file_get_contents('php://input'),true) ?: [];
 $health = ($input['type'] ?? '') === 'health';
+if (!$health) { echo json_encode(['success'=>true,'skipped'=>'Notifikasi pola 0-0 dinonaktifkan.']); exit; }
 $process = proc_open([$python,__DIR__.'/msports-parser/telegram_notify.py','--mode',$health?'health':'notify'],[0=>['pipe','r'],1=>['pipe','w'],2=>['pipe','w']],$pipes,__DIR__,null,['bypass_shell'=>true]);
 if (!is_resource($process)) {http_response_code(503);echo json_encode(['success'=>false]);exit;}
 if ($health) fwrite($pipes[0],json_encode(['source'=>$input['source'] ?? '', 'status'=>$input['status'] ?? '']));

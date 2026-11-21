@@ -7,7 +7,6 @@
   const phase = document.getElementById('pattern-results-phase');
   const allLeague = document.getElementById('pattern-results-league-filter');
   const market = document.getElementById('pattern-results-market-filter');
-  const record = document.getElementById('pattern-results-record-filter');
   const league = document.getElementById('pattern-vsoccer-league');
   const refresh = document.getElementById('pattern-vsoccer-refresh');
   const status = document.getElementById('pattern-vsoccer-status');
@@ -20,7 +19,7 @@
     const selected = league.value, query = key(search.value);
     const matches = (data?.matches || []).filter(match => (!selected || match.leagueId === selected) &&
       (!query || key(match.home).includes(query) || key(match.away).includes(query)) &&
-      (phase.value === 'all' || phase.value === 'finished') && record.value === 'all' && (() => {
+      (phase.value === 'all' || phase.value === 'finished') && (() => {
         if (market.value === 'all') return true;
         const score=String(match.ft || '').match(/^\s*(\d+)\s*[-–—:]\s*(\d+)\s*$/);
         if (!score) return false;
@@ -33,15 +32,12 @@
       for (const value of [match.time.slice(11,16), clean(match.league), clean(match.home)+' vs '+clean(match.away), match.ht || '—', match.ft]) {
         const cell = document.createElement('td'); cell.textContent = value; row.append(cell);
       }
-      window.SabarajaRecentMeetings.append(row.cells[2], match.recentMeetings || [], match.ht, null, match.recentByHt || {}, match.home, match.htRun, match.repeatFtMeetings);
-      const evaluated={...match,status:'Selesai',time:match.time.replace(' ','T')+':00+07:00'};
-      window.SabarajaSignalEvaluation.append(row.cells[2], evaluated, 'vsoccer:'+match.league);
-      window.SabarajaSignalHistory.capture(row.cells[2], 'vsoccer:'+match.league, evaluated);
+      window.SabarajaRecentMeetings.append(row.cells[2], match.h2hProfile, match.recentMeetings || [], match.home);
       fragment.append(row);
     }
     if (!matches.length) {
       const row = document.createElement('tr'), cell = document.createElement('td'); cell.colSpan = 5;
-      cell.textContent = record.value !== 'all' ? 'Filter rekor belum tersedia untuk V-Soccer.' : data?.updatedAt ? 'Tidak ada hasil V-Soccer yang cocok dengan filter.' : 'Belum ada hasil tersimpan untuk tanggal ini.';
+      cell.textContent = data?.updatedAt ? 'Tidak ada hasil V-Soccer yang cocok dengan filter.' : 'Belum ada hasil tersimpan untuk tanggal ini.';
       row.append(cell); fragment.append(row);
     }
     body.replaceChildren(fragment);
@@ -77,6 +73,6 @@
   league.addEventListener('change',render);
   search.addEventListener('input',render);
   phase.addEventListener('change',render);
-  for (const filter of [allLeague,market,record]) filter.addEventListener('change',render);
+  for (const filter of [allLeague,market]) filter.addEventListener('change',render);
   load(date.value,false);
 })();

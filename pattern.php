@@ -1,10 +1,7 @@
-<?php
-$patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
-?>
 <link rel="stylesheet" href="pattern.css?v=<?= (int) filemtime(__DIR__ . '/pattern.css') ?>">
 <div class="pattern-page-intro">
   <h1>Hasil &amp; Pola Pertandingan</h1>
-  <p>Pantau jadwal, skor, rekor tim, dan pola pertandingan dari hasil API.</p>
+  <p>Pantau jadwal, skor, dan profil pertandingan dari hasil API.</p>
 </div>
 <section id="pattern-results-host">
   <div class="results-header">
@@ -34,9 +31,8 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
     <label class="results-team-search">Fase <select id="pattern-results-phase"><option value="all">Semua fase</option><option value="scheduled">Jadwal</option><option value="halftime">HT</option><option value="live">Live</option><option value="finished">Selesai</option><option value="postponed">Ditunda</option></select></label>
     <label class="results-team-search">Liga <select id="pattern-results-league-filter"><option value="all">Semua liga</option><option value="15">League 15</option><option value="16">League 16</option><option value="20">League 20</option><option value="vietnam15">Vietnam</option><option value="f24-club">F24 · Club</option><option value="f24-international">F24 · International</option><option value="f26-club">F26 · Club</option><option value="f26-international">F26 · International</option><option value="vsoccer">V-Soccer</option></select></label>
     <label class="results-team-search">Market hasil FT <select id="pattern-results-market-filter"><option value="all">Semua hasil</option><option value="zero">FT 0–0</option><option value="under15">FT Under 1.5</option><option value="over15">FT Over 1.5</option><option value="under25">FT Under 2.5</option><option value="over25">FT Over 2.5</option></select></label>
-    <label class="results-team-search">Capaian rekor <select id="pattern-results-record-filter"><option value="all">Semua tim</option><option value="near">Mendekati (≥80%, belum tercapai)</option><option value="reached">Sudah mencapai rekor</option></select></label>
     </div>
-    <p class="results-search-status">Filter market memakai skor FT pertandingan selesai. Rekor dihitung per hari (UTC+8).</p>
+    <p class="results-search-status">Filter market memakai skor FT pertandingan selesai.</p>
   </details>
   <p id="pattern-results-search-status" class="results-search-status" role="status" aria-live="polite" hidden></p>
   <p id="pattern-results-note" role="status" class="results-error-note" hidden>Memuat hasil API…</p>
@@ -60,7 +56,6 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
       <p><strong>HT</strong>: skor babak pertama. <strong>FT</strong>: skor akhir. <strong>U1.5</strong>: Under 1.5 (0–1 gol). <strong>O0.5</strong>: Over 0.5 (minimal 1 gol). <strong>H2H</strong>: riwayat pertemuan. <strong>API saja</strong>: tanpa pembaruan live.</p>
     </details>
   </div>
-  <p id="pattern-signal-history-status" class="results-search-status" role="status">Sinyal yang pernah tampil disimpan per pertandingan untuk evaluasi.</p>
   <details id="pattern-sync-history" class="results-coverage">
     <summary>Riwayat sinkronisasi</summary>
     <p>Riwayat penyimpanan ke matches.csv, per liga dan tanggal. Kegagalan pengambilan dicatat terpisah.</p>
@@ -99,8 +94,6 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
     <div class="results-scroll vsoccer-scroll"><table class="vsoccer-table"><thead><tr><th>Jam WIB</th><th>Liga</th><th>Pertandingan</th><th>HT</th><th>FT</th></tr></thead><tbody id="pattern-vsoccer-rows"><tr><td colspan="5">Memuat hasil…</td></tr></tbody></table></div>
   </details>
 </section>
-<script src="pattern-signal-evaluation.js?v=<?= (int) filemtime(__DIR__.'/pattern-signal-evaluation.js') ?>" defer></script>
-<script src="pattern-signal-history.js?v=<?= (int) filemtime(__DIR__.'/pattern-signal-history.js') ?>" defer></script>
 <script src="pattern-recent-meetings.js?v=<?= (int) filemtime(__DIR__.'/pattern-recent-meetings.js') ?>" defer></script>
 <script src="pattern-live-results.js?v=<?= (int) filemtime(__DIR__.'/pattern-live-results.js') ?>" defer></script>
 <script src="vsoccer-results.js?v=<?= (int) filemtime(__DIR__.'/vsoccer-results.js') ?>" defer></script>
@@ -108,24 +101,5 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
 <script src="pattern-data-coverage.js?v=<?= (int) filemtime(__DIR__.'/pattern-data-coverage.js') ?>" defer></script>
 <script src="pattern-sync-history.js?v=<?= (int) filemtime(__DIR__.'/pattern-sync-history.js') ?>" defer></script>
 <script src="pattern-results.js?v=<?= (int) filemtime(__DIR__.'/pattern-results.js') ?>" defer></script>
-<!-- Engine mount only; analysis tables have been removed from the page. -->
-<div id="pattern-table-host" hidden></div>
-<script>
-(() => {
-    const prefix = 'sabaraja-pattern:';
-    window.GM_getValue = function (key, fallback) {
-        try {
-            const value = localStorage.getItem(prefix + key);
-            return value === null ? fallback : JSON.parse(value);
-        } catch (_) {
-            return fallback;
-        }
-    };
-    window.GM_setValue = function (key, value) {
-        localStorage.setItem(prefix + key, JSON.stringify(value));
-    };
-})();
-</script>
-<script src="patternsaba.js?v=<?= (int) $patternScriptVersion ?>" defer></script>
 <script src="pattern-live.js?v=<?= (int) filemtime(__DIR__ . '/pattern-live.js') ?>" defer></script>
 

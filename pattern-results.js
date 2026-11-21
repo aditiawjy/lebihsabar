@@ -7,7 +7,6 @@
   const phaseFilter = document.getElementById('pattern-results-phase');
   const leagueFilter = document.getElementById('pattern-results-league-filter');
   const marketFilter = document.getElementById('pattern-results-market-filter');
-  const recordFilter = document.getElementById('pattern-results-record-filter');
   const searchStatus = document.getElementById('pattern-results-search-status');
   const refresh = document.getElementById('pattern-results-refresh');
   const save = document.getElementById('pattern-results-save');
@@ -21,12 +20,10 @@
   let busy = false, stopped = false, rendered = '';
   let saving = false, saveMatches = [], vsoccerSaveMatches = [], vsoccerSaveDate = null, pendingAutoSave = false;
   let savedFingerprint = '';
-  let resultSnapshots = [], liveState = null, liveAnalysis = null;
+  let resultSnapshots = [], liveState = null;
   let apiTimestamp = '', lastLiveTimestamp = null;
   let apiHealth = 'unknown', apiHealthMessage = '', snapshotDate = null;
   const collapsedLeagues = new Set();
-  const openRecordGroups = new Set(), openRecordTeams = new Set();
-  const openH2hDetails = new Set();
   function reportTelegramHealth(source,status) {
     fetch('pattern-telegram-notify.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'health',source,status}),signal:AbortSignal.timeout(20000)}).catch(()=>{});
   }
@@ -73,113 +70,6 @@
     if (match.live) return /^(?:H\.?\s*Time|HT$|Half[ -]?Time)/i.test(livePhase) ? 'halftime' : 'live';
     return match.ht ? 'halftime' : 'scheduled';
   }
-  const isUnder15 = score => {
-    const goals = scoreGoals(score);
-    return goals !== null && goals[0] + goals[1] < 2;
-  };
-  function csvStreakTeams(data, market, maxGoals) {
-    const stats = data.csvStreakStats?.[market] || {};
-    const broken = new Set();
-    for (const match of data.displayMatches) {
-      if (!match.live?.fresh) continue;
-      const goals = scoreGoals(match.live.score);
-      if (goals && goals[0] + goals[1] > maxGoals)
-        for (const team of [match.home, match.away]) broken.add(noGoalTeamKey(team));
-    }
-    return Object.entries(stats).filter(([key, entry]) => entry.current > 0 && entry.current >= entry.record && !broken.has(key))
-      .map(([, entry]) => [entry.name, entry.current]).sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]));
-  }
-  const noGoalTeamKey = name=>String(name || '').replace(/\s*\(V\)/gi,'').replace(/\s+/g,' ').trim().toLowerCase();
-  function teamNoGoalStreak(matches,team,threshold,league='15') {
-    const sideOf = match => [match.home,match.away].findIndex(name=>noGoalTeamKey(name)===noGoalTeamKey(team));
-    let count=0,day=null;
-    for (const match of [...matches].sort((a,b)=>String(a.time || '').localeCompare(String(b.time || '')))) {
-      const side=sideOf(match);if(side<0 || match.status!=='Selesai')continue;
-      const goals=scoreGoals(match.ft);if(!goals)continue;
-      const currentDay=isSessionLeague(league) ? new Date(Date.parse(match.time)-4*3600000).toISOString().slice(0,10) : String(match.time || '').slice(0,10);
-      if(day!==currentDay)count=0;
-      day=currentDay;count=goals[side]===0?count+1:0;
-    }
-    for(const match of matches) {
-      const side=sideOf(match);if(side<0 || match.status==='Selesai')continue;
-      const goals=match.live?.fresh?scoreGoals(match.live.score):!match.live?scoreGoals(match.ht):null;
-      if(goals && goals[side]>0)count=0;
-    }
-    return count>=threshold?count:0;
-  }
-  const zeroZeroThreshold = league => ({'15':5,'16':4,'20':3})[String(league)] || 2;
-  function repeatedZeroZeroTeams(matches, league) {
-    const counts = new Map();
-    for (const match of matches) {
-      if (match.status !== 'Selesai' || !isZeroZero(match.ft)) continue;
-      for (const team of [match.home,match.away]) {
-        const name = String(team || '').replace(/\s*\(V\)/gi,'').replace(/\s+/g,' ').trim();
-        if (name) counts.set(name,(counts.get(name)||0)+1);
-      }
-    }
-    return [...counts.entries()].filter(([,count])=>count>=zeroZeroThreshold(league))
-      .sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
-  }
-  const teamCodes = {romania:'ROU',italy:'ITA',wales:'WAL',brazil:'BRA',poland:'POL',portugal:'POR',sweden:'SWE',
-    netherlands:'NED',germany:'GER',france:'FRA',england:'ENG',spain:'ESP',argentina:'ARG',belgium:'BEL',
-    'czech republic':'CZE',denmark:'DEN',finland:'FIN',ghana:'GHA',hungary:'HUN',mexico:'MEX',morocco:'MAR',
-    norway:'NOR',qatar:'QAT',scotland:'SCO',ukraine:'UKR',usa:'USA','new zealand':'NZL',
-    'korea republic':'KOR','inter milan':'INT','paris saint germain':'PSG'};
-  const teamCode = name => teamCodes[name.toLowerCase()] || (name.trim().split(/\s+/).length > 1
-    ? name.trim().split(/\s+/).map(part=>part[0]).join('').slice(0,4) : name.slice(0,3)).toUpperCase();
-  function resultHistoryAlertsByMatch(matches, league, under15Thresholds = {}) {
-    const counts = new Map();
-    const under15Counts = new Map();
-    const alerts = new Map();
-    const scope = isSessionLeague(league) ? 'sesi ini' : 'hari ini';
-    const under15Day = match => {
-      const timestamp = Date.parse(match.time);
-      return Number.isFinite(timestamp) ? new Date(timestamp + 8 * 3600000).toISOString().slice(0,10) : null;
-    };
-    const chronological = [...matches].sort((a,b)=>String(a.time).localeCompare(String(b.time)));
-    for (let start = 0; start < chronological.length;) {
-      const time = chronological[start].time;
-      let end = start + 1;
-      while (end < chronological.length && chronological[end].time === time) end++;
-      const group = chronological.slice(start,end);
-      for (const match of group) {
-        const isFinishedZeroZero = match.status === 'Selesai' && isZeroZero(match.ft);
-        const isFinishedUnder15 = match.status === 'Selesai' && isUnder15(match.ft);
-        const teamAlerts = [];
-        for (const team of [match.home,match.away]) {
-          const name = String(team || '').replace(/\s*\(V\)/gi,'').replace(/\s+/g,' ').trim();
-          if (!name) continue;
-          const previous = counts.get(name) || {zeroZero:0,under15:0};
-          const zeroZeroCount = previous.zeroZero + (isFinishedZeroZero ? 1 : 0);
-          const day = under15Day(match);
-          const under15Key = day && JSON.stringify([day,noGoalTeamKey(name)]);
-          const under15Count = (under15Counts.get(under15Key) || 0) + (isFinishedUnder15 ? 1 : 0);
-          const under15Threshold = under15Thresholds[noGoalTeamKey(name)];
-          if (zeroZeroCount >= zeroZeroThreshold(league)) teamAlerts.push({kind:'zerozero',highFrequency:zeroZeroCount >= 3,label:`${zeroZeroCount >= 3 ? '🔥 ' : ''}${teamCode(name)}: ${zeroZeroCount}× (0-0)`,detail:`${name}: FT 0–0 sudah ${zeroZeroCount}× (≥${zeroZeroThreshold(league)}) ${scope}`});
-          if (under15Key && Number.isInteger(under15Threshold) && under15Threshold > 0 && under15Count >= under15Threshold) teamAlerts.push({kind:'under15',label:`${teamCode(name)}: ${under15Count}× (U1.5)`,detail:`${name}: FT Under 1.5 ${under15Count}× pada ${day} UTC+8; rekor harian CSV ${under15Threshold}×.`});
-        }
-        if (teamAlerts.length) alerts.set(match,teamAlerts);
-      }
-      for (const match of group) {
-        if (match.status !== 'Selesai') continue;
-        const goals = scoreGoals(match.ft);
-        if (!goals) continue;
-        for (const team of [match.home,match.away]) {
-          const name = String(team || '').replace(/\s*\(V\)/gi,'').replace(/\s+/g,' ').trim();
-          if (!name) continue;
-          const previous = counts.get(name) || {zeroZero:0,under15:0};
-          if (goals[0] + goals[1] === 0) previous.zeroZero++;
-          if (goals[0] + goals[1] < 2 && under15Day(match)) {
-            const key = JSON.stringify([under15Day(match),noGoalTeamKey(name)]);
-            under15Counts.set(key,(under15Counts.get(key) || 0)+1);
-          }
-          counts.set(name,previous);
-        }
-      }
-      start = end;
-    }
-    return alerts;
-  }
   function updateSaveButton() {
     const count = saveMatches.length + (vsoccerSaveDate === date.value ? vsoccerSaveMatches.length : 0);
     save.disabled = busy || saving || !count;
@@ -193,7 +83,6 @@
     if (update) showApiHealth('loading', 'Menghubungi API. Data tersimpan tetap ditampilkan selama pembaruan.');
     setApiState(update ? 'Mengambil hasil terbaru dari API…' : 'Memuat hasil tersimpan…');
     try {
-      await window.SabarajaSignalHistory.load(requestedDate);
       const snapshots = [];
       let updateError = null;
       // All leagues share the same UTC+8 snapshot: refresh it only once.
@@ -255,10 +144,6 @@
       }
       rendered = ''; renderResults();
       if (update && !updateError) await saveResults(true);
-      // Server reads current local API results itself; no credentials or chat IDs in browser.
-      fetch('pattern-telegram-notify.php',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(20000)})
-        .then(response=>response.json()).then(result=>{if(!result.success)console.warn('Telegram: notifikasi belum terkirim.');})
-        .catch(()=>console.warn('Telegram: menunggu pembaruan berikutnya untuk mencoba lagi.'));
     } catch (error) {
       if (update) await window.SabarajaSyncHistory?.failure('MSports',requestedDate,'fetch',error);
       reportTelegramHealth('api',/401|403|menolak sesi|perbarui sesi login/i.test(error.message || '')?'denied':'error');
@@ -276,7 +161,7 @@
   function renderResults() {
       const query = teamSearch.value.normalize('NFKC').trim().toLocaleLowerCase('id-ID');
       const selectedPhase = phaseFilter.value;
-      const selectedLeague=leagueFilter.value, selectedMarket=marketFilter.value, selectedRecord=recordFilter.value;
+      const selectedLeague=leagueFilter.value, selectedMarket=marketFilter.value;
       const matchesSearch = (match,data) => {
         if (query && ![match.home,match.away].some(name => String(name || '').normalize('NFKC').toLocaleLowerCase('id-ID').includes(query))) return false;
         if (selectedPhase !== 'all' && matchPhase(match) !== selectedPhase) return false;
@@ -286,21 +171,16 @@
           const total=goals[0]+goals[1];
           if (!(selectedMarket === 'zero' ? total===0 : selectedMarket === 'under15' ? total<2 : selectedMarket === 'over15' ? total>=2 : selectedMarket === 'under25' ? total<3 : total>=3)) return false;
         }
-        if (selectedRecord !== 'all') {
-          const signals = selectedRecord === 'near' ? [...(data.zeroNearRecordSignals || []),...(data.under15NearRecordSignals || [])] : [...(data.zeroRecordSignals || []),...(data.under15RecordSignals || [])];
-          if (!signals.some(signal => signal.date === String(match.time || '').slice(0,10) && [match.home,match.away].some(name=>noGoalTeamKey(name)===noGoalTeamKey(signal.team)))) return false;
-        }
         return true;
       };
       const placeholders = ['15','16','20'].filter(league => !resultSnapshots.some(data => String(data.league) === league))
         .filter(() => busy || !resultSnapshots.length).map(league => ({league,date:date.value,timezone:'UTC+8',matches:[],loading:busy}));
       const snapshots = [...resultSnapshots, ...placeholders].sort((x, y) => resultLeagues.indexOf(String(x.league)) - resultLeagues.indexOf(String(y.league)))
-        .map(data => ({...data, displayMatches:window.SabarajaLiveResults.merge(data,liveState,liveAnalysis)}));
-      const signature = JSON.stringify([query, selectedPhase,selectedLeague,selectedMarket,selectedRecord, [...collapsedLeagues], snapshots.map(data => [data.league, data.loading, data.date, data.displayMatches, data.noGoalThresholds, data.under15Thresholds, data.under15StreakThresholds, data.zeroStreakThresholds, data.csvStreakStats, data.zeroRecordSignals, data.under15RecordSignals,data.zeroNearRecordSignals,data.under15NearRecordSignals])]);
+        .map(data => ({...data, displayMatches:window.SabarajaLiveResults.merge(data,liveState,null)}));
+      const signature = JSON.stringify([query, selectedPhase,selectedLeague,selectedMarket, [...collapsedLeagues], snapshots.map(data => [data.league, data.loading, data.date, data.displayMatches])]);
       if (signature !== rendered) {
-        window.SabarajaPatternDisplay = {snapshots};
         const visibleCount = snapshots.filter(data=>selectedLeague==='all'||selectedLeague===data.league).reduce((sum,data) => sum + data.displayMatches.filter(match=>matchesSearch(match,data)).length,0);
-        searchStatus.hidden = !query && selectedPhase === 'all' && selectedLeague === 'all' && selectedMarket === 'all' && selectedRecord === 'all';
+        searchStatus.hidden = !query && selectedPhase === 'all' && selectedLeague === 'all' && selectedMarket === 'all';
         searchStatus.textContent = !searchStatus.hidden ? `${visibleCount} pertandingan cocok pada liga MSports. Ringkasan dan sinkronisasi tetap mencakup seluruh pertandingan.` : '';
         const positions = [...host.querySelectorAll('.results-scroll')].map(el => el.scrollTop);
         // Build off-screen so periodic updates never collapse the page mid-scroll.
@@ -369,98 +249,6 @@
             source.textContent = 'Data dari API; tidak tersedia pembaruan live.';
             period.append(source);
           }
-          const zeroZeroCount = document.createElement('div');
-          zeroZeroCount.className = 'results-zerozero-count';
-          const zeroRecordSignals = [
-            ...(data.zeroRecordSignals || []).map(signal=>({...signal,metricLabel:'FT 0–0',metricClass:'results-zero-record'})),
-            ...(data.under15RecordSignals || []).map(signal=>({...signal,metricLabel:'FT Under 1.5',metricClass:'results-under15-record'}))
-          ];
-          const recordGroup = document.createElement('details');
-          recordGroup.className = 'results-record-group'; recordGroup.open = openRecordGroups.has(data.league);
-          const groupTitle = document.createElement('summary');
-          const recordTeams = new Set(zeroRecordSignals.map(signal=>noGoalTeamKey(signal.team)));
-          groupTitle.textContent = `Rekor harian tercapai · ${recordTeams.size} tim · ${zeroRecordSignals.length} catatan`;
-          recordGroup.append(groupTitle);
-          recordGroup.addEventListener('toggle', () => { if (recordGroup.open) openRecordGroups.add(data.league); else openRecordGroups.delete(data.league); });
-          for (const signal of zeroRecordSignals) {
-            const key = JSON.stringify([data.league,signal.team,signal.date,signal.metricLabel]);
-            const detail = document.createElement('details'); detail.className = 'results-record-detail'; detail.open = openRecordTeams.has(key);
-            detail.addEventListener('toggle', () => { if (detail.open) openRecordTeams.add(key); else openRecordTeams.delete(key); });
-            const title = document.createElement('summary');
-            title.textContent = `${signal.team} · ${signal.metricLabel} ${signal.count}/${signal.record}× · ${signal.date.split('-').reverse().join('/')}`;
-            detail.append(title);
-            const explanation = document.createElement('p');
-            explanation.textContent = `Rekor tersimpan: ${signal.recordDates.map(day=>day.split('-').reverse().join('/')).join(', ')}. Rekor historis bukan batas jumlah hasil berikutnya.`;
-            detail.append(explanation);
-            const games = data.matches.filter(match => match.status === 'Selesai' && String(match.time || '').slice(0,10) === signal.date &&
-              [match.home,match.away].some(name => noGoalTeamKey(name) === noGoalTeamKey(signal.team)) &&
-              (signal.metricLabel === 'FT 0–0' ? isZeroZero(match.ft) : isUnder15(match.ft)));
-            const list = document.createElement('ul');
-            for (const match of games) {
-              const item = document.createElement('li');
-              item.textContent = `${String(match.time).slice(11,16)} · ${match.home} vs ${match.away} · FT ${match.ft}`;
-              list.append(item);
-            }
-            if (!games.length) { const item = document.createElement('li'); item.textContent = 'Pertandingan terkait tidak tersedia dalam rentang kartu ini.'; list.append(item); }
-            detail.append(list);
-            if (games.length < signal.count) { const note = document.createElement('p'); note.textContent = 'Sebagian hasil rekor berasal dari riwayat tersimpan di luar rentang kartu ini.'; detail.append(note); }
-            recordGroup.append(detail);
-          }
-          recordGroup.hidden = !zeroRecordSignals.length;
-          const repeatedTeams = repeatedZeroZeroTeams(data.matches,data.league);
-          const zeroLabel = document.createElement('span'); zeroLabel.className = 'results-zerozero-label';
-          zeroLabel.textContent = 'FT 0–0'; zeroZeroCount.append(zeroLabel);
-          if (!repeatedTeams.length) {
-            const empty = document.createElement('span'); empty.className = 'results-zerozero-empty';
-            empty.textContent = `Belum ada tim ≥${zeroZeroThreshold(data.league)}×`; zeroZeroCount.append(empty);
-          }
-          for (const [team, count] of repeatedTeams) {
-            const chip = document.createElement('span'); chip.className = 'results-zerozero-chip';
-            chip.classList.toggle('is-high-frequency', count >= 3);
-            chip.textContent = `${count >= 3 ? '🔥 ' : ''}${team} (${count}×)`;
-            chip.title = `${team}: FT 0–0 ${count} kali ${isSessionLeague(data.league) ? 'dalam sesi ini' : 'pada tanggal ini'}`;
-            zeroZeroCount.append(chip);
-          }
-          const streakGroups = [
-            {zeroZeroStreak:true, underStreaks:csvStreakTeams(data,'zero',0)},
-            {zeroZeroStreak:false, underStreaks:csvStreakTeams(data,'under15',1)}
-          ];
-          for (const {zeroZeroStreak,underStreaks} of streakGroups) {
-          if (underStreaks.length || zeroZeroStreak) {
-            const label = document.createElement('span'); label.className = 'results-zerozero-label';
-            label.textContent = zeroZeroStreak ? 'FT 0–0 beruntun' : 'U1.5 beruntun'; zeroZeroCount.append(label);
-            if (!underStreaks.length) {
-              const empty = document.createElement('span'); empty.className = 'results-zerozero-empty';
-              empty.textContent = 'Belum ada tim yang mencapai rekor beruntun CSV lintas hari/sesi';
-              zeroZeroCount.append(empty);
-            }
-            for (const [team,count] of underStreaks) {
-              const chip = document.createElement('span'); chip.className = 'results-zerozero-chip results-under-streak';
-              chip.textContent = `${team} (${count}× beruntun)`;
-              chip.title = zeroZeroStreak
-                ? `${team}: ${count} hasil FT 0–0 berturut-turut dari CSV lintas hari/sesi; rekor beruntun CSV ${data.zeroStreakThresholds?.[noGoalTeamKey(team)]}×. Hilang saat pertandingan berikutnya mencetak gol.`
-                : `${team}: ${count} hasil FT Under 1.5 berturut-turut dari CSV lintas hari/sesi; rekor beruntun CSV ${data.under15StreakThresholds?.[noGoalTeamKey(team)]}×. Hilang saat pertandingan berikutnya mencapai total 2 gol.`;
-              zeroZeroCount.append(chip);
-            }
-          }
-          }
-          const noGoalScope = isSessionLeague(data.league)?'sesi ini':'hari ini';
-          const noGoalSignals = ['15','16','20'].includes(String(data.league)) ? Object.entries(data.noGoalThresholds || {}).filter(([,threshold])=>Number.isInteger(threshold) && threshold>0).map(([team,threshold])=>({team,threshold,count:teamNoGoalStreak(data.displayMatches,team,threshold,data.league)})).filter(signal=>signal.count>0) : [];
-          for (const signal of noGoalSignals) {
-            const chip = document.createElement('span'); chip.className = 'results-zerozero-chip is-high-frequency';
-            chip.textContent = `${signal.team}: tidak mencetak gol ${signal.count}× beruntun`;
-            chip.title = `Ambang pantauan ${signal.threshold}×, dihitung dari rekor terbaru matches.csv. Gol tim sendiri, kandang/tandang, hanya hasil FT selesai ${noGoalScope}. Hilang jika tim mencetak gol. Bukan jaminan gol pada laga berikutnya.`;
-            zeroZeroCount.append(chip);
-          }
-          const resultAlerts = resultHistoryAlertsByMatch(data.matches,data.league,data.under15Thresholds);
-          // Put each active record on one relevant fixture, regardless of table order.
-          const selectAlertMatch = (team, day = null) => data.displayMatches
-            .filter(match => match.status !== 'Selesai' && match.status !== 'Ditunda' && match.time &&
-              (!day || String(match.time).slice(0,10) === day) &&
-              [match.home,match.away].some(name => noGoalTeamKey(name) === noGoalTeamKey(team)))
-            .sort((a,b) => Number(!!b.live?.fresh) - Number(!!a.live?.fresh) ||
-              Number(!!b.ht) - Number(!!a.ht) || String(a.time).localeCompare(String(b.time)))[0];
-          const noGoalTargets = new Map(noGoalSignals.map(signal => [signal,selectAlertMatch(signal.team)]));
           const scroll = document.createElement('div'); scroll.className = 'results-scroll';
           const table = document.createElement('table');
           const colgroup = document.createElement('colgroup');
@@ -503,144 +291,8 @@
             time.append(state);
             const teams = row.insertCell();
             teams.append(document.createTextNode(match.home + ' vs ' + match.away));
-            window.SabarajaRecentMeetings.append(teams, match.h2h?.recentMeetings || [], /^1H\b/i.test(match.live?.status || '') ? null : match.live?.ht || match.ht, null, match.h2h?.recentByHt || {}, match.home, match.h2h?.htRun, match.h2h?.repeatFtMeetings);
-            if (match.status !== 'Selesai' && match.status !== 'Ditunda' && match.h2h) {
-              const liveStatus = String(match.live?.status || '');
-              const afterFirstHalf = /^(?:2H\b|H\.?\s*Time|HT$|Half[ -]?Time)/i.test(liveStatus);
-              const liveHt = scoreGoals(match.live?.ht || match.ht);
-              const liveScore = scoreGoals(match.live?.score);
-              const secondHalfGoal = afterFirstHalf && liveHt && liveScore && (liveScore[0] > liveHt[0] || liveScore[1] > liveHt[1]);
-              for (const [label, streak, available] of [
-                ['HT 0–0', match.h2h.htZeroStreak, !afterFirstHalf],
-                ['2H 0–0', match.h2h.secondHalfZeroStreak, !secondHalfGoal]
-              ]) {
-                if (!available || !streak?.record || streak.current < streak.record) continue;
-                const badge = document.createElement('a');
-                badge.className = 'result-h2h-badge';
-                badge.textContent = `H2H ${label} · ${streak.current}× beruntun · rekor ${streak.record}×`;
-                badge.title = `Riwayat H2H di liga yang sama sebelum kickoff dari CSV. ${label === '2H 0–0' ? '2H 0–0 berarti tidak ada gol pada babak kedua.' : 'HT 0–0 berarti tidak ada gol pada babak pertama.'} Hasil historis bukan jaminan.`;
-                badge.href = 'index.php?' + new URLSearchParams({page:'h2h',home:match.home,away:match.away,league:data.historyLeagueName || ''});
-                teams.append(badge);
-              }
-            }
-            if (match.status !== 'Selesai' && match.status !== 'Ditunda' && match.h2h?.under25StreakRecord > 0 && match.h2h.under25StreakCurrent >= match.h2h.under25StreakRecord) {
-              const badge = document.createElement('a');
-              badge.className = 'result-h2h-badge';
-              badge.textContent = `H2H UNDER 2.5 · ${match.h2h.under25StreakCurrent}× beruntun · rekor ${match.h2h.under25StreakRecord}×`;
-              badge.title = 'Hasil H2H Under 2.5 terbaru mencapai rekor beruntun pasangan ini di liga yang sama dalam CSV sebelum kickoff. Hasil historis bukan jaminan.';
-              badge.href = 'index.php?' + new URLSearchParams({page:'h2h',home:match.home,away:match.away,league:data.historyLeagueName || ''});
-              teams.append(badge);
-            }
-            if (match.status !== 'Selesai' && match.status !== 'Ditunda' && match.h2h?.drawStreakRecord > 0 && match.h2h.drawStreakCurrent >= match.h2h.drawStreakRecord) {
-              const badge = document.createElement('a');
-              badge.className = 'result-h2h-badge';
-              badge.textContent = `H2H DRAW · ${match.h2h.drawStreakCurrent}× seri beruntun · rekor ${match.h2h.drawStreakRecord}×`;
-              badge.title = 'Hasil seri H2H terbaru mencapai rekor beruntun pasangan ini di liga yang sama dalam CSV sebelum kickoff. Hasil historis bukan jaminan.';
-              badge.href = 'index.php?' + new URLSearchParams({page:'h2h',home:match.home,away:match.away,league:data.historyLeagueName || ''});
-              teams.append(badge);
-            }
-            if (match.live?.fresh && match.live.kickoffMatched && /^(?:2H\b|H\.?\s*Time|HT$|Half[ -]?Time)/i.test(match.live.status || '')) {
-              const htScore = scoreGoals(match.live.ht || match.ht);
-              const currentScore = scoreGoals(match.live.score);
-              const sample = htScore && match.secondHalfByHt?.[htScore.join(':')];
-              if (sample?.total && sample.goals / sample.total > 0.8 && currentScore && currentScore[0] === htScore[0] && currentScore[1] === htScore[1]) {
-                const badge = document.createElement('a');
-                badge.className = 'result-h2h-badge';
-                badge.textContent = `HT ${htScore.join('–')} · gol 2H ${sample.goals}/${sample.total} (${(100*sample.goals/sample.total).toFixed(1)}%)`;
-                badge.title = 'Hasil historis CSV sebelum kickoff, untuk liga dan urutan home–away yang sama. Persentase bukan jaminan gol.';
-                badge.href = 'index.php?' + new URLSearchParams({page:'h2h',home:match.home,away:match.away,league:data.historyLeagueName || ''});
-                teams.append(badge);
-              }
-            }
-            if ((match.status === 'Selesai' && match.h2hZeroStreakIncludingMatch) || (match.status !== 'Selesai' && match.status !== 'Ditunda' && match.h2hZeroStreak)) {
-              const badge = document.createElement('a');
-              badge.className = 'result-h2h-badge';
-              badge.textContent = match.status === 'Selesai' ? 'STREAK · 3 H2H berturut-turut FT 0–0' : 'PANTAU · 3 H2H terakhir FT 0–0';
-              badge.title = match.status === 'Selesai' ? 'Pertandingan ini dan dua pertemuan sebelumnya berakhir 0–0 di liga yang sama. Klik untuk melihat riwayat.' : 'Tiga pertemuan terbaru sebelum pertandingan ini berakhir 0–0 di liga yang sama. Klik untuk melihat riwayat.';
-              badge.href = 'index.php?' + new URLSearchParams({page:'h2h', home:match.home, away:match.away, league:data.historyLeagueName || ''});
-              teams.append(badge);
-            }
-            for (const signal of noGoalSignals.filter(signal=>noGoalTargets.get(signal) === match)) {
-              const badge=document.createElement('span');badge.className='result-h2h-badge';
-              badge.textContent=`PANTAU · ${signal.team} tanpa gol ${signal.count}× beruntun ${noGoalScope}`;
-              badge.title='Riwayat hasil selesai; bukan jaminan klub akan mencetak gol.';teams.append(badge);
-            }
+            window.SabarajaRecentMeetings.append(teams, match.h2h?.profile, match.h2h?.recentMeetings || [], match.home);
             window.SabarajaLiveResults.appendMarkets(teams, match.live);
-            if (match.h2h) {
-              for (const market of Object.values(match.h2h.markets || {})) {
-              const {period,side,line,wins,total} = market;
-              if (period === 'FT' && side === 'U' && [3.5, 4.5, 5.5].includes(Number(line))) continue;
-              if (match.status === 'Selesai' || match.status === 'Ditunda') continue;
-              const isFtOver05 = period === 'FT' && side === 'O' && Number(line) === 0.5;
-              const isFtOver15 = period === 'FT' && side === 'O' && Number(line) === 1.5;
-              if (!isFtOver05 && !isFtOver15 && match.h2h.total < 20) continue;
-              const recentMeetings = match.h2h.recentMeetings || [];
-              const zeroRecord = match.h2h.zeroStreakRecord || 0;
-              const zeroCurrent = match.h2h.zeroStreakCurrent || 0;
-              const under15Record = match.h2h.under15StreakRecord || 0;
-              const under15Current = match.h2h.under15StreakCurrent || 0;
-              if (isFtOver05 ? zeroRecord < 2 || zeroCurrent < zeroRecord : isFtOver15 ? !under15Record || under15Current < under15Record : total < 20 || wins/total < 0.95) continue;
-              const phase = match.live?.status || '';
-              const firstHalf = /^1H\b/i.test(phase);
-              const secondHalf = /^(?:2H\b|H\.?\s*Time|HT$|Half[ -]?Time)/i.test(phase);
-              const currentGoals = scoreGoals(match.live?.score || match.ft || match.ht);
-              const ht = scoreGoals(match.live?.ht || match.ht);
-              if (period === 'HT' && (secondHalf || (!firstHalf && ht))) continue;
-              if (period === '2H' && (!secondHalf || !ht || !currentGoals)) continue;
-              const goals = currentGoals ? currentGoals[0]+currentGoals[1] - (period === '2H' ? ht[0]+ht[1] : 0) : null;
-              if (goals !== null && (goals < 0 || goals > line)) continue;
-              const h2hDetail = document.createElement('details'); h2hDetail.className = 'result-h2h-detail';
-              const h2hKey = JSON.stringify([data.league,match.time,match.home,match.away,period,side,line]);
-              h2hDetail.open = openH2hDetails.has(h2hKey);
-              h2hDetail.addEventListener('toggle', () => { if (h2hDetail.open) openH2hDetails.add(h2hKey); else openH2hDetails.delete(h2hKey); });
-              const badge = document.createElement('summary'); badge.className = 'result-h2h-badge';
-              const perfect = wins === total;
-              if (perfect) badge.classList.add('is-perfect-history');
-              const formatH2hDate = value => value.split('-').reverse().join('/');
-              const dataPeriod = market.firstDate && market.lastDate ? `${formatH2hDate(market.firstDate)}–${formatH2hDate(market.lastDate)}` : 'tanggal tidak tersedia';
-              const undated = market.undated || 0;
-              badge.textContent = `H2H ${period} ${side}${line} · ${(100*wins/total).toFixed(1)}% (${wins}/${total}) · CSV ${dataPeriod}${undated ? ` · ${undated} tanpa tanggal` : ''}`;
-              if (perfect) badge.textContent += ' · sampel, bukan jaminan';
-              if (isFtOver05) badge.textContent += ` · ${zeroCurrent} H2H terakhir FT 0–0 · rekor ${zeroRecord}×`;
-              if (isFtOver15) badge.textContent += ` · ${under15Current} H2H terakhir Under 1.5 · rekor ${under15Record}×`;
-              badge.title = `H2H ${match.home} vs ${match.away}: ${wins} dari ${total} pertemuan memenuhi ${period} ${side}${line}. Tanggal dalam sampel CSV: ${dataPeriod} UTC+8${undated ? `; ${undated} pertemuan tanpa tanggal` : ''}. Per kompetisi, kandang–tandang digabung. CSV saat ini dapat memuat hasil setelah pertandingan yang ditampilkan. ${isFtOver05 ? `Syarat: H2H terbaru berturut-turut FT 0–0 mencapai rekor ${zeroRecord}× di CSV sebelum kickoff.` : isFtOver15 ? `Syarat: H2H terbaru berturut-turut FT Under 1.5 mencapai rekor ${under15Record}× di CSV sebelum kickoff.` : 'Minimal 20 pertemuan dan ≥95%.'} Data yang tersedia mungkin tidak lengkap. O = Over, U = Under. Hasil historis bukan jaminan dan bukan backtest sebelum kickoff.`;
-              if (isFtOver05 || isFtOver15) badge.title += ' H2H terbaru sebelum kickoff: ' + recentMeetings.map(meeting => `${meeting.time} FT ${meeting.ft}`).join('; ') + '.';
-              h2hDetail.append(badge);
-              const detailBody = document.createElement('div'); detailBody.className = 'result-h2h-detail-body';
-              const explanation = document.createElement('p');
-              explanation.textContent = `${period} ${side}${line}: ${(100*wins/total).toFixed(1)}% · ${wins} dari ${total} hasil dalam CSV · ${dataPeriod} UTC+8${undated ? ` · ${undated} tanpa tanggal` : ''}. Sampel dapat mencakup hasil setelah kickoff pertandingan ini.`;
-              detailBody.append(explanation);
-              const criterion = document.createElement('p');
-              criterion.textContent = isFtOver05 ? `Sinyal: ${zeroCurrent} H2H terakhir FT 0–0 mencapai rekor CSV ${zeroRecord}× sebelum kickoff.` : isFtOver15 ? `Sinyal: ${under15Current} H2H terakhir FT Under 1.5 mencapai rekor CSV ${under15Record}× sebelum kickoff.` : 'Sinyal: setidaknya 20 pertemuan dan 95% memenuhi market.';
-              detailBody.append(criterion);
-              const heading = document.createElement('strong'); heading.textContent = 'Hingga 5 pertemuan terakhir sebelum kickoff (UTC+8)'; detailBody.append(heading);
-              const list = document.createElement('ul');
-              for (const meeting of recentMeetings) {
-                const item = document.createElement('li');
-                const when = meeting.time ? meeting.time.slice(0,10).split('-').reverse().join('/')+' '+meeting.time.slice(11,16) : 'Tanggal tidak tersedia';
-                item.textContent = `${when} · ${meeting.home || 'Tim kandang'} vs ${meeting.away || 'Tim tandang'} · FT ${meeting.ft}`;
-                list.append(item);
-              }
-              if (!recentMeetings.length) { const item=document.createElement('li'); item.textContent='Tidak ada pertemuan bertanggal sebelum kickoff dalam CSV.'; list.append(item); }
-              detailBody.append(list); h2hDetail.append(detailBody); teams.append(h2hDetail);
-              }
-            }
-            const teamAlerts = resultAlerts.get(match.sourceMatch || match)?.filter(alert => !data.apiOnly || alert.kind === 'zerozero');
-            if (teamAlerts?.length) {
-              const badges = document.createElement('div');
-              badges.className = 'result-history-alerts';
-              for (const alert of teamAlerts) {
-                const badge = document.createElement('span');
-                badge.className = 'result-history-alert alert-' + alert.kind + (alert.highFrequency ? ' is-high-frequency' : '');
-                badge.textContent = alert.label;
-                badge.title = alert.detail;
-                badge.setAttribute('aria-label', alert.detail);
-                badges.append(badge);
-              }
-              teams.append(badges);
-            }
-            window.SabarajaSignalEvaluation.append(teams, match, data.league);
-            window.SabarajaSignalHistory.capture(teams, data.league, match);
             if (match.live && !match.live.kickoffMatched) {
               const hint = document.createElement('small'); hint.className = 'result-live-hint';
               hint.textContent = 'Kickoff belum cocok dengan API'; teams.append(hint);
@@ -651,11 +303,10 @@
             if (match.live) score.title = 'Skor berjalan' + (match.live.fresh ? '' : ' · data lama');
           }
           if (!visibleMatches.length) {
-            const cell = tbody.insertRow().insertCell(); cell.colSpan = 4; cell.textContent = query || selectedPhase !== 'all' || selectedMarket !== 'all' || selectedRecord !== 'all' ? 'Tidak ada pertandingan yang cocok dengan filter.' : apiHealth === 'error' ? 'Tidak ada pertandingan dalam data tersimpan. Pembaruan API gagal; data mungkin belum lengkap.' : data.snapshotFilesAvailable < data.snapshotFilesExpected ? 'Data tersimpan belum lengkap; pertandingan belum dapat dipastikan.' : 'Tidak ada pertandingan pada data yang tersedia untuk rentang ini.';
+            const cell = tbody.insertRow().insertCell(); cell.colSpan = 4; cell.textContent = query || selectedPhase !== 'all' || selectedMarket !== 'all' ? 'Tidak ada pertandingan yang cocok dengan filter.' : apiHealth === 'error' ? 'Tidak ada pertandingan dalam data tersimpan. Pembaruan API gagal; data mungkin belum lengkap.' : data.snapshotFilesAvailable < data.snapshotFilesExpected ? 'Data tersimpan belum lengkap; pertandingan belum dapat dipastikan.' : 'Tidak ada pertandingan pada data yang tersedia untuk rentang ini.';
           }
-          for (const part of [period,info,zeroZeroCount,scroll]) part.hidden = collapsedLeagues.has(data.league);
-          recordGroup.hidden = collapsedLeagues.has(data.league) || !zeroRecordSignals.length;
-          scroll.append(table); card.append(heading, period, info, recordGroup, zeroZeroCount, scroll);
+          for (const part of [period,info,scroll]) part.hidden = collapsedLeagues.has(data.league);
+          scroll.append(table); card.append(heading, period, info, scroll);
           ((data.extraCard ?? data.apiOnly) && extraBody ? extraCards : mainCards).append(card);
           restoredScrolls.push([scroll, positions[index] || 0]);
         }
@@ -669,7 +320,7 @@
       }
   }
   document.addEventListener('pattern-live-analysis', event => {
-    liveState = event.detail.payload; liveAnalysis = event.detail.analysis;
+    liveState = event.detail.payload;
     if (liveState?.timestamp) {
       const raw = String(liveState.timestamp);
       const parsed = new Date(/[zZ]$|[+-]\d\d:\d\d$/.test(raw) ? raw : raw + '+07:00');
@@ -742,29 +393,6 @@
           `${automatic ? 'Sinkron otomatis' : 'Tersimpan'}: ${data.inserted} pertandingan baru, ${data.updated} diperbarui, ${data.skipped_duplicate} sudah ada. Backup CSV dibuat otomatis.`);
         if (data.history_saved === false) setSaveState('CSV tersimpan · riwayat gagal', 'CSV tersimpan, tetapi riwayat tidak dapat dicatat.', 'error');
       }
-      try {
-        if ((data.inserted || data.updated) && date.value === selectedDate && resultSnapshots.length) {
-          const streakResponse = await fetch('pattern-streak-data.php', {
-            method:'POST', headers:{'Content-Type':'application/json'}, cache:'no-store',
-            body:JSON.stringify({date:selectedDate,leagues:resultSnapshots.map(snapshot=>({league:snapshot.league,name:snapshot.historyLeagueName}))}),
-            signal:AbortSignal.timeout(90000)
-          });
-          const refreshed = await streakResponse.json();
-          if (!streakResponse.ok) throw new Error(refreshed.error || 'Gagal memperbarui streak CSV.');
-          if (date.value === selectedDate) {
-            for (const snapshot of resultSnapshots) {
-              const stats = refreshed.leagues?.[snapshot.league]; if (!stats) continue;
-              snapshot.csvStreakStats = stats;
-              snapshot.under15StreakThresholds = Object.fromEntries(Object.entries(stats.under15).map(([key,value])=>[key,value.record]));
-              snapshot.zeroStreakThresholds = Object.fromEntries(Object.entries(stats.zero).map(([key,value])=>[key,value.record]));
-            }
-            rendered = ''; renderResults();
-          }
-        }
-        await window.SabarajaPatternEngine?.refreshHistory(true);
-        window.SabarajaPatternLive?.refreshView();
-      }
-      catch (_) { setSaveState('CSV tersimpan · muat ulang pola', saveStatus.title + ' Muat ulang halaman untuk memperbarui statistik pola.', 'error'); }
     } catch (error) {
       if (!automatic && saveSummary && date.value === selectedDate) { saveSummary.classList.add('is-error'); saveSummary.textContent='Gagal menyimpan: '+error.message; }
       if (date.value === selectedDate) setSaveState('CSV gagal disimpan', 'Gagal menyimpan: ' + error.message, 'error');
@@ -785,7 +413,7 @@
   save.addEventListener('click', () => saveResults());
   teamSearch.addEventListener('input', renderResults);
   phaseFilter.addEventListener('change', renderResults);
-  for (const filter of [leagueFilter,marketFilter,recordFilter]) filter.addEventListener('change', renderResults);
+  for (const filter of [leagueFilter,marketFilter]) filter.addEventListener('change', renderResults);
   date.addEventListener('change', () => { resultSnapshots = []; rendered = ''; renderResults(); saveMatches = []; vsoccerSaveMatches = []; vsoccerSaveDate = null; setSaveState(''); updateSaveButton(); load(false); });
   window.addEventListener('pagehide', () => { stopped = true; });
   window.addEventListener('pageshow', event => { if (event.persisted) { stopped = false; load(false); } });

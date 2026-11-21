@@ -59,7 +59,6 @@
       summary.classList.toggle('is-error', failures.length > 0);
       summary.textContent = `${failures.length ? 'Pembaruan belum lengkap' : 'Pembaruan selesai'} (${start}–${end}) · ${lines.join(' · ')}${failures.length ? ' · Gagal: '+failures.join('; ') : ''}. Tanggal MSports UTC+8; V-Soccer WIB.`;
       window.SabarajaSyncHistory?.refresh();
-      try { await window.SabarajaPatternEngine?.refreshHistory(true); window.SabarajaPatternLive?.refreshView(); } catch (_) {}
     } finally { button.disabled = false; document.dispatchEvent(new CustomEvent('pattern-results-cache-refresh')); }
   });
 })();

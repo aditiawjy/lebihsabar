@@ -176,7 +176,7 @@
       const placeholders = ['15','16','20'].filter(league => !resultSnapshots.some(data => String(data.league) === league))
         .filter(() => busy || !resultSnapshots.length).map(league => ({league,date:date.value,timezone:'UTC+8',matches:[],loading:busy}));
       const snapshots = [...resultSnapshots, ...placeholders].sort((x, y) => resultLeagues.indexOf(String(x.league)) - resultLeagues.indexOf(String(y.league)))
-        .map(data => ({...data, displayMatches:window.SabarajaLiveResults.merge(data,liveState,null)}));
+        .map(data => ({...data, displayMatches:window.SabarajaLiveResults.merge(data,liveState)}));
       const signature = JSON.stringify([query, selectedPhase,selectedLeague,selectedMarket, [...collapsedLeagues], snapshots.map(data => [data.league, data.loading, data.date, data.displayMatches])]);
       if (signature !== rendered) {
         const visibleCount = snapshots.filter(data=>selectedLeague==='all'||selectedLeague===data.league).reduce((sum,data) => sum + data.displayMatches.filter(match=>matchesSearch(match,data)).length,0);

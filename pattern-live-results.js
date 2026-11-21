@@ -2,7 +2,7 @@
   'use strict';
   const teamKey = value => String(value || '').replace(/\s*\(V\)/gi, '').normalize('NFKC').toLowerCase().replace(/\s+/g, ' ').trim();
   const calendarDay = now => new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Singapore',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(now));
-  function merge(snapshot, payload, analysis, now = Date.now()) {
+  function merge(snapshot, payload, now = Date.now()) {
     const rows = snapshot.matches.map(match => ({...match, sourceMatch:match}));
     const elapsedAge = payload?.fetchedAt ? Math.max(0, (now-payload.fetchedAt)/1000) : 0;
     const age = payload?.age == null ? Infinity : payload.age + elapsedAge;
@@ -11,7 +11,6 @@
       ? now >= Date.parse(snapshot.periodStart) && now < Date.parse(snapshot.periodEnd) + 16*60000
       : snapshot.date === calendarDay(now);
     if (!snapshot.apiOnly && inPeriod && age <= 300) {
-      const league16 = (payload.matches || []).filter(match => String(match.league || '16') === '16');
       const used = new Set();
       for (const match of payload.matches || []) {
         if (String(match.league || '16') !== String(snapshot.league)) continue;
@@ -31,11 +30,7 @@
         const row = candidates.length === 1 ? candidates[0] : {time:null, home:match.home.replace(/\s*\(V\)/gi,''), away:match.away.replace(/\s*\(V\)/gi,''), status:'Belum selesai', ht:null, ft:null};
         if (candidates.length !== 1) rows.push(row);
         used.add(row);
-        const evaluation = fresh && String(snapshot.league) === '16'
-          ? analysis?.matches?.find(result => result.index === league16.indexOf(match)) : null;
         row.live = {status:match.status, score:match.score, ht:match.ht, fresh, markets:match.markets || [],
-          signals:evaluation?.signals || [], evaluationReady:!!analysis?.ready,
-          phase:evaluation?.phase || null, htAvailable:!!evaluation?.htAvailable,
           kickoffMatched:candidates.length === 1};
       }
     }

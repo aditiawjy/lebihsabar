@@ -19,7 +19,7 @@
     return data;
   }
   function refreshView() {
-    document.dispatchEvent(new CustomEvent('pattern-live-analysis', {detail:{payload,analysis:null}}));
+    document.dispatchEvent(new CustomEvent('pattern-live-analysis', {detail:{payload}}));
   }
   async function poll() {
     if (fetching || document.hidden) return;

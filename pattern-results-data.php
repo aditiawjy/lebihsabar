@@ -90,8 +90,6 @@ $rows = [];
 $saveMatches = [];
 require_once __DIR__.'/pattern-h2h.php';
 $h2hStats = patternH2hStats();
-require_once __DIR__.'/pattern-signal-analysis.php';
-$analysisTeamIndex = [];
 usort($merged, static fn($a,$b)=>strcmp($a['match_date'] ?? '',$b['match_date'] ?? ''));
 foreach ($merged as $match) {
     if ((string)($match['events'] ?? '') !== $leagues[$league]) continue;
@@ -114,97 +112,12 @@ foreach ($merged as $match) {
             'ft_home'=>(int)$score[3], 'ft_away'=>(int)$score[4]
         ];
     }
-    $analysisLeague = $match['event_name'] ?? '';
-    if (!isset($analysisTeamIndex[$analysisLeague])) $analysisTeamIndex += patternAnalysisTeamIndex($h2hStats, $analysisLeague);
     $h2h = $h2hStats[($match['event_name'] ?? '').'|'.patternH2hKey($match['home_name'] ?? '',$match['away_name'] ?? '')] ?? null;
-    $secondHalfByHt = [];
     if ($h2h) {
-        $allPreviousMeetings = patternH2hRecentBefore($h2h, $time->format('c'), PHP_INT_MAX);
-        $currentZeroStreak = 0; $maxZeroStreak = 0; $runZeroStreak = 0;
-        $currentUnder15Streak = 0; $maxUnder15Streak = 0; $runUnder15Streak = 0;
-        $currentUnder25Streak = 0; $maxUnder25Streak = 0; $runUnder25Streak = 0;
-        $currentDrawStreak = 0; $maxDrawStreak = 0; $runDrawStreak = 0;
-        $halfStreaks = ['ht'=>['current'=>0,'record'=>0,'run'=>0,'open'=>true], 'second'=>['current'=>0,'record'=>0,'run'=>0,'open'=>true]];
-        $isDraw = static function($meeting): bool {
-            return preg_match('/^(\d+)–(\d+)$/uD', $meeting['ft'] ?? '', $score) === 1 && (int)$score[1] === (int)$score[2] && ($meeting['totalGoals'] ?? null) !== null;
-        };
-        foreach ($allPreviousMeetings as $meeting) {
-            $htKnown = isset($meeting['htHome'], $meeting['htAway'], $meeting['totalGoals']);
-            $htGoals = $htKnown ? $meeting['htHome'] + $meeting['htAway'] : null;
-            foreach (['ht'=>$htKnown && $htGoals === 0, 'second'=>$htKnown && $meeting['totalGoals'] - $htGoals === 0] as $half=>$zero) {
-                if ($zero) {
-                    $halfStreaks[$half]['run']++;
-                    $halfStreaks[$half]['record'] = max($halfStreaks[$half]['record'], $halfStreaks[$half]['run']);
-                    if ($halfStreaks[$half]['open']) $halfStreaks[$half]['current']++;
-                } else {
-                    $halfStreaks[$half]['run'] = 0;
-                    $halfStreaks[$half]['open'] = false;
-                }
-            }
-            if (($meeting['totalGoals'] ?? null) === 0) {
-                $runZeroStreak++;
-                $maxZeroStreak = max($maxZeroStreak, $runZeroStreak);
-            } else $runZeroStreak = 0;
-            if (isset($meeting['totalGoals']) && $meeting['totalGoals'] < 2) {
-                $runUnder15Streak++;
-                $maxUnder15Streak = max($maxUnder15Streak, $runUnder15Streak);
-            } else $runUnder15Streak = 0;
-            if (isset($meeting['totalGoals']) && $meeting['totalGoals'] < 3) {
-                $runUnder25Streak++;
-                $maxUnder25Streak = max($maxUnder25Streak, $runUnder25Streak);
-            } else $runUnder25Streak = 0;
-            if ($isDraw($meeting)) {
-                $runDrawStreak++;
-                $maxDrawStreak = max($maxDrawStreak, $runDrawStreak);
-            } else $runDrawStreak = 0;
-        }
-        foreach ($allPreviousMeetings as $meeting) {
-            if (($meeting['totalGoals'] ?? null) !== 0) break;
-            $currentZeroStreak++;
-        }
-        $h2h['zeroStreakRecord'] = $maxZeroStreak;
-        $h2h['zeroStreakCurrent'] = $currentZeroStreak;
-        foreach ($allPreviousMeetings as $meeting) {
-            if (!isset($meeting['totalGoals']) || $meeting['totalGoals'] >= 2) break;
-            $currentUnder15Streak++;
-        }
-        $h2h['under15StreakRecord'] = $maxUnder15Streak;
-        $h2h['under15StreakCurrent'] = $currentUnder15Streak;
-        foreach ($allPreviousMeetings as $meeting) {
-            if (!isset($meeting['totalGoals']) || $meeting['totalGoals'] >= 3) break;
-            $currentUnder25Streak++;
-        }
-        $h2h['under25StreakRecord'] = $maxUnder25Streak;
-        $h2h['under25StreakCurrent'] = $currentUnder25Streak;
-        foreach ($allPreviousMeetings as $meeting) {
-            if (!$isDraw($meeting)) break;
-            $currentDrawStreak++;
-        }
-        $h2h['drawStreakRecord'] = $maxDrawStreak;
-        $h2h['drawStreakCurrent'] = $currentDrawStreak;
-        $h2h['htZeroStreak'] = ['current'=>$halfStreaks['ht']['current'], 'record'=>$halfStreaks['ht']['record']];
-        $h2h['secondHalfZeroStreak'] = ['current'=>$halfStreaks['second']['current'], 'record'=>$halfStreaks['second']['record']];
-        $normalizeTeam = static fn($name) => strtolower(trim(preg_replace('/\s+/', ' ', preg_replace('/\s*\(V\)/i', '', $name))));
-        foreach ($h2h['meetings'] ?? [] as $meeting) {
-            if ($meeting['time'] >= $time->format('c') || $meeting['htHome'] === null || $meeting['htAway'] === null || $normalizeTeam($meeting['home']) !== $normalizeTeam($match['home_name'] ?? '') || $normalizeTeam($meeting['away']) !== $normalizeTeam($match['away_name'] ?? '')) continue;
-            $htKey = $meeting['htHome'].':'.$meeting['htAway'];
-            if (!isset($secondHalfByHt[$htKey])) $secondHalfByHt[$htKey] = ['total'=>0,'goals'=>0];
-            $secondHalfByHt[$htKey]['total']++;
-            if ($meeting['totalGoals'] > $meeting['htHome'] + $meeting['htAway']) $secondHalfByHt[$htKey]['goals']++;
-        }
-        $h2h['lastMeeting'] = patternH2hLatestBefore($h2h,$time->format('c'));
-        $h2h['recentMeetings'] = patternH2hRecentBefore($h2h,$time->format('c'),5);
-        $h2h['profile'] = patternH2hProfile($h2h,$time->format('c'));
-        $h2h['recentByHt'] = patternH2hRecentByHt($allPreviousMeetings, trim(preg_replace('/\s*\(V\)/i', '', $match['home_name'] ?? '')), trim(preg_replace('/\s*\(V\)/i', '', $match['away_name'] ?? '')));
-        $h2h['htRun'] = patternH2hHtRun($allPreviousMeetings, $match['home_name'] ?? '', $match['away_name'] ?? '');
-        unset($h2h['meetings']);
+        $h2h = ['recentMeetings'=>patternH2hRecentBefore($h2h,$time->format('c'),5), 'profile'=>patternH2hProfile($h2h,$time->format('c'))];
     }
     $rows[] = [
-        'signalAnalysis'=>patternAdvancedAnalysis($h2h ? $allPreviousMeetings : [], $analysisTeamIndex, $match['event_name'] ?? '', $match['home_name'] ?? '', $match['away_name'] ?? '', $time->format('c')),
-        'secondHalfByHt'=>$secondHalfByHt,
-        'h2h'=>$h2h ?: null,
-        'h2hZeroStreak'=>count($h2h['recentMeetings'] ?? []) >= 3 && array_reduce(array_slice($h2h['recentMeetings'], 0, 3), static fn($all, $meeting) => $all && ($meeting['totalGoals'] ?? null) === 0, true),
-        'h2hZeroStreakIncludingMatch'=>$finished && $validScore && (int)$score[3] === 0 && (int)$score[4] === 0 && count($h2h['recentMeetings'] ?? []) >= 2 && array_reduce(array_slice($h2h['recentMeetings'], 0, 2), static fn($all, $meeting) => $all && ($meeting['totalGoals'] ?? null) === 0, true),
+        'h2h'=>$h2h,
         'time'=>$time->format('c'),
         'home'=>trim(preg_replace('/\s*\(V\)/i', '', $match['home_name'] ?? '')),
         'away'=>trim(preg_replace('/\s*\(V\)/i', '', $match['away_name'] ?? '')),
@@ -215,53 +128,9 @@ foreach ($merged as $match) {
 }
 usort($rows, static function($a,$b) { return strcmp($b['time'], $a['time']); });
 $times = [];
-if (!defined('TEAM_ZERO_HISTORY_LIBRARY')) define('TEAM_ZERO_HISTORY_LIBRARY',true);
-require_once __DIR__.'/team-zero-history.php';
-$snapshotFiles = glob($directory.'/msports-????-??-??.json') ?: [];
-$visibleDays = array_fill_keys(array_map(static fn($row) => substr($row['time'],0,10),$rows),true);
-$recordSignals = [];
-$nearRecordSignals = [];
-foreach (['zero','under15'] as $metric) {
-    $history = teamZeroHistoryCached(__DIR__.'/matches.csv', $snapshotFiles, $metric);
-    $signals = []; $near = [];
-    foreach ($history['records'] as $record) {
-        if ((string)$record['league'] !== (string)$league) continue;
-        $key = json_encode([(string)$league,strtolower($record['name'])]);
-        foreach ($history['daily'][$key] ?? [] as $day=>$count) {
-            if (!isset($visibleDays[$day]) || $count <= 0 || $record['max'] <= 0) continue;
-            $signal = ['team'=>$record['name'],'date'=>$day,'count'=>$count,'record'=>$record['max'],'recordDates'=>$record['dates']];
-            if ($count >= $record['max']) $signals[] = $signal;
-            elseif ($count / $record['max'] >= 0.8) $near[] = $signal;
-        }
-    }
-    usort($signals,static fn($a,$b) => $b['count'] <=> $a['count'] ?: strcmp($a['team'],$b['team']));
-    $recordSignals[$metric] = $signals;
-    $nearRecordSignals[$metric] = $near;
-}
-require_once __DIR__.'/pattern-no-goal.php';
-require_once __DIR__.'/pattern-under15-streak.php';
-$streakLeagueNames = ['15'=>'SABA CLUB FRIENDLY Virtual PES 21 - 15 Mins Play', '16'=>'SABA INTERNATIONAL FRIENDLY Virtual FC 24 - 16 Mins Play', '20'=>'SABA INTERNATIONAL FRIENDLY Virtual PES 21 - 20 Mins Play'];
-$streakLeagueName = $extraNames[$league] ?? $streakLeagueNames[$league] ?? '';
-$csvStreakStats = $streakLeagueName === '' ? ['under15'=>[], 'zero'=>[]] : patternCsvStreakStats(__DIR__.'/matches.csv', $streakLeagueName, $period['periodEnd']);
-$under15StreakThresholds = array_map(static fn($entry) => $entry['record'], $csvStreakStats['under15']);
-$zeroStreakThresholds = array_map(static fn($entry) => $entry['record'], $csvStreakStats['zero']);
-$csvUnderHistory = teamZeroHistoryCached(__DIR__.'/matches.csv', [], 'under15');
-$under15Thresholds = [];
-foreach ($csvUnderHistory['records'] as $record) {
-    if ((string)$record['league'] === (string)$league && $record['max'] > 0) $under15Thresholds[strtolower($record['name'])] = $record['max'];
-}
 foreach ([$previousFile, $file] as $snapshotFile) if (is_file($snapshotFile)) $times[] = filemtime($snapshotFile);
 echo json_encode(array_merge($period, ['date'=>$date, 'league'=>$league, 'updatedAt'=>$times ? gmdate('c', min($times)) : null,
     'snapshotFilesAvailable'=>count($times), 'snapshotFilesExpected'=>2,
-    'zeroRecordSignals'=>$recordSignals['zero'],
-    'under15RecordSignals'=>$recordSignals['under15'],
-    'zeroNearRecordSignals'=>$nearRecordSignals['zero'], 'under15NearRecordSignals'=>$nearRecordSignals['under15'],
-    'noGoalThresholds'=>in_array($league,['15','16','20'],true)?patternNoGoalThresholds(null,$league):null,
-    'under15Thresholds'=>$under15Thresholds,
-    'csvStreakStats'=>$csvStreakStats,
-    'under15StreakThresholds'=>$under15StreakThresholds,
-    'historyLeagueName'=>$streakLeagueName,
-    'zeroStreakThresholds'=>$zeroStreakThresholds,
     'eventId'=>$leagues[$league], 'name'=>$extraNames[$league] ?? ('League ' . $league),
     'displayName'=>$extraLabels[$league] ?? ('League ' . $league), 'apiOnly'=>isset($extraNames[$league]), 'extraCard'=>isset($extraNames[$league]) && $league !== 'vietnam15',
     'matches'=>$rows, 'saveMatches'=>$saveMatches, 'source'=>'MSports Results', 'timezone'=>'UTC+8']), JSON_UNESCAPED_UNICODE);

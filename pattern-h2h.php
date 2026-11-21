@@ -4,13 +4,6 @@ function patternH2hKey($home, $away) {
     sort($teams, SORT_STRING);
     return implode('|', $teams);
 }
-function patternH2hLatestBefore(array $stats, string $before): ?array {
-    $latest = null;
-    foreach ($stats['meetings'] ?? [] as $meeting) {
-        if ($meeting['time'] < $before && ($latest === null || $meeting['time'] > $latest['time'])) $latest = $meeting;
-    }
-    return $latest;
-}
 function patternH2hRecentBefore(array $stats, string $before, int $limit = 2): array {
     $byTime = [];
     foreach ($stats['meetings'] ?? [] as $meeting) {
@@ -96,50 +89,6 @@ function patternH2hStats() {
     }
     return $stats;
 }
-
-function patternSameVenue(array $meeting, string $home, string $away): bool {
-    $clean = static fn($name) => strtolower(trim(preg_replace('/\s+/', ' ', preg_replace('/\s*(?:\(V\)|\[V\])/i', '', $name))));
-    return $clean($meeting['home'] ?? '') === $clean($home) && $clean($meeting['away'] ?? '') === $clean($away);
-}
-// Only the same home team and away team qualify; scores retain their CSV order.
-function patternH2hRecentByHt(array $meetings, string $home, string $away): array {
-    $groups = [];
-    foreach ($meetings as $meeting) {
-        if (!patternSameVenue($meeting, $home, $away)) continue;
-        if (!isset($meeting['htHome'], $meeting['htAway']) || ($meeting['totalGoals'] ?? null) === null) continue;
-        $key = $meeting['htHome'].':'.$meeting['htAway'];
-        if (count($groups[$key] ?? []) < 2) $groups[$key][] = $meeting;
-    }
-    return $groups;
-}
-
-// Input must contain every previous meeting, newest first; never filter by HT first.
-function patternH2hHtRun(array $meetings, string $home, string $away): array {
-    $key = null; $count = 0; $leading = true;
-    $runKey = null; $run = 0; $records = []; $runMeetings = []; $recordMeetings = [];
-    foreach ($meetings as $meeting) {
-        if (!patternSameVenue($meeting, $home, $away)) continue;
-        $score = null;
-        if (isset($meeting['htHome'], $meeting['htAway']) && ($meeting['totalGoals'] ?? null) !== null) {
-            $score = $meeting['htHome'].':'.$meeting['htAway'];
-        }
-        if ($leading) {
-            if ($score === null || ($key !== null && $score !== $key)) $leading = false;
-            else { $key = $score; $count++; }
-        }
-        if ($score === null) { $runKey = null; $run = 0; $runMeetings = []; continue; }
-        if ($score !== $runKey) $runMeetings = [];
-        $runMeetings[] = $meeting;
-        $run = $score === $runKey ? $run + 1 : 1;
-        $runKey = $score;
-        if ($run > ($records[$score] ?? 0)) {
-            $records[$score] = $run;
-            $recordMeetings[$score] = $runMeetings;
-        }
-    }
-    return ['score'=>$key, 'previous'=>$count, 'records'=>$records, 'recordMeetings'=>$recordMeetings];
-}
-
 function patternH2hProfile(array $stats, string $before): ?array {
     $goals=[];
     foreach(patternH2hRecentBefore($stats,$before,PHP_INT_MAX) as $meeting) if(($meeting['totalGoals'] ?? null)!==null) $goals[]=(int)$meeting['totalGoals'];

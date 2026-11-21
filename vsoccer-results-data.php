@@ -82,21 +82,14 @@ $result = $cached ?: ['date'=>$date,'updatedAt'=>null,'timezone'=>'UTC+7 / WIB',
 $result['saveMatches'] = vsoccerSaveMatches($result['matches'] ?? []);
 require_once __DIR__.'/pattern-h2h.php';
 $history = patternH2hStats();
-require_once __DIR__.'/pattern-signal-analysis.php';
-$analysisTeamIndex = [];
 $analysisOrder=array_keys($result['matches']);
 usort($analysisOrder,static fn($a,$b)=>strcmp($result['matches'][$a]['time'],$result['matches'][$b]['time']));
 foreach ($analysisOrder as $analysisIndex) {
     $match =& $result['matches'][$analysisIndex];
     $before = (new DateTimeImmutable($match['time'], new DateTimeZone('Asia/Jakarta')))->setTimezone(new DateTimeZone('Asia/Singapore'))->format('c');
-    if (!isset($analysisTeamIndex[$match['league']])) $analysisTeamIndex += patternAnalysisTeamIndex($history, $match['league']);
     $stats = $history[$match['league'].'|'.patternH2hKey($match['home'], $match['away'])] ?? [];
     $match['recentMeetings'] = patternH2hRecentBefore($stats, $before, 2);
     $match['h2hProfile'] = patternH2hProfile($stats,$before);
-    $previousMeetings = patternH2hRecentBefore($stats, $before, PHP_INT_MAX);
-    $match['recentByHt'] = patternH2hRecentByHt($previousMeetings, $match['home'], $match['away']);
-    $match['htRun'] = patternH2hHtRun($previousMeetings, $match['home'], $match['away']);
-    $match['signalAnalysis'] = patternAdvancedAnalysis($previousMeetings, $analysisTeamIndex, $match['league'], $match['home'], $match['away'], $before);
 }
 unset($match);
 echo json_encode($result,JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);

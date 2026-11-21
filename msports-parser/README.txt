@@ -7,7 +7,7 @@
 5. Pilih folder:
    `c:\xampp\htdocs\sabar\msports-parser`
 6. Ekstensi akan muncul di daftar.
-7. Buka halaman target: `https://msports.m88m8idtop.com/app/v2/sports.html`
+7. Buka halaman target: `https://msports.m88.com/app/v2/sports.html`
 8. Tombol **🚀 PARSE DATA** akan muncul di pojok kanan atas halaman.
 
 ---

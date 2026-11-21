@@ -1,13 +1,38 @@
 (() => {
   'use strict';
   const formatter = new Intl.DateTimeFormat('id-ID', {timeZone:'Asia/Singapore',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+  const cleanTeam = value => String(value || '').replace(/\s*(?:\(V\)|\[V\])/gi, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  function repeatedFt(meetings, home) {
+    const recent=meetings.slice(0,2);
+    if(recent.length!==2)return null;
+    const scores=recent.map(meeting=>{
+      if(meeting.totalGoals===null)return null;
+      const score=String(meeting.ft || '').match(/^(\d+)\s*[-–:]\s*(\d+)$/);
+      if(!score)return null;
+      const reverse=home && cleanTeam(home)!==cleanTeam(meeting.home);
+      return Number(score[reverse?2:1])+'–'+Number(score[reverse?1:2]);
+    });
+    return scores[0]!==null && scores[0]===scores[1]?scores[0]:null;
+  }
   window.SabarajaRecentMeetings = {
+    repeatedFt,
     append(target, meetings, ht = null, byHt = null, groups = {}, home = null, htRun = null) {
       const box = document.createElement('div'); box.className = 'result-recent-meetings';
       const heading = document.createElement('strong'); heading.textContent = byHt ? 'Rangkaian rekor HT ' + ht.replace(':', '–') + ' · ' + meetings.length + '× berturut-turut' : '2 pertemuan terakhir'; box.append(heading);
       box.title = 'Pertemuan di liga yang sama dengan posisi home–away yang sama sebelum kickoff, terbaru lebih dulu. Waktu UTC+8; skor mengikuti urutan tim pada judul pertandingan.';
       const recent = byHt ? meetings : meetings.slice(0, 2);
-      if (!byHt) target.closest('tr')?.classList.toggle('result-repeat-ht', false);
+      const sameFt=!byHt?repeatedFt(meetings,home):null;
+      if (!byHt) {
+        target.closest('tr')?.classList.toggle('result-repeat-ht', false);
+        target.closest('tr')?.classList.toggle('result-repeat-ft', !!sameFt);
+        if(sameFt) {
+          const badge=document.createElement('strong');badge.className='result-h2h-badge result-repeat-ft-badge';
+          badge.textContent='2 H2H terakhir FT sama · '+sameFt;
+          badge.title='Dua pertemuan terakhir sebelum kickoff di liga yang sama memiliki skor FT persis sama setelah disesuaikan ke urutan tim pertandingan ini. Catatan hasil, bukan prediksi.';
+          target.append(badge);
+          box.title=badge.title+' Waktu riwayat UTC+8.';
+        }
+      }
       if (byHt) {
         const current = String(ht || '').match(/^(\d+)\s*[-–:]\s*(\d+)$/);
         const clean = value => String(value || '').replace(/\s*(?:\(V\)|\[V\])/gi, '').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -49,7 +74,7 @@
         box.append(list);
         if (recent.length === 1) { const note = document.createElement('span'); note.textContent = 'Baru 1 pertemuan tersedia.'; box.append(note); }
       }
-      if (byHt) target.append(box);
+      if (byHt || sameFt) target.append(box);
       if (!byHt && ht) {
         const score = String(ht).match(/^(\d+)\s*[-–:]\s*(\d+)$/);
         if (score) {

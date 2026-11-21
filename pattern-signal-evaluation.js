@@ -72,10 +72,7 @@
     details.addEventListener('toggle',()=>{if(details.open)openAnalysis.add(key);else openAnalysis.delete(key);});
     const summary=document.createElement('summary');summary.textContent='Analisis CSV';details.append(summary);
     const body=document.createElement('div');body.className='result-h2h-detail-body';
-    const historical=match.status==='Selesai', h=a.htExact;
-    if(h?.score && h.previous>=2){const [home,away]=h.score.split(':').map(Number);
-      badge(body,`HT persis ${home}–${away} · ${h.previous}× sebelum kickoff · rekor ${h.record}×`,{period:'HT',kind:'notExact',home,away,history:'htExact'},h.after,historical);
-    }
+    const historical=match.status==='Selesai';
     for(const side of [0,1]) {
       const name=side===0?match.home:match.away;
       const entries=(a.teamNoGoal || []).filter(entry=>teamKey(entry.team)===teamKey(name));
@@ -92,6 +89,13 @@
     const note=document.createElement('p');note.className='result-analysis-note';note.textContent='Streak tanpa reset hari/sesi. Pemicu historis memakai panjang streak yang sama persis; sampel hanya sebelum kickoff. Data tersimpan dapat belum lengkap. Evaluasi streak memakai arah lawannya; Over yang sudah eksplisit tetap Over; persentase adalah sampel historis, bukan jaminan.';body.append(note);
     details.append(body);container.append(details);
   }
+  function exactTriggerValid(label, match) {
+    const exact=label.match(/^HT persis (\d+)[–-](\d+) · (\d+)× sebelum kickoff · rekor (\d+)×/);
+    if(!exact || !match.signalAnalysis?.htExact)return true;
+    const current=match.signalAnalysis.htExact;
+    return current.score===`${Number(exact[1])}:${Number(exact[2])}` &&
+      current.previous===Number(exact[3]) && current.record===Number(exact[4]);
+  }
   function decorate(container,match,observed={}) {
     for(const node of container.querySelectorAll('.result-h2h-badge, .result-history-alert')) {
       if(node.querySelector('.signal-outcome'))continue;
@@ -103,7 +107,8 @@
       const labelRun=label.match(/(?:· |setelah )(\d+)(?:×| H2H terakhir)/);
       if(history?.triggerRun && labelRun && Number(labelRun[1])!==history.triggerRun)history=null;
       history=counterHistory(history,rule);
-      const result=evaluate(rule,match,stored || null);
+      const valid=exactTriggerValid(label,match);
+      const result=valid?evaluate(rule,match,stored || null):{text:'Pemicu tidak valid',state:'info',reason:'Sinyal tersimpan tidak cocok dengan perhitungan ulang riwayat sebelum kickoff pada CSV terbaru; hasil ini tidak dihitung sebagai Kena/Gagal.'};
       const outcome=document.createElement('span');outcome.className='signal-outcome is-'+result.state;outcome.textContent=(rule?direction(rule)+' · ':'')+result.text;
       outcome.title=result.reason+(history?' '+historyText(history):'');node.append(outcome);
       const context=history?historyText(history):'';
@@ -113,5 +118,5 @@
 
     }
   }
-  window.SabarajaSignalEvaluation={inferRule,evaluate,append,decorate,historyText,counterHistory};
+  window.SabarajaSignalEvaluation={inferRule,evaluate,append,decorate,historyText,counterHistory,exactTriggerValid};
 })();

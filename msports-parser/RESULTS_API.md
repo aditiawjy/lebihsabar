@@ -2,7 +2,7 @@
 
 Endpoint terverifikasi dari bundle JavaScript publik MSports pada 17 Oktober 2026:
 
-`POST https://msports.m88m8idtop.com/api/v1/report/result/{opCode}/{ts}/match`
+`POST https://msports.m88.com/api/v1/report/result/{opCode}/{ts}/match`
 
 Header: `Authorization: Bearer {auth.acccessToken}` dan `Content-Type: application/json`.
 Ejaan `acccessToken` mengikuti nama yang dipakai situs.

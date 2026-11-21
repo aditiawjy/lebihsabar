@@ -3,7 +3,7 @@
 // @namespace    local.liverpool.saba
 // @version      1.33.0
 // @description  Hanya League 16 FC24 (41 pola) yang berjalan dan tampil. League 15/20 nonaktif sementara; storage aman.
-// @match        https://msports.m88m8idtop.com/app/v2/sports.html*
+// @match        https://msports.m88.com/app/v2/sports.html*
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @run-at       document-idle

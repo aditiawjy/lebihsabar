@@ -410,3 +410,8 @@ $patternScriptVersion = filemtime(__DIR__ . '/patternsaba.js');
 </script>
 <script src="patternsaba.js?v=<?= (int) $patternScriptVersion ?>" defer></script>
 <script src="pattern-live.js?v=<?= (int) filemtime(__DIR__ . '/pattern-live.js') ?>" defer></script>
+
+<style>
+#pattern-results-host tr.result-repeat-ft>td,#pattern-vsoccer-rows tr.result-repeat-ft>td{background:#fff7d6!important}
+.result-repeat-ft-badge{display:block;width:fit-content;margin-top:6px;color:#713f12;background:#fef3c7;border:1px solid #f59e0b;padding:4px 8px;border-radius:6px}
+</style>

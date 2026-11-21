@@ -48,7 +48,7 @@ async function syncData(data) {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'syncLeague16Results') {
-        if (!sender.url || new URL(sender.url).hostname !== 'msports.m88m8idtop.com') {
+        if (!sender.url || new URL(sender.url).hostname !== 'msports.m88.com') {
             sendResponse({success:false,error:'Unexpected Results source'});
             return false;
         }

@@ -73,7 +73,7 @@
     for(const node of container.querySelectorAll('.result-h2h-badge:not(.result-historical-signal), .result-history-alert')) {
       if(node.closest('.result-saved-signal'))continue;
       const details=node.closest('.result-h2h-detail');
-      const label=node.dataset.signalLabel || node.textContent.trim();if(!label)continue;
+      const label=node.dataset.signalLabel || node.textContent.trim();if(!label || /^HT persis /.test(label))continue;
       visible.add(label);
       if(!entry.signals[label]) {
         const href=node.getAttribute('href') || '';
@@ -95,6 +95,7 @@
     }
     if(changed){records.set(key,entry);dirty.set(key,entry);clearTimeout(localTimer);localTimer=setTimeout(localSave,50);clearTimeout(timer);timer=setTimeout(flush,350);}
     for(const signal of Object.values(entry.signals)) {
+      if(/^HT persis /.test(signal.label))continue;
       if(visible.has(signal.label))continue;
       if(signal.label.startsWith('H2H FT O0.5') && Number(signal.label.match(/rekor (\d+)/)?.[1] || 0) < 2)continue;
       const wrapper=document.createElement('details');wrapper.className='result-saved-signal';

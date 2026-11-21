@@ -10,7 +10,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
-ORIGIN = 'https://msports.m88m8idtop.com'
+ORIGIN = 'https://msports.m88.com'
 CONFIG = Path(os.environ.get('LOCALAPPDATA', str(Path.home()))) / 'Sabaraja' / 'msports-session.bin'
 
 

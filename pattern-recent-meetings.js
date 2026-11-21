@@ -16,19 +16,21 @@
   }
   window.SabarajaRecentMeetings = {
     repeatedFt,
-    append(target, meetings, ht = null, byHt = null, groups = {}, home = null, htRun = null) {
+    append(target, meetings, ht = null, byHt = null, groups = {}, home = null, htRun = null, repeatFtMeetings = null) {
       const box = document.createElement('div'); box.className = 'result-recent-meetings';
       const heading = document.createElement('strong'); heading.textContent = byHt ? 'Rangkaian rekor HT ' + ht.replace(':', '–') + ' · ' + meetings.length + '× berturut-turut' : '2 pertemuan terakhir'; box.append(heading);
       box.title = 'Pertemuan di liga yang sama dengan posisi home–away yang sama sebelum kickoff, terbaru lebih dulu. Waktu UTC+8; skor mengikuti urutan tim pada judul pertandingan.';
-      const recent = byHt ? meetings : meetings.slice(0, 2);
-      const sameFt=!byHt?repeatedFt(meetings,home):null;
+      const repeatedMeetings=repeatFtMeetings ?? meetings;
+      const recent = byHt ? meetings : (repeatedFt(repeatedMeetings,home)?repeatedMeetings:meetings.slice(0,2));
+      const sameFt=!byHt?repeatedFt(repeatedMeetings,home):null;
       if (!byHt) {
         target.closest('tr')?.classList.toggle('result-repeat-ht', false);
         target.closest('tr')?.classList.toggle('result-repeat-ft', !!sameFt);
         if(sameFt) {
           const badge=document.createElement('strong');badge.className='result-h2h-badge result-repeat-ft-badge';
-          badge.textContent='2 H2H terakhir FT sama · '+sameFt;
-          badge.title='Dua pertemuan terakhir sebelum kickoff di liga yang sama memiliki skor FT persis sama setelah disesuaikan ke urutan tim pertandingan ini. Catatan hasil, bukan prediksi.';
+          badge.textContent=recent.length+' H2H terakhir FT sama · '+sameFt;
+          heading.textContent=recent.length+' pertemuan terakhir · FT sama';
+          badge.title='Rangkaian pertemuan terakhir sebelum kickoff di liga yang sama memiliki skor FT persis sama setelah disesuaikan ke urutan tim pertandingan ini. Catatan hasil, bukan prediksi.';
           target.append(badge);
           box.title=badge.title+' Waktu riwayat UTC+8.';
         }

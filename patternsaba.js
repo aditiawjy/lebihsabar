@@ -1736,7 +1736,7 @@
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Gagal membaca matches.csv');
       patternCsvRecords = patternParseRows(data.rows);
-      patternCsvStatus = patternCsvRecords.length + ' pertandingan dari matches.csv · League 15/20: WIB, 00:00–23:59 · League 16: sesi SABA UTC+8.';
+      patternCsvStatus = patternCsvRecords.length + ' pertandingan dari matches.csv · L15/L20: WIB · L16: sesi UTC+8.';
       schedulePatternCache();
     })().catch(error => { patternCsvStatus = error.message; }).finally(() => renderPatternTable(patternTableLines));
   }
@@ -2013,7 +2013,7 @@
     const latest = history.reduce((max,r) => Math.max(max,r.t),0);
     output.note = latest && now-latest <= 3*3600000
       ? 'Pemicu dari riwayat CSV + skor live. Sinyal adalah kondisi pola, bukan jaminan gol.'
-      : 'Riwayat CSV 3 jam terakhir belum tersedia; pola yang memerlukan laga/slot sebelumnya mungkin belum dapat dipicu.';
+      : 'Riwayat CSV 3 jam terakhir belum tersedia; pola yang butuh laga sebelumnya mungkin belum aktif.';
     return output;
   }
   let scheduledMomentCache = null;
@@ -2113,7 +2113,7 @@
     const old = Date.now()-radar.next > 30*60000;
     meta.textContent = 'Hasil terakhir: '+format(radar.last)+' · Simulasi slot berikutnya: '+format(radar.next)+' (UTC+8). '+
       (old ? 'SNAPSHOT LAMA — bukan radar sesi live saat ini. ' : '')+
-      'Potensi bersyarat; jadwal dan HT target belum diketahui. Akurasi mengikuti rentang statistik yang dipilih.';
+      'Potensi bersyarat; jadwal dan HT target belum diketahui. Akurasi sesuai rentang statistik terpilih.';
     host.append(meta);
     const items = radar.items.map(item=>({...item,stats:csvRuleStats(item.rule)})).sort((a,b)=>{
       const accuracy = x => x.stats.win+x.stats.fail ? x.stats.win/(x.stats.win+x.stats.fail) : -1;
@@ -2129,7 +2129,7 @@
       const total = item.stats.win+item.stats.fail;
       title.textContent = item.rule.id+' · '+item.rule.market+' · '+(total ? (item.stats.win/total*100).toFixed(1)+'% ('+total+' sampel)' : 'Belum ada sampel')+(item.rule.experimental?' · UJI':'');
       const text = document.createElement('p');
-      if (item.slot) text.textContent = 'Slot terakhir berisi dua laga HT 0–0. Pantau dua laga pada slot berikutnya; minimal satu gol 2H pada pasangan laga target. Tunggu pasangan target dan HT keduanya.';
+      if (item.slot) text.textContent = 'Slot terakhir berisi dua laga HT 0–0. Pantau slot berikutnya: target minimal satu gol 2H pada pasangan laga target.';
       else {
         const homes = [...new Set(item.pairs.map(p=>p[0]))], aways = [...new Set(item.pairs.map(p=>p[1]))];
         const pretty = team => team.replace(/\b\w/g,c=>c.toUpperCase());
@@ -2333,7 +2333,7 @@
             const signal = document.createElement('span');
             signal.className = 'pattern-signal';
             signal.textContent = 'PEMICU AKTIF · CSV';
-            signal.title = 'Pemicu terpenuhi, hasil belum lengkap, kickoff dalam 45 menit terakhir. Berdasarkan snapshot CSV, bukan feed langsung.';
+            signal.title = 'Pemicu terpenuhi, hasil belum lengkap, kickoff <45 menit lalu. Berdasarkan snapshot CSV, bukan live.';
             cell.append(signal);
           }
         } else if (index === 2) {
@@ -2389,7 +2389,7 @@
     const matchesPanel = document.createElement('section');
     const matchesTitle = document.createElement('h2');
     matchesTitle.textContent = 'Pertandingan ⓘ';
-    matchesTitle.title = 'Hasil dari matches.csv, dilengkapi jadwal dan skor live API. Skor live belum dihitung sebagai hasil FT. League 16: sesi UTC+8 mulai 12:00; laga setelah tengah malam masuk sesi sebelumnya.';
+    matchesTitle.title = 'Hasil dari matches.csv plus jadwal dan skor live API. Skor live belum dihitung sebagai FT. L16: sesi mulai 12:00 UTC+8.';
     matchesPanel.append(matchesTitle);
     const filters = document.createElement('div');
     filters.className = 'pattern-match-filters';

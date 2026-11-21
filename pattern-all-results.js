@@ -30,7 +30,7 @@
     }
     return {...total, historyFailed};
   }
-  const display = (name, stats) => `${name}: ${stats.inserted} baru, ${stats.updated} diperbarui, ${stats.skipped_duplicate} sudah ada${stats.skipped_invalid ? `, ${stats.skipped_invalid} tidak valid` : ''}${stats.historyFailed ? ' (riwayat gagal dicatat)' : ''}`;
+  const display = (name, stats) => `${name}: ${stats.inserted} baru, ${stats.updated} diperbarui${stats.updated ? ' (skor CSV beda, diganti skor API)' : ''}, ${stats.skipped_duplicate} sudah ada${stats.skipped_invalid ? `, ${stats.skipped_invalid} tidak valid` : ''}${stats.historyFailed ? ' (riwayat gagal dicatat)' : ''}`;
   button.addEventListener('click', async () => {
     if (button.disabled || document.getElementById('pattern-results-refresh').disabled || document.getElementById('pattern-vsoccer-refresh').disabled) return;
     button.disabled = true; summary.hidden = false; summary.classList.remove('is-error');

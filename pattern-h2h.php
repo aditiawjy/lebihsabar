@@ -139,3 +139,15 @@ function patternH2hHtRun(array $meetings, string $home, string $away): array {
     }
     return ['score'=>$key, 'previous'=>$count, 'records'=>$records, 'recordMeetings'=>$recordMeetings];
 }
+
+function patternH2hRepeatedFt(array $stats, string $before, string $home): array {
+    $run=[]; $last=null;
+    foreach(patternH2hRecentBefore($stats,$before,PHP_INT_MAX) as $meeting) {
+        if(($meeting['totalGoals'] ?? null)===null || !preg_match('/^(\d+)–(\d+)$/uD',$meeting['ft'] ?? '',$score))break;
+        if(patternH2hKey($meeting['home'],'')!==patternH2hKey($home,''))$score=[$score[0],$score[2],$score[1]];
+        $value=(int)$score[1].':'.(int)$score[2];
+        if($last!==null && $value!==$last)break;
+        $last=$value;$run[]=$meeting;
+    }
+    return count($run)>=2?$run:[];
+}

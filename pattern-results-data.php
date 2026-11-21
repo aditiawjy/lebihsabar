@@ -194,6 +194,7 @@ foreach ($merged as $match) {
         }
         $h2h['lastMeeting'] = patternH2hLatestBefore($h2h,$time->format('c'));
         $h2h['recentMeetings'] = patternH2hRecentBefore($h2h,$time->format('c'),5);
+        $h2h['repeatFtMeetings'] = patternH2hRepeatedFt($h2h,$time->format('c'),$match['home_name']);
         $h2h['recentByHt'] = patternH2hRecentByHt($allPreviousMeetings, trim(preg_replace('/\s*\(V\)/i', '', $match['home_name'] ?? '')), trim(preg_replace('/\s*\(V\)/i', '', $match['away_name'] ?? '')));
         $h2h['htRun'] = patternH2hHtRun($allPreviousMeetings, $match['home_name'] ?? '', $match['away_name'] ?? '');
         unset($h2h['meetings']);

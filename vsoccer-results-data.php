@@ -92,6 +92,7 @@ foreach ($analysisOrder as $analysisIndex) {
     if (!isset($analysisTeamIndex[$match['league']])) $analysisTeamIndex += patternAnalysisTeamIndex($history, $match['league']);
     $stats = $history[$match['league'].'|'.patternH2hKey($match['home'], $match['away'])] ?? [];
     $match['recentMeetings'] = patternH2hRecentBefore($stats, $before, 2);
+    $match['repeatFtMeetings'] = patternH2hRepeatedFt($stats,$before,$match['home']);
     $previousMeetings = patternH2hRecentBefore($stats, $before, PHP_INT_MAX);
     $match['recentByHt'] = patternH2hRecentByHt($previousMeetings, $match['home'], $match['away']);
     $match['htRun'] = patternH2hHtRun($previousMeetings, $match['home'], $match['away']);

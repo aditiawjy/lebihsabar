@@ -52,6 +52,7 @@
     apiHealth = state; apiHealthMessage = message;
     const panel = document.getElementById('pattern-api-health');
     panel.className = 'results-api-health' + (state === 'ok' ? ' is-ok' : state === 'error' ? ' is-error' : '');
+    if (state === 'error') { const details = panel.closest('details'); if (details) details.open = true; }
     document.getElementById('pattern-api-health-title').textContent = state === 'ok' ? 'API MSports terhubung' : state === 'error' ? 'Pembaruan API MSports gagal' : state === 'loading' ? 'Memeriksa API MSports…' : 'Status API MSports belum diperiksa';
     document.getElementById('pattern-api-health-detail').textContent = message;
   }
@@ -182,7 +183,7 @@
   function updateSaveButton() {
     const count = saveMatches.length + (vsoccerSaveDate === date.value ? vsoccerSaveMatches.length : 0);
     save.disabled = busy || saving || !count;
-    save.textContent = saving ? 'Menyinkronkan…' : 'Sinkronkan ' + count + ' hasil ke matches.csv';
+    save.textContent = saving ? 'Menyimpan…' : 'Simpan ulang ' + count + ' hasil ke CSV';
   }
   async function load(update = false) {
     if (busy || !date.value || stopped || (update && document.hidden)) return;
@@ -196,28 +197,29 @@
       const snapshots = [];
       let updateError = null;
       // All leagues share the same UTC+8 snapshot: refresh it only once.
-      for (const league of resultLeagues) {
-        let response = await fetch('pattern-results-data.php?date=' + encodeURIComponent(requestedDate) + '&league=' + league, {
-          method: update && league === resultLeagues[0] ? 'POST' : 'GET', cache:'no-store', signal:AbortSignal.timeout(90000)
-        });
+      const fetchLeague = async (league, post) => {
+        const url = 'pattern-results-data.php?date=' + encodeURIComponent(requestedDate) + '&league=' + league;
+        let response = await fetch(url, {method: post ? 'POST' : 'GET', cache:'no-store', signal:AbortSignal.timeout(90000)});
         let data = await response.json();
-        if (!response.ok && update && league === resultLeagues[0]) {
+        if (!response.ok && post) {
           updateError = data.error || 'Pembaruan API gagal.';
-          response = await fetch('pattern-results-data.php?date=' + encodeURIComponent(requestedDate) + '&league=' + league, {cache:'no-store', signal:AbortSignal.timeout(90000)});
+          response = await fetch(url, {cache:'no-store', signal:AbortSignal.timeout(90000)});
           data = await response.json();
         }
         if (!response.ok) throw new Error(data.error || 'Gagal memuat hasil API League ' + league + '.');
-        snapshots.push(data);
-        // Restore each league immediately; do not hide every match until all eight requests finish.
+        // Restore each league immediately; do not hide every match until all requests finish.
         if (date.value === requestedDate) {
           if (snapshotDate !== requestedDate) resultSnapshots = [];
           const existing = resultSnapshots.findIndex(snapshot => String(snapshot.league) === String(data.league));
           if (existing < 0) resultSnapshots.push(data); else resultSnapshots[existing] = data;
+          resultSnapshots.sort((x, y) => resultLeagues.indexOf(String(x.league)) - resultLeagues.indexOf(String(y.league)));
           snapshotDate = requestedDate;
           rendered = ''; renderResults();
         }
-
-      }
+        return data;
+      };
+      snapshots.push(await fetchLeague(resultLeagues[0], update));
+      snapshots.push(...await Promise.all(resultLeagues.slice(1).map(league => fetchLeague(league, false))));
       saveMatches = snapshots.flatMap(data => data.saveMatches || []);
       const liveSnapshot = snapshots.find(data => data.league === '16');
       if (liveSnapshot) {
@@ -235,14 +237,14 @@
       resultSnapshots = snapshots;
       snapshotDate = requestedDate;
       const times = snapshots.map(data => data.updatedAt && new Date(data.updatedAt).getTime()).filter(Boolean);
-      apiTimestamp = times.length ? new Date(Math.min(...times)).toLocaleString('id-ID', {timeZone:'Asia/Singapore',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) + ' UTC+8' : '';
+      apiTimestamp = times.length ? new Date(Math.min(...times)).toLocaleString('id-ID', {timeZone:'Asia/Singapore',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) + ' UTC+8 (' + new Date(Math.min(...times)).toLocaleTimeString('id-ID', {timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit'}) + ' WIB)' : '';
       document.getElementById('pattern-results-last-updated').textContent = apiTimestamp ? 'API ' + apiTimestamp : 'API belum tersedia';
       const incomplete = snapshots.some(data => data.snapshotFilesAvailable < data.snapshotFilesExpected);
       if (updateError) {
         await window.SabarajaSyncHistory?.failure('MSports',requestedDate,'fetch',updateError);
         const expired = /401|403|menolak sesi|perbarui sesi login/i.test(updateError);
         reportTelegramHealth('api', expired ? 'denied' : 'error');
-        showApiHealth('error', (expired ? 'Sesi ditolak (HTTP 401/403); kemungkinan kedaluwarsa. Perbarui sesi login dengan curl terbaru. ' : updateError + ' ') + (apiTimestamp ? 'Berkas tersimpan terlama: ' + apiTimestamp + '.' : 'Belum ada data tersimpan untuk tanggal ini.') + ' Tekan Perbarui dari API untuk mencoba lagi.');
+        showApiHealth('error', (expired ? 'Sesi ditolak (HTTP 401/403); kemungkinan kedaluwarsa. Perbarui sesi login dengan curl terbaru. ' : updateError + ' ') + (apiTimestamp ? 'Berkas tersimpan terlama: ' + apiTimestamp + '.' : 'Belum ada data tersimpan untuk tanggal ini.') + ' Tekan Perbarui tanggal ini untuk mencoba lagi.');
         setApiState(apiHealthMessage, 'error');
       } else {
         if (update) reportTelegramHealth('api',!times.length || Date.now()-Math.min(...times)>180000?'stale':'ok');
@@ -261,13 +263,13 @@
       if (update) await window.SabarajaSyncHistory?.failure('MSports',requestedDate,'fetch',error);
       reportTelegramHealth('api',/401|403|menolak sesi|perbarui sesi login/i.test(error.message || '')?'denied':'error');
       if (snapshotDate !== requestedDate) { resultSnapshots = []; saveMatches = []; }
-      showApiHealth('error', (error.message || 'Tidak dapat memuat hasil API.') + (apiTimestamp && snapshotDate === requestedDate ? ' Data tersimpan terakhir: ' + apiTimestamp + '.' : ' Data untuk tanggal ini belum dapat dimuat.') + ' Tekan Perbarui dari API untuk mencoba lagi.');
+      showApiHealth('error', (error.message || 'Tidak dapat memuat hasil API.') + (apiTimestamp && snapshotDate === requestedDate ? ' Data tersimpan terakhir: ' + apiTimestamp + '.' : ' Data untuk tanggal ini belum dapat dimuat.') + ' Tekan Perbarui tanggal ini untuk mencoba lagi.');
       rendered = ''; renderResults();
-      setApiState((error.message || 'Tidak dapat memuat hasil API.') + ' Tekan Perbarui dari API untuk mencoba lagi.', 'error');
+      setApiState((error.message || 'Tidak dapat memuat hasil API.') + ' Tekan Perbarui tanggal ini untuk mencoba lagi.', 'error');
     }
     finally {
       document.dispatchEvent(new CustomEvent('pattern-results-cycle', {detail:{date:requestedDate,update:false}}));
-      busy = false; refresh.disabled = false; date.disabled = false;
+      busy = false; refresh.disabled = false; date.disabled = false; renderResults();
       updateSaveButton();
     }
   }
@@ -290,9 +292,11 @@
         }
         return true;
       };
-      const snapshots = (resultSnapshots.length ? resultSnapshots : ['16'].map(league => ({league,date:date.value,timezone:'UTC+8',matches:[]})))
+      const placeholders = ['15','16','20'].filter(league => !resultSnapshots.some(data => String(data.league) === league))
+        .filter(() => busy || !resultSnapshots.length).map(league => ({league,date:date.value,timezone:'UTC+8',matches:[],loading:busy}));
+      const snapshots = [...resultSnapshots, ...placeholders].sort((x, y) => resultLeagues.indexOf(String(x.league)) - resultLeagues.indexOf(String(y.league)))
         .map(data => ({...data, displayMatches:window.SabarajaLiveResults.merge(data,liveState,liveAnalysis)}));
-      const signature = JSON.stringify([query, selectedPhase,selectedLeague,selectedMarket,selectedRecord, [...collapsedLeagues], snapshots.map(data => [data.league, data.date, data.displayMatches, data.noGoalThresholds, data.under15Thresholds, data.under15StreakThresholds, data.zeroStreakThresholds, data.csvStreakStats, data.zeroRecordSignals, data.under15RecordSignals,data.zeroNearRecordSignals,data.under15NearRecordSignals])]);
+      const signature = JSON.stringify([query, selectedPhase,selectedLeague,selectedMarket,selectedRecord, [...collapsedLeagues], snapshots.map(data => [data.league, data.loading, data.date, data.displayMatches, data.noGoalThresholds, data.under15Thresholds, data.under15StreakThresholds, data.zeroStreakThresholds, data.csvStreakStats, data.zeroRecordSignals, data.under15RecordSignals,data.zeroNearRecordSignals,data.under15NearRecordSignals])]);
       if (signature !== rendered) {
         window.SabarajaPatternDisplay = {snapshots};
         const visibleCount = snapshots.filter(data=>selectedLeague==='all'||selectedLeague===data.league).reduce((sum,data) => sum + data.displayMatches.filter(match=>matchesSearch(match,data)).length,0);
@@ -328,6 +332,12 @@
           collapse.setAttribute('aria-expanded', String(!collapsedLeagues.has(data.league)));
           collapse.setAttribute('aria-label', `${collapse.textContent} ${data.displayName || ('League ' + data.league)}`);
           heading.append(collapse);
+          if (data.loading) {
+            const skeleton = document.createElement('div'); skeleton.className = 'results-skeleton'; skeleton.setAttribute('aria-hidden', 'true');
+            skeleton.innerHTML = '<div class="sk-summary">' + '<span></span>'.repeat(4) + '</div>' + '<div class="sk-row"><span></span><span></span><span></span><span></span></div>'.repeat(6);
+            collapse.hidden = true; card.setAttribute('aria-busy', 'true');
+            card.append(heading, skeleton); mainCards.append(card); continue;
+          }
           collapse.addEventListener('click', () => {
             if (collapsedLeagues.has(data.league)) collapsedLeagues.delete(data.league); else collapsedLeagues.add(data.league);
             renderResults();
@@ -493,7 +503,7 @@
             time.append(state);
             const teams = row.insertCell();
             teams.append(document.createTextNode(match.home + ' vs ' + match.away));
-            window.SabarajaRecentMeetings.append(teams, match.h2h?.recentMeetings || [], /^1H\b/i.test(match.live?.status || '') ? null : match.live?.ht || match.ht, null, match.h2h?.recentByHt || {}, match.home, match.h2h?.htRun);
+            window.SabarajaRecentMeetings.append(teams, match.h2h?.recentMeetings || [], /^1H\b/i.test(match.live?.status || '') ? null : match.live?.ht || match.ht, null, match.h2h?.recentByHt || {}, match.home, match.h2h?.htRun, match.h2h?.repeatFtMeetings);
             if (match.status !== 'Selesai' && match.status !== 'Ditunda' && match.h2h) {
               const liveStatus = String(match.live?.status || '');
               const afterFirstHalf = /^(?:2H\b|H\.?\s*Time|HT$|Half[ -]?Time)/i.test(liveStatus);
@@ -725,7 +735,8 @@
       if (date.value === selectedDate) {
         if (saveSummary) {
           saveSummary.hidden = false; saveSummary.classList.remove('is-error');
-          saveSummary.textContent = `${automatic ? 'Sinkronisasi otomatis' : 'Sinkronisasi selesai'} · ${data.inserted ?? 0} baru · ${data.updated ?? 0} diperbarui · ${data.skipped_duplicate ?? 0} sudah ada dan sama` + (data.skipped_invalid ? ` · ${data.skipped_invalid} tidak valid` : '') + '.';
+          saveSummary.textContent = `${automatic ? 'Sinkronisasi otomatis' : 'Sinkronisasi selesai'} · ${data.inserted ?? 0} baru · ${data.updated ?? 0} diperbarui · ${data.skipped_duplicate ?? 0} sudah ada dan sama` + (data.skipped_invalid ? ` · ${data.skipped_invalid} tidak valid` : '') + '.' + (data.updated ? ` Skor ${data.updated} pertandingan di CSV berbeda dari API dan sudah diganti dengan skor API.` : '');
+          saveSummary.classList.toggle('has-updates', Boolean(data.updated));
         }
         setSaveState(data.inserted || data.updated ? `CSV · ${data.inserted} baru / ${data.updated} update` : 'CSV sinkron',
           `${automatic ? 'Sinkron otomatis' : 'Tersimpan'}: ${data.inserted} pertandingan baru, ${data.updated} diperbarui, ${data.skipped_duplicate} sudah ada. Backup CSV dibuat otomatis.`);

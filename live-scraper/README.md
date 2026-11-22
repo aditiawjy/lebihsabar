@@ -36,3 +36,11 @@ set BPVM_URL=https://p1b3gp.bpyuxsq3.com/en-US/live/997
 - `http://127.0.0.1:5000/api/status` → `{"status":"online", ...}`
 - `http://127.0.0.1:5000/api/live-data` → `count` > 0 dengan `timestamp` baru.
 - Log runner: `headless_runner.log`.
+
+## Peringatan Telegram bila pengumpulan berhenti
+Jalankan **`install_watchdog.bat`** sekali. Windows Task Scheduler akan menjalankan
+`msports-parser/telegram_notify.py --mode watch` tiap 15 menit: memeriksa API server
+(port 5000) dan apakah `goal_log_bpvm.csv` masih bertambah (batas 60 menit, ubah lewat
+env `SABARAJA_COLLECTOR_STALE_MINUTES`). Pesan dikirim setelah 2 pemeriksaan gagal
+berturut-turut dan sekali lagi saat pulih. Cek tanpa mengirim pesan:
+`python msports-parser/telegram_notify.py --mode watch-status`.

@@ -12,6 +12,16 @@ TZ=timezone(timedelta(hours=8))
 IDS={'10026214':'15','10031403':'16','10026211':'20'}
 THRESHOLDS={'15':5,'16':4,'20':3}
 HEALTH=BASE/'telegram-health-state.json'
+ODDS_LOG=Path(__file__).resolve().parent.parent/'goal_log_bpvm.csv'
+SCRAPER_STATUS_URL='http://127.0.0.1:5000/api/status'
+COLLECTOR_STALE_MINUTES=int(os.environ.get('SABARAJA_COLLECTOR_STALE_MINUTES','60'))
+def collector_status(now=None):
+    now=now or time.time()
+    try:
+        with urlopen(SCRAPER_STATUS_URL,timeout=5) as response:response.read()
+    except (URLError,TimeoutError,OSError):return 'offline',None
+    age=(now-ODDS_LOG.stat().st_mtime)/60 if ODDS_LOG.exists() else None
+    return ('stale' if age is None or age>COLLECTOR_STALE_MINUTES else 'ok'),age
 def health_transition(previous,status,now,source):
     current=dict(previous or {})
     if current.get('status')!=status:current.update(status=status,since=now,count=0)
@@ -27,13 +37,14 @@ def health_transition(previous,status,now,source):
     return current,event
 def report_health(config,payload):
     source=payload.get('source');status=payload.get('status')
-    allowed={'api':{'ok','denied','error','stale'},'scraper':{'ok','offline','stale'}}
+    allowed={'api':{'ok','denied','error','stale'},'scraper':{'ok','offline','stale'},'collector':{'ok','offline','stale'}}
     if source not in allowed or status not in allowed[source]:raise ValueError('Status kesehatan tidak valid.')
     state=json.loads(HEALTH.read_text()) if HEALTH.exists() else {}
     current,event=health_transition(state.get(source),status,time.time(),source)
     if event:
-        component='API Results' if source=='api' else 'Live scraper'
+        component={'api':'API Results','scraper':'Live scraper','collector':'Pengumpul odds kickoff'}[source]
         descriptions={'denied':'Sesi API ditolak (401/403). Perbarui sesi login/cURL.','error':'Pembaruan API gagal berulang. Data baru belum bisa dipastikan.','stale':'Data melewati batas usia aman. Jangan menganggap sinyal lama sebagai sinyal baru.','offline':'Koneksi scraper terputus berulang. Menunggu koneksi pulih.'}
+        if source=='collector':descriptions={'offline':'API server scraper (port 5000) mati. Jalankan live-scraper\\start_headless.bat.','stale':f'goal_log_bpvm.csv tidak bertambah lebih dari {COLLECTOR_STALE_MINUTES} menit. Cek domain SABA, halaman live, atau jendela scraper.'}
         message=('✅ Sabaraja · '+component+' pulih. Data terbaru kembali tersedia.') if event=='recovered' else ('⚠️ Sabaraja · '+component+' bermasalah\n'+descriptions[status])
         api(config['token'],'sendMessage',{'chat_id':config['chat_id'],'text':message})
     state[source]=current;save_json(HEALTH,state)
@@ -87,7 +98,16 @@ def notifications(counts,state):
             if count>=THRESHOLDS[league] and count>previous.get(team,0):alerts.append((scope,team,count))
     return alerts
 def run(mode):
+    if mode=='watch-status':
+        status,age=collector_status()
+        return {'success':True,'status':status,'odds_log_age_minutes':None if age is None else round(age,1),'stale_after_minutes':COLLECTOR_STALE_MINUTES}
     if not CONFIG.exists():return {'success':False,'error':'Telegram belum dikonfigurasi.'}
+    if mode=='watch':
+        status,age=collector_status()
+        config=json.loads(protect_local(CONFIG.read_bytes(),decrypt=True))
+        result=report_health(config,{'source':'collector','status':status})
+        result['odds_log_age_minutes']=None if age is None else round(age,1)
+        return result
     config=json.loads(protect_local(CONFIG.read_bytes(),decrypt=True))
     if mode=='health':return report_health(config,json.load(sys.stdin))
     if mode=='health-test':
@@ -114,7 +134,7 @@ def run(mode):
     save_json(STATE,{'initialized':True,'scopes':scopes})
     return {'success':True,'sent':len(alerts),'checked':sum(len(t) for t in counts.values())}
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--import-token',type=Path);parser.add_argument('--expected-bot',default='sabaraja_pattern_bot');parser.add_argument('--mode',choices=['test','baseline','notify','health','health-test'],default='notify');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--import-token',type=Path);parser.add_argument('--expected-bot',default='sabaraja_pattern_bot');parser.add_argument('--mode',choices=['test','baseline','notify','health','health-test','watch','watch-status'],default='notify');args=parser.parse_args()
     BASE.mkdir(parents=True,exist_ok=True)
     try:
         with (BASE/'telegram-notify.lock').open('a+b') as lock:

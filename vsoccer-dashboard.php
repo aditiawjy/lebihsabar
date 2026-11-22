@@ -150,7 +150,7 @@ canvas{width:100%;height:180px;display:block;margin-top:.5rem;}
     <span class="badge">&#x25CF; DATA</span>
     <span>Update CSV: <?= $csvTime ? date('d/m/Y H:i', $csvTime) : '—' ?></span>
     <a class="btn" href="javascript:location.reload()">&#x21BB; Refresh</a>
-    <a class="btn" href="dashboard.php">← Dashboard SABA</a>
+    
   </div>
 
   <?php if ($totalN === 0): ?>

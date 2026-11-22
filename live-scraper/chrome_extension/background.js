@@ -506,7 +506,6 @@ async function handleFreshData(data) {
     await setSavedMatchData(data);
     await syncLiveDataToApi(data);
     await trackGoalEvents(Array.isArray(data?.matches) ? data.matches : []);
-    await trackP727374GoalSignal(Array.isArray(data?.matches) ? data.matches : []);
     await trackOneGoal2HSignal(Array.isArray(data?.matches) ? data.matches : []);
     await trackTeamHalftimeSignal(Array.isArray(data?.matches) ? data.matches : []);
     await trackH2HLive0to0SecondHalf(Array.isArray(data?.matches) ? data.matches : []);

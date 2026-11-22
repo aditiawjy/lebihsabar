@@ -59,7 +59,7 @@ function e(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8')
             <?php endforeach; ?>
         </select>
         <button type="submit" class="btn-action">Filter</button>
-        <a href="dashboard.php" class="btn-action" style="text-decoration:none;">&larr; Dashboard</a>
+        
     </form>
 
 <?php if (!is_file($csvFile)): ?>
